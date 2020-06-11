@@ -3,7 +3,7 @@
 const nodemailer = require("nodemailer");
 const myStorageClass = null
 
-
+const apiKeys = require('local/aipkeys')
 
 class ReMailer extends EventEmitter {
     
@@ -54,7 +54,7 @@ var g_mail_transport = nodemailer.createTransport({
     secure: false, // true for 465, false for other ports
     auth: {
       user: 'apikey', // generated ethereal user
-      pass: 'my api key' // generated ethereal password
+      pass: apiKeys.sendGrid // generated ethereal password
     }
 });
 
