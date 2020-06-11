@@ -54,7 +54,7 @@ var g_mail_transport = nodemailer.createTransport({
     secure: false, // true for 465, false for other ports
     auth: {
       user: 'apikey', // generated ethereal user
-      pass: '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' // generated ethereal password
+      pass: 'my api key' // generated ethereal password
     }
 });
 
