@@ -4,13 +4,15 @@ const GeneralMiddleWare = require('lib/general_middleware')
 var bodyParser = require('body-parser');
 var cors = require('cors')
 
+
 // create application/json parser
 var jsonParser = bodyParser.json()
 // create application/x-www-form-urlencoded parser
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 
-class CaptchaMiddleWare extends GeneralMiddleWare {
+
+class MediaUpMiddleWare extends GeneralMiddleWare {
 
     constructor() {
         super()
@@ -39,4 +41,4 @@ class CaptchaMiddleWare extends GeneralMiddleWare {
 
 
 
-module.exports = new CaptchaMiddleWare()
+module.exports = new MediaUpMiddleWare()

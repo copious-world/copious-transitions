@@ -9,14 +9,12 @@ const  redis = require("redis")
 const RedisStoreFactory = require('connect-redis');
 
 
-
 // pre initializatoin
 const redClient = redis.createClient();  // leave it to the module to figure out how to connect
 
-
+var g_citadel = null
 var g_citadel_pass = ""
 var g_restarting = false
-var g_user_queue = []
 
 
 //
@@ -54,13 +52,13 @@ async function run_citadel() {
 async function post_new_user() {
   if ( g_restarting ) {
     setTimeout(() => { post_new_user() }, 200 )
-  } else if ( (g_user_queue.length === 0) ) {
+  } else if ( G_users_trns.empty_queue() ) {
     setTimeout(() => { post_new_user() }, 1000 )
   } else {
     //
-    while ( g_citadel && (g_user_queue.length > 0) ) {
-      let udata = g_user_queue.shift()
-      let isNew = await g_citadel.create_user(udata.name,udata.pass)
+    while ( g_citadel && !(G_users_trns.empty_queue()) ) {
+      let udata = G_users_trns.get_work()
+      await g_citadel.create_user(udata.name,udata.pass)
       await g_citadel.logout()
     }
     setTimeout(() => { post_new_user() }, 1000 )
@@ -68,6 +66,35 @@ async function post_new_user() {
   }
 }
 
+
+async function post_contact_message() {
+  if ( g_restarting ) {
+    setTimeout(() => { post_contact_message() }, 200 )
+  } else if ( G_contact_trns.empty_queue() ) {
+    setTimeout(() => { post_contact_message() }, 1000 )
+  } else {
+    //
+    await g_citadel.user('admin')
+    await g_citadel.password(g_citadel_pass)    
+    while ( g_citadel && !(G_contact_trns.empty_queue()) ) {
+      let msg_body = G_contact_trns.get_work()
+      //
+      let msgObject = {
+        'recipient' : "admin",
+        'anonymous' : false, 
+        'type' : false,
+        'subject' : decodeURIComponent(msg_body.name),
+        'author' : decodeURIComponent(msg_body.email),
+        'references' : decodeURIComponent(msg_body.website),
+        'text' : decodeURIComponent(msg_body.comment)
+      }
+      //
+      await g_citadel.post_message(msgObject)
+    }
+    await g_citadel.logout()
+    setTimeout(() => { post_contact_message() }, 1000 )
+  }
+}
 
 
 async function dropConnections() {
@@ -112,6 +139,7 @@ class CaptchaDBClass extends DBClass {
     initialize(conf) {
         g_citadel_pass = conf.citadel_password.trim()  // decrypt ??
         setTimeout(post_new_user,5000)
+        setTimeout(post_contact_message,5000)
         super.initialize(conf)
     }
 
@@ -120,67 +148,40 @@ class CaptchaDBClass extends DBClass {
         dropConnections()
     }
 
+
+
+    //  custom: contacts, ...
+    store(collection,data) {
+        if ( G_contact_trns.tagged(collection) ) {
+            let udata = G_contact_trns.update(data,token)
+            G_contact_trns.enqueue(udata)
+        } else {
+            super.store(collection,data)
+        }
+    }
+
+
     // // // 
     store_user(udata) {
-        if ( g_citadel ) {
-            g_user_queue.push(udata)  // for citadel interface
-            g_newSignUps[email] = body;
+        if ( G_users_trns.tagged('user') ) {
+            udata = G_users_trns.update(udata,token)          // custom user storage (seconday service)
+            G_users_trns.enqueue(udata)
         }
-        this.storeCache(email,body);
+        this.storeCache(email,body,G_users_trns.back_ref());  // this app will use cache to echo persitent storage
+        super.store_user(udata)                               // use persitent storage
     }
 
-    // // // 
-    fetch_user(identifer) {
-
-    }
-
-    storeCache(email,body) {
-        const hash = crypto.createHash('sha256');
-        hash.update(email);
-        let ehash = hash.digest('hex');
-        //
-        let user_id = body.user_id;
-        this.set_key_value(ehash,JSON.stringify(body))
-        this.set_key_value(user_id,ehash)
-    }
-
-
-    async loadUser(user_id,cbUserLoaded) {
-        if ( user_id == undefined ) return(false);
-        try {
-            let ehash = await this.get_key_value(user_id)
-            try {
-                let u_data = await this.get_key_value(ehash)
-                return JSON.parse(u_data)
-            } catch (e) {
-                return [false,"unknown"]
-            }
-        } catch(e) {
-            return [false,"unknown"]
-        }
-    }
-
-
-    async cacheStored(email,body) {
-        const hash = crypto.createHash('sha256');
-        hash.update(email);
-        let ehash = hash.digest('hex');
-        try {
-            let data = this.get_key_value(ehash)
-            return JSON.parse(data)
-        } catch(e) {
-            return body
-        }
-    }
-    
 
     exists(collection,post_body) {
         let query = post_body
-        if ( collection != 'user' ) {
-            if ( g_newSignUps[email] ) {
-                return(true)
-            } // else
-            query = { "email" : post_body.email }
+        if ( G_users_trns.tagged(collection) ) {
+            if ( G_users_trns.from_cache() ) {
+                let udata = this.fetch_user_from_key_value_store(post_body[G_users_trns.kv_store_key()])
+                if ( udata ) {
+                    return(true)
+                }
+            }
+            query = G_users_trns.existence_query(post_body)
         }
         return(super.exists(collection,query))
     }

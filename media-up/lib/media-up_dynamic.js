@@ -1,13 +1,13 @@
-//const GeneralStatic = require('lib/general_dynamic')
+const GeneralDynamic = require('lib/general_dynamic')
 
-const svgCaptcha = require('svg-captcha');
+const svgMediaUp = require('svg-captcha');
 
 const myStorageClass = null
 
-class CaptchaDynamic {
+class MediaUpDynamic extends GeneralDynamic {
     //
-    constructor() {
-        //super(myStorageClass)
+    constructor(conf) {
+        super(conf)
         this.db = null
     }
 
@@ -26,6 +26,6 @@ class CaptchaDynamic {
     }
 }
 
-    
 
-module.exports = new CaptchaDynamic()
+
+module.exports = new MediaUpDynamic()

@@ -1,52 +1,9 @@
-//const GeneralStatic = require('lib/general_static')
-
+const GeneralBusiness = require('lib/general_business')
 const nodemailer = require("nodemailer");
-const myStorageClass = null
+const ReMailer =  = require("lib/remailer");
+//const myStorageClass = null
 
 const apiKeys = require('local/aipkeys')
-
-class ReMailer extends EventEmitter {
-    
-    constructor(mail_transport,props) {
-        //
-        super()
-        //
-        this.on('email_this',(email) => {
-            this.mailer(email).catch(console.error);
-        })
-
-        this.transporter = mail_transport
-        this.setMailProps(props)
-        //
-    }
-
-    //
-    setMailProps(props) {
-        this.html_template = props.html
-        this.text_template = props.text
-        this.html = this.html_template
-        this.from = this.text_template
-        this.subject = props.subject
-        this.text = props.text
-    }
-
-    //
-    async mailer(email) {
-        //
-        await this.transporter.sendMail({
-            from: this.from,          // sender address
-            to: email,                // list of receivers
-            subject: this.subject,    // Subject line
-            text: this.text,          // plain text body
-            html: this.html           // html body
-        });
-        //
-        this.html = this.html_template
-        this.from = this.text_template
-    }
-
-}
-
 
 var g_mail_transport = nodemailer.createTransport({
     host: "smtp.sendgrid.net",
@@ -85,7 +42,7 @@ const forgetful_user_props = {
     `,
     "from": '"noreply" <noreply@noreply.com>', // sender address
     "to": "", // list of receivers
-    "subject": "Your copious.world BB account is now active", // Subject line
+    "subject": "Reset your account password", // Subject line
     "text": "Please surf to: http://www.copious.world/new_password/$$whokey", // plain text body
 }
 
@@ -96,18 +53,12 @@ var g_MailToForgetfulUser = new ReMailer(g_mail_transport,forgetful_user_props);
 
 
 
-class CaptchaBusines {
+class CaptchaBusines extends GeneralBusiness {
     //
     constructor() {
         //super(myStorageClass)
         this.db = null
         this.rules = null
-    }
-
-    //
-    initialize(conf_obj,db) {
-        this.db = db
-        this.rules = conf_obj.business ? ( conf_obj.business.rules ? conf_obj.business.rules : null ) : null
     }
 
     //

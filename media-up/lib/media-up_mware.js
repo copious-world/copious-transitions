@@ -3,6 +3,8 @@ const GeneralMiddleWare = require('lib/general_middleware')
 
 var bodyParser = require('body-parser');
 var cors = require('cors')
+const fileUpload = require('express-fileupload');
+
 
 // create application/json parser
 var jsonParser = bodyParser.json()
@@ -10,7 +12,8 @@ var jsonParser = bodyParser.json()
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 
-class CaptchaMiddleWare extends GeneralMiddleWare {
+
+class MediaUpMiddleWare extends GeneralMiddleWare {
 
     constructor() {
         super()
@@ -31,6 +34,7 @@ class CaptchaMiddleWare extends GeneralMiddleWare {
         this.add(jsonParser)
         this.add(urlencodedParser)
         this.add(appCors)
+        this.add(fileUpload)
         //
         super.setup(app,db,session_manager)
     }
@@ -39,4 +43,4 @@ class CaptchaMiddleWare extends GeneralMiddleWare {
 
 
 
-module.exports = new CaptchaMiddleWare()
+module.exports = new MediaUpMiddleWare()

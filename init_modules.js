@@ -1,6 +1,8 @@
 const fs = require('fs')
 
 
+// bash for f in captcha_*; do mv "$f" "${f/*_/media-up_}"; done
+
 function load_parameters() {
     let config = "./user-service.conf"
     if ( process.argv[2] !== undefined ) {

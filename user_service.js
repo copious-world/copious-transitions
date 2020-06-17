@@ -3,6 +3,9 @@ const fs = require('fs')
 const crypto = require('crypto')
 //
 const conf_obj = load_parameters()                  // configuration parameters to select modules, etc.
+const g_custom_transitions = require(conf_obj.mod_path.custom_transitions)
+// SPECIAL NAMED TRANSITIONS (PATHS)
+g_custom_transitions.initialize()
 // CONFIGURE
 const g_db = require(conf_obj.mod_path.db)                   // The database interface. Sets up session store, static store, and other DB pathways
 const g_middleware = require(conf_obj.mod_path.middleware)   // This is middleware for Express applications
@@ -12,7 +15,7 @@ const g_dynamics = require(conf_obj.mod_path.dynamic_assets) // Program spends s
 const g_validator = require(conf_obj.mod_path.validator)     // Custom access to field specification from configuration and the application through DB or inline code
 const g_business = require(conf_obj.mod_path.business)       // backend tasks that don't return values, but may send them out to other services.. (some procesing involved)
 //
-var g_app = require(conf_obj.mod_path.expression)(conf_obj); // exports a function
+var g_app = require(conf_obj.mod_path.expression)(conf_obj,g_db); // exports a function
 
 //
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
@@ -77,8 +80,7 @@ g_app.post('/keyed_mime/secondary',(req,res) => {
     if ( body.token !== undefined ) {
         let cached_transition = g_secondary_mime_actions[body.token]            // take the asset information from cache
         if ( cached_transition !== undefined ) {
-            let transtionObj = cached_transition.tobj
-            if ( g_session_manager.match(body,transtionObj)  ) {                // check on matching tokens and possibly other things
+            if ( g_session_manager.match(body,cached_transition)  ) {                // check on matching tokens and possibly other things
                 if ( g_session_manager.key_mime_type_transition(req) ) {
                     let asset_obj = cached_transition.data                          // Finally, send the asset 
                     res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
@@ -102,9 +104,17 @@ g_app.post('/transition/:transition', function(req, res){           // the trans
         if ( g_session_manager.feasible(transition,body,req) ) {                        // can this session actually make the transition?
             let transtionObj = g_session_manager.process_transition(transition,body,req)            // either fetch or produced transition data
             if ( transtionObj.secondary_action ) {                                      // Require a seconday action as part of the transition for finalization
-                let elements = g_dynamics.fetch_elements(transition,transtionObj);      // elements is purposely vague and may be application sepecific
-                g_finalize_transitions[transtionObj.token] = { 'tobj' : transtionObj, 'elements' : elements, 'transition' : transition }
-                return(res.status(200).send(JSON.stringify({ 'type' : 'transition', 'OK' : 'true', 'data' : transtionObj, 'elements' : elements })));
+                let [send_elements, store_elements] = g_dynamics.fetch_elements(transition,transtionObj);      // elements is purposely vague and may be application sepecific
+                g_finalize_transitions[transtionObj.token] = { 'tobj' : transtionObj, 'elements' : store_elements, 'transition' : transition }
+                return(res.status(200).send(JSON.stringify({ 'type' : 'transition', 'OK' : 'true', 'data' : transtionObj, 'elements' : send_elements })));
+            } else {
+                body.token = transtionObj.token
+                let finalization_state = g_session_manager.finalize_transition(transition,body,{},req)      // FINALIZE (not a final state)
+                if ( finalization_state ) {     // relay the finalized transition and go on with business. 
+                    let state = finalization_state.state
+                    let OK = finalization_state.OK
+                    return(res.status(200).send(JSON.stringify({ 'type' : 'finalize', 'OK' : OK, 'state' : state, 'reason' : 'matched' })));
+                }
             }
         }
     }
@@ -117,14 +127,14 @@ g_app.post('/transition/secondary',(req,res) => {
     if ( body.token !== undefined ) {
         let cached_transition = g_finalize_transitions[body.token]      // get the transition from cache
         if ( cached_transition !== undefined ) {
-            let transtionObj = cached_transition.tobj
-            if ( g_session_manager.match(body,transtionObj)  ) {        // check on matching tokens and possibly other things 
-                let elements = cached_transition.elements
+            if ( g_session_manager.match(body,cached_transition)  ) {        // check on matching tokens and possibly other things 
                 // some kind of transition takes place and becomes the state of the session. It may not be the same as the one
                 // specified in the cached transition, but may be similar depending on how types (categories) are regulated 
                 let finalization_state = g_session_manager.finalize_transition(cached_transition.transition,body,elements,req)      // FINALIZE (not a final state)
                 if ( finalization_state ) {     // relay the finalized transition and go on with business. 
-                    return(res.status(200).send(JSON.stringify({ 'type' : 'finalize', 'OK' : 'true', 'state' : finalization_state, 'reason' : 'matched' })));
+                    let state = finalization_state.state
+                    let OK = finalization_state.OK
+                    return(res.status(200).send(JSON.stringify({ 'type' : 'finalize', 'OK' : OK, 'state' : state, 'reason' : 'matched' })));
                 } // else nothing worked 
             }
         }
@@ -135,7 +145,8 @@ g_app.post('/transition/secondary',(req,res) => {
 
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-
+if ( conf_obj.login_app ) {   // LOGIN APPS OPTION (START)
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 // USER MANAGEMENT - handle authorization and user presence.
 let g_secondary_user_actions = {}
 g_app.post(['/users/login','/users/logout','/users/register','/users/forgot'],(req,res) => {
@@ -163,8 +174,8 @@ g_app.post('/users/secondary/:action',(req,res) => {
         if ( (cached_transition !== undefined) && (action == cached_transition.action) ) {      // the action must match (artifac of use an array of paths)
             // this is the asset needed by the client to turn on personlization and key access (aside from sessions and cookies)
             let session_token = cached_transition.session_token
-            let transtionObj = cached_transition.tobj
-            if ( g_session_manager.match(body,transtionObj)  ) {        // check the tokens and any other application specific information required
+            if ( g_session_manager.match(body,cached_transition)  ) {        // check the tokens and any other application specific information required
+                let transtionObj = cached_transition.tobj
                 g_session_manager.initialize_session_state('user',session_token,transtionObj,res)
                 res.status(200).send(JSON.stringify({ 'type' : transtionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token }));
                 return;
@@ -173,6 +184,9 @@ g_app.post('/users/secondary/:action',(req,res) => {
     }
     res.status(200).send(JSON.stringify( { 'type' : 'secondary/action', 'OK' : 'false', 'reason' : 'missing data' }));
 })
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+}       // LOGIN APPS OPTION (END)
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
@@ -183,11 +197,10 @@ g_app.post('/users/secondary/:action',(req,res) => {
 g_db.last_step_initalization()
 g_app.listen(conf_obj.port);
 
-
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
-global.clonify = clonify => (obj) {
+global.clonify = (obj) => {
     if ( typeof obj == "object" ) {
         return(JSON.parse(JSON.stringify(obj)))
     }
@@ -214,7 +227,9 @@ function load_parameters() {
         for ( let mname in confJSON.modules ) {
             confJSON.mod_path[mname] = __dirname + '/' + module_path + '/' + confJSON.modules[mname]
         }
-        __dirname + '/' 
+
+        const apiKeys = require('local/aipkeys')
+        confJSON.citadel_password = apiKeys.citadel_password
         return(confJSON)
     } catch (e) {
         console.log(e)

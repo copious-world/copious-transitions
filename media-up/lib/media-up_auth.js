@@ -2,7 +2,7 @@ const { GeneralAuth, SessionManager } = require('lib/general_auth')
 //
 const expressSession = require('express-session');
 
-class CaptchaSessionManager extends SessionManager {
+class UploaderSessionManager extends SessionManager {
 
     constructor(exp_app,db_obj) {
         //
@@ -32,16 +32,6 @@ class CaptchaSessionManager extends SessionManager {
         this.middle_ware.push(this.session)             // this is where the session object is introduced as middleware
     }
 
-    // //
-    process_user(user_op,body,req) {
-        let transtionObj = super.process_user(user_op,body,req)
-        if ( G_users_trns.action_selector(user_op) ) {
-            let pkey = G_users_trns.primary_key()
-            transtionObj[pkey] = body[pkey]
-        }
-        return(transtionObj)
-    }
-
     //process_asset(asset_id,post_body) {}
     feasible(transition,post_body,req) {                // is the transition something that can be done?
         if (  G_captcha_trns.tagged(transition) || G_contact_trns.tagged(transition) ) {
@@ -56,7 +46,7 @@ class CaptchaSessionManager extends SessionManager {
         //
         if ( G_captcha_trns.tagged(transition) ) {
             post_body._uuid_prefix =  G_captcha_trns.uuid_prefix()
-        } else if ( G_contact_trns.tagged(transition) ) {
+        } else if ( G_uploader_trns.tagged(transition) ) {
             trans_object.secondary_action = false
         }
         //
@@ -67,8 +57,6 @@ class CaptchaSessionManager extends SessionManager {
     match(post_body,transtion_object)  {
         if ( G_captcha_trns.tagged(transtion_object.tobj.asset_key) ) {
             post_body._t_match_field = post_body[G_captcha_trns.match_key()]
-        } else if ( G_users_trns.action_selector(transtion_object.action) ) {
-            post_body._t_match_field = post_body[G_users_trns.match_key()]
         } else {
             return false
         }
@@ -83,16 +71,11 @@ class CaptchaSessionManager extends SessionManager {
                 let finalization_state = {
                     "state" : "captcha-in-flight",
                     "OK" : "true"
-                }
+                }    
                 return(finalization_state)
             }
-        } else if ( G_contact_trns.tagged(transition) ) {
-            this.db.store(transition,post_body)
-            let finalization_state = {
-                "state" : "stored",
-                "OK" : "true"
-            }
-            return(finalization_state)
+        } else if ( G_uploader_trns.tagged(transition) ) {
+            return(this.upload_file(post_body,G_uploader_trns,req))
         }
         let finalization_state = {
             "state" : "ERROR",
@@ -100,33 +83,14 @@ class CaptchaSessionManager extends SessionManager {
         }
         return(finalization_state)
     }
-
-    //
-    update_session_state(transition,session_token,req) {    // req for session cookies if any
-        if (  G_users_trns.action_selector(body.action) ) {
-            this.addSession(req.body.email,session_token)
-            res.cookie(this.user_cookie, session_token, { maxAge: 900000, httpOnly: true });
-        } else {
-            return super.update_session_state(transition,session_token,req)
-        }
-        return true
-    }
-
-    //
-    initialize_session_state(transition,session_token,transtionObj,res) {
-        if ( G_users_trns.tagged('user') ) {
-            transtionObj._db_session_key = transtionObj[G_users_trns.session_key()]
-            super.initialize_session_state(transition,session_token,transtionObj,res)
-        }
-    }
-
+    
 }
 
-class CaptchaAuth  extends GeneralAuth {
+class UploaderAuth  extends GeneralAuth {
     constructor() {
-        super(CaptchaSessionManager)   // intializes general authorization with the customized session manager class.
+        super(UploaderSessionManager)   // intializes general authorization with the customized session manager class.
     }
 }
 
-var session_producer = new CaptchaAuth()
+var session_producer = new UploaderAuth()
 module.exports = session_producer;

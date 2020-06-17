@@ -1,0 +1,2400 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="author" content="Richard Leddy" />
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+	<meta id="theme-color" name="theme-color" content="#452770">
+
+	<title>Pop Song Now</title>
+	<meta name="description" content="Make you songs safe as soon as you think of them.">
+	<style>
+		
+		.items {
+			display: flex;
+			flex-wrap: wrap;
+			margin-left: -10px;
+			margin-top: -10px;
+		}
+	
+		.items .item {
+			flex: 1 0 300px;
+			box-sizing: border-box;
+			background: -webkit-linear-gradient(to right, rgba(242, 242, 210, 0.3), white));
+			background: linear-gradient(to right, rgba(242, 242, 210, 0.3), white );
+			color: #171e42;
+			padding: 10px;
+			margin-left: 10px;
+			margin-top: 0px;
+		}
+	
+		.items .extra-i {
+			padding-left: 10%;
+			padding-bottom: 4px;
+			padding-right: 12px;
+			font-size: 110%;
+			font-family: sans-serif;
+		}
+	
+		.middleBanner {
+			text-align: 'center';
+			padding-left: 10%;
+			padding-right: 10%;
+			font-weight:bold;
+			color: darkgreen;
+			padding-top:4%;
+			overflow:auto;
+		}
+
+		.applink {
+			padding:3px;
+			background-color: cornsilk;
+			width:inherit;
+			min-height: 100%;
+			color:darkolivegreen;
+			font-weight: bolder;
+
+		}
+	
+		.extraBanner {
+			text-align: 'center';
+			padding-left: 10%;
+			padding-right: 10%;
+			font-weight:bold;
+			color: #FF4400;
+			padding-top:4%;
+		}
+	
+	
+		.fillLowerWrap {
+			width: 66%;
+			margin-left:0px;
+			margin-right:0px;
+			padding: 8px;
+			margin-top:8px;
+			background: -webkit-linear-gradient(to right, white, #FAFAFF)));
+			background: linear-gradient(to right, white, #FAFAFF );
+			margin-left: 10px;
+		}
+	
+		.fitMenuLower {
+			width: 95%;
+			height: 50%;
+			margin-left:0px;
+			margin-right:0px;
+			padding: 8px;
+			margin-top:8px;
+			background: -webkit-linear-gradient(to right, white, #FAFAFF)));
+			background: linear-gradient(to right, white, #FAFAFF );
+			margin-left: 10px;
+		}
+	
+		#squashMenu:hover {
+			border: 1px solid rgb(230,230,240,0.4);
+			padding-top:4px;
+			background-color: #EFEFEF;
+		}
+	
+		#squashMenuContainer {
+			position:absolute;
+			visibility:hidden;
+			top : 0; left : 0;
+			height:100%;
+			width: 55%;
+			z-index:100;
+			border: rgba(252, 190, 190, 0.4) 2px solid;
+			background-color: white;
+		}
+	
+		.fade_able {
+			position:absolute;
+			visibility:hidden;
+			top : 10px; left : 10px;
+			height:80%;
+			width: 40%;
+			z-index:101;
+			border: rgba(252, 190, 190, 0.4) 2px solid;
+			background-color: white;
+			overflow: auto;
+		}
+
+		#thankyou_box {
+			position:absolute;
+			visibility:hidden;
+			top : 25%; left : 25%;
+			height:50%;
+			width: 50%;
+			z-index:150;
+			border: rgba(100, 5, 5, 0.6) 2px solid;
+			background-color: lightgoldenrodyellow;
+			overflow: auto;
+		}
+
+
+
+		@media screen and (max-width: 1040px) {
+			.fade_able {
+				width: 60%;
+			}
+		}
+
+		@media screen and (max-width: 600px) {
+			.fade_able {
+				width: 90%;
+			}
+		}
+
+		.fade_able_content {
+			height:100%;
+			width: 100%;
+			overflow:auto;
+		}
+
+		.togglebar {
+			height:20px;
+			visibility:inherit;
+			background-color: navy;
+			text-align:right;
+		}
+	
+		.closer_x {
+			padding:2px;
+			color:purple;
+			font-weight:bolder;
+			border: solid 1px red;
+			cursor:pointer;
+		}
+
+		@media (max-width: 1225px) {
+			.fillLowerWrap {
+				visibility : "none";
+				height : 0px;
+			}
+		}
+
+	
+		.fillLower {
+			border: darkred 2px solid;
+			height: 96%;
+			width: 96%;
+			margin-left: 10px;
+			padding:8px;
+			background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE));
+			background: linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE );
+		}
+	
+		button {
+			cursor: pointer;
+			font-size: 101%;
+			font-weight: bold;
+			color: darkblue;
+			margin: 2px;
+			width:120px;
+		}
+	
+		button:hover {
+			background-color : #CACAFF;
+			color: darkred;
+		}
+	
+		@media screen and (max-width: 390px) {
+			.items .extra-i {
+				padding-left: 1%;
+			}
+		}
+	
+		@media screen and (max-width: 600px) {
+			.items .extra-i {
+				padding-left: 3%;
+			}
+		}
+	
+		.longviz {
+			visibility : "visibile";
+			height: 10px;
+			background-color:inherit;
+		}
+	
+		@media (max-width: 1040px) {
+			.longviz {
+				visibility : "none";
+				height : 0px;
+			}
+		}
+	
+		.shortviz {
+			visibility : "none";
+			height:0px;
+			margin-top:6px;
+		}
+
+		@media (max-width: 620px) {
+			.shortviz {
+				visibility : "visible";
+				height:2px;
+				background-color:darkgreen;
+				margin-bottom:12px;
+			}
+		}
+	
+		@media (min-width: 1040px) {
+			.shortviz {
+				visibility : "visible";
+				height:120px;
+				border: 2px darkblue solid;
+				background-color:#FFFFF6;
+				margin-bottom:30px;
+				margin-top:5px;
+			}
+		}
+	
+		@media (min-width: 380px) {
+			.items .item {
+				max-width: calc(100% - 20px);
+			}
+			.items .extra-i {
+				padding-left: 3%;
+			}
+		}
+		@media (min-width: 410px) {
+			.items .item {
+				max-width: calc(100% - 10px);
+			}
+		}
+		@media (min-width: 620px) {
+			.items .item {
+				max-width: calc(50% - 10px);
+			}
+		}
+		@media (min-width: 830px) {
+			.items .item {
+				max-width: calc(50% - 10px);
+			}
+		}
+		@media (min-width: 1040px) {
+			.items .item {
+				max-width: calc(33.33333% - 10px);
+			}
+		}
+		@media (min-width: 1250px) {
+			.items .item {
+				max-width: calc(25%- 10px);
+			}
+		}
+		@media (min-width: 1460px) {
+			.items .item {
+				max-width: calc(20% - 10px);
+			}
+		}
+		@media (min-width: 1670px) {
+			.items .item {
+				min-width: calc(16.66667% - 10px);
+			}
+		}
+	
+	
+		body {
+			border: 1px solid black;
+			
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+
+
+		@media screen and (orientation: portrait) {
+			#mainNav {
+				width: 100%;
+			}
+		}
+
+		@media screen and (orientation: landscape) {
+			#mainNav {
+				width: 100%;
+			}
+		}
+	
+		main {
+			border-left: solid 3px navy;
+			border-top: solid 1px #8833BB;
+			padding : 4px;
+		}
+	
+		#mainNav {
+			font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+			font-weight: 700;
+			text-transform: uppercase;
+			background: blue;
+			border-left: solid 3px navy;
+			border-top: solid 3px navy;
+			border-bottom: solid 3px rgba(252,252,255,0.7);
+			min-height: 90px
+			padding: 20px
+			background: -webkit-linear-gradient(to left, rgba(242, 242, 210, 0.3), white));
+			background: linear-gradient(to left, rgba(242, 242, 210, 0.3), white );
+			
+		}
+	
+		#mainNav table {
+			padding-left: 3%;
+		}
+	
+	
+		#mainNav  table  a:focus { outline: none; }
+		#mainNav  table  .navbar-brand {
+			font-size: 1.1rem;
+			color: white;
+		}
+	
+		#mainNav  table  .navbar-brand.active, #mainNav .navbar-brand:active, #mainNav .navbar-brand:focus, #mainNav .navbar-brand:hover {
+			color: white;
+		}
+	
+		#mainNav  table  .navbar-nav {
+			letter-spacing: 1px; }
+	
+		#mainNav  table  .navbar-nav li.nav-item {
+			display:inline;
+		}
+	
+		
+		
+		#mainNav  table  .navbar-nav li.nav-item a.nav-link {
+			color: darkgreen;
+			text-decoration: none;
+			vertical-align: top;
+			padding-right: 10px;
+		}
+	
+		#mainNav  table  .navbar-nav li.nav-item a.nav-link:hover {
+			color: #18BC9C;
+			outline: none;
+			
+		}
+	
+	
+		#mainNav  table  .navbar-nav a.nav-text {
+			background-color : rgba(242,222,255,0.6);
+			border-radius: 25px;
+			margin-bottom: 9px;
+			margin-right: 6px;
+			white-space: nowrap;
+		}
+
+
+		#mainNav  table  .navbar-nav li.nav-item a.nav-link:active, #mainNav .navbar-nav li.nav-item a.nav-link:focus { color: white; }
+		
+		.footer-list li {
+			list-style-type: none;
+		}
+	
+		.footer-list li a:hover { color: gold; }
+		
+		.hover_group {
+			cursor:pointer;
+		}
+	
+		.hover_group rect {
+			fill:#e6e6e6;
+		}
+	
+		.hover_group:hover rect {
+			fill: #F6F6e6;
+		}
+	
+		footer {
+			padding:10px;
+			background: -webkit-linear-gradient(to left, rgba(252,252,255,0.5), #fffbe2 );
+			background: linear-gradient(to left, rgba(252,252,255,0.5), #fffbe2  );
+			text-align: center;
+			font-size: 0.85em;
+		}
+	
+		footer a {
+			text-decoration:none;
+			color:darkgreen;
+			font-weight:bold;
+			font-style: italic;
+		}
+	
+		.copiouslink:hover {
+			fill:navy;
+		}
+		.copiouslink {
+			fill:black;
+		}
+	
+		* {margin: 0; padding: 0; box-sizing: border-box}
+		
+		.PhIOtjDr_0 {
+			fill:none;
+			stroke:#1c1448;
+			stroke-width:4.59875107;
+			stroke-miterlimit:4;
+			stroke-dasharray: 2948 2950;
+			stroke-dashoffset: 2949;
+			animation: PhIOtjDr_draw 6666ms ease-in forwards;
+		}
+
+		@keyframes PhIOtjDr_draw {
+			100% {stroke-dashoffset: 0}
+		}
+
+		@keyframes PhIOtjDr_fade {
+			0% {stroke-opacity: 1}
+			97.1830985915493% {stroke-opacity: 1}
+			100% {stroke-opacity: 0}
+		}
+	
+		.form_el {
+			border:lightgray solid 1px;
+			padding:6px;
+			margin:2px;
+			width:80%;
+		}
+	
+		label {
+			font-weight:bold;
+			color:darkgreen;
+			width:35%;
+		}
+		.field_el {
+			width:65%;
+		}
+	
+		@media (max-width: 1040px) {
+			.field_el {
+				width:94%;
+				margin-left:3%;
+				margin-right:3%;
+			}
+		}
+
+		#contact_box {
+			background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE));
+			background: linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE );
+		}
+	
+		.textarea_field_el {
+			width: 94%;
+			margin:3%;
+		}
+	
+		#errors_here {
+			visibility:hidden;
+			width:100%;
+			font-weight:bolder;
+			color:red;
+			background-color:white;
+			border: solid 1px orange;
+			padding:2px;
+			margin:3px;
+		}
+
+		/* The Modal (background) */
+		.modal {
+		  display: none; /* Hidden by default */
+		  position: relative; /* Stay in place */
+		  z-index: 1; /* Sit on top */
+		  left: 0;
+		  top: 0;
+		  width: 100%; /* Full width */
+		  height: 100%; /* Full height */
+		  overflow: auto; /* Enable scroll if needed */
+		  background-color: rgb(0,0,0); /* Fallback color */
+		  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+		  -webkit-animation-name: fadeIn; /* Fade in the background */
+		  -webkit-animation-duration: 0.4s;
+		  animation-name: fadeIn;
+		  animation-duration: 0.4s
+		}
+
+		/* Modal Content */
+		.modal-content {
+		  position: inherit;
+		  top: 0;
+		  background-color: #fefefe;
+		  width: 100%;
+		  -webkit-animation-name: slideIn;
+		  -webkit-animation-duration: 0.4s;
+		  animation-name: slideIn;
+		  animation-duration: 0.4s
+		}
+
+		/* The Close Button */
+		.close {
+		  color: white;
+		  float: right;
+		  font-size: 18px;
+		  font-weight: bold;
+		}
+
+		.close:hover,
+		.close:focus {
+		  color: #000;
+		  text-decoration: none;
+		  cursor: pointer;
+		}
+
+		.modal-header {
+		  padding: 2px 16px;
+		  background-color: #4ca85c;
+		  color: white;
+		}
+
+		.modal-body {padding: 2px 16px;}
+
+		.modal-footer {
+		  padding: 2px 16px;
+		  background-color: darkgreen;
+		  color: white;
+		}
+
+		/* Add Animation */
+		@-webkit-keyframes slideIn {
+		  from {bottom: -300px; opacity: 0}
+		  to {bottom: 0; opacity: 1}
+		}
+
+		@keyframes slideIn {
+		  from {bottom: -300px; opacity: 0}
+		  to {top: 0; opacity: 1}
+		}
+
+		@-webkit-keyframes fadeIn {
+		  from {opacity: 0}
+		  to {opacity: 1}
+		}
+
+		@keyframes fadeIn {
+		  from {opacity: 0}
+		  to {opacity: 1}
+		}
+
+	</style>
+</head>
+<script>
+		//var g_siteURL = "localhost";
+		var g_siteURL = "localhost";
+</script>
+<body>
+	<nav id="mainNav">
+		<table style="width:100%">
+			<tr>
+				<td style="width:62;height:63">
+					<a class="nav-link" href="/">
+						<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.0"
+   width="70"
+   height="70"
+   viewBox="0 0 350 350"
+   preserveAspectRatio="xMidYMid meet"
+   id="svg2">
+  <defs id="defs16">
+    <linearGradient id="linearGradient1115">
+      <stop
+         style="stop-color:#e9ff00;stop-opacity:1;"
+         offset="0"
+         id="stop1111" />
+      <stop
+         style="stop-color:#e9ff00;stop-opacity:0;"
+         offset="1"
+         id="stop1113" />
+    </linearGradient>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       id="filter1107"
+       x="-0.02418653"
+       width="1.0483731"
+       y="-0.023816325"
+       height="1.0476327">
+      <feGaussianBlur
+         stdDeviation="2.8845338"
+         id="feGaussianBlur1109" />
+    </filter>
+    <radialGradient
+       xlink:href="#linearGradient1115"
+       id="radialGradient1117"
+       cx="162.94153"
+       cy="166.10171"
+       fx="162.94153"
+       fy="166.10171"
+       r="150.03728"
+       gradientTransform="matrix(1,0,0,1.0148269,0,-2.4627807)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <g
+     id="g4232"
+     transform="translate(12.8,0)">
+    <ellipse
+       style="opacity:0.98000004;fill:url(#radialGradient1117);fill-opacity:1;stroke:none;stroke-width:33.07086563;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill;filter:url(#filter1107)"
+       id="path833"
+       cx="162.94153"
+       cy="166.1017"
+       rx="143.1144"
+       ry="145.33899"
+       transform="matrix(1.153994,0,0,1.1209987,-27.316594,-14.907414)" />
+    <text
+       transform="scale(1.0420353,0.95966038)"
+       id="text4170"
+       y="109.06458"
+       x="144.01936"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:95.65157318px;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff0080;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="109.06458"
+         x="144.01936"
+         id="tspan4172"
+         style="fill:#ff0080;fill-opacity:1">O</tspan></text>
+    <text
+       id="text4195"
+       y="243.96106"
+       x="183.45763"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:64px;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="243.96106"
+         x="183.45763"
+         id="tspan4197">ong</tspan></text>
+    <g
+       id="g831"
+       transform="translate(23.333334,11.666667)">
+      <path
+         style="fill:#0000ff;stroke:none"
+         id="path12"
+         d="m 65.085952,145.23192 c 3.26895,0.045 6.29859,-0.22234 6.72969,-0.55143 0.56359,-0.36425 0.98273,-2.72972 1.12104,-5.34268 0.13832,-2.61297 0.64228,-9.56307 1.1107,-15.43029 1.75701,-23.11592 2.87369,-37.52803 4.261,-58.18425 l 1.48023,-21.485981 11.992232,3.58025 c 10.950016,3.32009 12.621086,3.62804 18.522196,3.51118 14.2188,-0.23097 26.09194,-6.22644 32.52851,-16.25373 2.4006,-3.91106 2.85933,-5.48194 2.68708,-9.83735 -0.37617,-9.346466 -7.6659,-17.341296 -18.99565,-21.097346 -5.54917,-1.80138 -7.57621,-2.06853 -15.22352,-1.97132 -6.88593,0.10985 -10.92611,0.75264 -18.875886,2.86232 -13.283252,3.73975 -20.815682,7.93923 -25.381632,14.196096 -3.51988,4.79849 -3.5614,4.86318 -3.8692,20.24142 -0.38487,16.525811 -3.04833,67.255061 -3.6297,68.160751 -0.37373,0.58223 -7.0047,-2.27387 -12.57569,-5.41127 -8.70357,-4.93602 -17.27674,-12.64393 -20.88808,-18.66294 -7.03283,-11.82005 -7.01766,-25.88617 0.16639,-37.077941 2.45005,-3.81684 2.84156,-4.9405 1.77561,-5.6774 -1.85899,-1.38519 -5.75277,0.39953 -10.36429,4.84365 C 1.9240117,60.39223 -2.0878686,74.17718 4.8798417,89.18116 c 4.3155099,9.37451 7.2958803,12.609 21.4717203,24.08997 17.57938,14.22745 25.23493,21.48113 28.18573,26.81668 1.37651,2.47933 3.09315,4.60004 3.548,4.74769 0.58735,0.1125 3.77324,0.28681 7.00066,0.39642 z"
+         />
+      <ellipse
+         style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:2.25200582;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="path4199"
+         cx="110.36122"
+         cy="26.560381"
+         rx="21.172937"
+         ry="11.617853" />
+    </g>
+    <path
+       d="m 124.58334,69.729014 c -7.68174,3.748996 -12.93255,7.75361 -18.37783,14.229149 -6.612125,7.92402 -11.279516,16.444467 -13.418726,24.538887 -2.528168,9.3725 -2.333698,25.56135 0.38894,34.84864 l 1.94475,6.64594 -10.598858,8.94648 c -19.8364,16.78527 -31.21315,31.01442 -37.6308,46.69205 -3.50054,8.77605 -4.08397,23.60164 -1.26409,33.99658 2.72264,10.13934 8.65411,19.76744 16.04414,26.41339 7.48727,6.64595 15.26625,10.73577 26.93472,14.31436 8.654109,2.55613 9.918189,2.72654 22.947974,2.81174 l 13.80768,0 1.06961,4.26022 c 6.12594,24.53889 6.32042,27.09503 2.6254,33.31496 -1.94474,3.32297 -9.82095,8.00922 -13.51597,8.00922 -2.72264,0 -3.59777,-1.10766 -1.65303,-2.21532 2.23646,-1.19286 4.76462,-7.6684 4.76462,-12.52506 0,-13.97353 -15.46071,-22.57918 -30.143524,-16.70007 -15.36349,6.04951 -19.25298,21.72714 -8.65411,35.27464 13.807678,17.80774 37.047364,20.27867 55.230724,5.87912 12.34912,-9.71331 16.04414,-27.18023 10.40438,-48.82216 -1.36132,-5.28269 -2.52817,-9.96893 -2.52817,-10.39496 0,-0.34082 1.65304,-1.53368 3.59778,-2.55613 10.30714,-5.6235 20.71152,-15.3368 25.8651,-24.19807 4.66738,-8.09443 5.93147,-13.63272 5.93147,-25.13532 -0.0972,-9.79852 -0.29172,-11.16179 -3.01436,-17.29651 -5.34804,-11.67301 -13.22426,-18.74499 -25.96233,-23.17562 -7.39003,-2.55613 -15.46072,-3.749 -24.40654,-3.8342 l -5.93147,0 -2.33369,-10.13933 -2.33369,-10.13934 4.37567,-4.60104 c 12.25189,-12.69547 23.5314,-27.86186 27.12918,-36.29711 1.16685,-2.55613 2.72264,-8.43523 3.59778,-12.95108 1.55579,-7.6684 1.55579,-8.69085 0,-15.422007 C 146.75342,81.40203 137.32142,67.17288 132.07061,67.17288 c -1.26409,0 -4.57015,1.192862 -7.48727,2.556134 z m 4.66739,19.937843 c 1.16684,1.53369 2.52817,5.027068 3.11159,7.668411 2.52817,10.735762 -5.34805,26.328182 -19.35021,38.597622 -1.75027,1.53368 -3.59777,2.81176 -3.98672,2.81176 -2.52817,0 -2.91712,-21.55674 -0.58342,-28.79912 2.43093,-7.24239 6.90384,-13.973533 12.44636,-18.830192 2.72264,-2.385725 5.25081,-4.345432 5.63976,-4.345432 0.38894,0 1.65303,1.278071 2.72264,2.896951 z m -26.643,94.406573 1.26409,4.85665 -4.764625,2.72654 c -5.639751,3.15257 -12.543599,9.62811 -15.071759,14.14395 -1.45856,2.55613 -1.84751,5.11227 -1.84751,11.75821 0,10.30975 1.94474,14.48476 10.015428,21.64194 5.737001,5.11226 7.681741,4.94186 5.542521,-0.34082 -1.847501,-4.43063 -1.750271,-4.68624 0.58343,-10.13933 2.041975,-4.85666 8.751345,-12.86587 10.793325,-12.86587 0.68066,0 3.20882,9.4577 6.51489,24.02765 4.37567,19.25622 5.25081,24.19808 4.1812,24.5389 -2.62541,0.85204 -15.46072,0.34081 -21.392185,-0.85205 -13.029779,-2.72654 -22.850739,-9.20208 -28.490509,-18.9154 -3.20882,-5.53828 -3.30606,-5.96431 -3.20882,-16.01844 0,-9.37249 0.29171,-10.82097 3.11159,-17.29651 1.75027,-3.9194 4.47291,-8.86126 6.22319,-11.07658 4.86186,-6.30513 15.07176,-16.87048 20.030858,-20.70468 3.889491,-2.98217 4.667386,-3.23777 4.861856,-1.95971 0.19448,0.93725 0.97237,3.8342 1.65303,6.47555 z m 39.67278,26.24297 c 10.01544,3.32298 15.26624,10.99138 15.26624,22.57919 0,11.07658 -5.63975,20.10826 -15.46071,24.96491 l -3.88949,1.95971 -0.58342,-1.95971 c -0.29171,-1.10765 -2.43093,-10.22454 -4.86186,-20.27866 -2.52817,-10.05413 -4.86186,-19.68224 -5.25081,-21.30113 -0.48619,-1.61888 -1.16685,-4.0046 -1.45856,-5.36787 l -0.58342,-2.30053 5.73699,0 c 3.50054,0 7.97345,0.68164 11.08504,1.70409 z"
+       id="path8"
+       style="fill:#ff0000;stroke:none" />
+    <g
+       id="g827"
+       transform="translate(-11.864407,57.641243)">
+      <path
+         d="m 234.35149,146.71497 c 3.26895,0.045 6.29859,-0.22234 6.72969,-0.55143 0.56359,-0.36425 0.98273,-2.72972 1.12104,-5.34268 0.13832,-2.61297 0.64228,-9.56307 1.1107,-15.43029 1.75701,-23.11592 2.87369,-37.528029 4.261,-58.184249 l 1.48023,-21.485981 11.99223,3.58025 c 10.95001,3.32009 12.62108,3.62804 18.52219,3.51118 14.2188,-0.23097 26.09194,-6.22644 32.52851,-16.25373 2.4006,-3.91106 2.85933,-5.48194 2.68708,-9.83735 -0.37617,-9.346466 -7.6659,-17.3412962 -18.99565,-21.0973462 -5.54917,-1.80138 -7.57621,-2.06853 -15.22352,-1.97132 -6.88593,0.10985 -10.92611,0.75264 -18.87588,2.86232 -13.28325,3.7397502 -20.81568,7.9392302 -25.38163,14.1960962 -3.51988,4.79849 -3.5614,4.86318 -3.8692,20.24142 -0.38487,16.525811 -3.04833,67.25506 -3.6297,68.16075 -0.37373,0.58223 -7.0047,-2.27387 -12.57569,-5.41127 -8.70357,-4.936019 -17.27674,-12.643929 -20.88808,-18.662939 -7.03283,-11.82005 -7.01766,-25.88617 0.16639,-37.077941 2.45005,-3.81684 2.84156,-4.9405 1.77561,-5.6774 -1.85899,-1.38519 -5.75277,0.39953 -10.36429,4.84365 -15.73297,14.748571 -19.74486,28.533521 -12.77714,43.537501 4.3155,9.374509 7.29588,12.608999 21.47172,24.089969 17.57938,14.22745 25.23493,21.48113 28.18573,26.81668 1.37651,2.47933 3.09315,4.60004 3.548,4.74769 0.58735,0.1125 3.77324,0.28681 7.00066,0.39642 z"
+         id="path823"
+         style="fill:#176431;fill-opacity:1;stroke:none" />
+      <ellipse
+         ry="11.617853"
+         rx="21.172937"
+         cy="26.560381"
+         cx="278.33157"
+         id="ellipse4230"
+         style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:2.25200582;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+  </g>
+</svg>
+
+					</a>
+				</td>
+				<td>
+					<ul class="navbar-nav">
+						<li class="nav-item">
+							<a class="nav-link" href="http://www.soundcloud.com/leddy-sound" target="SoundCloud" >
+								<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" width="60" height="90" x="0px" y="0px"
+	 viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:url(#SVGID_1_);}
+</style>
+<g id="XMLID_1_">
+	
+		<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="250" y1="352.7188" x2="250" y2="147.5012" gradientTransform="matrix(1 0 0 -1 0 500.11)">
+		<stop  offset="0" style="stop-color:#F79810"/>
+		<stop  offset="1" style="stop-color:#F8310E"/>
+	</linearGradient>
+	<path class="st0" d="M74.1,240.9c-0.8,0-1.3,0.6-1.4,1.4l-2.6,20l2.6,19.7c0.1,0.8,0.7,1.4,1.4,1.4c0.7,0,1.3-0.6,1.4-1.4l0,0v0
+		c0,0,0,0,0,0l3.1-19.7l-3.1-20C75.4,241.5,74.8,240.9,74.1,240.9z M88.9,230c-0.1-0.9-0.7-1.5-1.5-1.5c-0.8,0-1.4,0.6-1.5,1.5
+		c0,0-3.5,32.3-3.5,32.3l3.5,31.6c0.1,0.8,0.7,1.5,1.5,1.5c0.8,0,1.4-0.6,1.5-1.5l4-31.6L88.9,230z M144.6,200.1
+		c-1.5,0-2.7,1.2-2.7,2.7l-2.8,59.5l2.8,38.4c0.1,1.5,1.3,2.7,2.7,2.7c1.4,0,2.6-1.2,2.7-2.7v0l3.2-38.4l-3.2-59.5
+		C147.3,201.3,146.1,200.1,144.6,200.1z M115.8,220.8c-1.1,0-2,0.9-2.1,2.1l-3.2,39.4l3.2,38.1c0.1,1.2,1,2.1,2.1,2.1
+		c1.1,0,2-0.9,2.1-2.1l3.6-38.1l-3.6-39.4C117.8,221.7,116.9,220.8,115.8,220.8z M174,303.5c1.8,0,3.3-1.5,3.3-3.3l2.8-37.8
+		l-2.8-79.2c-0.1-1.9-1.5-3.3-3.3-3.3c-1.8,0-3.3,1.5-3.3,3.3c0,0-2.5,79.2-2.5,79.2l2.5,37.8C170.7,302,172.2,303.5,174,303.5z
+		 M234,303.6c2.5,0,4.5-2,4.6-4.5v0v0l1.9-36.7l-1.9-91.5c0-2.5-2.1-4.5-4.6-4.5c-2.5,0-4.5,2-4.6,4.6l-1.7,91.4
+		c0,0.1,1.7,36.8,1.7,36.8C229.5,301.6,231.5,303.6,234,303.6z M203.8,303.5c2.2,0,3.9-1.7,4-3.9v0l2.3-37.2l-2.3-79.8
+		c-0.1-2.2-1.8-3.9-4-3.9c-2.2,0-3.9,1.7-4,3.9l-2.1,79.8l2.1,37.2C199.9,301.8,201.6,303.5,203.8,303.5z M130.2,303.1
+		c1.3,0,2.3-1,2.4-2.4l3.4-38.4l-3.4-36.6c-0.1-1.4-1.1-2.4-2.4-2.4c-1.3,0-2.3,1-2.4,2.4l-3,36.6l3,38.4
+		C127.8,302.1,128.9,303.1,130.2,303.1z M101.5,301c0.9,0,1.7-0.7,1.8-1.8l3.8-37l-3.8-38.4c-0.1-1-0.9-1.8-1.8-1.8
+		c-0.9,0-1.7,0.7-1.8,1.8c0,0-3.4,38.4-3.4,38.4l3.4,37C99.8,300.3,100.6,301,101.5,301z M218.8,181.3c-2.3,0-4.2,1.9-4.3,4.2
+		l-1.9,76.9l1.9,37c0,2.4,1.9,4.2,4.3,4.2c2.3,0,4.2-1.9,4.3-4.2v0l2.1-37l-2.1-76.9C223,183.1,221.2,181.3,218.8,181.3z
+		 M159.3,303.5c1.6,0,3-1.3,3-3l3-38.2l-3-73.1c-0.1-1.7-1.4-3-3-3c-1.6,0-3,1.3-3,3c0,0-2.6,73.1-2.6,73.1l2.6,38.2
+		C156.3,302.2,157.6,303.5,159.3,303.5z M192.5,299.9L192.5,299.9l2.6-37.6l-2.6-81.9c-0.1-2-1.7-3.6-3.6-3.6c-2,0-3.6,1.6-3.6,3.6
+		l-2.3,81.9l2.3,37.6c0.1,2,1.7,3.6,3.6,3.6C190.8,303.5,192.4,301.9,192.5,299.9L192.5,299.9z M385.7,215.2
+		c-6.1,0-11.9,1.2-17.1,3.4c-3.5-39.9-37-71.2-77.8-71.2c-10,0-19.7,2-28.3,5.3c-3.3,1.3-4.2,2.6-4.3,5.2v140.5c0,2.7,2.1,5,4.8,5.2
+		c0.1,0,122,0.1,122.7,0.1c24.5,0,44.3-19.8,44.3-44.3C430,235,410.2,215.2,385.7,215.2z M249.1,157.8c-2.7,0-4.8,2.2-4.9,4.9
+		l-2,99.8l2,36.2c0,2.6,2.2,4.8,4.9,4.8c2.7,0,4.8-2.2,4.9-4.9v0l2.2-36.2l-2.2-99.8C254,160,251.8,157.8,249.1,157.8z M105.8,331.9
+		c-5.2-1.2-6.7-1.9-6.7-4c0-1.5,1.2-3,4.7-3c3,0,5.4,1.2,7.5,3.4l4.8-4.6c-3.1-3.3-6.9-5.2-12-5.2c-6.5,0-11.8,3.7-11.8,9.7
+		c0,6.5,4.3,8.4,10.3,9.9c6.2,1.4,7.4,2.4,7.4,4.5c0,2.5-1.8,3.6-5.8,3.6c-3.2,0-6.1-1.1-8.5-3.8l-4.8,4.3c2.5,3.7,7.3,6,12.8,6
+		c9,0,13-4.2,13-10.5C116.8,334.9,111,333.1,105.8,331.9z M136.2,318.5c-9,0-14.3,7-14.3,17c0,10.1,5.3,17,14.3,17s14.4-7,14.4-17
+		C150.5,325.5,145.2,318.5,136.2,318.5z M136.2,346.1c-5.3,0-7.6-4.6-7.6-10.5c0-5.9,2.2-10.5,7.6-10.5c5.3,0,7.6,4.6,7.6,10.5
+		C143.7,341.5,141.5,346.1,136.2,346.1z M177.2,337.6c0,5.3-2.6,8.5-6.8,8.5c-4.2,0-6.7-3.4-6.7-8.6V319H157v18.6
+		c0,9.6,5.4,15,13.4,15c8.4,0,13.4-5.5,13.4-15.1V319h-6.6V337.6z M212.3,333c0,1.8,0.1,6,0.1,7.2c-0.4-0.9-1.5-2.5-2.3-3.7
+		L198.4,319h-6.3v33h6.5v-14.5c0-1.8-0.1-6-0.1-7.2c0.4,0.8,1.5,2.5,2.3,3.7l12.1,18h5.9v-33h-6.5V333z M237.7,319h-10.3v33h9.9
+		c8.5,0,16.9-4.9,16.9-16.5C254.1,323.5,247.1,319,237.7,319z M237.2,345.7h-3.3v-20.2h3.5c7,0,9.9,3.3,9.9,10.1
+		C247.3,341.6,244.1,345.7,237.2,345.7z M274.5,325.1c3,0,4.9,1.3,6,3.6l6.1-2.8c-2.1-4.3-5.9-7.3-12.1-7.3c-8.6,0-14.7,7-14.7,17
+		c0,10.4,5.8,17,14.4,17c6,0,10-2.8,12.2-7.5l-5.6-3.3c-1.7,2.9-3.5,4.2-6.5,4.2c-5,0-7.8-4.5-7.8-10.5
+		C266.7,329.4,269.6,325.1,274.5,325.1z M299,319h-6.6v33h19.9v-6.5H299V319z M329.7,318.5c-9,0-14.4,7-14.4,17
+		c0,10.1,5.3,17,14.4,17c9,0,14.3-7,14.3-17C344,325.5,338.7,318.5,329.7,318.5z M329.7,346.1c-5.3,0-7.6-4.6-7.6-10.5
+		c0-5.9,2.2-10.5,7.6-10.5c5.3,0,7.5,4.6,7.5,10.5C337.2,341.5,335,346.1,329.7,346.1z M370.7,337.6c0,5.3-2.6,8.5-6.8,8.5
+		c-4.2,0-6.8-3.4-6.8-8.6V319h-6.6v18.6c0,9.6,5.4,15,13.4,15c8.4,0,13.4-5.5,13.4-15.1V319h-6.6V337.6z M395.9,319h-10.3v33h9.9
+		c8.5,0,16.9-4.9,16.9-16.5C412.3,323.5,405.4,319,395.9,319z M395.4,345.7h-3.3v-20.2h3.5c7,0,9.9,3.3,9.9,10.1
+		C405.5,341.6,402.4,345.7,395.4,345.7z"/>
+</g>
+</svg>
+
+							</a>
+						</li>
+						<li id="squashMenu"   class="nav-item" style="visibility:hidden;cursor:pointer" onmousedown="menuHandler(this)" onmouseup="releaseMenu(this)">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path class="heroicon-ui" d="M4 5h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2z"/></svg>
+						</li>
+					</ul>
+				</td>
+			</tr>
+		</table>
+	</nav>
+	<main>
+
+	<div class="items">
+		
+		<div class="item">
+			<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="360"
+   height="220"
+   viewBox="0 0 360 220"
+   id="svg4"
+   version="1.1"
+   sodipodi:docname="intro.svg"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1385"
+     inkscape:window-height="813"
+     id="namedview24"
+     showgrid="false"
+     inkscape:zoom="1.55"
+     inkscape:cx="161.50105"
+     inkscape:cy="84.193548"
+     inkscape:window-x="47"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg4" />
+  <defs
+     id="defs4">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient912">
+      <stop
+         style="stop-color:#bdfffe;stop-opacity:1;"
+         offset="0"
+         id="stop908" />
+      <stop
+         style="stop-color:#bdfffe;stop-opacity:0;"
+         offset="1"
+         id="stop910" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient892">
+      <stop
+         style="stop-color:#fff8bb;stop-opacity:1;"
+         offset="0"
+         id="stop888" />
+      <stop
+         style="stop-color:#fff8bb;stop-opacity:0;"
+         offset="1"
+         id="stop890" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient880">
+      <stop
+         style="stop-color:#57eb68;stop-opacity:1;"
+         offset="0"
+         id="stop876" />
+      <stop
+         style="stop-color:#57eb68;stop-opacity:0;"
+         offset="1"
+         id="stop878" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient4212">
+      <stop
+         style="stop-color:#fffbe2;stop-opacity:1;"
+         offset="0"
+         id="stop4214" />
+      <stop
+         style="stop-color:#fffbe2;stop-opacity:0;"
+         offset="1"
+         id="stop4216" />
+    </linearGradient>
+    <linearGradient
+       xlink:href="#linearGradient4212"
+       id="linearGradient4218"
+       x1="0"
+       y1="772.36212"
+       x2="360"
+       y2="772.36212"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.0055812,0,0,1,-1.0046148,-1543.7233)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient880"
+       id="linearGradient882"
+       x1="10.322571"
+       y1="190.96774"
+       x2="50.967735"
+       y2="138.21393"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.70689655,0,0,1.8571428,-88.889862,-188.00193)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient912"
+       id="linearGradient914"
+       x1="0.32259369"
+       y1="292.58063"
+       x2="132.58065"
+       y2="292.58063"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient892"
+       id="radialGradient916"
+       cx="121.33818"
+       cy="136.07718"
+       fx="121.33818"
+       fy="136.07718"
+       r="180.64516"
+       gradientTransform="matrix(0.54487667,0.7272778,-0.52968557,0.39684054,129.83474,-35.473307)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <rect
+     style="opacity:0.98000004;fill:url(#radialGradient916);fill-opacity:1;stroke:none;stroke-width:5.6692915;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
+     id="rect886"
+     width="361.29031"
+     height="221.29033"
+     x="0"
+     y="-0.64516127" />
+  <path
+     style="opacity:0.98000004;fill:url(#linearGradient882);fill-opacity:1;stroke:none;stroke-width:6.49575138;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
+     id="path874"
+     sodipodi:type="arc"
+     sodipodi:cx="-15.46385"
+     sodipodi:cy="166.65247"
+     sodipodi:rx="66.129028"
+     sodipodi:ry="67.096771"
+     sodipodi:start="0"
+     sodipodi:end="6.2353009"
+     sodipodi:open="true"
+     d="m 50.665178,166.65247 a 66.129028,67.096771 0 0 1 -65.33741,67.09196 66.129028,67.096771 0 0 1 -66.901694,-65.48567 66.129028,67.096771 0 0 1 63.735674,-68.659801 66.129028,67.096771 0 0 1 68.427631,63.841841"
+     transform="rotate(-29.297473)" />
+  <path
+     d="M 132.58065,292.58063 A 66.129028,67.096771 0 0 1 67.24324,359.67259 66.129028,67.096771 0 0 1 0.34154633,294.18692 66.129028,67.096771 0 0 1 64.077221,225.52712 66.129028,67.096771 0 0 1 132.50485,289.36897"
+     sodipodi:open="true"
+     sodipodi:end="6.2353009"
+     sodipodi:start="0"
+     sodipodi:ry="67.096771"
+     sodipodi:rx="66.129028"
+     sodipodi:cy="292.58063"
+     sodipodi:cx="66.451622"
+     sodipodi:type="arc"
+     id="path896"
+     style="opacity:0.98000004;fill:url(#linearGradient914);fill-opacity:1;stroke:none;stroke-width:6.49575138;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
+     transform="matrix(0,1,1,0,0,0)" />
+  <g
+     id="g872"
+     transform="translate(0,6)">
+    <text
+       transform="scale(1.02226,0.97822471)"
+       id="text4161"
+       y="68.054626"
+       x="20.885248"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90.01738739px;line-height:125%;font-family:'Arial Rounded MT Bold';-inkscape-font-specification:'Arial Rounded MT Bold, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.76034957px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="68.054626"
+         x="20.885248"
+         id="tspan4163"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:90.01739502px;font-family:Optima;-inkscape-font-specification:'Optima, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.76034957px">Pop</tspan></text>
+    <text
+       id="text4165"
+       y="63.91618"
+       x="264.27057"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:79.99466705px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:3.33311129px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"
+       transform="scale(0.68805903,1.4533637)"><tspan
+         y="63.91618"
+         x="264.27057"
+         id="tspan4167"
+         style="stroke-width:3.33311129px">Song</tspan></text>
+  </g>
+  <text
+     xml:space="preserve"
+     style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:27.89769554px;line-height:125%;font-family:Helvetica;-inkscape-font-specification:'Helvetica, Bold Italic';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#2b2b88;fill-opacity:1;stroke:none;stroke-width:0.92992318px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     x="57.36261"
+     y="170.70592"
+     id="text4175"
+     transform="scale(1.0753576,0.9299232)"><tspan
+       id="tspan4177"
+       x="57.36261"
+       y="170.70592"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:69.8855896px;font-family:Helvetica;-inkscape-font-specification:'Helvetica, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.92992318px">NOW!!</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:31.85223961px;line-height:125%;font-family:'Arial Rounded MT Bold';-inkscape-font-specification:'Arial Rounded MT Bold, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#f80ba9;fill-opacity:1;stroke:none;stroke-width:0.98894149px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     x="22.320084"
+     y="193.53438"
+     id="text4188-b"
+     transform="scale(0.94184902,1.0617413)"><tspan
+       x="22.320084"
+       y="193.53438"
+       id="tspan4192-b"
+       style="fill:#f80ba9;fill-opacity:1;stroke-width:0.98894149px">Create!</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:30.10520744px;line-height:125%;font-family:'Arial Rounded MT Bold';-inkscape-font-specification:'Arial Rounded MT Bold, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ef0611;fill-opacity:1;stroke:none;stroke-width:1.67251146px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     x="226.89952"
+     y="171.01501"
+     id="text4188-c"
+     transform="scale(0.82863071,1.2068102)"><tspan
+       x="226.89952"
+       y="171.01501"
+       id="tspan20"
+       style="stroke-width:1.67251146px">Create Safe</tspan></text>
+</svg>
+
+		</div>
+		<div class="item">
+			<div id="desktopCenter" class="shortviz" ></div>
+			<p class="extra-i" style="color:navy">
+			Join in the <span style="font-weight:bold;">Pop Song</span> conversation.
+			</p>
+			<br>
+			<a id="a4179" href="http://www.copious.world:2006/"  style="cursor:pointer" >
+			<p class="extra-i" style="text-align:center" >
+			<svg
+				width="360"
+				height="38"
+				viewBox="0 0 360 38">
+					<rect
+						y="0"
+						x="10.203392"
+						height="36"
+						width="236"
+						id="rect4308"
+						style="opacity:0.675;fill:#e6e6F6;fill-opacity:1;stroke:navy;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+						ry="4.2373047"
+						rx="5.9322033">
+					</rect>
+					<text
+						id="text4337"
+						y="20"
+						x="0"
+						style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#004000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+						xml:space="preserve"><tspan
+							y="22"
+							x="60"
+							id="tspan4339">Join our Community</tspan></text>
+			</svg>
+			</p>
+			</a>
+		</div>
+		<div class="item">
+			<div class="longviz" style="backroun-color:blue" >&nbsp;</div>
+			<p class="extra-i" style="color:darkred">
+			Browse the blog or check out some demonstrations.
+			</p>
+			<br>
+			<p class="extra-i" style="text-align:center">
+			<svg
+				width="360"
+				height="40"
+				viewBox="0 0 360 40">
+				 	<a id="a4187" xlink:href="http://www.copious.world:2000/dotgoto?room=Copious.World"   style="cursor:pointer">
+					<rect
+						y="0"
+						x="10"
+						height="36"
+						width="124"
+						id="rect4308"
+						style="opacity:0.675;fill:#e6e6F6;fill-opacity:1;stroke:navy;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+						ry="4.2373047"
+						rx="5.9322033">
+					</rect>
+					<text
+						id="text4337"
+						y="22"
+						x="0"
+						style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#004000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+						xml:space="preserve"><tspan
+							y="22"
+							x="60"
+							id="tspan4339">Blog</tspan></text>
+					</a>
+					<a id="a4193" xlink:href="http://www.copious.world:2000/dotgoto?room=Demo-notes"  style="cursor:pointer">
+					<rect
+						y="0"
+						x="144"
+						height="36"
+						width="124"
+						id="rect4308"
+						style="opacity:0.675;fill:#e6e6F6;fill-opacity:1;stroke:navy;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+						ry="4.2373047"
+						rx="5.9322033">
+					</rect>
+					<text
+						id="text4337"
+						y="22"
+						x="170"
+						style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#004000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+						xml:space="preserve"><tspan
+							y="22"
+							x="180"
+							id="tspan4339">Demos</tspan></text>
+					</a>
+			</svg>
+			</p>
+			<div id="desktopRight" class="shortviz" ></div>
+		</div>
+		<div class="item">
+			
+			<p class="extra-i" style="color:darkgreen;font-weight:bold;">
+			Already a member?
+			</p>
+			<hr><br>
+			<a id="a4199" href="http://www.copious.world:2000/summary"   style="cursor:pointer">
+			<p class="extra-i" >
+			<svg
+				width="360"
+				height="38"
+				viewBox="0 0 360 38">
+				<rect
+					y="0"
+					x="55"
+					height="36"
+					width="140"
+					id="rect4308"
+					style="opacity:0.675;fill:#e6e6F6;fill-opacity:1;stroke:navy;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+					ry="4.2373047"
+					rx="5.9322033">
+				</rect>
+				<text
+					id="text4337"
+					y="22"
+					x="100"
+					style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#004000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+					xml:space="preserve"><tspan
+						y="22"
+						x="105"
+						id="tspan4339">Login</tspan></text>
+			</svg>
+			</p>
+			</a>
+		</div>
+		
+		<div id="lowerFiller" class="fillLowerWrap">
+			<div class="fillLower">
+				alpha test
+			</div>
+		</div>
+	</div>
+	
+	</main>
+
+<footer>
+	<ul class="footer-list">
+		<li>
+			<a href="http://www.copious.world">copyright &copy; 2020 copious.world</a>
+		</li>
+	</ul>
+</footer>
+
+<div id="squashMenuContainer" >
+	this is a test;
+</div>
+<div id="contact_box" class="fade_able" style="z-index:102" >
+	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('contact_box')">x</span></div>
+	<!-- The Modal -->
+	<div class="fade_able_content">
+		<div id="myModal" class="modal">
+			<!-- Modal content -->
+			<div class="modal-content">
+				<div class="modal-header">
+					<span class="close">&times;</span>
+					<h3><i>Captcha</i> : I am not a robot</h3>
+				</div>
+				<div class="modal-body">
+					<div id="captcha-goes-here" style="border:1px solid lime;margin:2px;" >
+						------
+					</div>
+					<div id="captcha-entry" >
+						Type in the text that you see above:
+						<input type="text" id="captcha-field" class="svgFormTextField" style="font-size:14px;margin-top:1px;margin-left:2px;border:1px solid black;"/>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button onclick="captchaCheck()">submit</button>
+				</div>
+			</div>
+		</div>
+		
+		<div id="myContactForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
+			<div id="errors_here" >no error</div>
+			<div class="form_el" >
+				<label for='contact-name' class='name'>Name<span> (required) </span></label>
+				<input type='text' name='contact-name' id='contact-name' value='' class='field_el name' required onkeyup="checkError('contact-name')" />
+			</div>
+			
+			<div class="form_el" >
+				<label for='contact-email' class='email'>Email<span> (required) </span></label>
+				<input type='email' name='contact-email' id='contact-email' value=''class='field_el email'  required onkeyup="checkError('contact-email')"  />
+			</div>
+			
+			<div class="form_el" >
+				<label for='contact-website' class='url'>Website<span> (optional)</span></label>
+				<input type='text' name='contact-website' id='contact-website' value='' class='field_el url' onkeyup="checkError('contact-website')"  />
+			</div>
+			
+			<div class="form_el" style="vertical-align:top">
+				<label for='contact-comment' class='grunion-field-label textarea'>Comment<span>(required)</span></label><br>
+				<textarea name='contact-comment' id='contact-comment' rows='20' class='textarea_field_el'  required onkeyup="checkError('contact-comment')"  ></textarea>
+			</div>
+			<p class='contact-submit'>
+			<button onclick="processContact()" >Submit</button>
+			</p>
+		</div>
+	</div>
+</div>
+<div id="topicBox_1" class="fade_able" style="z-index:103" >
+	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('topicBox_1')">x</span></div>
+	<div class="fade_able_content" >
+		<div style="min-width: 400px;min-height: 300px;">
+			<div id="catcher-app" class="applink" >
+    <p style="text-align:center;color:firebrick;font-size:120%;">Record New Songs</p>
+    <blockquote style="text-align:center;padding-bottom:4px;">
+    <button id="load-song-catcher" style="width:50%" >Load Song Catcher</button>
+    <br>
+    <button id="install-song-catcher" style="width:50%" >Install Song Catcher</button>
+    </blockquote>
+    <blockquote style="text-align:justify;padding: 8%;padding-top:4px;">
+        Use the Copious Song Catcher to record your new song ideas.
+        Songs will be stored in a distributed database permanently linked to your identity.
+    </blockquote>
+</div>
+
+		</div>
+	</div>
+</div>
+<div id="about_box" class="fade_able" style="z-index:104" >
+	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('about_box')">x</span></div>
+	<div class="fade_able_content" >
+		<div style="min-width: 400px;min-height: 300px;overflow: auto;">
+			<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="620"
+   height="620"
+   viewBox="0 0 189.97214 189.97214"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="about.svg"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06">
+  <metadata
+     id="metadata41">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1443"
+     inkscape:window-height="797"
+     id="namedview39"
+     showgrid="false"
+     inkscape:zoom="0.98"
+     inkscape:cx="-52.129198"
+     inkscape:cy="402.20337"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1"
+     units="px"
+     viewbox-width="220" />
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient894">
+      <stop
+         style="stop-color:#fff1c1;stop-opacity:1;"
+         offset="0"
+         id="stop890" />
+      <stop
+         style="stop-color:#fff1c1;stop-opacity:0;"
+         offset="1"
+         id="stop892" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient871">
+      <stop
+         style="stop-color:#f3e2a5;stop-opacity:1"
+         offset="0"
+         id="stop867" />
+      <stop
+         style="stop-color:#f9f1de;stop-opacity:0;"
+         offset="1"
+         id="stop869" />
+    </linearGradient>
+    <linearGradient
+       xlink:href="#linearGradient871"
+       id="linearGradient873"
+       x1="10.630033"
+       y1="98.430893"
+       x2="209.95244"
+       y2="297.21494"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-0.15931834,-0.21493577)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient894"
+       id="linearGradient896"
+       x1="9.5911455"
+       y1="108.39216"
+       x2="197.55614"
+       y2="277.72549"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.90476932,0,0,0.90480275,0,58.288546)" />
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(0,-137.04407)">
+    <rect
+       style="opacity:1;fill:url(#linearGradient896);fill-opacity:1;stroke:none;stroke-width:2.04910946;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
+       id="rect865"
+       width="189.81439"
+       height="189.88797"
+       x="0"
+       y="137.12694" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.3837676px;line-height:125%;font-family:Didot;-inkscape-font-specification:'Didot, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#3d66a5;fill-opacity:1;stroke:none;stroke-width:0.30243853px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="101.60815"
+       y="129.04822"
+       id="text855"
+       transform="scale(0.79152235,1.2633882)"><tspan
+         id="tspan853"
+         x="101.60815"
+         y="129.04822"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.3837676px;font-family:Didot;-inkscape-font-specification:'Didot, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#3d66a5;fill-opacity:1;stroke-width:0.30243853px">A Copious Systems website.</tspan></text>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot857"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       transform="matrix(0.90476932,0,0,0.90480272,0,58.114045)"><flowRegion
+         id="flowRegion859"><rect
+           id="rect861"
+           width="1.1363636"
+           height="53.409092"
+           x="696.59088"
+           y="485.74625" /></flowRegion><flowPara
+         id="flowPara863" /></flowRoot>    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:8.93727493px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#220977;fill-opacity:1;stroke:none;stroke-width:0.2393913px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="6.1290073"
+       y="152.05389"
+       id="text877"
+       transform="scale(0.99998151,1.0000185)"><tspan
+         id="tspan875"
+         x="6.1290073"
+         y="152.05389"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:8.93727493px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#220977;fill-opacity:1;stroke-width:0.2393913px">POP SONG NOW</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.54070568px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.72539496px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="80.042824"
+       y="66.753166"
+       id="text854"
+       transform="scale(0.33000902,3.0302202)"><tspan
+         x="80.042824"
+         y="66.753166"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.54070663px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.72539496px"
+         id="tspan856" /></text>
+    <text
+       transform="scale(0.79152235,1.2633882)"
+       id="text923"
+       y="190.06303"
+       x="70.998123"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.3837676px;line-height:125%;font-family:Didot;-inkscape-font-specification:'Didot, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#1e2323;fill-opacity:1;stroke:none;stroke-width:0.30243853px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.3837676px;font-family:Didot;-inkscape-font-specification:'Didot, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#d0633e;fill-opacity:1;stroke-width:0.30243853px"
+         y="190.06303"
+         x="70.998123"
+         id="tspan921">Singing new songs to wonderful singers is a gift.</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.46863747px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke:none;stroke-width:0.2393913px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="21.545216"
+       y="167.87888"
+       id="text864"
+       transform="scale(0.99998151,1.0000185)"><tspan
+         sodipodi:role="line"
+         id="tspan862"
+         x="21.545216"
+         y="167.87888"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#c12718;fill-opacity:1;stroke-width:0.2393913px">Pop Song Now</tspan><tspan
+         sodipodi:role="line"
+         x="21.545216"
+         y="173.63049"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         id="tspan866">Addresses the moment of creation of a song.</tspan><tspan
+         sodipodi:role="line"
+         x="21.545216"
+         y="179.38213"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         id="tspan868">Everyone with a song in his or her heart should know </tspan><tspan
+         sodipodi:role="line"
+         x="21.545216"
+         y="185.13374"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         id="tspan870">Whatever their soul brings into the world is something </tspan><tspan
+         sodipodi:role="line"
+         x="21.545216"
+         y="190.88538"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         id="tspan872">That is a part of them and is their own gift they bring </tspan><tspan
+         sodipodi:role="line"
+         x="21.545216"
+         y="196.63699"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         id="tspan874">To the world. </tspan><tspan
+         sodipodi:role="line"
+         x="21.545216"
+         y="202.38863"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         id="tspan876">The relation of the song creator to the world</tspan><tspan
+         sodipodi:role="line"
+         x="21.545216"
+         y="208.14024"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         id="tspan878">Is a relation that does not belong to others who might sing it</tspan><tspan
+         sodipodi:role="line"
+         x="21.545216"
+         y="213.89188"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         id="tspan880">Produce it or put their name on it in any other way.</tspan></text>
+    <text
+       id="text900"
+       y="229.13733"
+       x="6.1290073"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:8.93727493px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#220977;fill-opacity:1;stroke:none;stroke-width:0.2393913px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"
+       transform="scale(0.99998151,1.0000185)"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:8.93727493px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#220977;fill-opacity:1;stroke-width:0.2393913px"
+         y="229.13733"
+         x="6.1290073"
+         id="tspan898">POP SONG COMMUNITY</tspan></text>
+    <text
+       id="text920"
+       y="244.96237"
+       x="21.545216"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.46863747px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke:none;stroke-width:0.2393913px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"
+       transform="scale(0.99998151,1.0000185)"><tspan
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#c12718;fill-opacity:1;stroke-width:0.2393913px"
+         y="244.96237"
+         x="21.545216"
+         id="tspan902"
+         sodipodi:role="line">Pop Song Now</tspan><tspan
+         id="tspan918"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         y="250.71399"
+         x="21.545216"
+         sodipodi:role="line">The motivation of this site comes from having sung to wonderful</tspan><tspan
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         y="256.46561"
+         x="21.545216"
+         sodipodi:role="line"
+         id="tspan957">singers in the first place. They are the ones who brought songs to</tspan><tspan
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         y="262.21725"
+         x="21.545216"
+         sodipodi:role="line"
+         id="tspan959">the world to be loved by everyone.</tspan><tspan
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         y="267.96887"
+         x="21.545216"
+         sodipodi:role="line"
+         id="tspan969" /><tspan
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         y="273.55466"
+         x="21.545216"
+         sodipodi:role="line"
+         id="tspan982">Pop Song Now aims to bring new creations to the voices that will </tspan><tspan
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         y="279.3063"
+         x="21.545216"
+         sodipodi:role="line"
+         id="tspan988">bring them to hearts and souls of the world.</tspan><tspan
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         y="285.05792"
+         x="21.545216"
+         sodipodi:role="line"
+         id="tspan992" /><tspan
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         y="290.64371"
+         x="21.545216"
+         sodipodi:role="line"
+         id="tspan994">The gift of the song should also benefit those who sing it. Perhaps </tspan><tspan
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         y="296.39536"
+         x="21.545216"
+         sodipodi:role="line"
+         id="tspan998">the unkown may become known. And, everyone will be tied to their</tspan><tspan
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         y="302.14697"
+         x="21.545216"
+         sodipodi:role="line"
+         id="tspan1002">passion when they polish each new diamond in the rough.  </tspan><tspan
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.83026075px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#033c10;fill-opacity:1;stroke-width:0.2393913px"
+         y="307.89859"
+         x="21.545216"
+         sodipodi:role="line"
+         id="tspan965" /></text>
+  </g>
+</svg>
+
+		</div>
+	</div>
+</div>
+<div id="topicBox_2" class="fade_able" style="z-index:105" >
+	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('topicBox_2')">x</span></div>
+	<div class="fade_able_content" >
+		<div style="min-width: 400px;min-height: 300px;">
+			<div class="applink" >
+    <p style="text-align:center;color:firebrick;font-size:120%;">Stream of the Day</p>
+    <div style="border:solid 1px darkcyan;margin:2px">
+        <blockquote style="text-align:justify;padding: 8%;padding-top:4px;margin-top: 4px;">
+            Pick of the Day
+            <div style="border:solid 1px darkcyan;margin:2px;color:darkslateblue;background-color: floralwhite;">
+                <span style="font-weight: 900;color:royalblue;">Playing: </span>
+                <span id="streamer-day_title" style="font-weight: 800;color:rebeccapurple">planet</span>
+                &nbsp;by&nbsp;
+                <span id="streamer-day_author" style="font-weight: 800;color :seagreen">planet</span>
+            </div>
+            <br>
+            <audio controls controlsList="nodownload">
+                <source src="http://localhost:2011/streamoftheday" type="audio/ogg">
+                <source src="http://localhost:2011/streamoftheday" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio> 
+        </blockquote>
+    </div>
+    <div style="border:solid 1px darkcyan;margin:2px;padding:4px;">
+        <p style="text-align:center;color:firebrick;font-size:105%;">Search for Songs</p>
+        <blockquote style="text-align:center;padding-bottom:4px;">
+            <input type="text" id="search-song-hints" style="width:50%" />
+            <br>
+            <button style="width:50%" onclick="do_search(0)" >Search for songs</button>
+        </blockquote>
+    </div>
+    <div style="border:solid 1px darkcyan;margin:2px;padding:4px;">
+        <p style="text-align:center;color:firebrick;font-size:105%;">Submit to Song of the Day</p>
+        <blockquote style="text-align:center;padding-bottom:4px;">
+            <button style="width:50%" onclick="do_submit()" >Submit Song</button>
+        </blockquote>
+    </div>
+    <div id="streamer-scratchpad" style="border:solid 1px darkcyan;margin:2px;overflow: auto;">
+    </div>
+</div>
+<script>
+
+// //
+async function fetchEndPoint(endpoint) {
+    if ( document.querySelector('#streamer-scratchpad') ) {
+        let myRequest = new Request(`http://${g_siteURL}:2010/${endpoint}`);
+		//
+		try {
+			const body = await fetch(myRequest, {
+										 method: 'GET', // *GET, POST, PUT, DELETE, etc.
+										 mode: 'cors', // no-cors, *cors, same-origin
+										 cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+										 credentials: 'omit', // include, *same-origin, omit
+										 redirect: 'follow', // manual, *follow, error
+										 referrerPolicy: 'no-referrer', // no-referrer, *client
+									 });
+			//
+            let infoObj = await body.json();
+            return(infoObj)
+            //
+		} catch (e) {
+            console.log(e.message)
+            return(false)
+        }
+    }
+    return true
+}
+
+// 
+var g_songOfDayInterval = 60000
+var g_songOfDayUpdate = null
+// 
+async function song_of_day() {
+    if ( g_songOfDayUpdate ) {
+        clearInterval(g_songOfDayUpdate)
+    }
+    let song_info = await fetchEndPoint('song_of_day_info')
+    if ( song_info ) {
+        // streamer-day_info
+        let spanObj = document.querySelector('#streamer-day_author')
+        if ( spanObj ) {
+            spanObj.innerHTML = song_info.author
+        }
+        spanObj = document.querySelector('#streamer-day_title')
+        if ( spanObj ) {
+            spanObj.innerHTML = song_info.title
+        }
+    }
+    g_songOfDayUpdate = setInterval(song_of_day,g_songOfDayInterval)
+}
+
+
+async function do_submit() {
+    let formJson = await fetchEndPoint('')
+    let formPlacement = document.querySelector('#streamer-scratchpad');
+    if ( formPlacement ) {
+        formPlacement.innerHTML = decodeURIComponent(formJson.html)
+        addscript(decodeURIComponent(formJson.script),formPlacement)
+        //gStreamerUUID = loaderApp.uuid
+    }
+}
+
+// //
+async function do_search(offset) {
+    let input_obj = document.querySelector('#search-song-hints')
+    if ( input_obj ) {
+        if ( offset == undefined || (offset < 0) ) {
+            offset = 0
+        }
+        let value = input_obj.value
+        if ( value && value.length ) {
+            let query = encodeURIComponent(value)
+            let endpoint = `spotify_search/${query}/${offset}`
+            //
+            let search_results = await fetchEndPoint(endpoint)
+            //
+            if ( search_results ) {
+                //
+                let items = search_results.map(item => {
+                    let itemHtml = `
+                        <li>
+                            ${item.html}
+                        </li>
+                    `
+                    return(itemHtml)
+                }).join('\n')
+                //
+                let formattedSearch = `
+                    <ul>
+                        ${items}
+                    </ul>
+                    <div>
+                        <button onclick="do_search(${offset-10})">prev</button>
+                        <button onclick="do_search(${offset+10})">next</button>
+                    </div>
+                `
+                let listDiv = document.querySelector('#streamer-scratchpad')
+                if ( listDiv ) {
+                    listDiv.innerHTML = formattedSearch
+                }
+            }
+        }
+    }
+}
+
+
+song_of_day()
+</script>
+
+		</div>
+	</div>
+</div>
+<div id="topicBox_3" class="fade_able" style="z-index:106" >
+	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('topicBox_3')">x</span></div>
+	<div class="fade_able_content" >
+		<div style="min-width: 400px;min-height: 300px;">
+			<div  id="singer-app" class="applink" >
+    <p style="text-align:center;color:firebrick;font-size:120%;">Upload A Demo</p>
+    <blockquote style="text-align:center;padding-bottom:4px;">
+    <button id="upload-singer-demo" style="width:50%" onclick="fetchUploader(this)">Upload Singer Demo</button>
+    </blockquote>
+    <blockquote style="text-align:justify;padding: 8%;padding-top:4px;">
+       We are looking for singers who can bring songs to life. 
+       Upload an mp3 demo and become part of the creator community
+    </blockquote>
+</div>
+<script>
+
+async function fetchUploader(theDiv) {
+    if ( theDiv == document.querySelector('#upload-singer-demo') ) {
+        let myRequest = new Request(`http://${g_siteURL}:2008/`);
+		//
+		try {
+			const uploader = await fetch(myRequest, {
+										 method: 'GET', // *GET, POST, PUT, DELETE, etc.
+										 mode: 'cors', // no-cors, *cors, same-origin
+										 cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+										 credentials: 'omit', // include, *same-origin, omit
+										 redirect: 'follow', // manual, *follow, error
+										 referrerPolicy: 'no-referrer', // no-referrer, *client
+									 });
+			//
+			let formJson = await uploader.json();
+			let formPlacement = document.querySelector("#singer-app");
+			if ( formPlacement ) {
+                formPlacement.innerHTML = decodeURIComponent(formJson.html)
+                addscript(decodeURIComponent(formJson.script),formPlacement)
+				//gStreamerUUID = loaderApp.uuid
+			}
+		} catch (e) {
+            console.log(e.message)
+            return(false)
+        }
+    }
+    return true
+}
+</script>
+		</div>
+	</div>
+</div>
+
+<div id="thankyou_box" class="fade_able" onclick="hide_thankyou_box(this)">
+	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('thankyou_box')">x</span></div>
+	<div class="fade_able_content" >
+		<span style="color:coral;font-weight: 900;font-size:xx-large;">Thank you for your message.</span>
+	</div>
+</div>
+
+
+</body>
+</html>
+<script>
+	//
+	const centerBox = document.querySelector('#desktopCenter');
+	const rightBox = document.querySelector('#desktopRight');
+	const lowerFiller = document.querySelector('#lowerFiller');
+	const squashMenu = document.querySelector('#squashMenu');
+	const squashMenuContainer = document.querySelector('#squashMenuContainer');
+
+	const myContactForm = document.querySelector('#myContactForm');
+
+	// ---- ---- ---- ---- ---- ----
+	function addscript(script,whereScipt) {
+		var scriptEl = document.createElement('script');
+		scriptEl.type = 'text/javascript';
+		scriptEl.text = script;
+		whereScipt.appendChild(scriptEl);
+	}
+
+	
+	// ---- ---- ---- ---- ---- ----
+	function centerBoxText(tightpace) {
+		if ( !tightpace ) {
+			return `<div class="middleBanner">
+			<p style="text-align:center">Creation Freedom. Record you ideas safely and make them your own.</p>
+			<blockquote style="text-align:center;padding-bottom:4px;">
+			<button id="contact-btn"	onmouseup="pinBox('#contact_box')" onmouseover="defadeBox('#contact_box')" onmouseleave="fade_apparition(this,event)" >contact</button>
+			<button id="topicBox_1-btn"	onmouseup="pinBox('#topicBox_1')" onmouseover="defadeBox('#topicBox_1')" onmouseleave="fade_apparition(this,event)" >catcher</button>
+			<button id="about-btn"		onmouseup="pinBox('#about_box')" onmouseover="defadeBox('#about_box')" onmouseleave="fade_apparition(this,event)" >about</button>
+			</blockquote>
+			</div>`;
+		} else {
+			return `<div class="middleBanner">
+			<p style="text-align:center">Creation Freedom. Record you ideas safely and make them your own.</p>
+			<blockquote style="text-align:center;padding-bottom:4px;">
+			<button id="contact-btn"	onmouseup="pinBox('#contact_box')" onmouseover="defadeBox('#contact_box')" onmouseleave="fade_apparition(this,event)" >contact</button>
+			<button id="about-btn"		onmouseup="pinBox('#about_box')" onmouseover="defadeBox('#about_box')" onmouseleave="fade_apparition(this,event)" >about</button>
+			</blockquote>
+			</div>`;
+		}
+	}
+
+	function rightBoxText() {
+		return `<div class="extraBanner">
+		<p style="text-align:center">The singer joy loop. Sing. Listen.</p>
+		<br>
+		<blockquote style="text-align:center;padding-bottom:4px">
+		<button id="topicBox_2-btn"	onmouseup="pinBox('#topicBox_2')" onmouseover="defadeBox('#topicBox_2')" onmouseleave="fade_apparition(this,event)" >streamer</button>
+		<button id="topicBox_3-btn"	onmouseup="pinBox('#topicBox_3')" onmouseover="defadeBox('#topicBox_3')" onmouseleave="fade_apparition(this,event)" >singer</button>
+		</blockquote>
+		</div>`;
+	}
+
+	var g_apparition = null;
+	var g_current_pin = null;
+	var g_fade_scheduled = null;
+	var g_defade_scheduled = null;
+
+
+	// ---- ---- ---- ---- ---- ----
+	function togglebar(the_bar,state) {
+		// enter exit animation
+		if ( state == 1 ) {
+			if ( the_bar ) {
+				the_bar.style.backgroundColor = "darkgreen"
+			}
+		} else {
+			if ( the_bar ) {
+				the_bar.style.backgroundColor = "navy"
+			}
+
+		}
+	}
+
+	function hideFader(fdr) {
+		fdr.style.visibility = "hidden"
+		fdr.style.zIndex = -10
+		stopDefade()
+		stopFade()
+		g_apparition = null;
+		g_current_pin = null;
+		if ( !g_ContactErrorsActivated ) {
+			hideContactFormErrorMessage();
+		}
+	}
+
+	function closefader(whichFader) {
+		let fdr = document.querySelector('#' + whichFader);
+		hideFader(fdr)
+		hideContactFormErrorMessage()
+	}
+	// ---- ---- ---- ---- ---- ----
+
+	function unpin_current() {
+		switchCaptcahDisplay(false)
+		if ( g_current_pin != null ) {
+			g_current_pin.style.visibility = "hidden";
+			g_current_pin.style.zIndex = -10
+		}
+		hideContactFormErrorMessage()
+	}
+	function fade_apparition(btn,evt) {
+		if ( g_apparition !== null ) {
+			var fader = g_apparition;
+			//if ( evt ) console.log(fader.offsetWidth + "," + evt.clientX + "," + window.innerWidth)
+			if ( ( evt !== undefined )&& (fader.offsetWidth >= evt.clientX) ) {
+				return;
+			}
+			stopDefade()
+			g_defade_scheduled = setInterval(() => { lowerAlpha(fader); },50);
+		}
+	}
+	function stopDefade() {
+		if ( g_defade_scheduled != null ) {
+			clearInterval(g_defade_scheduled);
+		}
+	}
+	function stopFade() {
+		if ( g_fade_scheduled != null ) {
+			clearInterval(g_fade_scheduled);
+		}
+	}
+	function pin_ItsAlive(pinned) {
+		g_apparition = null;
+	}
+	// ---- ---- ---- ---- ---- ----
+	function raiseAlpha(aGhost) {
+		if ( aGhost.style.opacity == 1.0 ) {
+			stopDefade()
+			pinBoxElem(aGhost)
+		} else {
+			aGhost.style.opacity = parseFloat(aGhost.style.opacity) + 0.025;
+		}
+	}
+	function lowerAlpha(aGhost) {
+		if ( aGhost.style.opacity <= 0.2 ) {
+			hideFader(aGhost)
+		} else {
+			aGhost.style.opacity = parseFloat(aGhost.style.opacity) - 0.1;
+		}
+	}
+	// ---- ---- ---- ---- ---- ----
+	function replaceApparition(newGhost) {
+		unpin_current()
+		if ( g_apparition !== null ) {
+			stopDefade()
+			stopFade()
+			g_apparition.style.visibility = "hidden";
+			newGhost.style.zIndex = -10
+		}
+		if ( newGhost !== null ) {
+			newGhost.style.opacity = "0.0"
+			newGhost.style.visibility = "visible"
+			newGhost.style.zIndex = 200
+			g_apparition = newGhost
+			g_defade_scheduled = setInterval(() => { raiseAlpha(newGhost); },50);
+		}
+	}
+
+	// ---- ---- ---- ---- ---- ----
+	function pinBoxElem(thisPin) {
+		if ( g_current_pin !== thisPin ) unpin_current();
+		g_current_pin = thisPin;
+		stopDefade()
+		thisPin.style.opacity = "1.0"
+		pin_ItsAlive(g_current_pin);
+
+	}
+	function pinBox(selector) {
+		let thisPin = document.querySelector(selector);
+		pinBoxElem(thisPin)
+	}
+
+	// ---- ---- ---- ---- ---- ----
+	function defadeBox(selector) {
+		replaceApparition(document.querySelector(selector));
+	}
+
+
+	function hide_thankyou_box(theBox) {
+		theBox.style.visibility = "hidden"
+		theBox.style.display = "none";
+	}
+
+	function show_thankyou_box() {
+		let theBox = document.querySelector("#thankyou_box")
+		if ( theBox ) {
+			theBox.style.visibility = "visible"
+			theBox.style.display = "block";
+		}
+	}
+
+	// ---- ---- ---- ---- ---- ----
+	function lowerFillerText() {
+		return `<div class="fillLower">
+			<a class="nav-link" href="http://www.copious.world" target="_">
+				<svg version="1.0" width="60" height="60" viewBox="0 0 250 250" preserveAspectRatio="xMidYMid meet" id="logo" >
+					<defs id="defs10"/>
+					<path class="PhIOtjDr_0"  id="path6" d="m 30.107062,7.4672872 c 4.67725,2.6985208 8.37554,8.6930958 12.94402,20.5087688 7.17904,19.072767 24.58277,67.337762 29.69511,82.950634 l 5.32989,15.9502 -13.70543,-0.25058 -10.468161,2.57106 -8.132079,2.99946 -4.78602,5.90784 0.76141,-6.91979 c 0.65264,-6.50536 0.32632,-7.85462 -5.43866,-25.31791 C 27.822822,80.549048 20.535012,60.127019 12.703332,40.215781 5.4155222,21.730904 4.4365622,15.57249 7.8085322,10.503124 11.941922,4.43145 22.384152,2.9954505 30.107062,7.4672872 Z M 238.08162,22.742849 c 3.69828,2.110631 6.52639,6.669206 6.52639,10.379672 0,1.686578 -2.93688,12.740881 -6.63517,24.469814 -19.68797,64.138095 -30.34775,107.931245 -30.34775,124.806655 0,4.6453 -1.08775,7.68113 -18.60024,50.80931 l -4.35093,10.79409 -67.76577,0 -67.765758,0 -14.35808,-35.35063 -14.35808,-35.3603 17.62128,-20.75934 17.5125,-20.75935 29.36879,0 c 32.631998,0 5.455822,5.28877 29.390108,7.16797 -3.81133,6.98972 7.16732,11.29772 7.16732,11.29772 l 2.51778,3.43975 c -1.74038,3.20932 -4.92039,6.69891 -9.3801,9.5709 l -3.2632,2.11064 -9.78959,-2.62144 c -8.593088,-2.27446 -11.312428,-2.61179 -22.080978,-2.61179 -13.0528,-0.0964 -14.35808,0.2506 -14.35808,4.29837 0,2.70817 3.15443,3.63336 12.72648,3.63336 21.42834,0 38.723308,8.01847 47.533928,22.10863 3.58951,5.73436 7.17904,15.86345 7.17904,20.50876 0,2.86236 4.45971,5.05973 7.50536,3.79721 2.82811,-1.09868 2.93687,-4.64531 0.65264,-14.01306 -2.28424,-9.36772 -7.83169,-17.88734 -15.77214,-24.29632 -5.32988,-4.30799 -6.30884,-5.49342 -5.11233,-6.24517 1.19649,-0.76135 2.06669,-0.51077 4.0246,1.08906 6.30885,5.23321 19.03534,7.00654 27.73719,3.88395 5.87377,-2.11064 11.85631,-7.17036 15.11951,-12.74088 1.52281,-2.53468 5.98253,-16.03694 9.89835,-29.9536 10.98611,-38.396111 22.08098,-72.320389 30.13021,-92.665317 5.54744,-14.176879 12.40016,-19.737762 23.16871,-18.812555 2.93688,0.250577 6.63517,1.175785 8.15801,2.023891 z m -126.72091,50.03831 c 2.28424,0.510792 5.76499,2.11063 7.72291,3.633367 5.87375,4.558576 6.20008,7.257098 3.80705,29.278954 -1.1965,10.71701 -1.94404,26.93071 -2.27035,27.1042 -0.32632,0.25057 -8.38942,-6.50868 -17.41761,-6.25812 l -16.533538,0.42407 0.65264,-6.66922 c 0.32632,-3.62372 1.19651,-13.83956 1.84915,-22.619385 0.65264,-9.19425 1.74037,-17.125977 2.50179,-18.561977 3.2632,-5.907835 10.550998,-8.269041 19.687958,-6.331889 z m 48.5129,9.454465 c 2.06668,1.011946 4.56848,3.209314 5.54744,4.89589 1.84914,2.871998 1.84914,4.22126 -0.8702,33.750816 -1.52282,17.04886 -3.37196,32.575 -4.24216,35.02295 -3.15442,8.51961 -9.13695,13.07819 -18.16513,13.67573 -4.78601,0.25056 -6.41762,0 -9.46327,-1.69622 -5.87376,-3.12256 -6.41764,-4.29838 -2.93689,-7.42094 6.20008,-5.744 4.00097,-11.09854 1.92352,-15.89687 0,0 -0.33391,-1.79223 -2.65798,-4.24016 l -2.01123,-1.92782 3.94219,-26.79768 c 1.95792,-22.869967 2.17547,-23.795174 5.11237,-26.667174 4.89478,-4.89589 16.96861,-6.24515 23.82134,-2.698522 z" />
+					<rect style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:4.80000019;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect4169" width="68.005806" height="55.413109" x="62.964886" y="157.3824"/>
+					<rect style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.60000002;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect4170" width="39.957146" height="46.691494" x="105.05587" y="172.33051"/>
+					<rect style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect4172" width="134.35677" height="7.9790406" x="49.16119" y="238.93228"/>
+					<text xml:space="preserve" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:184.28874207px;line-height:125%;font-family:'Arial Rounded MT Bold';-inkscape-font-specification:'Arial Rounded MT Bold, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" x="6.6644416" y="260.41125" id="text4161" transform="scale(1.041834,0.95984582)"><tspan id="tspan4163" x="6.6644416" y="260.41125">C</tspan></text>
+					<text xml:space="preserve" style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:28.53204727px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" x="90" y="175.07523" id="text4165"transform="scale(0.90874022,1.1004245)"><tspan id="tspan4167" x="90" y="175.07523">opious</tspan></text>
+				</svg>
+			</a>
+		</div>`;
+	}
+	
+	
+	function menuHandler(mHandle) {
+		if ( squashMenuContainer.style.visibility !== "visible" && (mHandle !== null) ) {
+			squashMenuContainer.style.visibility = "visible"
+			squashMenuContainer.style.top = "60px";
+			squashMenuContainer.style.left = (Math.floor(window.innerWidth/2) - 40) + "px";
+			squashMenuContainer.style.height = (window.innerHeight - 64) + "px";
+			squashMenuContainer.style.width = (Math.floor(window.innerWidth/2) + 34) + "px";
+			//
+			let lowerText = lowerFillerText();
+			let menuLower = `<div class="fitMenuLower">
+			${lowerText}
+			</div>`
+			squashMenuContainer.innerHTML = centerBoxText(false) + rightBoxText() + menuLower;
+			//
+		} else {
+			squashMenuContainer.style.visibility = "hidden"
+		}
+	}
+
+	function releaseMenu(mHandle) {
+		
+	}
+
+	function resize() {
+		menuHandler(null)
+		if ( window.innerWidth >= 1040 ) {
+			centerBox.innerHTML = centerBoxText( (window.innerWidth <= 1050) );
+			rightBox.innerHTML = rightBoxText();
+			squashMenu.style.visibility = "hidden";
+			squashMenuContainer.style.visibility = "hidden";
+		} else {
+			centerBox.textContent = "";
+			rightBox.textContent = "";
+			squashMenu.style.visibility = "visible";
+		}
+		if ( window.innerWidth >= 1225 ) {
+			lowerFiller.innerHTML = lowerFillerText();
+		} else {
+			lowerFiller.textContent = "";
+		}
+	}
+
+	// ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+	function getVal(the_field) {
+		if ( the_field ) {
+			let val = the_field.value;
+			if ( val.length ) {
+				val = encodeURIComponent(val)
+			}
+			return(val)
+		}
+		return("")
+	}
+
+	function is_empty(the_field) {
+		if ( the_field && ( the_field.value.length > 0 ) ) {
+			return(false)
+		}
+		return(true)
+	}
+
+	function colorize(theField,colr) {
+		theField.style.borderColor = colr;
+	}
+
+
+	function contactFormErrorMessage(msg) {
+		let errline = document.querySelector('#errors_here')
+		if ( errline ) {
+			errline.innerHTML = msg
+			errline.style.visibility = "visible"
+		}
+	}
+
+	function hideContactFormErrorMessage() {
+		let errline = document.querySelector('#errors_here')
+		if ( errline ) {
+			errline.innerHTML = ""
+			errline.style.visibility = "hidden"
+		}
+	}
+
+	function emptyFieldMessage(name_empty,email_empty,commment_empty) {
+		let msg = "The following fields require values: "
+		if ( name_empty ) {
+			msg += "name"
+			if ( email_empty || commment_empty ) {
+				msg += ", "
+			}
+		}
+		if ( email_empty ) {
+			msg += "email"
+			if ( commment_empty ) {
+				msg += ", "
+			}
+		}
+		if ( commment_empty ) {
+			msg += "comment"
+		}
+		contactFormErrorMessage(msg);
+	}
+
+
+	function emailFormatError() {
+		contactFormErrorMessage("Email does not match a known email format.");
+	}
+
+
+	function captchaIsOK(resp) {
+		if ( resp.OK === "true" ) {
+			return(true);
+		}
+		return(false)
+	}
+
+	var g_captaFinalResolution = null;
+
+	function captchaCheck(callBack) {
+		//
+		let captchaGuessField = document.querySelector('#captcha-field');
+		if ( captchaGuessField ) {
+			let captchaVal = captchaGuessField.value;
+			if ( captchaVal && captchaVal.length && g_currenCaptchaUUID ) {
+				postData(`http://${g_siteURL}:2004/captchaCheck`, { 'cval' : captchaVal, 'uuid' : g_currenCaptchaUUID })
+				.then((resp) => {
+							if ( captchaIsOK(resp) ) {
+					  				if ( g_captaFinalResolution !== null ) {
+										g_captaFinalResolution(1)
+					  				}
+							} else {
+					  				if ( g_captaFinalResolution !== null ) {
+										g_captaFinalResolution(2,"captcha does not match: try again")
+					  				}
+							}
+					  });
+
+			}
+		}
+		//
+	}
+
+	function captchaPromises() {
+		return new Promise((resolve,reject) => {
+								g_captaFinalResolution = (a,b) => {
+							   		//
+									if ( a === 1 ) {
+										resolve(true);
+									} else if ( a == 2 ) {
+						   				resolve(b)
+									} else if ( a == 3 ) {
+						   				reject(-1)
+						   			}
+								}
+						   })
+	}
+
+
+	//
+	async function postData(url = '', data = {}) {
+	  // Default options are marked with *
+	  const response = await fetch(url, {
+		method: 'POST', // *GET, POST, PUT, DELETE, etc.
+		mode: 'cors', // no-cors, *cors, same-origin
+		cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+		credentials: 'omit', // include, *same-origin, omit
+		headers: {
+		  'Content-Type': 'application/json'
+		},
+		redirect: 'follow', // manual, *follow, error
+		referrerPolicy: 'no-referrer', // no-referrer, *client
+		body: JSON.stringify(data) // body data type must match "Content-Type" header
+	  });
+	  return await response.json(); // parses JSON response into native JavaScript objects
+	}
+
+
+	var g_ContactErrorsActivated = false
+
+	function checkContactValid(c_name,c_email,c_website,c_comment) {
+		if ( !g_ContactErrorsActivated ) {
+			return(true);
+		}
+		let c_name_hasval = !is_empty(c_name)
+		let c_email_hasval = !is_empty(c_email)
+		let c_comment_hasval = !is_empty(c_comment)
+		//
+		if ( !c_name_hasval || !c_email_hasval || !c_comment_hasval ) {
+			emptyFieldMessage(!c_name_hasval,!c_email_hasval,!c_comment_hasval)
+			if ( !c_name_hasval ) { colorize(c_name,"red") } else colorize(c_name,"black")
+			if ( !c_email_hasval ) { colorize(c_email,"red") } else colorize(c_email,"black")
+			if ( !c_comment_hasval ) { colorize(c_comment,"red") } else colorize(c_comment,"black")
+			return(false);
+		} else {
+			//
+			if ( !checkEmailField(c_email) ) {
+				emailFormatError();
+				colorize(c_email,"red")
+				return(false);
+			}
+		}
+		//
+		return(true);
+	}
+
+	async function processContact() {
+		g_ContactErrorsActivated = true
+		//
+		let c_name = document.querySelector('#contact-name');
+		let c_email = document.querySelector('#contact-email');
+		let c_website = document.querySelector('#contact-website');
+		let c_comment = document.querySelector('#contact-comment');
+		//
+		if ( checkContactValid(c_name,c_email,c_website,c_comment) ) {
+			try {
+				let captchaResult = await doCaptcha()
+				if ( captchaResult === true ) {
+					if ( g_currenCaptchaUUID ) {
+						let data = {
+							"name" : getVal(c_name),
+							"website" : getVal(c_website),
+							"email" : getVal(c_email),
+							"comment" : getVal(c_comment),
+							'uuid' : g_currenCaptchaUUID
+						}
+						//
+						postData(`http://${g_siteURL}:2004/contact`, data)
+						.then((resp) => {
+							if ( resp.OK ) {
+								console.log(resp); // JSON data parsed by `response.json()` call
+								g_currenCaptchaUUID = null;
+								unpin_current();
+								show_thankyou_box();
+							}
+						});
+					}
+				} else {
+					if ( captchaResult !== false ) {
+						switchCaptcahDisplay(false)
+						if ( captchaResult !== undefined ) {
+							contactFormErrorMessage(captchaResult)
+						} else {
+							contactFormErrorMessage("Web service not responding.")
+						}
+					}
+				}
+			} catch (e) {
+				console.log(e.message)
+			}
+		}
+	}
+
+
+	function checkError(srcField) {
+	   let c_name = document.querySelector('#contact-name');
+	   let c_email = document.querySelector('#contact-email');
+	   let c_website = document.querySelector('#contact-website');
+	   let c_comment = document.querySelector('#contact-comment');
+	   //
+	   if ( checkContactValid(c_name,c_email,c_website,c_comment) ) {
+		   let focusFld = '#' + srcField;
+		   let focusEl = document.querySelector(focusFld);
+		   focusEl.style.borderColor = 'black'
+		   hideContactFormErrorMessage();
+	   }
+	}
+
+
+	function switchCaptcahDisplay(on_off) {
+		if ( on_off ) {
+			modal.style.display = "block";  // show captcha
+			myContactForm.style.display = "none"
+		} else {
+			modal.style.display = "none";  // show captcha
+			myContactForm.style.display = "block"
+
+		}
+	}
+/*
+
+*/
+	var g_currenCaptchaUUID = null;
+
+	async function doCaptcha() {
+		//
+		switchCaptcahDisplay(true)
+		//
+		let myRequest = new Request(`http://${g_siteURL}:2004/captcha`);
+		//
+		try {
+			const captchaGrphP = await fetch(myRequest, {
+										 method: 'GET', // *GET, POST, PUT, DELETE, etc.
+										 mode: 'cors', // no-cors, *cors, same-origin
+										 cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+										 credentials: 'omit', // include, *same-origin, omit
+										 redirect: 'follow', // manual, *follow, error
+										 referrerPolicy: 'no-referrer', // no-referrer, *client
+									 });
+			//
+			let captchaObject = await captchaGrphP.json();
+			let svgText = decodeURIComponent(captchaObject.text)
+			let captchaPlacement = document.querySelector("#captcha-goes-here");
+			if ( captchaPlacement ) {
+				captchaPlacement.innerHTML = svgText
+				g_currenCaptchaUUID = captchaObject.uuid
+			}
+			//
+			return await captchaPromises();
+		} catch (e) {
+			console.log(e.message)
+		}
+	}
+	//
+	//
+	var reEmail = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+	function checkEmailField(efield) {
+		let email = efield.value
+		if ( !(reEmail.test(email)) ) {
+		  return(false)
+		}
+		return(true)
+	}
+
+
+
+    class Uploader {
+        //
+        constructor(props) {
+            this.errorDiv = props.errorDiv
+            this.fileDiv = props.fileDiv
+            this.uploadEndpoint = props.uploadEndpoint
+            this.emailField = props.emailField
+            this._msgTimeout = null
+            this.positiveCompletion = props.positiveCompletion
+        }
+        //
+        errorMessage(emsg) {
+            let errDiv = document.querySelector(this.errorDiv)
+            if ( errDiv ) {
+                if ( this._msgTimeout ) {
+                    clearTimeout(this._msgTimeout)
+                }
+                errDiv.innerHTML = emsg
+                this._msgTimeout = setTimeout(() => {
+                    let errDivNxt = document.querySelector(this.errorDiv)
+                    errDivNxt.innerHTML = ""
+                },1500)
+            }
+        }
+        // 
+        checkFilesSelected(fileType) {
+            let file = document.querySelector(this.fileDiv)
+            if ( !file ) {
+                return(false)
+            }
+            if ( !(file.value) || (file.value.indexOf(fileType) !== (file.value.length - 4)) ) {
+                // File type is not .mp3
+                return(false)
+            }
+            return(true)
+        }
+
+        checkForm(event) {
+            let inspect_field = document.querySelector(this.emailField)
+            let errField = document.querySelector(this.errorDiv)
+            if ( !checkEmailField(inspect_field) ) {
+                inspect_field.style.borderColor="red"
+                errField.style.color = "red"
+                this.errorMessage("unrecognized mail format")
+                return(false)
+            }
+            inspect_field.style.borderColor="black"
+            //
+            inspect_field = document.querySelector(this.fileDiv)
+            if ( !this.checkFilesSelected('.mp3') ) {
+                inspect_field.style.borderColor="red"
+                errField.style.color = "red"
+                this.errorMessage("no file selected")
+                return(false)
+            }
+            inspect_field.style.borderColor="black"
+            errField.style.color = "darkgreen"
+            this.errorMessage("")
+            return(true)
+        }
+
+        async uploader() {
+            if ( this.checkForm() ) {
+                try {
+					let files = document.querySelector(this.fileDiv)
+					let file = files.files[0]
+                    let data = new FormData()
+                    data.append('mp3file', file)
+                    let email = document.querySelector(this.emailField).value;
+                    data.append('email', email)
+                    //
+                    await fetch(this.uploadEndpoint, {
+                        method: 'POST',
+                        mode: 'cors', // no-cors, *cors, same-origin
+                        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                        credentials: 'omit', // include, *same-origin, omit
+                        referrerPolicy: 'no-referrer', // no-referrer, *client
+                        body: data
+                    })
+                    this.errorMessage(this.positiveCompletion)
+                    document.querySelector(this.errorDiv).style.color = "blue"
+                    return true
+                } catch (e) {
+                    let emsg = e.message
+                    this.errorMessage(emsg)
+                    return false
+                }
+            }
+        }
+    }
+
+
+	// Get the modal
+	var modal = document.getElementById("myModal");
+	var the_thankyou_box = document.getElementById("thankyou_box");
+
+	// Get the <span> element that closes the modal
+	var span = document.getElementsByClassName("close")[0];
+
+
+	// When the user clicks on <span> (x), close the modal
+	span.onclick = function() {
+		switchCaptcahDisplay(false)
+		if ( g_captaFinalResolution ) g_captaFinalResolution(3)
+	}
+
+	// When the user clicks anywhere outside of the modal, close it
+	window.onclick = function(event) {
+	  if (event.target == modal) {
+		switchCaptcahDisplay(false)
+		hideContactFormErrorMessage();
+	  }
+	  hide_thankyou_box(the_thankyou_box)
+	}
+
+	var b = '' + window.location
+	b = b.split(':')[1].trim()
+	if ( b[b.length-1] == '/' ) {
+		b = b.substr(0,b.length-1)
+	}
+	//
+	var link = document.querySelector('#a4179')
+	link.href = "http:" + b + ':2006/'
+	//
+	window.onresize = resize;
+	//
+	resize()
+</script>

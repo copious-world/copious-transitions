@@ -1,0 +1,28 @@
+{
+  "name": "copious-transitions",
+  "version": "0.1.0",
+  "description": "Framework for working with frameworks",
+  "main": "user_services.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "node tests/runall.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rleddy/copious-transitions.git"
+  },
+  "keywords": [
+    "node",
+    "js",
+    "sandwich",
+    "framework"
+  ],
+  "author": "Richard Leddy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rleddy/copious-transitions/issues"
+  },
+  "homepage": "https://github.com/rleddy/copious-transitions#readme"
+}

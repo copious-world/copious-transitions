@@ -1,0 +1,36 @@
+
+<div id="song_upload_html" style="display: block" >
+    <h2>Upload to Song of the Day</h2>
+    <br>
+    Enter your email to identify your file and for upate. Then select an mp3 file and finally click &quot;Upload&quot; <br><br>
+    <label for="email-song">Email:</label>
+    <input type="text" name="email-song" id="email-song" onKeyPress="g_SongUploader.checkForm(event);">
+    <br>
+    <label for="song-demo">Mp3 File:</label>
+    <input type="file" accept="audio/mpeg" name="song-demo" id="song-demo" >
+    <br><br>
+    <button style="color:orangered;font-size: x-large;width: 60%;" onclick="song_demo_uploader()"  >Upload</button>
+</div>
+<br>
+<div id="login_errmsg-song" style="color:red"> </div>
+
+<noscript><div id="noscript_warning">
+	WARNING: You have JavaScript disabled in your web browser.  Many functions of this system will not work properly.
+</div></noscript>
+
+<script>
+
+    var g_SongUploader = new Uploader({
+        "errorDiv" : "#login_errmsg-song",
+        "fileDiv" : "#song-demo",
+        "uploadEndpoint" :`http://${g_siteURL}:2010/song_upload`,
+        "emailField" : "#email-song",
+        "positiveCompletion" : "Your demo has been uploaded. Thank you!"
+    })
+
+    function song_demo_uploader() {
+        g_SongUploader.uploader()
+    }
+
+</script>
+
