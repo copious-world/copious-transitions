@@ -8,6 +8,8 @@ const CitadelClient = require('node_citadel')
 const  redis = require("redis")
 const RedisStoreFactory = require('connect-redis');
 
+const apiKeys = require('local/aipkeys')
+g_citadel_pass = apiKeys.citadel_password.trim()  // decrypt ??
 
 // pre initializatoin
 const redClient = redis.createClient();  // leave it to the module to figure out how to connect
@@ -137,7 +139,6 @@ class CaptchaDBClass extends DBClass {
 
     // // // 
     initialize(conf) {
-        g_citadel_pass = conf.citadel_password.trim()  // decrypt ??
         setTimeout(post_new_user,5000)
         setTimeout(post_contact_message,5000)
         super.initialize(conf)

@@ -130,6 +130,7 @@ g_app.post('/transition/secondary',(req,res) => {
             if ( g_session_manager.match(body,cached_transition)  ) {        // check on matching tokens and possibly other things 
                 // some kind of transition takes place and becomes the state of the session. It may not be the same as the one
                 // specified in the cached transition, but may be similar depending on how types (categories) are regulated 
+                let elements = cached_transition.elements
                 let finalization_state = g_session_manager.finalize_transition(cached_transition.transition,body,elements,req)      // FINALIZE (not a final state)
                 if ( finalization_state ) {     // relay the finalized transition and go on with business. 
                     let state = finalization_state.state
@@ -237,9 +238,6 @@ function load_parameters() {
         for ( let mname in confJSON.modules ) {
             confJSON.mod_path[mname] = __dirname + '/' + module_path + '/' + confJSON.modules[mname]
         }
-
-        const apiKeys = require('local/aipkeys')
-        confJSON.citadel_password = apiKeys.citadel_password
         return(confJSON)
     } catch (e) {
         console.log(e)

@@ -2,6 +2,8 @@ const { DBClass, SessionStore }  = require('lib/general_db')
 const crypto = require('crypto')
 const EventEmitter = require('events')
 const CitadelClient = require('node_citadel')
+const apiKeys = require('local/aipkeys')
+g_citadel_pass = apiKeys.citadel_password.trim()  // decrypt ??
 
 //
 //
@@ -122,7 +124,6 @@ class UploaderDBClass extends DBClass {
 
     // // // 
     initialize(conf) {
-        g_citadel_pass = conf.citadel_password.trim()  // decrypt ??
         setTimeout(post_new_user,5000)
         setTimeout(post_uploader_message,5000)
         super.initialize(conf)
