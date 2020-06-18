@@ -1,0 +1,127 @@
+<div id="myforgotModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close">&times;</span>
+            <h3><i>Captcha</i> : I am not a robot</h3>
+        </div>
+        <div class="modal-body">
+            <div id="captcha-goes-here-forgot" style="border:1px solid lime;margin:2px;" >
+                ------
+            </div>
+            <div id="captcha-entry-forgot" >
+                Type in the text that you see above:
+                <input type="text" id="captcha-field-forgot" class="svgFormTextField" style="font-size:14px;margin-top:1px;margin-left:2px;border:1px solid black;"/>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="captchaCheck('forgot')">submit</button>
+        </div>
+    </div>
+</div>
+
+<div id="myforgotForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
+    <div id="forgot-errors_here" >no error</div>
+ 
+    <div class="form_el" >
+        <label for='forgot-email' class='email'>Email:</span></label>
+        <input type='email' name='forgot-email' id='forgot-email' value=''class='field_el email'  required onkeyup="onkey_checkforgotError('forgot-email')"  />
+    </div>
+    
+    <p class='forgot-submit'>
+    <button onclick="processforgot()" >Submit</button>
+    </p>
+</div>
+
+<noscript><div id="noscript_warning">
+	WARNING: You have JavaScript disabled in your web browser.  Many functions of this system will not work properly.
+</div></noscript>
+
+<script>
+
+	// Get the modal
+    var g_forgot_port = "2102"
+    //
+    function forgot_password_rules(fld_name,ptext) {
+        return(true)
+    }
+
+
+	// LOGIN APPLICATION
+	var g_forgot_Handling = new ValidationContainer({
+			"auth_port" : g_forgot_port,
+			"errors_here" : document.getElementById('forgot-errors_here'),
+            "password_rules" : forgot_password_rules,
+			"fields" : {
+				"email" : document.getElementById('forgot-email')
+			},
+			"checks" : {
+				"is_empty" : ["email"],  // ref into fields above...
+				"email" : ["email"]
+			},
+			"modal" : document.getElementById("myforgotModal"),
+			"form" : document.getElementById('myforgotForm'),
+			"captcha" : document.getElementById('captcha-goes-here-forgot'),
+			"captcha_field" : document.getElementById("captcha-field-forgot")
+		});
+
+	async function processforgot() {
+		//
+		g_ComponentErrorsActivated = true	// will be processing errors, etc. some selective behavior permitted
+		g_CurContainer = g_forgot_Handling;	// The open container will be the contact form
+		//
+		if ( g_CurContainer.checkFormValid() ) {
+			//
+			let c_email =  g_forgot_Handling.fields["email"]
+			//
+			try {
+				let port = g_forgot_port
+				// CAPTCH PROCESSING 
+				let captchaResult = await doCaptcha(port)   // the captcha has to be processed first.
+				// CAPTCH RESULT 
+				if ( captchaResult === true ) {
+					if ( g_currenCaptchaUUID ) {
+						let data = {
+							"email" : getVal(c_email),
+							'uuid' : g_currenCaptchaUUID
+						}
+						//
+						postData(`http://${g_siteURL}:${port}/user/forgot`, data)
+						.then((resp) => {
+							if ( resp.OK ) {
+								console.log(resp);              // JSON data parsed by `response.json()` call
+								g_currenCaptchaUUID = null;     // check for duplicates
+                                show_thankyou_box();
+							} else {
+                                g_CurContainer.formErrorMessage(`FORGOT Failed: ${resp.reason}`)
+                            }
+						});
+					}
+				} else {
+					if ( captchaResult !== false ) {
+						g_CurContainer.switchCaptchaDisplay(false)
+						if ( captchaResult !== undefined ) {
+							g_CurContainer.formErrorMessage(captchaResult)
+						} else {
+							g_CurContainer.formErrorMessage("Web service not responding.")
+						}
+					}
+				}
+			} catch (e) {
+				console.log(e.message)
+			}
+		}
+	}
+
+
+	function onkey_checkforgotError(srcField) {
+	   if ( g_forgot_Handling.checkFormValid() ) {
+		   let focusEl = document.getElementById(srcField);
+		   focusEl.style.borderColor = 'black'
+		   g_forgot_Handling.hideFormErrorMessage()
+	   }
+	}
+
+
+</script>
+

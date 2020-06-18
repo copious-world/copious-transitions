@@ -1,0 +1,297 @@
+    <style>
+        .login-menu-horizontal {
+            width: inherit;
+            white-space: nowrap;
+        }
+
+        .login-strat-choice {
+            font-weight: bold;
+            cursor: pointer;
+            font-size:medium;
+        }
+
+        .login-strat-choice:hover {
+            color:teal;
+            background-color: wheat;
+        }
+        .login-labeler {
+            font-weight: bold;
+        }
+    </style>
+    <div id="myLoginModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close">&times;</span>
+            <h3><i>Captcha</i> : I am not a robot</h3>
+        </div>
+        <div class="modal-body">
+            <div id="captcha-goes-here-login" style="border:1px solid lime;margin:2px;" >
+                ------
+            </div>
+            <div id="captcha-entry-login" >
+                Type in the text that you see above:
+                <input type="text" id="captcha-field-login" class="svgFormTextField" style="font-size:14px;margin-top:1px;margin-left:2px;border:1px solid black;"/>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="captchaCheck('login')">submit</button>
+        </div>
+    </div>
+</div>
+
+<div id="myLoginForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
+    <div id="login-errors_here" >no error</div>
+     
+    <div id='login-strategy' style="border:solid 1px darkmagenta;margin: 3px;">
+        <div class="form_el" style="padding: 0.5em;border:solid 1px darkmagenta;font-weight: bold;overflow-x: scroll;" >
+            <span class="form_el login-menu-horizontal" > Login Methods: 
+            <span class="form_el login-menu-horizontal">
+                <button class="login-strat-choice" onclick="login_strategy('local');show_password_container();hide_openID_container()" >Local</button>
+                <button class="login-strat-choice" onclick="login_strategy('GitHub');hide_password_container();hide_openID_container()" >GitHub</button>
+                <button class="login-strat-choice" onclick="login_strategy('Google');hide_password_container();hide_openID_container()" >Google</button>
+                <button class="login-strat-choice" onclick="login_strategy('Twitter');hide_password_container();hide_openID_container()" >Twitter</button> 
+                <button class="login-strat-choice" onclick="login_strategy('OpenID');hide_password_container();show_openID_container()" >OpenID</button> 
+            </span></span>
+        </div>
+        <input type="hidden" id="login-strategy-value" name="strategy" value="local">
+        <div class="form_el" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+            <label for='login-email' class='login-labeler '>Email:</span></label>
+            <input type='email' name='login-email' id='login-email' value=''class='field_el email'  required onkeyup="onkey_checkLoginError('login-email')"  />
+        </div>
+        
+        <div id="password-container" class="form_el" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+            <label for='login-password' class='login-labeler'>Password:</span></label>
+            <input type='password' name='login-password' id='login-password' value='' class='field_el password' onkeyup="onkey_checkLoginError('login-password')"  />
+        </div> 
+
+        <div id="openID-container" class="form_el" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+            <label for='login-openID' class='login-labeler'>OpenID:</span></label>
+            <input type='text' name='login-openID' id='login-openID' value='' class='field_el'  />
+        </div>    
+        
+    </div>
+
+    <p class='login-submit'>
+    <button onclick="processLogin()" >Submit</button>
+    </p>
+
+    <p class='login-submit'>
+    <button onclick="processForgotPassword()" >Forgot Password</button>
+    </p>
+    
+</div>
+
+<noscript><div id="noscript_warning">
+	WARNING: You have JavaScript disabled in your web browser.  Many functions of this system will not work properly.
+</div></noscript>
+
+<script>
+
+	// Get the modal
+    var g_login_port = "2101"
+
+
+    var loginStrategyField = document.getElementById("login-strategy-value")
+    function login_strategy(strategy) {
+        loginStrategyField.value = strategy
+    }
+    var g_passwordContainer = document.getElementById("password-container")
+    var g_OpenIDContainer = document.getElementById("openID-container")
+    function show_password_container() {
+        if ( g_passwordContainer ) {
+            g_passwordContainer.style.visibility = "visible"
+            g_passwordContainer.style.display = "block"
+        }
+    }
+    function hide_password_container() {
+        if ( g_passwordContainer ) {
+            g_passwordContainer.style.visibility = "hidden"
+            g_passwordContainer.style.display = "none"
+        }
+    }
+    function show_openID_container() {
+        if ( g_OpenIDContainer ) {
+            g_OpenIDContainer.style.visibility = "visible"
+            g_OpenIDContainer.style.display = "block"
+        }
+    }
+    function hide_openID_container() {
+        if ( g_OpenIDContainer ) {
+            g_OpenIDContainer.style.visibility = "hidden"
+            g_OpenIDContainer.style.display = "none"
+        }
+    }
+    //
+
+    function password_rules(fld_name,ptext) {
+        return(true)
+    }
+
+    function presentLogout(accountDate) {
+
+    }
+
+    function secondaryVerify(resp) {
+       /*
+
+
+
+
+<div class="authbox" id="authbox_userpass" style="display: block">
+<h2>Log in using a user name and password</h2>
+<form id="ajax_username_password_form" method="POST" action="ajax_login_username_password">
+<label for="uname">User name:</label>
+<input type="text" name="name" id="uname" onKeyPress="username_and_password_onkeypress(event);">
+<br><br>
+<label for="pname">Password:</label>
+<input type="password" name="pass" id="pname" onKeyPress="username_and_password_onkeypress(event);">
+<br><br>
+</form>
+<div class="logbuttons"><a href="javascript:ajax_try_username_and_password();">Log in</a></div>
+<div class="registernow"><a href="javascript:authtoggle('authbox_newuser');">New user?  Register now</a></div>
+</div>
+
+
+       fetch(url, {
+  credentials: "same-origin"
+}).then(...).catch(...);
+
+fetch(url, {
+  method: 'GET',
+  credentials: 'include'
+})
+  .then((response) => response.json())
+  .then((json) => {
+    console.log('Gotcha');
+  }).catch((err) => {
+    console.log(err);
+});
+
+
+let username = 'test-name';
+let password = 'EbQZB37gbS2yEsfs';
+let formdata = new FormData();
+let headers = new Headers();
+
+formdata.append('grant_type','password');
+formdata.append('username','testname');
+formdata.append('password','qawsedrf');
+
+headers.append('Authorization', 'Basic ' + base64.encode(username + ":" + password));
+fetch('https://www.example.com/token.php', {
+ method: 'POST',
+ headers: headers,
+ body: formdata
+}).then((response) => response.json())
+.then((responseJson) => {
+ console.log(responseJson);
+
+ this.setState({
+    data: responseJson
+ })
+  })
+   .catch((error) => {
+ console.error(error);
+   });
+       */ 
+    }
+
+	// LOGIN APPLICATION
+	var g_login_Handling = new ValidationContainer({
+			"auth_port" : g_login_port,
+			"errors_here" : document.getElementById('login-errors_here'),
+            "password_rules" : password_rules,
+			"fields" : {
+				"email" : document.getElementById('login-email'),
+				"password" : document.getElementById('login-password'),
+                "strategy" : document.getElementById('login-strategy'),
+                "openID" :  document.getElementById('login-openID')
+			},
+			"checks" : {
+				"is_empty" : ["password","email"],  // ref into fields above...
+				"email" : ["email"],
+                "passwords" : ["password"]
+			},
+			"modal" : document.getElementById("myLoginModal"),
+			"form" : document.getElementById('myLoginForm'),
+			"captcha" : document.getElementById('captcha-goes-here-login'),
+			"captcha_field" : document.getElementById("captcha-field-login")
+		});
+
+	async function processAuthEndpoint(endpoint) {
+		//
+		g_ComponentErrorsActivated = true	// will be processing errors, etc. some selective behavior permitted
+		g_CurContainer = g_login_Handling;	// The open container will be the contact form
+		//
+		if ( g_CurContainer.checkFormValid() ) {
+			//
+			let c_email =  g_login_Handling.fields["email"]
+            let c_password = g_login_Handling.fields["password"]
+            let c_openID = g_login_Handling.fields["openID"]
+            let c_strategy = g_login_Handling.fields["strategy"]
+			//
+			try {
+				let port = g_login_port
+				// CAPTCH PROCESSING 
+				let captchaResult = await doCaptcha(port)   // the captcha has to be processed first.
+				// CAPTCH RESULT 
+				if ( captchaResult === true ) {
+					if ( g_currenCaptchaUUID ) {
+						let data = {
+							"email" : getVal(c_email),
+                            "password" : getVal(c_password),
+                            "strategy" : getVal(c_strategy),
+                            "opneID" : getVal(c_openID),
+							'uuid' : g_currenCaptchaUUID
+						}
+						//
+						postData(`http://${g_siteURL}:${port}/${endpoint}`, data, 'include')
+						.then((resp) => {
+							if ( resp.OK ) {
+								console.log(resp); // JSON data parsed by `response.json()` call
+								g_currenCaptchaUUID = null;
+                                presentLogout(resp)
+                                secondaryVerify(resp)
+							} else {
+                                g_CurContainer.formErrorMessage(`Login Failed: ${resp.reason}`)
+                            }
+						});
+					}
+				} else {
+					if ( captchaResult !== false ) {
+						g_CurContainer.switchCaptchaDisplay(false)
+						if ( captchaResult !== undefined ) {
+							g_CurContainer.formErrorMessage(captchaResult)
+						} else {
+							g_CurContainer.formErrorMessage("Web service not responding.")
+						}
+					}
+				}
+			} catch (e) {
+				console.log(e.message)
+			}
+		}
+	}
+
+
+    function processLogin() {
+        processAuthEndpoint("users/login")
+    }
+
+    function processForgotPassword() {
+        processAuthEndpoint("users/forgot")
+    }
+
+
+	function onkey_checkLoginError(srcField) {
+	   if ( g_login_Handling.checkFormValid() ) {
+		   let focusEl = document.getElementById(srcField);
+		   focusEl.style.borderColor = 'black'
+		   g_login_Handling.hideFormErrorMessage()
+	   }
+	}
+
+
+</script>
+

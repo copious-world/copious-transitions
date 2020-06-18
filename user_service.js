@@ -63,7 +63,8 @@ g_app.post('/keyed_mime/:asset', (req, res) => {
         let transtionObj = g_session_manager.process_asset(asset,body)  // not checking sesion, key the asset and use any search refinement in the body.
         if ( transtionObj.secondary_action ) {                          // return a transition object to go to the client. 
             let asset_obj = g_statics.fetch(asset);                     // get the asset for later
-            g_secondary_mime_actions[transtionObj.token] = { 'tobj' : transtionObj, 'asset' : asset_obj }               // store the object and the asset. 
+            let tObjCached = { 'tobj' : transtionObj, 'asset' : asset_obj } 
+            add_local_cache_transition(g_secondary_mime_actions,transtionObj.token,tObjCached)
             return(res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));    // transition object has token
         } else {
             let asset_obj = g_statics.fetch(asset);     // no checks being done, just send the asset. No token field included
@@ -105,7 +106,8 @@ g_app.post('/transition/:transition', function(req, res){           // the trans
             let transtionObj = g_session_manager.process_transition(transition,body,req)            // either fetch or produced transition data
             if ( transtionObj.secondary_action ) {                                      // Require a seconday action as part of the transition for finalization
                 let [send_elements, store_elements] = g_dynamics.fetch_elements(transition,transtionObj);      // elements is purposely vague and may be application sepecific
-                g_finalize_transitions[transtionObj.token] = { 'tobj' : transtionObj, 'elements' : store_elements, 'transition' : transition }
+                let tObjCached = { 'tobj' : transtionObj, 'elements' : store_elements, 'transition' : transition }
+                add_local_cache_transition(g_finalize_transitions,transtionObj.token,tObjCached)
                 return(res.status(200).send(JSON.stringify({ 'type' : 'transition', 'OK' : 'true', 'data' : transtionObj, 'elements' : send_elements })));
             } else {
                 body.token = transtionObj.token
@@ -150,21 +152,37 @@ if ( conf_obj.login_app ) {   // LOGIN APPS OPTION (START)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 // USER MANAGEMENT - handle authorization and user presence.
 let g_secondary_user_actions = {}
-g_app.post(['/users/login','/users/logout','/users/register','/users/forgot'],(req,res) => {
+g_app.post(['/users/login','/users/logout','/users/register','/users/forgot'],(req,res,next) => {
     let body = req.body
     let user_op = body['action']
     if ( g_validator.valid(body,g_validator.field_set[user_op]) ) {        // every post that comes through will have validation from configuration
         let transtionObj = g_session_manager.process_user(user_op,body,req)         // most paths require secondation action (perhaps logout doesn't) (Captch as model)
         if ( transtionObj.secondary_action ) {
-            g_secondary_user_actions[transtionObj.token] = { 'tobj' : transtionObj, 'token' : transtionObj.session_token, 'action' : user_op }
-            delete transtionObj.session_token
+            let tObjCached = { 'tobj' : transtionObj, 'token' : transtionObj.session_token, 'action' : user_op }
+            add_local_cache_transition(g_secondary_user_actions,transtionObj.token,tObjCached)
             return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
+        } else if ( transtionObj.defer_to_middleware ) {
+            g_session_manager.set_strategy(body.strategy)
+            g_session_manager.external_authorizer(req, res, next, (err, user, info) => {
+                if ( err || !user ) { 
+                    let message = err.message ? err.message : "bad form"
+                    res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : message }));
+                } else {
+                    transtionObj.user_info = g_session_manager.extract_exposable_user_info(user,info)
+                    let tObjCached = { 'tobj' : transtionObj, 'token' : transtionObj.session_token, 'action' : user_op }
+                    add_local_cache_transition(g_secondary_user_actions,transtionObj.token,tObjCached)
+                    return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
+                }
+            })
         } else {
             return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
         }
-    }    
-    res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : 'bad form' }));
+    } else {
+        res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : 'bad form' }));
+    }   
 })
+
+
  
 // USER MANAGEMENT - finalize the user action.
 g_app.post('/users/secondary/:action',(req,res) => {
@@ -222,6 +240,16 @@ function fetch_local_cache_transition(cache_map,token) {
         return transObject
     }
     return undefined
+}
+
+
+function add_local_cache_transition(cache_map,token,tobject) {
+    if ( cache_map ) {
+        cache_map[token] = tobject
+        if (  tobject.tobj.session_token ) {
+            delete tobject.tobj.session_token
+        }
+    }
 }
 
 

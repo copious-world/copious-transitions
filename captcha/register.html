@@ -1,0 +1,153 @@
+<div id="myRegisterModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close">&times;</span>
+            <h3><i>Captcha</i> : I am not a robot</h3>
+        </div>
+        <div class="modal-body">
+            <div id="captcha-goes-here-register" style="border:1px solid lime;margin:2px;" >
+                ------
+            </div>
+            <div id="captcha-entry-register" >
+                Type in the text that you see above:
+                <input type="text" id="captcha-field-register" class="svgFormTextField" style="font-size:14px;margin-top:1px;margin-left:2px;border:1px solid black;"/>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="captchaCheck('register')">submit</button>
+        </div>
+    </div>
+</div>
+
+<div id="myRegisterForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
+    <div id="register-errors_here" >no error</div>
+ 
+
+    <div class="form_el" >
+        <label for='register-name' class='email'>Name:</span></label>
+        <input type='email' name='register-name' id='register-name' value=''class='field_el name'  required onkeyup="onkey_checkRegisterError('register-name')"  />
+    </div>
+ 
+    <div class="form_el" >
+        <label for='register-email' class='email'>Email:</span></label>
+        <input type='email' name='register-email' id='register-email' value=''class='field_el email'  required onkeyup="onkey_checkRegisterError('register-email')"  />
+    </div>
+    
+    <div class="form_el" >
+        <label for='register-password' class='url'>Password:</span></label>
+        <input type='password' name='register-password' id='register-password' value='' class='field_el password' onkeyup="onkey_checkRegisterError('register-password')"  />
+    </div>
+
+        
+    <div class="form_el" >
+        <label for='register-password-match' class='url'>Password:</span></label>
+        <input type='password' name='register-password-match' id='register-password-match' value='' class='field_el password' onkeyup="onkey_checkRegisterError('register-password-match')"  />
+    </div>
+
+    
+    <p class='register-submit'>
+    <button onclick="processRegister()" >Submit</button>
+    </p>
+</div>
+
+<noscript><div id="noscript_warning">
+	WARNING: You have JavaScript disabled in your web browser.  Many functions of this system will not work properly.
+</div></noscript>
+
+<script>
+
+	// Get the modal
+    var g_register_port = "2102"
+    //
+    function register_password_rules(fld_name,ptext) {
+        return(true)
+    }
+
+
+	// LOGIN APPLICATION
+	var g_register_Handling = new ValidationContainer({
+			"auth_port" : g_register_port,
+			"errors_here" : document.getElementById('register-errors_here'),
+            "password_rules" : register_password_rules,
+			"fields" : {
+				"email" : document.getElementById('register-email'),
+				"name" : document.getElementById('register-name'),
+				"password" : document.getElementById('register-password'),
+                "password-match" : document.getElementById('register-password-match'),
+			},
+			"checks" : {
+				"is_empty" : ["password","email"],  // ref into fields above...
+				"email" : ["email"],
+                "passwords" : ["password","password-match"]
+			},
+			"modal" : document.getElementById("myRegisterModal"),
+			"form" : document.getElementById('myRegisterForm'),
+			"captcha" : document.getElementById('captcha-goes-here-register'),
+			"captcha_field" : document.getElementById("captcha-field-register")
+		});
+
+	async function processRegister() {
+		//
+		g_ComponentErrorsActivated = true	// will be processing errors, etc. some selective behavior permitted
+		g_CurContainer = g_register_Handling;	// The open container will be the contact form
+		//
+		if ( g_CurContainer.checkFormValid() ) {
+			//
+			let c_email =  g_register_Handling.fields["email"]
+			let c_password = g_register_Handling.fields["password"]
+			let c_password_verify = g_register_Handling.fields["password-match"]
+			//
+			try {
+				let port = g_register_port
+				// CAPTCH PROCESSING 
+				let captchaResult = await doCaptcha(port)   // the captcha has to be processed first.
+				// CAPTCH RESULT 
+				if ( captchaResult === true ) {
+					if ( g_currenCaptchaUUID ) {
+						let data = {
+							"email" : getVal(c_email),
+							"password" : getVal(c_password),
+                            "password-verify" : getVal(c_password_verify),
+							'uuid' : g_currenCaptchaUUID
+						}
+						//
+						postData(`http://${g_siteURL}:${port}/users/register`, data)
+						.then((resp) => {
+							if ( resp.OK ) {
+								console.log(resp);              // JSON data parsed by `response.json()` call
+								g_currenCaptchaUUID = null;     // check for duplicates
+                                show_thankyou_box();
+							} else {
+                                g_CurContainer.formErrorMessage(`Registration Failed: ${resp.reason}`)
+                            }
+						});
+					}
+				} else {
+					if ( captchaResult !== false ) {
+						g_CurContainer.switchCaptchaDisplay(false)
+						if ( captchaResult !== undefined ) {
+							g_CurContainer.formErrorMessage(captchaResult)
+						} else {
+							g_CurContainer.formErrorMessage("Web service not responding.")
+						}
+					}
+				}
+			} catch (e) {
+				console.log(e.message)
+			}
+		}
+	}
+
+
+	function onkey_checkRegisterError(srcField) {
+	   if ( g_register_Handling.checkFormValid() ) {
+		   let focusEl = document.getElementById(srcField);
+		   focusEl.style.borderColor = 'black'
+		   g_register_Handling.hideFormErrorMessage()
+	   }
+	}
+
+
+</script>
+

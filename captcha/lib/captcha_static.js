@@ -9,7 +9,7 @@ class CaptchaStatic extends GeneralStatic {
         //
         this.preloaded = {
             "login" : { "fname" :__dirname + '/user/login.html', "ftype" : "html" },
-            "register" : { "fname" :__dirname + '/user/submitter.html', "ftype" : "html" },
+            "register" : { "fname" :__dirname + '/user/register.html', "ftype" : "html" },
             "forgetful" : { "fname" :__dirname + '/user/forgot.html', "ftype" : "html" }
         }
         //
