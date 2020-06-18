@@ -78,7 +78,7 @@ g_app.post('/keyed_mime/:asset', (req, res) => {
 g_app.post('/keyed_mime/secondary',(req,res) => {
     let body = req.body
     if ( body.token !== undefined ) {
-        let cached_transition = g_secondary_mime_actions[body.token]            // take the asset information from cache
+        let cached_transition = fetch_local_cache_transition(g_secondary_mime_actions,body.token)
         if ( cached_transition !== undefined ) {
             if ( g_session_manager.match(body,cached_transition)  ) {                // check on matching tokens and possibly other things
                 if ( g_session_manager.key_mime_type_transition(req) ) {
@@ -125,7 +125,7 @@ g_app.post('/transition/:transition', function(req, res){           // the trans
 g_app.post('/transition/secondary',(req,res) => {
     let body = req.body
     if ( body.token !== undefined ) {
-        let cached_transition = g_finalize_transitions[body.token]      // get the transition from cache
+        let cached_transition = fetch_local_cache_transition(g_finalize_transitions,body.token)
         if ( cached_transition !== undefined ) {
             if ( g_session_manager.match(body,cached_transition)  ) {        // check on matching tokens and possibly other things 
                 // some kind of transition takes place and becomes the state of the session. It may not be the same as the one
@@ -170,7 +170,7 @@ g_app.post('/users/secondary/:action',(req,res) => {
     let body = req.body
     let action = req.params['action']
     if ( body.token !== undefined ) {                                   // the token must be present
-        let cached_transition = g_secondary_user_actions[body.token]
+        let cached_transition = fetch_local_cache_transition(g_secondary_user_actions,body.token)
         if ( (cached_transition !== undefined) && (action == cached_transition.action) ) {      // the action must match (artifac of use an array of paths)
             // this is the asset needed by the client to turn on personlization and key access (aside from sessions and cookies)
             let session_token = cached_transition.session_token
@@ -213,6 +213,16 @@ global.do_hash = (text) => {
     let ehash = hash.digest('hex');
     return(ehash)
 }
+
+function fetch_local_cache_transition(cache_map,token) {
+    if ( cache_map ) {
+        let transObject = cache_map[token]
+        delete cache_map[token]
+        return transObject
+    }
+    return undefined
+}
+
 
 function load_parameters() {
 
