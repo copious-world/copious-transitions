@@ -90,6 +90,14 @@ class CaptchaSessionManager extends SessionManager {
         return(transtionObj)
     }
 
+    ok_forgetfulness(boolVal,transtion_object) {
+        transtion_object.forgetfulness_msg = boolVal 
+                                                ? "You will receive an email with a link to a password restoration page" 
+                                                : "Please try again later"
+        transtion_object.forgetfulness_proceed = boolVal
+    }
+
+
     external_authorizer(req, res, next, cb) {
         passport.authenticate(this.current_auth_strategy, (err, user, info) => {
             if ( err || !user ) { cb(err,null) }
@@ -121,6 +129,13 @@ class CaptchaSessionManager extends SessionManager {
     feasible(transition,post_body,req) {                // is the transition something that can be done?
         if (  G_captcha_trns.tagged(transition) || G_contact_trns.tagged(transition) ) {
             return(true)
+        } else if ( G_password_reset_trn.tagged(transition ) ) {
+            let forgetful_record = this.db.get_key_value(tracking_num)
+            if ( forgetful_record ) {
+                post_body.email = forgetful_record.email
+                return(true)
+            }
+            return(false)
         }
         return(super.feasible(transition,post_body,req))
     }
@@ -132,6 +147,8 @@ class CaptchaSessionManager extends SessionManager {
         if ( G_captcha_trns.tagged(transition) ) {
             post_body._uuid_prefix =  G_captcha_trns.uuid_prefix()
         } else if ( G_contact_trns.tagged(transition) ) {
+            trans_object.secondary_action = false
+        } else if ( G_password_reset_trn.tagged(transition ) ) {
             trans_object.secondary_action = false
         }
         //
@@ -168,7 +185,19 @@ class CaptchaSessionManager extends SessionManager {
                 "OK" : "true"
             }
             return(finalization_state)
+        } else if ( G_password_reset_trn.tagged(transition ) ) {
+            let reset_info = {
+                "password" : post_body.password,
+                "email" : post_body.email
+            }
+            this.db.store_user_secret(reset_info)
+            let finalization_state = {
+                "state" : "stored",
+                "OK" : "true"
+            }
+            return(finalization_state)
         }
+
         let finalization_state = {
             "state" : "ERROR",
             "OK" : "false"

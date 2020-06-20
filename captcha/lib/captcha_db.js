@@ -172,6 +172,15 @@ class CaptchaDBClass extends DBClass {
         super.store_user(udata)                               // use persitent storage
     }
 
+    
+    store_user_secret(reset_info) {
+      let user = this.fetch_user_from_key_value_store(reset_info.email)
+      if ( user ) {
+        user.password = this.crypto_version(reset_info.password)
+        this.store(user)
+      }
+    }
+
 
     exists(collection,post_body) {
         let query = post_body

@@ -50,7 +50,7 @@ class CaptchaPaths extends TaggedTransition {
 }
 
 // Contact Paths
-class ConntactPaths extends TaggedTransition {
+class ContactPaths extends TaggedTransition {
     constructor() {
         super("contact")
     }
@@ -61,19 +61,29 @@ class ConntactPaths extends TaggedTransition {
     }
 }
 
+// Password Reset
+class PasswordReset extends TaggedTransition {
+    constructor() {
+        super("password-reset")
+    }
+    //
+
+}
 
 
 class CaptchaCustomTransitions {
     constructor() {
         this.captcha_keyed = new CaptchaPaths()
-        this.contact_keyed = new ConntactPaths()
+        this.contact_keyed = new ContactPaths()
         this.users_keyed = new CaptchaUsers()
+        this.password_keyed = new PasswordReset()
     }
 
     initialize() {
         global.G_captcha_trns = this.captcha_keyed
         global.G_contact_trns = this.contact_keyed
         global.G_users_trns = this.users_keyed
+        global.G_password_reset_trns = this.password_keyed
     }
 }
 
