@@ -1,5 +1,4 @@
 const { DBClass, SessionStore }  = require('lib/general_db')
-const crypto = require('crypto')
 const EventEmitter = require('events')
 const CitadelClient = require('node_citadel')
 
@@ -172,7 +171,7 @@ class CaptchaDBClass extends DBClass {
         super.store_user(udata)                               // use persitent storage
     }
 
-    
+
     store_user_secret(reset_info) {
       let user = this.fetch_user_from_key_value_store(reset_info.email)
       if ( user ) {
