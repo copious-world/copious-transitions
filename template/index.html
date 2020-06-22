@@ -753,7 +753,7 @@ html {
 		</div>
 		
 		<div id="myContactForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
-			<div id="errors_here" >no error</div>
+			<div id="contact-errors_here" >no error</div>
 			<div class="form_el" >
 				<label for='contact-name' class='name'>Name<span> (required) </span></label>
 				<input type='text' name='contact-name' id='contact-name' value='' class='field_el name' required onkeyup="onkey_checkContactError('contact-name')" />
@@ -1087,12 +1087,12 @@ html {
 		g_loginStateViewHolders["gAndM1"] = {
 			'element' : greetAndMeetContainer1,
 			'unauthed' : g_originalGreetAndMeet1,
-			'authed' : `see your profile`
+			'authed' : `{{{yourProileLinks.content}}}`
 		}
 		g_loginStateViewHolders["gAndM2"] = {
 			'element' : greetAndMeetContainer2,
 			'unauthed' : g_originalGreetAndMeet2,
-			'authed' : `check out your dashboard`
+			'authed' : `{{{yourDashboardLinks.content}}}`
 		}
 	}
 
@@ -1175,6 +1175,10 @@ html {
 			this.captch_input = props.captcha_field
 			this.auth_port = props.auth_port
 			this.password_rules = props.password_rules
+			this.service_url = props.service_url
+
+			this.errline.style.visibility = "hidden"
+			this.failure_msg_prefix = props.failure_msg_prefix
 		}
 
 		hideFormErrorMessage() {
@@ -1197,10 +1201,7 @@ html {
 			let msg = "The following fields require values: "
 			//
 			let sep = ','
-			for ( field in fields ) {
-				msg += sep + field
-				sep = ','
-			}
+			msg += fields.join(sep)
 			this.formErrorMessage(msg);
 		}
 
@@ -1223,7 +1224,7 @@ html {
 			})
 			//
 			if ( empty_fields.length ) {
-				emptyFieldMessage(empty_fields)
+				this.emptyFieldMessage(empty_fields)
 				empty_fields.forEach(field => {
 					let c = this.fields[field]
 					colorize(c,"red")
@@ -1233,7 +1234,7 @@ html {
 			//
 			let emailFields = this.checks.email
 			emailFields.forEach(e_field => {
-				let c = this.fields[field]
+				let c = this.fields[e_field]
 				if ( !checkEmailField(c) ) {
 					this.emailFormatError();
 					colorize(c,"red")
@@ -1269,6 +1270,47 @@ html {
 			}
 		}
 
+	}
+
+
+	async function processUI_captchaService(handlerDefsValidator,calcAppDataDB,completionaAction) {
+		//
+		g_ComponentErrorsActivated = true	// will be processing errors, etc. some selective behavior permitted
+		g_CurContainer = handlerDefsValidator
+		//
+		if ( g_CurContainer.checkFormValid() ) {
+			let port = g_CurContainer.auth_port
+			try {
+				// CAPTCH PROCESSING 
+				let captchaResult = await doCaptcha(port)   // the captcha has to be processed first.
+				// CAPTCH RESULT 
+				if ( captchaResult === true ) {
+					if ( g_currenCaptchaUUID ) {
+						let data = calcAppDataDB()		// calcAppDataDB
+						postData(g_CurContainer.service_url, data)
+						.then((resp) => {
+							if ( resp.OK ) {
+								g_currenCaptchaUUID = null;     // check for duplicates
+                                completionaAction();
+							} else {
+                                g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${resp.reason}`)
+                            }
+						});
+					}
+				} else {
+					if ( captchaResult !== false ) {
+						g_CurContainer.switchCaptchaDisplay(false)
+						if ( captchaResult !== undefined ) {
+							g_CurContainer.formErrorMessage(captchaResult)
+						} else {
+							g_CurContainer.formErrorMessage("Web service not responding.")
+						}
+					}
+				}
+			} catch(e) {
+				console.log(e.message)
+			}
+		}
 	}
 
 
@@ -1587,11 +1629,14 @@ html {
 	// APPLICATIONS
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- 
 
-
 	// CONTACT APPLICATION
-	var g_contact_Handling = new ValidationContainer({
+	var g_contact_Handling = null
+	function initContact() {
+		g_contact_Handling = new ValidationContainer({
 			"auth_port" : g_contact_port,
-			"errors_here" : document.querySelector('#contact-errors_here'),
+            "service_url" : `http://${g_siteURL}:${g_contact_port}/contact`,
+            "errors_here" : document.getElementById('contact-errors_here'),
+            "failure_msg_prefix" : "Cannot Process Captcha",
 			"fields" : {
 				"name" : document.querySelector('#contact-name'),
 				"email" : document.querySelector('#contact-email'),
@@ -1607,59 +1652,39 @@ html {
 			"captcha" : document.querySelector('#captcha-goes-here'),
 			"captcha_field" : document.querySelector("#captcha-field")
 		})
-
-	async function processContact() {
-		//
-		g_ComponentErrorsActivated = true	// will be processing errors, etc. some selective behavior permitted
-		g_CurContainer = g_contact_Handling;	// The open container will be the contact form
-		//
-		if ( g_CurContainer.checkFormValid() ) {
-			//
-			let c_name = g_contact_Handling.fields["name"]
-			let c_email =  g_contact_Handling.fields["email"]
-			let c_website = g_contact_Handling.fields["website"]
-			let c_comment = g_contact_Handling.fields["comment"]
-			//
-			try {
-				let port = g_contact_port
-				// CAPTCH PROCESSING 
-				let captchaResult = await doCaptcha(port)   // the captcha has to be processed first.
-				// CAPTCH RESULT 
-				if ( captchaResult === true ) {
-					if ( g_currenCaptchaUUID ) {
-						let data = {
-							"name" : getVal(c_name),
-							"website" : getVal(c_website),
-							"email" : getVal(c_email),
-							"comment" : getVal(c_comment),
-							'uuid' : g_currenCaptchaUUID
-						}
-						//
-						postData(`http://${g_siteURL}:${port}/contact`, data)
-						.then((resp) => {
-							if ( resp.OK ) {
-								console.log(resp); // JSON data parsed by `response.json()` call
-								g_currenCaptchaUUID = null;
-								unpin_current();
-								show_thankyou_box();
-							}
-						});
-					}
-				} else {
-					if ( captchaResult !== false ) {
-						g_CurContainer.switchCaptchaDisplay(false)
-						if ( captchaResult !== undefined ) {
-							g_CurContainer.formErrorMessage(captchaResult)
-						} else {
-							g_CurContainer.formErrorMessage("Web service not responding.")
-						}
-					}
-				}
-			} catch (e) {
-				console.log(e.message)
-			}
-		}
 	}
+
+
+	function contact_calcAppDataDB() {
+		//
+		let c_name = g_contact_Handling.fields["name"]
+		let c_email =  g_contact_Handling.fields["email"]
+		let c_website = g_contact_Handling.fields["website"]
+		let c_comment = g_contact_Handling.fields["comment"]
+		//
+		let data = {
+			"name" : getVal(c_name),
+			"website" : getVal(c_website),
+			"email" : getVal(c_email),
+			"comment" : getVal(c_comment),
+			'uuid' : g_currenCaptchaUUID
+		}
+		//
+		return(data)
+	}
+
+	function contact_completionaAction() {
+		unpin_current();
+		show_thankyou_box();
+	}
+	
+	function processContact() {
+		processUI_captchaService( contact_calcAppDataDB,
+									contact_calcAppDataDB,
+									contact_completionaAction )
+	}
+
+	g_finalizers.push(initContact)
 
 
 	function onkey_checkContactError(srcField) {
@@ -1684,6 +1709,7 @@ html {
 			//
 			g_CurContainer = g_login_Handling
 		}
+		login_opening_view()
 	}
 
 	// 
@@ -1695,6 +1721,7 @@ html {
 			register.style.display = "block";
 			//
 			g_CurContainer = g_register_Handling
+			g_ComponentErrorsActivated = true
 		}
 	}
 	

@@ -145,27 +145,38 @@
         }
     }
     //
-    login_strategy('local');show_password_container();hide_openID_container()
+    
     //
+    function login_opening_view() {
+        login_strategy('local');show_password_container();hide_openID_container()
+    }
 
     function password_rules(fld_name,ptext) {
         return(true)
     }
 
-    function presentLogout(accountDate) {}
+    function presentLogout(accountData) {
+        loginView()
+    }
 
-    function secondaryVerify(resp) {}
+    function secondaryVerify(resp) {
+        // e.g auto login to another service this uses simultaneously
+    }
 
-	// LOGIN APPLICATION
-	var g_login_Handling = new ValidationContainer({
-			"auth_port" : g_login_port,
-			"errors_here" : document.getElementById('login-errors_here'),
-            "password_rules" : password_rules,
+    // LOGIN APPLICATION
+    var g_login_Handling = null
+    
+    function initLogin() {
+        g_login_Handling = new ValidationContainer({
+            "auth_port" : g_login_port,
+            "serice_url" : `http://${g_siteURL}:${g_login_port}/`,
+            "errors_here" : document.getElementById('login-errors_here'),
+            "failure_msg_prefix" : "Login Failed",
+            "password_rules" : login_password_rules,
 			"fields" : {
 				"email" : document.getElementById('login-email'),
 				"password" : document.getElementById('login-password'),
-                "strategy" : document.getElementById('login-strategy'),
-                "openID" :  document.getElementById('login-openID')
+                "strategy" : "local"
 			},
 			"checks" : {
 				"is_empty" : ["password","email"],  // ref into fields above...
@@ -176,63 +187,39 @@
 			"form" : document.getElementById('myLoginForm'),
 			"captcha" : document.getElementById('captcha-goes-here-login'),
 			"captcha_field" : document.getElementById("captcha-field-login")
-		});
+        });
+    }
 
-	async function processAuthEndpoint(endpoint) {
+
+	function login_calcAppDataDB() {
 		//
-		g_ComponentErrorsActivated = true	// will be processing errors, etc. some selective behavior permitted
-		g_CurContainer = g_login_Handling;	// The open container will be the contact form
+        let c_email =  g_login_Handling.fields["email"]
+        let c_password = g_login_Handling.fields["password"]
+        let c_openID = g_login_Handling.fields["openID"]
+        let c_strategy = g_login_Handling.fields["strategy"]
 		//
-		if ( g_CurContainer.checkFormValid() ) {
-			//
-			let c_email =  g_login_Handling.fields["email"]
-            let c_password = g_login_Handling.fields["password"]
-            let c_openID = g_login_Handling.fields["openID"]
-            let c_strategy = g_login_Handling.fields["strategy"]
-			//
-			try {
-				let port = g_login_port
-				// CAPTCH PROCESSING 
-				let captchaResult = await doCaptcha(port)   // the captcha has to be processed first.
-				// CAPTCH RESULT 
-				if ( captchaResult === true ) {
-					if ( g_currenCaptchaUUID ) {
-						let data = {
-							"email" : getVal(c_email),
-                            "password" : getVal(c_password),
-                            "strategy" : getVal(c_strategy),
-                            "opneID" : getVal(c_openID),
-							'uuid' : g_currenCaptchaUUID
-						}
-						//
-						postData(`http://${g_siteURL}:${port}/${endpoint}`, data, 'include')
-						.then((resp) => {
-							if ( resp.OK ) {
-								console.log(resp); // JSON data parsed by `response.json()` call
-								g_currenCaptchaUUID = null;
-                                presentLogout(resp)
-                                secondaryVerify(resp)
-							} else {
-                                g_CurContainer.formErrorMessage(`Login Failed: ${resp.reason}`)
-                            }
-						});
-					}
-				} else {
-					if ( captchaResult !== false ) {
-						g_CurContainer.switchCaptchaDisplay(false)
-						if ( captchaResult !== undefined ) {
-							g_CurContainer.formErrorMessage(captchaResult)
-						} else {
-							g_CurContainer.formErrorMessage("Web service not responding.")
-						}
-					}
-				}
-			} catch (e) {
-				console.log(e.message)
-			}
-		}
+        let data = {
+            "email" : getVal(c_email),
+            "password" : getVal(c_password),
+            "strategy" : getVal(c_strategy),
+            "opneID" : getVal(c_openID),
+            'uuid' : g_currenCaptchaUUID
+        }
+		//
+		return(data)
 	}
 
+	function login_completionaAction() {
+        presentLogout(resp)
+        secondaryVerify(resp)
+	}
+
+	function processAuthEndpoint(endpoint) {
+        g_login_Handling.serice_url = `http://${g_siteURL}:${g_login_port}/${endpoint}`
+		processUI_captchaService( g_login_Handling,
+                                    login_calcAppDataDB,
+									login_completionaAction )
+	}
     
     // send users throught the captcha interface
     function processLogin() {
@@ -244,7 +231,6 @@
         processAuthEndpoint("users/forgot")
     }
 
-
 	function onkey_checkLoginError(srcField) {
 	   if ( g_login_Handling.checkFormValid() ) {
 		   let focusEl = document.getElementById(srcField);
@@ -252,6 +238,8 @@
 		   g_login_Handling.hideFormErrorMessage()
 	   }
 	}
+
+    g_finalizers.push(initLogin)
 
 
 </script>

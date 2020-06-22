@@ -22,30 +22,27 @@
 
 <div id="myRegisterForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
     <div id="register-errors_here" >no error</div>
- 
 
     <div class="form_el" >
         <label for='register-name' class='email'>Name:</span></label>
-        <input type='email' name='register-name' id='register-name' value=''class='field_el name'  required onkeyup="onkey_checkRegisterError('register-name')"  />
+        <input type='email' name='register-name' id='register-name' value=''class='field_el name'  required onkeyup="onkey_checkRegisterError(this)"  />
     </div>
  
     <div class="form_el" >
         <label for='register-email' class='email'>Email:</span></label>
-        <input type='email' name='register-email' id='register-email' value=''class='field_el email'  required onkeyup="onkey_checkRegisterError('register-email')"  />
+        <input type='email' name='register-email' id='register-email' value=''class='field_el email'  required onkeyup="onkey_checkRegisterError(this)"  />
     </div>
     
     <div class="form_el" >
         <label for='register-password' class='url'>Password:</span></label>
-        <input type='password' name='register-password' id='register-password' value='' class='field_el password' onkeyup="onkey_checkRegisterError('register-password')"  />
+        <input type='password' name='register-password' id='register-password' value='' class='field_el password' onkeyup="onkey_checkRegisterError(this)"  />
     </div>
-
         
     <div class="form_el" >
-        <label for='register-password-match' class='url'>Password:</span></label>
-        <input type='password' name='register-password-match' id='register-password-match' value='' class='field_el password' onkeyup="onkey_checkRegisterError('register-password-match')"  />
+        <label for='register-password-match' class='url'>Validate Password:</span></label>
+        <input type='password' name='register-password-match' id='register-password-match' value='' class='field_el password' onkeyup="onkey_checkRegisterError(this)"  />
     </div>
 
-    
     <p class='register-submit'>
     <button onclick="processRegister()" >Submit</button>
     </p>
@@ -63,91 +60,73 @@
     function register_password_rules(fld_name,ptext) {
         return(true)
     }
-
-
-	// LOGIN APPLICATION
-	var g_register_Handling = new ValidationContainer({
-			"auth_port" : g_register_port,
-			"errors_here" : document.getElementById('register-errors_here'),
-            "password_rules" : register_password_rules,
-			"fields" : {
-				"email" : document.getElementById('register-email'),
-				"name" : document.getElementById('register-name'),
-				"password" : document.getElementById('register-password'),
-                "password-match" : document.getElementById('register-password-match'),
-			},
-			"checks" : {
-				"is_empty" : ["password","email"],  // ref into fields above...
-				"email" : ["email"],
-                "passwords" : ["password","password-match"]
-			},
-			"modal" : document.getElementById("myRegisterModal"),
-			"form" : document.getElementById('myRegisterForm'),
-			"captcha" : document.getElementById('captcha-goes-here-register'),
-			"captcha_field" : document.getElementById("captcha-field-register")
+	// REGISTRATION APPLICATION
+	//
+	var g_register_Handling = null
+	function initRegistration() {
+		g_register_Handling = new ValidationContainer({
+				"auth_port" : g_register_port,
+				"serice_url" : `http://${g_siteURL}:${g_register_port}/users/register`,
+				"errors_here" : document.getElementById('register-errors_here'),
+				"failure_msg_prefix" : "Registration failed",
+				"password_rules" : register_password_rules,
+				"fields" : {
+					"name" : document.getElementById('register-name'),
+					"email" : document.getElementById('register-email'),
+					"password" : document.getElementById('register-password'),
+					"password-match" : document.getElementById('register-password-match'),
+				},
+				"checks" : {
+					"is_empty" : ["password","email"],  // ref into fields above...
+					"email" : ["email"],
+					"passwords" : ["password","password-match"]
+				},
+				"modal" : document.getElementById("myRegisterModal"),
+				"form" : document.getElementById('myRegisterForm'),
+				"captcha" : document.getElementById('captcha-goes-here-register'),
+				"captcha_field" : document.getElementById("captcha-field-register")
 		});
+	}
 
-	async function processRegister() {
+	function register_calcAppDataDB() {
 		//
-		g_ComponentErrorsActivated = true	// will be processing errors, etc. some selective behavior permitted
-		g_CurContainer = g_register_Handling;	// The open container will be the contact form
+		let c_name =  g_register_Handling.fields["name"]
+		let c_email =  g_register_Handling.fields["email"]
+		let c_password = g_register_Handling.fields["password"]
+		let c_password_verify = g_register_Handling.fields["password-match"]
 		//
-		if ( g_CurContainer.checkFormValid() ) {
-			//
-			let c_email =  g_register_Handling.fields["email"]
-			let c_password = g_register_Handling.fields["password"]
-			let c_password_verify = g_register_Handling.fields["password-match"]
-			//
-			try {
-				let port = g_register_port
-				// CAPTCH PROCESSING 
-				let captchaResult = await doCaptcha(port)   // the captcha has to be processed first.
-				// CAPTCH RESULT 
-				if ( captchaResult === true ) {
-					if ( g_currenCaptchaUUID ) {
-						let data = {
-							"email" : getVal(c_email),
-							"password" : getVal(c_password),
-                            "password-verify" : getVal(c_password_verify),
-							'uuid' : g_currenCaptchaUUID
-						}
-						//
-						postData(`http://${g_siteURL}:${port}/users/register`, data)
-						.then((resp) => {
-							if ( resp.OK ) {
-								console.log(resp);              // JSON data parsed by `response.json()` call
-								g_currenCaptchaUUID = null;     // check for duplicates
-                                show_thankyou_box();
-							} else {
-                                g_CurContainer.formErrorMessage(`Registration Failed: ${resp.reason}`)
-                            }
-						});
-					}
-				} else {
-					if ( captchaResult !== false ) {
-						g_CurContainer.switchCaptchaDisplay(false)
-						if ( captchaResult !== undefined ) {
-							g_CurContainer.formErrorMessage(captchaResult)
-						} else {
-							g_CurContainer.formErrorMessage("Web service not responding.")
-						}
-					}
-				}
-			} catch (e) {
-				console.log(e.message)
-			}
+		let data = {
+			"name" : getVal(c_name),
+			"email" : getVal(c_email),
+			"password" : getVal(c_password),
+			"password-verify" : getVal(c_password_verify),
+			'uuid' : g_currenCaptchaUUID
 		}
+		// register application
+		data.name = data.name.length === 0 ? "anonymous" : data.name
+		//
+		return(data)
+	}
+
+	function registration_completionaAction() {
+		show_thankyou_box()
+	}
+
+	function processRegister() {
+		processUI_captchaService( g_register_Handling,
+									register_calcAppDataDB,
+									registration_completionaAction )
 	}
 
 
-	function onkey_checkRegisterError(srcField) {
+	function onkey_checkRegisterError(focusEl) {
 	   if ( g_register_Handling.checkFormValid() ) {
-		   let focusEl = document.getElementById(srcField);
-		   focusEl.style.borderColor = 'black'
+		   if ( focusEl ) focusEl.style.borderColor = 'black'
 		   g_register_Handling.hideFormErrorMessage()
 	   }
 	}
 
-
+	g_finalizers.push(initRegistration)
+	
 </script>
 
