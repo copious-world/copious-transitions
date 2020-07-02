@@ -21,7 +21,11 @@
 </div>
 
 <div id="myRegisterForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
-    <div id="register-errors_here" >no error</div>
+	<div id="register-errors_here" >no error</div>
+	<div id="the-register-form-secure" style="color:darkorange;background-color: palegreen;visibility:hidden;display:none;">
+        switching to a secure version of this page
+    </div>
+
 
     <div class="form_el" >
         <label for='register-name' class='email'>Name:</span></label>
@@ -55,7 +59,16 @@
 <script>
 
 	// Get the modal
-    var g_register_port = "2102"
+	
+	function register_opening_view() {
+		if (location.protocol !== 'https:') {           // start from a secure page
+            let lformMSG = document.getElementById('the-register-form-secure')
+            lformMSG.style.visibility = "visible"
+            lformMSG.style.display = "block"
+            setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
+        }
+	}
+
     //
     function register_password_rules(fld_name,ptext) {
         return(true)
@@ -65,8 +78,8 @@
 	var g_register_Handling = null
 	function initRegistration() {
 		g_register_Handling = new ValidationContainer({
-				"auth_port" : g_register_port,
-				"serice_url" : `http://${g_siteURL}:${g_register_port}/users/register`,
+				"auth_port" : "",
+				"serice_url" : `http://${g_siteURL}/{{auth_path}}/users/register`,
 				"errors_here" : document.getElementById('register-errors_here'),
 				"failure_msg_prefix" : "Registration failed",
 				"password_rules" : register_password_rules,

@@ -1,9 +1,9 @@
-const GeneralBusiness = require('lib/general_business')
+const GeneralBusiness = require.main.require('./lib/general_business')
+const ReMailer = require.main.require("./lib/remailer");
+const apiKeys = require.main.require('./local/api_keys')
 const nodemailer = require("nodemailer");
-const ReMailer =  = require("lib/remailer");
 //const myStorageClass = null
 
-const apiKeys = require('local/aipkeys')
 
 
 var g_mail_transport = nodemailer.createTransport({
@@ -54,7 +54,7 @@ var g_MailToForgetfulUser = new ReMailer(g_mail_transport,forgetful_user_props);
 class CaptchaBusines extends GeneralBusiness {
     //
     constructor() {
-        //super(myStorageClass)
+        super()
         this.db = null
         this.rules = null
     }

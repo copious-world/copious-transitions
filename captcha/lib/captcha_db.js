@@ -1,17 +1,20 @@
-const { DBClass, SessionStore }  = require('lib/general_db')
+const { DBClass, SessionStore } = require.main.require('./lib/general_db')
+
 const EventEmitter = require('events')
 const CitadelClient = require('node_citadel')
 
 //
 //
-const  redis = require("redis")
-const RedisStoreFactory = require('connect-redis');
+const Memcached = require("memcached")
+const MemCacheStoreFactory = require('connect-memcached');
 
-const apiKeys = require('local/aipkeys')
+const apiKeys = require.main.require('./local/api_keys')
+
+
 g_citadel_pass = apiKeys.citadel_password.trim()  // decrypt ??
 
 // pre initializatoin
-const redClient = redis.createClient();  // leave it to the module to figure out how to connect
+const memcdClient = new Memcached('localhost:11211');;  // leave it to the module to figure out how to connect
 
 var g_citadel = null
 var g_citadel_pass = ""
@@ -111,15 +114,15 @@ async function dropConnections() {
 
 class CaptchaSessionStore extends SessionStore {
     //
-    constructor() {
-        super()
+    constructor(db_wrapper) {
+        super(db_wrapper)
     }
     //
     generateStore(expressSession) {
         if ( super.can_generate_store(expressSession,true) ) {
             // custom code goes here
-            let RedisStore = new RedisStoreFactory(expressSession)
-            return (new RedisStore({ client: redClient }))
+            let MemcachedStore = new MemCacheStoreFactory(expressSession)
+            return (new MemcachedStore({ client: memcdClient }))
         } else {
             process.exit(1)
         }
@@ -133,7 +136,7 @@ class CaptchaDBClass extends DBClass {
 
     //
     constructor() {
-        super(CaptchaSessionStore,redClient)
+        super(CaptchaSessionStore,memcdClient)
     }
 
     // // // 

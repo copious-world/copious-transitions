@@ -1,6 +1,10 @@
 //
 const fs = require('fs')
 const crypto = require('crypto')
+const clone = require('clone')
+const WebSocketServer = require('ws').Server;
+const http = require("http");
+
 //
 const conf_obj = load_parameters()                  // configuration parameters to select modules, etc.
 const g_custom_transitions = require(conf_obj.mod_path.custom_transitions)
@@ -30,10 +34,20 @@ g_validator.initialize(conf_obj,g_db,g_session_manager)     // The validator may
 g_statics.initialize(g_db)                                  // Static assets may be taken out of DB storage or from disk, etc.
 g_dynamics.initialize(g_db)                                 // Dynamichk assets may be taken out of DB storage or from disk, etc.
 
+/*
+/static/:asset            -- previously static_mime.  This just returns a static (not computed) piece of information. The app should be able to set the mime type.
+/guarded/static/:asset    -- previously keyed_mime.   Same as above, but checks the session for access.
+/guarded/dynamic/:asset   -- does the same as static but calls on functions that generate assets -- could be a function service.
+/guarded/secondary        -- a handshake that may be required of some assets before delivery of the asset.
+/transition/:transition   -- a kind of transition of the session -- this may return a dynamic asset or it might just process a form -- a change of state expected
+/transition/secondary     -- a handshake that may be required of some assets before delivery of the asset and always finalization of transition
+'/users/login','/users/logout','/users/register','/users/forgot' -- the start, stop sessions, manage passwords.
+/users/secondary/:action  -- the handler for user session management that may require a handshake or finalization.
+*/
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
-// ROOT ... unauthorized entry point
+// ROOT ... unauthorized entry point  -- this is likely to be done by Nginx and will not be needed here.
 g_app.get('/', (req, res) => {
     var html = g_statics.fetch('index.html');
     res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -41,9 +55,9 @@ g_app.get('/', (req, res) => {
 });
 
 // STATIC FETCH
-g_app.get('/static_mime/:asset', (req, res) => {
+g_app.get('/static/:asset', (req, res) => {
     let asset = req.params['asset']
-    if ( g_session_manager.check(asset,req) ) {     // returns a true value by default, but may guard some assets
+    if ( g_session_manager.guard(asset,req) ) {     // returns a true value by default, but may guard some assets
         var asset_obj = g_statics.fetch(asset);     // returns an object with fields mime_type, and string e.g. text/html with uriEncoded html
         res.writeHead(200, { 'Content-Type': asset_obj.mime_type });
         res.end(asset_obj.string);    
@@ -55,11 +69,11 @@ g_app.get('/static_mime/:asset', (req, res) => {
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
-// KEYED MIME_TYPES  -- no validation check on the post, so only a key is expected
+// STATIC KEYED MIME_TYPES  -- no form validation, but GUARD asset within a session
 let g_secondary_mime_actions = {}
-g_app.post('/keyed_mime/:asset', (req, res) => {
+g_app.post('/guarded/static/:asset', (req, res) => {
     let asset = req.params['asset']
-    if ( g_session_manager.check(asset,req) ) {             // asset exits, permission granted, etc.
+    if ( g_session_manager.guard(asset,req) ) {             // asset exits, permission granted, etc.
         let transtionObj = g_session_manager.process_asset(asset,body)  // not checking sesion, key the asset and use any search refinement in the body.
         if ( transtionObj.secondary_action ) {                          // return a transition object to go to the client. 
             let asset_obj = g_statics.fetch(asset);                     // get the asset for later
@@ -75,8 +89,26 @@ g_app.post('/keyed_mime/:asset', (req, res) => {
     res.status(200).send(JSON.stringify({ 'type' : 'mime', 'OK' : 'false', 'reason' : 'unavailable' }));
 });
 
+g_app.post('/guarded/dynamic/:asset', (req, res) => {
+    let asset = req.params['asset']
+    if ( g_session_manager.guard(asset,req) ) {             // asset exits, permission granted, etc.
+        let transtionObj = g_session_manager.process_asset(asset,body)  // not checking sesion, key the asset and use any search refinement in the body.
+        if ( transtionObj.secondary_action ) {                          // return a transition object to go to the client. 
+            let asset_obj = g_dynamics.fetch(asset);                     // get the asset for later
+            let tObjCached = { 'tobj' : transtionObj, 'asset' : asset_obj } 
+            add_local_cache_transition(g_secondary_mime_actions,transtionObj.token,tObjCached)
+            return(res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));    // transition object has token
+        } else {
+            let asset_obj = g_dynamics.fetch(asset);     // no checks being done, just send the asset. No token field included
+            res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
+            return(res.end(asset_obj.string));
+        }
+    }
+    res.status(200).send(JSON.stringify({ 'type' : 'mime', 'OK' : 'false', 'reason' : 'unavailable' }));
+});
+
 // KEYED MIME_TYPES  - TRANSITION ACCEPTED  -- the body should send back the token it got with the asset.
-g_app.post('/keyed_mime/secondary',(req,res) => {
+g_app.post('/guarded/secondary',(req,res) => {
     let body = req.body
     if ( body.token !== undefined ) {
         let cached_transition = fetch_local_cache_transition(g_secondary_mime_actions,body.token)
@@ -108,7 +140,7 @@ g_app.post('/transition/:transition', function(req, res){           // the trans
                 let [send_elements, store_elements] = g_dynamics.fetch_elements(transition,transtionObj);      // elements is purposely vague and may be application sepecific
                 let tObjCached = { 'tobj' : transtionObj, 'elements' : store_elements, 'transition' : transition }
                 add_local_cache_transition(g_finalize_transitions,transtionObj.token,tObjCached)
-                return(res.status(200).send(JSON.stringify({ 'type' : 'transition', 'OK' : 'true', 'data' : transtionObj, 'elements' : send_elements })));
+                return(res.status(200).send(JSON.stringify({ 'type' : 'transition', 'OK' : 'true', 'transition' : transtionObj, 'elements' : send_elements })));
             } else {
                 body.token = transtionObj.token
                 let finalization_state = g_session_manager.finalize_transition(transition,body,{},req)      // FINALIZE (not a final state)
@@ -156,29 +188,22 @@ g_app.post(['/users/login','/users/logout','/users/register','/users/forgot'],(r
     let body = req.body
     let user_op = body['action']
     if ( g_validator.valid(body,g_validator.field_set[user_op]) ) {        // every post that comes through will have validation from configuration
-        let transtionObj = g_session_manager.process_user(user_op,body,req)         // most paths require secondation action (perhaps logout doesn't) (Captch as model)
-        if ( transtionObj.secondary_action ) {
+        let transtionObj = g_session_manager.process_user(user_op,body,req)       // most paths require secondation action (perhaps logout doesn't) (Captch as model)
+        if ( transtionObj.secondary_action || transtionObj.foreign_authorizer_endpoint ) {
             let tObjCached = { 'tobj' : transtionObj, 'token' : transtionObj.session_token, 'action' : user_op }
             add_local_cache_transition(g_secondary_user_actions,transtionObj.token,tObjCached)
-            return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
-        } else if ( transtionObj.defer_to_middleware ) {
-            g_session_manager.set_strategy(body.strategy)
-            g_session_manager.external_authorizer(req, res, next, (err, user, info) => {
-                if ( err || !user ) { 
-                    let message = err.message ? err.message : "bad form"
-                    res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : message }));
-                } else {
-                    transtionObj.user_info = g_session_manager.extract_exposable_user_info(user,info)
-                    let tObjCached = { 'tobj' : transtionObj, 'token' : transtionObj.session_token, 'action' : user_op }
-                    add_local_cache_transition(g_secondary_user_actions,transtionObj.token,tObjCached)
-                    return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
-                }
-            })
+            if ( !(transtionObj.foreign_authorizer_endpoint) ) {
+                return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
+            } else {
+                transtionObj.foreign_authorizer_endpoint += '/' + transtionObj.token  // token of auth process
+                return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj,
+                                                                     'windowize' : transtionObj.foreign_authorizer_endpoint })));
+            }
         } else {
             return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
         }
     } else {
-        res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : 'bad form' }));
+        return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : 'bad form' })));
     }   
 })
 
@@ -203,6 +228,31 @@ g_app.post('/users/secondary/:action',(req,res) => {
     }
     res.status(200).send(JSON.stringify( { 'type' : 'secondary/action', 'OK' : 'false', 'reason' : 'missing data' }));
 })
+
+
+g_app.post('/users/foreign_login',(req,foreign_res) => {  // or use the websockets publication of state....
+    let body = req.body
+    let OK = req.params['success']
+    if ( OK ) {                                   // the token must be present
+        let cached_transition = fetch_local_cache_transition(g_secondary_user_actions,body.token)
+        if ( cached_transition !== undefined ) {      // the action must match (artifac of use an array of paths)
+            // this is the asset needed by the client to turn on personlization and key access (aside from sessions and cookies)
+            let session_token = cached_transition.session_token
+            if ( g_session_manager.match(body,cached_transition)  ) {        // check the tokens and any other application specific information required
+                let transtionObj = cached_transition.tobj
+                let res = cached_transition.waiting_response
+                g_session_manager.initialize_session_state('user',session_token,transtionObj,res)
+                res.status(200).end("SUCCESS")  // message back to local auth service
+                send_ws_outofband(body.token,{ 'type' : transtionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token })
+                return;
+            }
+        }
+    }
+    res.status(514).end("FAILED LOGIN")
+    send_ws_outofband({ 'type' : 'secondary/action', 'OK' : 'false', 'reason' : 'missing data', 'action' : 'login', 'path' : 'user' })
+})
+
+
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 }       // LOGIN APPS OPTION (END)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
@@ -219,19 +269,61 @@ g_app.listen(conf_obj.port);
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
-global.clonify = (obj) => {
-    if ( typeof obj == "object" ) {
-        return(JSON.parse(JSON.stringify(obj)))
+
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+if ( conf_obj.ws_port ) {   // WEB SCOCKETS OPTION (START)
+    // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+    
+
+let server = http.createServer(g_app);
+server.listen(conf_obj.ws_port);
+
+var g_going_ws_session = {}
+
+var g_auth_wss = new WebSocketServer({server: server});
+g_auth_wss.on("connection", function (ws) {
+    //
+    var timestamp = new Date().getTime();
+
+    ws.send(JSON.stringify({ 'msgType': 'onOpenConnection', 'msg': { 'connectionId': timestamp }  }));
+
+    ws.on("message", function (data, flags) {
+        let clientIdenifier = JSON.parse(data.toString());
+        g_going_ws_session[clientIdenifier.id] = ws    // associate the client with the DB
+
+    });
+
+    ws.on("close", function () {
+        let token = null
+        for ( let tk in g_going_ws_session ) {
+            if ( g_going_ws_session[tk] === ws ) {
+                token = tk
+                break
+            }
+        }
+        if ( token ) {
+            delete g_going_ws_session[token]
+        }
+    });
+
+});
+
+
+function send_ws_outofband(token_key,data) {
+    if ( g_auth_wss ) {
+        let ws = g_going_ws_session[token_key]
+        if ( ws ) {
+            g_auth_ws.send(data);
+        }
     }
-    return(obj)
 }
 
-global.do_hash = (text) => {
-    const hash = crypto.createHash('sha256');
-    hash.update(text);
-    let ehash = hash.digest('hex');
-    return(ehash)
-}
+
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+}       // WEB SCOCKETS OPTION (END)
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+
+
 
 function fetch_local_cache_transition(cache_map,token) {
     if ( cache_map ) {
@@ -254,6 +346,23 @@ function add_local_cache_transition(cache_map,token,tobject) {
 
 
 function load_parameters() {
+    //
+    global.clonify = (obj) => {
+        return(clone(obj))
+        /*
+        if ( typeof obj == "object" ) {
+            return(JSON.parse(JSON.stringify(obj)))
+        }
+        return(obj)
+        */
+    }
+
+    global.do_hash = (text) => {
+        const hash = crypto.createHash('sha256');
+        hash.update(text);
+        let ehash = hash.digest('hex');
+        return(ehash)
+    }
 
     let config = "./user-service.conf"
     if ( process.argv[2] !== undefined ) {

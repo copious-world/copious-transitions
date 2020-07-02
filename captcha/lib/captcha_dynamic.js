@@ -1,13 +1,13 @@
-//const GeneralStatic = require('lib/general_dynamic')
+const GeneralDynamic = require.main.require('./lib/general_dynamic')
 
 const svgCaptcha = require('svg-captcha');
 
 const myStorageClass = null
 
-class CaptchaDynamic {
+class CaptchaDynamic extends GeneralDynamic {
     //
     constructor() {
-        //super(myStorageClass)
+        super(myStorageClass)
         this.db = null
     }
 

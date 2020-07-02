@@ -1,6 +1,7 @@
 const { GeneralAuth, SessionManager } = require('lib/general_auth')
 //
 const expressSession = require('express-session');
+const cookieParser = require('cookie-parser');
 
 class SearcherSessionManager extends SessionManager {
 

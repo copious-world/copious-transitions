@@ -1,5 +1,5 @@
 
-const GeneralValidator = require('lib/general_validator')
+const GeneralValidator = require.main.require('./lib/general_validator')
 
 
 class CaptchaValidator extends GeneralValidator {

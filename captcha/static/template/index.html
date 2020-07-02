@@ -20,7 +20,6 @@
 
 /**
  * Extra rules that Pure adds on top of Normalize.css
- 
 
 html {
 
@@ -384,7 +383,7 @@ html {
 			border-bottom: solid 3px rgba(252,252,255,0.7);
 			min-height: 90px
 			padding: 20px
-			background: -webkit-linear-gradient(to left, rgba(242, 242, 210, 0.3), white));
+			background: -webkit-linear-gradient(to left, rgba(242, 242, 210, 0.3), white);
 			background: linear-gradient(to left, rgba(242, 242, 210, 0.3), white );
 			
 		}
@@ -820,7 +819,6 @@ html {
 	</div>
 </div>
 
-
 <div id="register" class="solid_able" style="z-index:116" >
 	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closesolid('register')">x</span></div>
 	<div class="fade_able_content" >
@@ -829,7 +827,6 @@ html {
 		</div>
 	</div>
 </div>
-
 
 <div id="login" class="solid_able" style="z-index:117" >
 	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closesolid('login')">x</span></div>
@@ -873,34 +870,33 @@ html {
 		whereScipt.appendChild(scriptEl);
 	}
 
+
+	// streamer-scratchpad  -- in the stream app was using this.
 	// //
 	async function fetchEndPoint(endpoint,port) {
-		if ( document.querySelector('#streamer-scratchpad') ) {
-			let myRequest = new Request(`http://${g_siteURL}${port}/${endpoint}`);
+		port = port.length ? ':' + port : port
+		let myRequest = new Request(`${location.protocol}//${g_siteURL}${port}/${endpoint}`);
+		try {
+			const body = await fetch(myRequest, {
+										method: 'GET', // *GET, POST, PUT, DELETE, etc.
+										mode: 'cors', // no-cors, *cors, same-origin
+										cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+										credentials: 'omit', // include, *same-origin, omit
+										redirect: 'follow', // manual, *follow, error
+										referrerPolicy: 'no-referrer', // no-referrer, *client
+									});
 			//
-			try {
-				const body = await fetch(myRequest, {
-											method: 'GET', // *GET, POST, PUT, DELETE, etc.
-											mode: 'cors', // no-cors, *cors, same-origin
-											cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-											credentials: 'omit', // include, *same-origin, omit
-											redirect: 'follow', // manual, *follow, error
-											referrerPolicy: 'no-referrer', // no-referrer, *client
-										});
-				//
-				let infoObj = await body.json();
-				return(infoObj)
-				//
-			} catch (e) {
-				console.log(e.message)
-				return(false)
-			}
+			let infoObj = await body.json();
+			return(infoObj)
+			//
+		} catch (e) {
+			console.log(e.message)
+			return(false)
 		}
-		return true
 	}
 
 	//
-	async function postData(url = '', data = {}, creds = 'omit') {
+	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true) {
 	  // Default options are marked with *
 	  const response = await fetch(url, {
 		method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -912,7 +908,7 @@ html {
 		},
 		redirect: 'follow', // manual, *follow, error
 		referrerPolicy: 'no-referrer', // no-referrer, *client
-		body: JSON.stringify(data) // body data type must match "Content-Type" header
+		body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
 	  });
 	  return await response.json(); // parses JSON response into native JavaScript objects
 	}
@@ -924,10 +920,14 @@ html {
         constructor(props) {
             this.errorDiv = props.errorDiv
             this.fileDiv = props.fileDiv
-            this.uploadEndpoint = props.uploadEndpoint
-            this.emailField = props.emailField
+			this.uploadEndpoint = props.uploadEndpoint
+			this.fileType = props.fileType ? props.fileType : '.mp3'
+			//
+			for ( let prop in props ) {
+				this[prop] = props[prop]
+			}
+			//
             this._msgTimeout = null
-            this.positiveCompletion = props.positiveCompletion
         }
         //
         errorMessage(emsg) {
@@ -957,25 +957,33 @@ html {
         }
 
         checkForm(event) {
-            let inspect_field = document.querySelector(this.emailField)
-            let errField = document.querySelector(this.errorDiv)
-            if ( !checkEmailField(inspect_field) ) {
-                inspect_field.style.borderColor="red"
-                errField.style.color = "red"
-                this.errorMessage("unrecognized mail format")
-                return(false)
-            }
-            inspect_field.style.borderColor="black"
-            //
-            inspect_field = document.querySelector(this.fileDiv)
-            if ( !this.checkFilesSelected('.mp3') ) {
-                inspect_field.style.borderColor="red"
-                errField.style.color = "red"
-                this.errorMessage("no file selected")
-                return(false)
-            }
-            inspect_field.style.borderColor="black"
-            errField.style.color = "darkgreen"
+			if ( this.emailField ) {
+				let inspect_field = document.querySelector(this.emailField)
+				let errField = document.querySelector(this.errorDiv)
+				if ( inspect_field && !checkEmailField(inspect_field) ) {
+					inspect_field.style.borderColor="red"
+					if (errField) errField.style.color = "red"
+					this.errorMessage("unrecognized mail format")
+					return(false)
+				}
+				if ( inspect_field ) inspect_field.style.borderColor="black"
+			}
+			//
+			if ( this.fileDiv ) {
+				let inspect_field = document.querySelector(this.fileDiv)
+				if ( !(inspect_field) || !(this.fileType) ) {
+					this.errorMessage("This page has not specified either a file container <div> or a file type in props [fileDiv,fileType]")
+					return(false)
+				}
+				if ( !this.checkFilesSelected(this.fileType) ) {
+					inspect_field.style.borderColor="red"
+					if (errField) errField.style.color = "red"
+					this.errorMessage("no file selected")
+					return(false)
+				}
+				if ( inspect_field ) inspect_field.style.borderColor="black"
+			}
+            if (errField) errField.style.color = "darkgreen"
             this.errorMessage("")
             return(true)
         }
@@ -983,21 +991,10 @@ html {
         async uploader() {
             if ( this.checkForm() ) {
                 try {
-					let files = document.querySelector(this.fileDiv)
-					let file = files.files[0]
-                    let data = new FormData()
-                    data.append('mp3file', file)
-                    let email = document.querySelector(this.emailField).value;
-                    data.append('email', email)
-                    //
-                    await fetch(this.uploadEndpoint, {
-                        method: 'POST',
-                        mode: 'cors', // no-cors, *cors, same-origin
-                        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-                        credentials: 'omit', // include, *same-origin, omit
-                        referrerPolicy: 'no-referrer', // no-referrer, *client
-                        body: data
-                    })
+					let data = new FormData()
+					this.app_prepData(data)
+					let json =  await postData(this.uploadEndpoint,data,'omit',false)
+					this.success_report(json)
                     this.errorMessage(this.positiveCompletion)
                     document.querySelector(this.errorDiv).style.color = "blue"
                     return true
@@ -1007,118 +1004,22 @@ html {
                     return false
                 }
             }
-        }
-    }
-
-
-	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
-	// CONTENT GENERATION
-	// ---- ---- ---- ---- ---- ----
-	function centerBoxText(tightpace) {
-		if ( !tightpace ) {
-			return `<div class="middleBanner">
-			<p style="text-align:center">{{middleBoxHook}}</p>
-			<blockquote style="text-align:center;padding-bottom:4px;">
-			<button id="contact-btn"	onmouseup="pinBox('#contact_box')" onmouseover="defadeBox('#contact_box')" onmouseleave="fade_apparition(this,event)" >contact</button>
-			<button id="topicBox_1-btn"	onmouseup="pinBox('#topicBox_1')" onmouseover="defadeBox('#topicBox_1')" onmouseleave="fade_apparition(this,event)" >{{topicBox_1.name}}</button>
-			<button id="about-btn"		onmouseup="pinBox('#about_box')" onmouseover="defadeBox('#about_box')" onmouseleave="fade_apparition(this,event)" >about</button>
-			</blockquote>
-			</div>`;
-		} else {
-			return `<div class="middleBanner">
-			<p style="text-align:center">{{middleBoxHook}}</p>
-			<blockquote style="text-align:center;padding-bottom:4px;">
-			<button id="contact-btn"	onmouseup="pinBox('#contact_box')" onmouseover="defadeBox('#contact_box')" onmouseleave="fade_apparition(this,event)" >contact</button>
-			<button id="about-btn"		onmouseup="pinBox('#about_box')" onmouseover="defadeBox('#about_box')" onmouseleave="fade_apparition(this,event)" >about</button>
-			</blockquote>
-			</div>`;
 		}
-	}
-
-	function rightBoxText() {
-		return `<div class="extraBanner">
-		<p style="text-align:center">{{rightBoxHook}}</p>
-		<br>
-		<blockquote style="text-align:center;padding-bottom:4px">
-		<button id="topicBox_2-btn"	onmouseup="pinBox('#topicBox_2')" onmouseover="defadeBox('#topicBox_2')" onmouseleave="fade_apparition(this,event)" >{{topicBox_2.name}}</button>
-		<button id="topicBox_3-btn"	onmouseup="pinBox('#topicBox_3')" onmouseover="defadeBox('#topicBox_3')" onmouseleave="fade_apparition(this,event)" >{{topicBox_3.name}}</button>
-		</blockquote>
-		</div>`;
-	}
-
-	function logoutForDropdown() {
-		if ( g_LoggedIn ) {
-			return `
-		<div style='text-align:center' >
-			<button class='logout' onclick='logout()'>logout</button>
-		</div>
-		`
-		} else {
-			return ""
+		
+		app_prepData(data) {		// mp3 one file as default -- subclass and override
+			let files = document.querySelector(this.fileDiv)
+			let file = files.files[0]
+			data.append('mp3file', file)
+            let email = document.querySelector(this.emailField).value;
+            data.append('email', email)
 		}
-	}
 
-	// independent floating box..
-
-	function hide_thankyou_box(theBox) {
-		theBox.style.visibility = "hidden"
-		theBox.style.display = "none";
-	}
-
-	function show_thankyou_box() {
-		let theBox = document.querySelector("#thankyou_box")
-		if ( theBox ) {
-			theBox.style.visibility = "visible"
-			theBox.style.display = "block";
+		success_report(json){
+			if ( this.positiveCompletion ) this.errorMessage(this.positiveCompletion)
+			document.querySelector(this.errorDiv).style.color = "blue"
 		}
-	}
-
-	// ---- ---- ---- ---- ---- ----
-	function lowerFillerText() {
-		return `<div class="fillLower">
-			{{{decoratedLinks.content}}}
-		</div>`;
 	}
 	
-
-	function setupLogoutRestoration() {
-		let g_originalGreetAndMeet1 = greetAndMeetContainer1.innerHTML
-		let g_originalGreetAndMeet2 = greetAndMeetContainer2.innerHTML
-		g_loginStateViewHolders["gAndM1"] = {
-			'element' : greetAndMeetContainer1,
-			'unauthed' : g_originalGreetAndMeet1,
-			'authed' : `{{{yourProileLinks.content}}}`
-		}
-		g_loginStateViewHolders["gAndM2"] = {
-			'element' : greetAndMeetContainer2,
-			'unauthed' : g_originalGreetAndMeet2,
-			'authed' : `{{{yourDashboardLinks.content}}}`
-		}
-	}
-
-	function menuHandler(mHandle) {
-		if ( squashMenuContainer.style.visibility !== "visible" && (mHandle !== null) ) {
-			squashMenuContainer.style.visibility = "visible"
-			squashMenuContainer.style.top = "60px";
-			squashMenuContainer.style.left = (Math.floor(window.innerWidth/2) - 40) + "px";
-			squashMenuContainer.style.height = (window.innerHeight - 64) + "px";
-			squashMenuContainer.style.width = (Math.floor(window.innerWidth/2) + 34) + "px";
-			//
-			let lowerText = lowerFillerText();
-			let menuLower = `<div class="fitMenuLower">
-			${lowerText}
-			</div>`
-			squashMenuContainer.innerHTML = logoutForDropdown() + centerBoxText(false) + rightBoxText() + menuLower;
-			//
-		} else {
-			squashMenuContainer.style.visibility = "hidden"
-		}
-	}
-
-	function releaseMenu(mHandle) {
-		
-	}
-
 
 	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
 	// VALIDATION
@@ -1279,18 +1180,17 @@ html {
 		g_CurContainer = handlerDefsValidator
 		//
 		if ( g_CurContainer.checkFormValid() ) {
-			let port = g_CurContainer.auth_port
 			try {
 				// CAPTCH PROCESSING 
-				let captchaResult = await doCaptcha(port)   // the captcha has to be processed first.
+				let captchaResult = await doCaptcha('','{{auth_path}}')   // the captcha has to be processed first.
 				// CAPTCH RESULT 
 				if ( captchaResult === true ) {
-					if ( g_currenCaptchaUUID ) {
+					if ( g_currenCaptchaTOKEN ) {
 						let data = calcAppDataDB()		// calcAppDataDB
 						postData(g_CurContainer.service_url, data)
 						.then((resp) => {
 							if ( resp.OK ) {
-								g_currenCaptchaUUID = null;     // check for duplicates
+								g_currenCaptchaTOKEN = null;     // check for duplicates
                                 completionaAction();
 							} else {
                                 g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${resp.reason}`)
@@ -1311,6 +1211,116 @@ html {
 				console.log(e.message)
 			}
 		}
+	}
+
+
+
+	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
+	// CONTENT GENERATION
+	// ---- ---- ---- ---- ---- ----
+	function centerBoxText(tightpace) {
+		if ( !tightpace ) {
+			return `<div class="middleBanner">
+			<p style="text-align:center">{{middleBoxHook}}</p>
+			<blockquote style="text-align:center;padding-bottom:4px;">
+			<button id="contact-btn"	onmouseup="pinBox('#contact_box')" onmouseover="defadeBox('#contact_box')" onmouseleave="fade_apparition(this,event)" >contact</button>
+			<button id="topicBox_1-btn"	onmouseup="pinBox('#topicBox_1')" onmouseover="defadeBox('#topicBox_1')" onmouseleave="fade_apparition(this,event)" >{{topicBox_1.name}}</button>
+			<button id="about-btn"		onmouseup="pinBox('#about_box')" onmouseover="defadeBox('#about_box')" onmouseleave="fade_apparition(this,event)" >about</button>
+			</blockquote>
+			</div>`;
+		} else {
+			return `<div class="middleBanner">
+			<p style="text-align:center">{{middleBoxHook}}</p>
+			<blockquote style="text-align:center;padding-bottom:4px;">
+			<button id="contact-btn"	onmouseup="pinBox('#contact_box')" onmouseover="defadeBox('#contact_box')" onmouseleave="fade_apparition(this,event)" >contact</button>
+			<button id="about-btn"		onmouseup="pinBox('#about_box')" onmouseover="defadeBox('#about_box')" onmouseleave="fade_apparition(this,event)" >about</button>
+			</blockquote>
+			</div>`;
+		}
+	}
+
+	function rightBoxText() {
+		return `<div class="extraBanner">
+		<p style="text-align:center">{{rightBoxHook}}</p>
+		<br>
+		<blockquote style="text-align:center;padding-bottom:4px">
+		<button id="topicBox_2-btn"	onmouseup="pinBox('#topicBox_2')" onmouseover="defadeBox('#topicBox_2')" onmouseleave="fade_apparition(this,event)" >{{topicBox_2.name}}</button>
+		<button id="topicBox_3-btn"	onmouseup="pinBox('#topicBox_3')" onmouseover="defadeBox('#topicBox_3')" onmouseleave="fade_apparition(this,event)" >{{topicBox_3.name}}</button>
+		</blockquote>
+		</div>`;
+	}
+
+	function logoutForDropdown() {
+		if ( g_LoggedIn ) {
+			return `
+		<div style='text-align:center' >
+			<button class='logout' onclick='logout()'>logout</button>
+		</div>
+		`
+		} else {
+			return ""
+		}
+	}
+
+	// independent floating box..
+
+	function hide_thankyou_box(theBox) {
+		theBox.style.visibility = "hidden"
+		theBox.style.display = "none";
+	}
+
+	function show_thankyou_box() {
+		let theBox = document.querySelector("#thankyou_box")
+		if ( theBox ) {
+			theBox.style.visibility = "visible"
+			theBox.style.display = "block";
+		}
+	}
+
+	// ---- ---- ---- ---- ---- ----
+	function lowerFillerText() {
+		return `<div class="fillLower">
+			{{{decoratedLinks.content}}}
+		</div>`;
+	}
+	
+
+	function setupLogoutRestoration() {
+		let g_originalGreetAndMeet1 = greetAndMeetContainer1.innerHTML
+		let g_originalGreetAndMeet2 = greetAndMeetContainer2.innerHTML
+		g_loginStateViewHolders["gAndM1"] = {
+			'element' : greetAndMeetContainer1,
+			'unauthed' : g_originalGreetAndMeet1,
+			'authed' : `{{{yourProileLinks.content}}}`
+		}
+		g_loginStateViewHolders["gAndM2"] = {
+			'element' : greetAndMeetContainer2,
+			'unauthed' : g_originalGreetAndMeet2,
+			'authed' : `{{{yourDashboardLinks.content}}}`
+		}
+	}
+
+	function menuHandler(mHandle) {
+		if ( squashMenuContainer.style.visibility !== "visible" && (mHandle !== null) ) {
+			squashMenuContainer.style.visibility = "visible"
+			squashMenuContainer.style.top = "60px";
+			squashMenuContainer.style.left = (Math.floor(window.innerWidth/2) - 40) + "px";
+			squashMenuContainer.style.height = (window.innerHeight - 64) + "px";
+			squashMenuContainer.style.width = (Math.floor(window.innerWidth/2) + 34) + "px";
+			//
+			let lowerText = lowerFillerText();
+			let menuLower = `<div class="fitMenuLower">
+			${lowerText}
+			</div>`
+			squashMenuContainer.innerHTML = logoutForDropdown() + centerBoxText(false) + rightBoxText() + menuLower;
+			//
+		} else {
+			squashMenuContainer.style.visibility = "hidden"
+		}
+	}
+
+	function releaseMenu(mHandle) {
+		
 	}
 
 
@@ -1514,30 +1524,24 @@ html {
 
 	//  === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
 	// CAPTCHA
-	// -- -- -- -- -- -- -- -- -- -- -- -- -- 
+	// -- -- -- -- -- -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- -- -- -- -- -- --  -- -- -- -- -- 
 
-	var g_currenCaptchaUUID = null; 	// delivered by the authorization handler, which maps this interaction to a session.
+	var g_currenCaptchaTOKEN = null; 	// delivered by the authorization handler, which maps this interaction to a session.
 	var g_captaFinalResolution = null;  // will be a function for completing a captcha
-
-	function captchaIsOK(resp) {
-		if ( resp.OK === "true" ) {
-			return(true);
-		}
-		return(false)
-	}
 
 	function captchaCheck(callBack) {
 		//
 		let captchaGuessField = g_CurContainer.captch_input
 		if ( captchaGuessField ) {
 			let captchaVal = captchaGuessField.value;
-			if ( captchaVal && captchaVal.length && g_currenCaptchaUUID ) {
+			if ( captchaVal && captchaVal.length && g_currenCaptchaTOKEN ) {
 				//
 				let port = g_CurContainer.auth_port
+				port = port ? '' : ( port.length ? port + ':'  : '')
 				//
-				postData(`http://${g_siteURL}:${port}/captchaCheck`, { 'cval' : captchaVal, 'uuid' : g_currenCaptchaUUID })
+				postData(`${location.protocol}//${g_siteURL}:${port}/transition/secondary`, { 'captcha_val' : captchaVal, 'token' : g_currenCaptchaTOKEN })
 				.then((resp) => {
-							if ( captchaIsOK(resp) ) {
+							if ( resp.OK === "true" ) {
 					  				if ( g_captaFinalResolution !== null ) {
 										g_captaFinalResolution(1)
 					  				}
@@ -1569,61 +1573,33 @@ html {
 	}
 
 
-	async function doCaptcha(port) {
-		//
-		port = port.length ? ':' + port : port
+	async function doCaptcha(port,proxyPath) {
 		//
 		g_CurContainer.switchCaptchaDisplay(true)
 		//
 		try {
-			let myRequest = new Request(`http://${g_siteURL}${port}/captcha`);
-			const captchaGrphP = await fetch(myRequest, {
-										 method: 'GET', // *GET, POST, PUT, DELETE, etc.
-										 mode: 'cors', // no-cors, *cors, same-origin
-										 cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-										 credentials: 'omit', // include, *same-origin, omit
-										 redirect: 'follow', // manual, *follow, error
-										 referrerPolicy: 'no-referrer', // no-referrer, *client
-									 });
-			//
-			let captchaObject = await captchaGrphP.json();
-			let svgText = decodeURIComponent(captchaObject.text)
-			let captchaPlacement = g_CurContainer.where_captcha
-			if ( captchaPlacement ) {
-				captchaPlacement.innerHTML = svgText
-				g_currenCaptchaUUID = captchaObject.uuid
+			port = port ? '' : ( port.length ? port + ':'  : '')
+				//
+
+			let endpoint = `${location.protocol}//${g_siteURL}${port}/${proxyPath}/transition/captcha`
+			let captchaObject = await postData(endpoint)
+			if ( (captchaObject.type == "transition") && (captchaObject.OK == true) )  {
+				let svgText = decodeURIComponent(captchaObject.elements.captcha)
+				let captchaPlacement = g_CurContainer.where_captcha
+				if ( captchaPlacement ) {
+					captchaPlacement.innerHTML = svgText
+					g_currenCaptchaTOKEN = captchaObject.transition.token
+				}
+				//
+				return await captchaPromises();  // wait for user interaction to finish else 
+			} else {
+				g_CurContainer.formErrorMessage("captcha service not available")
 			}
-			//
-			return await captchaPromises();  // wait for user interaction to finish
 		} catch (e) {
 			console.log(e.message)  // page level error may be needed
 		}
 	}
 
-	function logout() {
-		// send synch message
-		// then
-		for ( let key in g_loginStateViewHolders ) {
-			let stateHolder = g_loginStateViewHolders[key]
-			let element = stateHolder.element
-			element.innerHTML = stateHolder.unauthed
-			element.style.visibility = true
-			element.style.display = "block"
-		}
-		//
-		g_LoggedIn = false
-		resize()
-	}
-
-	function loginView() {
-		g_LoggedIn = true
-		for ( let key in g_loginStateViewHolders ) {
-			let stateHolder = g_loginStateViewHolders[key]
-			let element = stateHolder.element
-			element.innerHTML = stateHolder.authed
-		}
-		resize()
-	}
 
 	//  === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
 	// APPLICATIONS
@@ -1634,7 +1610,7 @@ html {
 	function initContact() {
 		g_contact_Handling = new ValidationContainer({
 			"auth_port" : g_contact_port,
-            "service_url" : `http://${g_siteURL}:${g_contact_port}/contact`,
+            "service_url" : `http://${g_siteURL}/captcha/contact`,
             "errors_here" : document.getElementById('contact-errors_here'),
             "failure_msg_prefix" : "Cannot Process Captcha",
 			"fields" : {
@@ -1667,7 +1643,7 @@ html {
 			"website" : getVal(c_website),
 			"email" : getVal(c_email),
 			"comment" : getVal(c_comment),
-			'uuid' : g_currenCaptchaUUID
+			'token' : g_currenCaptchaTOKEN
 		}
 		//
 		return(data)
@@ -1684,9 +1660,6 @@ html {
 									contact_completionaAction )
 	}
 
-	g_finalizers.push(initContact)
-
-
 	function onkey_checkContactError(srcField) {
 	   if ( g_contact_Handling.checkFormValid() ) {
 		   let focusFld = '#' + srcField;
@@ -1695,6 +1668,8 @@ html {
 		   g_contact_Handling.hideFormErrorMessage()
 	   }
 	}
+
+	g_finalizers.push(initContact)
 
 
 	// --------- LOGIN // REGISTER
@@ -1723,14 +1698,42 @@ html {
 			g_CurContainer = g_register_Handling
 			g_ComponentErrorsActivated = true
 		}
+		register_opening_view()
 	}
 	
 
+	//  === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
+
+	function logout() {
+		// send synch message
+		// then
+		for ( let key in g_loginStateViewHolders ) {
+			let stateHolder = g_loginStateViewHolders[key]
+			let element = stateHolder.element
+			element.innerHTML = stateHolder.unauthed
+			element.style.visibility = true
+			element.style.display = "block"
+		}
+		//
+		g_LoggedIn = false
+		resize()
+	}
+
+	function loginView() {
+		g_LoggedIn = true
+		for ( let key in g_loginStateViewHolders ) {
+			let stateHolder = g_loginStateViewHolders[key]
+			let element = stateHolder.element
+			element.innerHTML = stateHolder.authed
+		}
+		resize()
+	}
+
+	// // // ----------------- // // // ----------------- // // // -----------------
 	// // // ----------------- // // // ----------------- // // // -----------------
 
 	// initial validation application is contact
 	g_CurContainer = g_contact_Handling
-
 
 	// EXTRA STUFF for some gracefull clicing
 	var the_thankyou_box = document.getElementById("thankyou_box");

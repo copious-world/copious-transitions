@@ -2,3 +2,6 @@ local/*
 *.txt
 icon/*
 dump.rdb
+node_modules
+node_modules/*
+backend/*

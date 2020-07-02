@@ -1,0 +1,329 @@
+    <style>
+        .login-menu-horizontal {
+            width: inherit;
+            white-space: nowrap;
+        }
+
+        .login-strat-choice {
+            font-weight: bold;
+            cursor: pointer;
+            font-size:medium;
+        }
+
+        .login-strat-choice:hover {
+            color:teal;
+            background-color: wheat;
+        }
+        .login-labeler {
+            font-weight: bold;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+        }
+
+        .button1 {border-radius: 2px;}
+        .button2 {border-radius: 4px;}
+        .button3 {border-radius: 8px;}
+        .button4 {border-radius: 12px;}
+        .button5 {border-radius: 90%;}
+</style>
+<div id="myLoginModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close">&times;</span>
+            <h3><i>Captcha</i> : I am not a robot</h3>
+        </div>
+        <div class="modal-body">
+            <div id="captcha-goes-here-login" style="border:1px solid lime;margin:2px;" >
+                ------
+            </div>
+            <div id="captcha-entry-login" >
+                Type in the text that you see above:
+                <input type="text" id="captcha-field-login" class="svgFormTextField" style="font-size:14px;margin-top:1px;margin-left:2px;border:1px solid black;"/>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="captchaCheck('login')">submit</button>
+        </div>
+    </div>
+</div>
+
+<div id="myLoginForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
+    <div id="login-errors_here" >no error</div>
+
+    <div id="the-login-form-secure" style="color:darkorange;background-color: palegreen;visibility:hidden;display:none;">
+        switching to a secure version of this page
+    </div>
+     
+    <div id='login-strategy' style="border:solid 1px darkmagenta;margin: 3px;">
+        <div class="form_el" style="padding: 0.5em;border:solid 1px darkmagenta;font-weight: bold;overflow-x: scroll;" >
+            <span class="form_el login-menu-horizontal" > Login Methods: 
+            <span class="form_el login-menu-horizontal">
+                <button class="login-strat-choice button5" onclick="login_strategy('local');show_password_container();hide_openID_container()" >
+                    <svg version="1.0" width="30" height="30" viewBox="0 0 250 250" preserveAspectRatio="xMidYMid meet" id="login-local" >
+                        <title>Local</title>
+                        <path fill="navy" id="path6" d="m 30.107062,7.4672872 c 4.67725,2.6985208 8.37554,8.6930958 12.94402,20.5087688 7.17904,19.072767 24.58277,67.337762 29.69511,82.950634 l 5.32989,15.9502 -13.70543,-0.25058 -10.468161,2.57106 -8.132079,2.99946 -4.78602,5.90784 0.76141,-6.91979 c 0.65264,-6.50536 0.32632,-7.85462 -5.43866,-25.31791 C 27.822822,80.549048 20.535012,60.127019 12.703332,40.215781 5.4155222,21.730904 4.4365622,15.57249 7.8085322,10.503124 11.941922,4.43145 22.384152,2.9954505 30.107062,7.4672872 Z M 238.08162,22.742849 c 3.69828,2.110631 6.52639,6.669206 6.52639,10.379672 0,1.686578 -2.93688,12.740881 -6.63517,24.469814 -19.68797,64.138095 -30.34775,107.931245 -30.34775,124.806655 0,4.6453 -1.08775,7.68113 -18.60024,50.80931 l -4.35093,10.79409 -67.76577,0 -67.765758,0 -14.35808,-35.35063 -14.35808,-35.3603 17.62128,-20.75934 17.5125,-20.75935 29.36879,0 c 32.631998,0 5.455822,5.28877 29.390108,7.16797 -3.81133,6.98972 7.16732,11.29772 7.16732,11.29772 l 2.51778,3.43975 c -1.74038,3.20932 -4.92039,6.69891 -9.3801,9.5709 l -3.2632,2.11064 -9.78959,-2.62144 c -8.593088,-2.27446 -11.312428,-2.61179 -22.080978,-2.61179 -13.0528,-0.0964 -14.35808,0.2506 -14.35808,4.29837 0,2.70817 3.15443,3.63336 12.72648,3.63336 21.42834,0 38.723308,8.01847 47.533928,22.10863 3.58951,5.73436 7.17904,15.86345 7.17904,20.50876 0,2.86236 4.45971,5.05973 7.50536,3.79721 2.82811,-1.09868 2.93687,-4.64531 0.65264,-14.01306 -2.28424,-9.36772 -7.83169,-17.88734 -15.77214,-24.29632 -5.32988,-4.30799 -6.30884,-5.49342 -5.11233,-6.24517 1.19649,-0.76135 2.06669,-0.51077 4.0246,1.08906 6.30885,5.23321 19.03534,7.00654 27.73719,3.88395 5.87377,-2.11064 11.85631,-7.17036 15.11951,-12.74088 1.52281,-2.53468 5.98253,-16.03694 9.89835,-29.9536 10.98611,-38.396111 22.08098,-72.320389 30.13021,-92.665317 5.54744,-14.176879 12.40016,-19.737762 23.16871,-18.812555 2.93688,0.250577 6.63517,1.175785 8.15801,2.023891 z m -126.72091,50.03831 c 2.28424,0.510792 5.76499,2.11063 7.72291,3.633367 5.87375,4.558576 6.20008,7.257098 3.80705,29.278954 -1.1965,10.71701 -1.94404,26.93071 -2.27035,27.1042 -0.32632,0.25057 -8.38942,-6.50868 -17.41761,-6.25812 l -16.533538,0.42407 0.65264,-6.66922 c 0.32632,-3.62372 1.19651,-13.83956 1.84915,-22.619385 0.65264,-9.19425 1.74037,-17.125977 2.50179,-18.561977 3.2632,-5.907835 10.550998,-8.269041 19.687958,-6.331889 z m 48.5129,9.454465 c 2.06668,1.011946 4.56848,3.209314 5.54744,4.89589 1.84914,2.871998 1.84914,4.22126 -0.8702,33.750816 -1.52282,17.04886 -3.37196,32.575 -4.24216,35.02295 -3.15442,8.51961 -9.13695,13.07819 -18.16513,13.67573 -4.78601,0.25056 -6.41762,0 -9.46327,-1.69622 -5.87376,-3.12256 -6.41764,-4.29838 -2.93689,-7.42094 6.20008,-5.744 4.00097,-11.09854 1.92352,-15.89687 0,0 -0.33391,-1.79223 -2.65798,-4.24016 l -2.01123,-1.92782 3.94219,-26.79768 c 1.95792,-22.869967 2.17547,-23.795174 5.11237,-26.667174 4.89478,-4.89589 16.96861,-6.24515 23.82134,-2.698522 z" />
+                    </svg>
+                </button>
+                <button class="login-strat-choice button5" onclick="login_strategy('GitHub');hide_password_container();hide_openID_container()" ><svg role="img" width="30" height="30"  preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></button>
+                <button class="login-strat-choice button5" onclick="login_strategy('Google');hide_password_container();hide_openID_container()" ><svg role="img" width="30" height="30"  preserveAspectRatio="xMidYMid" viewBox="0 -150 500 500" xmlns="http://www.w3.org/2000/svg"><title>Google</title><path d="M496.052 102.672l14.204 9.469c-4.61 6.79-15.636 18.44-34.699 18.44-23.672 0-41.301-18.315-41.301-41.614 0-24.793 17.816-41.613 39.308-41.613 21.616 0 32.206 17.193 35.633 26.475l1.869 4.735-55.692 23.049c4.236 8.348 10.84 12.584 20.183 12.584 9.345 0 15.823-4.61 20.495-11.525zM452.384 87.66l37.19-15.45c-2.056-5.17-8.16-8.845-15.45-8.845-9.281 0-22.176 8.223-21.74 24.295z" fill="#FF302F"/><path d="M407.407 4.931h17.94v121.85h-17.94V4.93z" fill="#20B15A"/><path d="M379.125 50.593h17.318V124.6c0 30.711-18.128 43.357-39.558 43.357-20.183 0-32.33-13.58-36.878-24.606l15.885-6.604c2.865 6.79 9.78 14.827 20.993 14.827 13.767 0 22.24-8.535 22.24-24.482v-5.98h-.623c-4.112 4.983-11.961 9.468-21.928 9.468-20.807 0-39.87-18.128-39.87-41.488 0-23.486 19.063-41.8 39.87-41.8 9.905 0 17.816 4.423 21.928 9.282h.623v-5.98zm1.245 38.499c0-14.702-9.78-25.417-22.239-25.417-12.584 0-23.174 10.715-23.174 25.417 0 14.514 10.59 25.042 23.174 25.042 12.46.063 22.24-10.528 22.24-25.042z" fill="#3686F7"/><path d="M218.216 88.78c0 23.984-18.688 41.613-41.613 41.613-22.924 0-41.613-17.691-41.613-41.613 0-24.108 18.689-41.675 41.613-41.675 22.925 0 41.613 17.567 41.613 41.675zm-18.19 0c0-14.95-10.84-25.23-23.423-25.23-12.583 0-23.423 10.28-23.423 25.23 0 14.826 10.84 25.23 23.423 25.23 12.584 0 23.423-10.404 23.423-25.23z" fill="#FF302F"/><path d="M309.105 88.967c0 23.984-18.689 41.613-41.613 41.613-22.925 0-41.613-17.63-41.613-41.613 0-24.108 18.688-41.613 41.613-41.613 22.924 0 41.613 17.443 41.613 41.613zm-18.253 0c0-14.95-10.839-25.23-23.423-25.23-12.583 0-23.423 10.28-23.423 25.23 0 14.826 10.84 25.23 23.423 25.23 12.646 0 23.423-10.466 23.423-25.23z" fill="#FFBA40"/><path d="M66.59 112.328c-26.102 0-46.534-21.056-46.534-47.158 0-26.101 20.432-47.157 46.534-47.157 14.079 0 24.357 5.544 31.957 12.646l12.522-12.521C100.479 7.984 86.338.258 66.59.258 30.833.259.744 29.414.744 65.17c0 35.758 30.089 64.912 65.846 64.912 19.312 0 33.889-6.354 45.289-18.19 11.711-11.712 15.324-28.158 15.324-41.489 0-4.174-.498-8.472-1.059-11.649H66.59v17.318h42.423c-1.246 10.84-4.672 18.253-9.718 23.298-6.105 6.168-15.76 12.958-32.705 12.958z" fill="#3686F7"/></svg></button>
+                <button class="login-strat-choice button5" onclick="login_strategy('Twitter');hide_password_container();hide_openID_container()" ><svg role="img" width="30" height="30"  preserveAspectRatio="xMidYMid" viewBox="-50 -100 400 400" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M256 25.45c-9.42 4.177-19.542 7-30.166 8.27 10.845-6.5 19.172-16.793 23.093-29.057a105.183 105.183 0 0 1-33.351 12.745C205.995 7.201 192.346.822 177.239.822c-29.006 0-52.523 23.516-52.523 52.52 0 4.117.465 8.125 1.36 11.97-43.65-2.191-82.35-23.1-108.255-54.876-4.52 7.757-7.11 16.78-7.11 26.404 0 18.222 9.273 34.297 23.365 43.716a52.312 52.312 0 0 1-23.79-6.57c-.003.22-.003.44-.003.661 0 25.447 18.104 46.675 42.13 51.5a52.592 52.592 0 0 1-23.718.9c6.683 20.866 26.08 36.05 49.062 36.475-17.975 14.086-40.622 22.483-65.228 22.483-4.24 0-8.42-.249-12.529-.734 23.243 14.902 50.85 23.597 80.51 23.597 96.607 0 149.434-80.031 149.434-149.435 0-2.278-.05-4.543-.152-6.795A106.748 106.748 0 0 0 256 25.45" fill="#55acee"/></svg></button> 
+                <button class="login-strat-choice button5" onclick="login_strategy('OpenID');hide_password_container();show_openID_container()" ><svg role="img" width="30" height="30"  preserveAspectRatio="xMidYMid" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg"><title>OpenID</title><polygon points="471.2,952.3 471.2,136.3 599.8,47.7 599.8,881.4 "/><path d="M435.8,313.7v110.9c0,0-254.2,20-270.5,212.9c0,0-35.6,168.5,270.5,221.7v93.1c0,0-430.2-44.3-425.7-319.3C10,633,5.6,353.7,435.8,313.7z"/><path d="M630.8,313.7v103.5c0,0,82.1-1.1,150.8,56.1l-75.3,30.9L990,575.4V353.6l-96.8,54.8C893.2,408.4,810.5,321.6,630.8,313.7z"/></svg></button> 
+            </span></span>
+        </div>
+        <input type="hidden" id="login-strategy-value" name="strategy" value="local">
+        <div class="form_el" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+            <label for='login-email' class='login-labeler '>Email:</span></label>
+            <input type='email' name='login-email' id='login-email' value=''class='field_el email'  required onkeyup="onkey_checkLoginError('login-email')"  />
+        </div>
+        
+        <div id="password-container" class="form_el" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+            <label for='login-password' class='login-labeler'>Password:</span></label>
+            <input type='password' name='login-password' id='login-password' value='' class='field_el password' onkeyup="onkey_checkLoginError('login-password')"  />
+        </div>
+
+        <div id="openID-container" class="form_el" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+            <label for='login-openID' class='login-labeler'>OpenID:</span></label>
+            <input type='text' name='login-openID' id='login-openID' value='' class='field_el'  />
+        </div>
+        
+    </div>
+
+    <p class='login-submit'>
+    <button onclick="processLogin()" >Submit</button>
+    </p>
+
+    <p class='login-submit'>
+    <button onclick="processForgotPassword()" >Forgot Password</button>
+    </p>
+
+    <iframe id="loginframe" name="loginframe" style="visibility:hidden;" src="about:blank" style="width:0;height:0;border:0px solid #fff;" >
+	</iframe>
+    <div style="height:0px;width:0px;display: none;visibility: hidden;">
+        <form id="the-login-form" method="POST" action="https://www.copious.world/webcit/ajax_login_username_password" target="loginframe" onsubmit="login_viewchanges()">
+                <input type='text' name='name' id='login-name' value='' class='field_el'  required onkeyup="onkey_checkLoginError('login-name')"  />
+                <input type='password' name='pass' id='login-password' value='' class='field_el password' onkeyup="onkey_checkLoginError('login-password')"  />
+        </form>
+    </div>
+</div>
+
+<noscript><div id="noscript_warning">
+	WARNING: You have JavaScript disabled in your web browser.  Many functions of this system will not work properly.
+</div></noscript>
+
+<script>
+
+	// Get the modal
+    var g_login_port = "2101"
+
+    var loginStrategyField = document.getElementById("login-strategy-value")
+    function login_strategy(strategy) {
+        loginStrategyField.value = strategy
+    }
+    var g_passwordContainer = document.getElementById("password-container")
+    var g_OpenIDContainer = document.getElementById("openID-container")
+    function show_password_container() {
+        if ( g_passwordContainer ) {
+            g_passwordContainer.style.visibility = "visible"
+            g_passwordContainer.style.display = "block"
+        }
+    }
+    function hide_password_container() {
+        if ( g_passwordContainer ) {
+            g_passwordContainer.style.visibility = "hidden"
+            g_passwordContainer.style.display = "none"
+        }
+    }
+    function show_openID_container() {
+        if ( g_OpenIDContainer ) {
+            g_OpenIDContainer.style.visibility = "visible"
+            g_OpenIDContainer.style.display = "block"
+        }
+    }
+    function hide_openID_container() {
+        if ( g_OpenIDContainer ) {
+            g_OpenIDContainer.style.visibility = "hidden"
+            g_OpenIDContainer.style.display = "none"
+        }
+    }
+    //
+
+
+    function loginFailed() {
+        // display reason, etc.
+    }
+    
+    //
+    function login_opening_view() {
+        login_strategy('local');show_password_container();hide_openID_container()
+        if (location.protocol !== 'https:') {           // start from a secure page
+            let lform = document.getElementById('the-login-form')
+            lform.style.visibility = "hidden"
+            lform.style.display = "none"
+            let lformMSG = document.getElementById('the-login-form-secure')
+            lformMSG.style.visibility = "visible"
+            lformMSG.style.display = "block"
+            setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
+        }
+    }
+
+    function app_tandem_login() {       // get cookie for webcit -- specific to this application
+        let loginForm = document.getElementById('the-login-form')
+	    loginForm.submit()
+    }
+
+    function login_password_rules(fld_name,ptext) {
+        return(true)
+    }
+
+    function presentLogout(accountData) {
+        loginView()
+    }
+
+    var g_foreign_login_window = null
+    var g_foreign_login_socket = null
+    function secondaryVerify(resp) {
+        // e.g auto login to another service this uses simultaneously
+        if (  resp && resp.OK ) {
+            if ( resp.windowize ) {
+                //
+                try {
+                    g_foreign_login_socket = new WebSocket(`wss://${g_siteURL}/auth_websocket/foreign_auth`, "protocolOne");
+                    g_foreign_login_socket.onmessage = (event) => {     // handle the finalization through the websocket
+                        try {
+                            let login_instructions = JSON.parse(event.data)
+                            if ( login_instructions.OK ) {
+                                finalize_foreign_Login(login_instructions)
+                            }
+                        } catch (e) {
+                        }
+                    }
+                    //
+                    // fetch this URL
+                    g_foreign_login_window = window.open(resp.windowize, '_blank');  // resp.windowize = location  + 'start/' + <strategy> + '/' + <email> + '/' + token
+                    //g_foreign_login_window.location;
+                    g_foreign_login_window.focus()
+                    return(false)       // prevent display of logout, etc until finalized
+                } catch(e) {
+                    loginFailed()
+                    return(false)       // prevent display of logout, etc until finalized
+                }
+            } else if ( resp.amelioritive_action ) {
+                try {
+                    eval(resp.amelioritive_action)
+                } catch (e) {
+                    loginFailed()
+                }
+                return(false)
+            } else {
+                // now do an app based login for tandem service, etc.
+                app_tandem_login()
+                return(true)  // accept less defind behavior as a pass (this is basically local login)
+            }
+        } else {
+            loginFailed()
+            return(false)
+        }
+    }
+
+
+    function finalize_foreign_Login(cmds) {
+        if ( g_foreign_login_window ) {
+            g_foreign_login_window.close()
+            presentLogout(resp)
+            window.focus()
+        }
+    }
+
+    // LOGIN APPLICATION
+    var g_login_Handling = null
+    
+    function initLogin() {
+        g_login_Handling = new ValidationContainer({
+            "service_url" : `/captcha/`,
+            "errors_here" : document.getElementById('login-errors_here'),
+            "failure_msg_prefix" : "Login Failed",
+            "password_rules" : login_password_rules,
+			"fields" : {
+				"email" : document.getElementById('login-email'),
+				"password" : document.getElementById('login-password'),
+                "strategy" : "local"
+			},
+			"checks" : {
+				"is_empty" : ["password","email"],  // ref into fields above...
+				"email" : ["email"],
+                "passwords" : ["password"]
+			},
+			"modal" : document.getElementById("myLoginModal"),
+			"form" : document.getElementById('myLoginForm'),
+			"captcha" : document.getElementById('captcha-goes-here-login'),
+			"captcha_field" : document.getElementById("captcha-field-login")
+        });
+    }
+
+
+	function login_calcAppDataDB() {
+		//
+        let c_email =  g_login_Handling.fields["email"]
+        let c_password = g_login_Handling.fields["password"]
+        let c_openID = g_login_Handling.fields["openID"]
+        let c_strategy = g_login_Handling.fields["strategy"]
+		//
+        let data = {
+            "email" : getVal(c_email),
+            "password" : getVal(c_password),
+            "strategy" : getVal(c_strategy),
+            "opneID" : getVal(c_openID),
+            'uuid' : g_currenCaptchaUUID
+        }
+		//
+		return(data)
+	}
+
+	function login_completionaAction(resp) {
+        if ( secondaryVerify(resp) ) {
+            presentLogout(resp)
+        }
+	}
+
+	function processAuthEndpoint(endpoint) {
+        let url = `${location.protocol}//${g_siteURL}/{{auth_path}}/${endpoint}`
+        g_login_Handling.service_url = url
+		processUI_captchaService( g_login_Handling,
+                                    login_calcAppDataDB,
+									login_completionaAction )
+	}
+    
+    // send users throught the captcha interface
+    function processLogin() {
+        processAuthEndpoint("users/login")
+    }
+
+    // send users throught the captcha interface
+    function processForgotPassword() {
+        processAuthEndpoint("users/forgot")
+    }
+
+	function onkey_checkLoginError(srcField) {
+	   if ( g_login_Handling.checkFormValid() ) {
+		   let focusEl = document.getElementById(srcField);
+		   focusEl.style.borderColor = 'black'
+		   g_login_Handling.hideFormErrorMessage()
+	   }
+	}
+
+    g_finalizers.push(initLogin)
+
+
+</script>
+

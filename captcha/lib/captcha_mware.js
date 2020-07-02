@@ -1,4 +1,4 @@
-const GeneralMiddleWare = require('lib/general_middleware')
+const GeneralMiddleWare = require.main.require('./lib/general_mware')
 
 
 var bodyParser = require('body-parser');
@@ -19,6 +19,7 @@ class CaptchaMiddleWare extends GeneralMiddleWare {
     setup(app,db,session_manager) {
         //
         let conf = app._extract_conf()
+        this.initialize(db)
         //
         let appCors = null
         if ( conf.cors ) {

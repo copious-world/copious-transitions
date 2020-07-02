@@ -1,53 +1,7 @@
-const { GeneralAuth, SessionManager } = require('lib/general_auth')
+const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth')
 //
 const expressSession = require('express-session');
-const passport = require("passport")
-
-const OpenIDStrategy = require('passport-openid').Strategy;
-const GitHubStrategy = require('passport-github').Strategy;
-const TwitterStrategy = require('passport-twitter').Strategy;
-const GoogleStrategy = require('passport-google-oauth').OAuthStrategy;
-
-passport.use(new OpenIDStrategy({
-    returnURL: 'http://www.example.com/auth/openid/return',
-    realm: 'http://www.example.com/'
-  },
-  (identifier, done) => {
-    //
-  }
-));
-
-
-passport.use(new GitHubStrategy({
-        clientID: GITHUB_CLIENT_ID,
-        clientSecret: GITHUB_CLIENT_SECRET
-    },
-    (accessToken, refreshToken, profile, cb)  => {
-        //
-    }
-));
-
-
-passport.use(new TwitterStrategy({
-        consumerKey: TWITTER_CONSUMER_KEY,
-        consumerSecret: TWITTER_CONSUMER_SECRET
-    },
-    (token, tokenSecret, profile, done) => {
-        //
-    }
-));
-
-
-passport.use(new GoogleStrategy({
-    consumerKey: GOOGLE_CONSUMER_KEY,
-    consumerSecret: GOOGLE_CONSUMER_SECRET
-  },
-  (token, tokenSecret, profile, done) => {
-      //
-  }
-));
-
-
+const cookieParser = require('cookie-parser');
 
 
 class CaptchaSessionManager extends SessionManager {
@@ -59,7 +13,7 @@ class CaptchaSessionManager extends SessionManager {
         let db_store = db_obj.session_store.generateStore(expressSession)  // custom application session store for express 
         //
         this.session = expressSession({         // express session middleware
-            secret: conf.sessions.secret,
+            secret: this.conf.sessions.secret,
             resave: true,
             saveUninitialized: true,
             proxy : true,
@@ -72,7 +26,7 @@ class CaptchaSessionManager extends SessionManager {
             cookie: {
                 secure: false,
                 httpOnly: true,
-                domain: conf.domain
+                domain: this.conf.domain
             }
         })
 
@@ -81,10 +35,10 @@ class CaptchaSessionManager extends SessionManager {
     }
 
     // //
-    process_user(user_op,body,req) {
-        let transtionObj = super.process_user(user_op,body,req)
+    process_user(user_op,body,req,res) {
+        let pkey = G_users_trns.primary_key()
+        let transtionObj = super.process_user(user_op,body,req,res,pkey)
         if ( G_users_trns.action_selector(user_op) ) {
-            let pkey = G_users_trns.primary_key()
             transtionObj[pkey] = body[pkey]
         }
         return(transtionObj)
@@ -95,33 +49,6 @@ class CaptchaSessionManager extends SessionManager {
                                                 ? "You will receive an email with a link to a password restoration page" 
                                                 : "Please try again later"
         transtion_object.forgetfulness_proceed = boolVal
-    }
-
-
-    external_authorizer(req, res, next, cb) {
-        passport.authenticate(this.current_auth_strategy, (err, user, info) => {
-            if ( err || !user ) { cb(err,null) }
-            req.logIn(user, (err) => {   // logIn from passport
-              if ( err ) { cb(err,null) }
-              else {
-                  cb(null,user)
-              }
-            });
-          })(req, res, next);
-    }
-
-    extract_exposable_user_info(user,info) {
-        return(user.name)
-    }
-
-    //
-    app_custom_auth(post_body) {  // check that it is in supported strategies
-        return( (post_body.strategy !== "local") )
-    }
-
-    //
-    use_built_in_auth(post_body) {
-        return(post_body.strategy === "local")
     }
 
 

@@ -1,4 +1,4 @@
-const GeneralStatic = require('lib/general_static')
+const GeneralStatic = require.main.require('./lib/general_static')
 
 const myStorageClass = null
 
