@@ -5,3 +5,4 @@ dump.rdb
 node_modules
 node_modules/*
 backend/*
+package-lock.json
