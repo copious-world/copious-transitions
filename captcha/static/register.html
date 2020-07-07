@@ -2,7 +2,7 @@
     <!-- Modal content -->
     <div class="modal-content">
         <div class="modal-header">
-            <span class="close">&times;</span>
+            <span id="myRegisterModalCloser" class="close">&times;</span>
             <h3><i>Captcha</i> : I am not a robot</h3>
         </div>
         <div class="modal-body">
@@ -21,6 +21,17 @@
 </div>
 
 <div id="myRegisterForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
+
+	<div class="form_el" style="padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style: oblique;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+		<div style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
+			Please join our community at {{companyShortLink}}. 
+			Take part in our conversation, and make use of the tools we provide.
+			<blockquote style="border-top: 1px dotted darkmagenta;background-color:beige;padding:3px;font-size: 0.8em;font-weight:normal;color:slategray;font-style:italic;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+				You may use social login on this site with e-mails matching the one you provide here. 
+			</blockquote>
+		</div>
+	</div>
+
 	<div id="register-errors_here" >no error</div>
 	<div id="the-register-form-secure" style="color:darkorange;background-color: palegreen;visibility:hidden;display:none;">
         switching to a secure version of this page
@@ -69,6 +80,10 @@
         }
 	}
 
+	function registrationFailed(resp) {
+
+	}
+
     //
     function register_password_rules(fld_name,ptext) {
         return(true)
@@ -95,6 +110,7 @@
 					"passwords" : ["password","password-match"]
 				},
 				"modal" : document.getElementById("myRegisterModal"),
+				"closer" : document.getElementById('myRegisterModalCloser'),
 				"form" : document.getElementById('myRegisterForm'),
 				"captcha" : document.getElementById('captcha-goes-here-register'),
 				"captcha_field" : document.getElementById("captcha-field-register")
@@ -113,7 +129,9 @@
 			"email" : getVal(c_email),
 			"password" : getVal(c_password),
 			"password-verify" : getVal(c_password_verify),
-			'uuid' : g_currenCaptchaUUID
+			'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
+			'action' : 'register',
+            'form_key' : 'register'
 		}
 		// register application
 		data.name = data.name.length === 0 ? "anonymous" : data.name
@@ -128,7 +146,7 @@
 	function processRegister() {
 		processUI_captchaService( g_register_Handling,
 									register_calcAppDataDB,
-									registration_completionaAction )
+									registration_completionaAction, registrationFailed )
 	}
 
 

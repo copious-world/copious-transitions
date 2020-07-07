@@ -151,7 +151,7 @@ html {
 			z-index:101;
 			border: rgba(252, 190, 190, 0.4) 2px solid;
 			background-color: white;
-			overflow: auto;
+			overflow:hidden;
 		}
 
 		.solid_able {
@@ -163,7 +163,7 @@ html {
 			z-index:111;
 			border: rgba(252, 190, 190, 0.4) 2px solid;
 			background-color: white;
-			overflow: auto;
+			overflow: hidden;
 		}
 
 		@media screen and (max-width: 950px) {
@@ -505,6 +505,13 @@ html {
 			margin:2px;
 			width:80%;
 		}
+
+		.form_el_inner {
+			border:lightgray solid 1px;
+			padding:6px;
+			margin:2px;
+			width:100%;
+		}
 	
 		label {
 			font-weight:bold;
@@ -599,6 +606,7 @@ html {
 
 		.modal-footer {
 		  padding: 2px 16px;
+		  margin-bottom: 20px;
 		  background-color: darkgreen;
 		  color: white;
 		}
@@ -952,7 +960,7 @@ viewBox="0 0 360 38">
 			<!-- Modal content -->
 			<div class="modal-content">
 				<div class="modal-header">
-					<span class="close">&times;</span>
+					<span id="contactModalCloser" class="close">&times;</span>
 					<h3><i>Captcha</i> : I am not a robot</h3>
 				</div>
 				<div class="modal-body">
@@ -994,6 +1002,9 @@ viewBox="0 0 360 38">
 			<p class='contact-submit'>
 			<button onclick="processContact()" >Submit</button>
 			</p>
+			<div class="form_el" style="height:20px;background-color:rgb(230,230,240,0.4);font-style: oblique;font-weight: bold;color:rgba(242, 242, 210, 0.3);">
+				copious contact (thank you for your interest and concerns)
+			</div>
 		</div>
 	</div>
 </div>
@@ -1880,7 +1891,7 @@ viewBox="0 0 360 38">
     <!-- Modal content -->
     <div class="modal-content">
         <div class="modal-header">
-            <span class="close">&times;</span>
+            <span id="myRegisterModalCloser" class="close">&times;</span>
             <h3><i>Captcha</i> : I am not a robot</h3>
         </div>
         <div class="modal-body">
@@ -1899,6 +1910,17 @@ viewBox="0 0 360 38">
 </div>
 
 <div id="myRegisterForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
+
+	<div class="form_el" style="padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style: oblique;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+		<div style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
+			Please join our community at copious.world. 
+			Take part in our conversation, and make use of the tools we provide.
+			<blockquote style="border-top: 1px dotted darkmagenta;background-color:beige;padding:3px;font-size: 0.8em;font-weight:normal;color:slategray;font-style:italic;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+				You may use social login on this site with e-mails matching the one you provide here. 
+			</blockquote>
+		</div>
+	</div>
+
 	<div id="register-errors_here" >no error</div>
 	<div id="the-register-form-secure" style="color:darkorange;background-color: palegreen;visibility:hidden;display:none;">
         switching to a secure version of this page
@@ -1947,6 +1969,10 @@ viewBox="0 0 360 38">
         }
 	}
 
+	function registrationFailed(resp) {
+
+	}
+
     //
     function register_password_rules(fld_name,ptext) {
         return(true)
@@ -1973,6 +1999,7 @@ viewBox="0 0 360 38">
 					"passwords" : ["password","password-match"]
 				},
 				"modal" : document.getElementById("myRegisterModal"),
+				"closer" : document.getElementById('myRegisterModalCloser'),
 				"form" : document.getElementById('myRegisterForm'),
 				"captcha" : document.getElementById('captcha-goes-here-register'),
 				"captcha_field" : document.getElementById("captcha-field-register")
@@ -1991,7 +2018,9 @@ viewBox="0 0 360 38">
 			"email" : getVal(c_email),
 			"password" : getVal(c_password),
 			"password-verify" : getVal(c_password_verify),
-			'uuid' : g_currenCaptchaUUID
+			'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
+			'action' : 'register',
+            'form_key' : 'register'
 		}
 		// register application
 		data.name = data.name.length === 0 ? "anonymous" : data.name
@@ -2006,7 +2035,7 @@ viewBox="0 0 360 38">
 	function processRegister() {
 		processUI_captchaService( g_register_Handling,
 									register_calcAppDataDB,
-									registration_completionaAction )
+									registration_completionaAction, registrationFailed )
 	}
 
 
@@ -2072,7 +2101,7 @@ viewBox="0 0 360 38">
     <!-- Modal content -->
     <div class="modal-content">
         <div class="modal-header">
-            <span class="close">&times;</span>
+            <span id="myLoginModalCloser" class="close">&times;</span>
             <h3><i>Captcha</i> : I am not a robot</h3>
         </div>
         <div class="modal-body">
@@ -2096,11 +2125,22 @@ viewBox="0 0 360 38">
     <div id="the-login-form-secure" style="color:darkorange;background-color: palegreen;visibility:hidden;display:none;">
         switching to a secure version of this page
     </div>
+
+    <div class="form_el" style="padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style:initial;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+		<div style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
+			Login to: copious.world. 
+			If you have already provided us with an e-mail, you may login using your prefered method.
+		</div>
+	</div>
+
      
-    <div id='login-strategy' style="border:solid 1px darkmagenta;margin: 3px;">
-        <div class="form_el" style="padding: 0.5em;border:solid 1px darkmagenta;font-weight: bold;overflow-x: scroll;" >
-            <span class="form_el login-menu-horizontal" > Login Methods: 
-            <span class="form_el login-menu-horizontal">
+    <div id='login-strategy' class="form_el" style="border:solid 1px darkmagenta;margin: 3px;width: fit-content;">
+        <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;font-weight: bold;overflow-x: scroll;height:fit-content;" >
+            Current login method: <span id="login-method-banner">copious.world</span>
+        </div>
+        <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;font-weight: bold;overflow-x: scroll;height:fit-content;" >
+            <span class="form_el_inner login-menu-horizontal" > Login Methods: 
+            <span class="form_el_inner login-menu-horizontal" style="height:fit-content;">
                 <button class="login-strat-choice button5" onclick="login_strategy('local');show_password_container();hide_openID_container()" >
                     <svg version="1.0" width="30" height="30" viewBox="0 0 250 250" preserveAspectRatio="xMidYMid meet" id="login-local" >
                         <title>Local</title>
@@ -2114,37 +2154,39 @@ viewBox="0 0 360 38">
             </span></span>
         </div>
         <input type="hidden" id="login-strategy-value" name="strategy" value="local">
-        <div class="form_el" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+        <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
             <label for='login-email' class='login-labeler '>Email:</span></label>
             <input type='email' name='login-email' id='login-email' value=''class='field_el email'  required onkeyup="onkey_checkLoginError('login-email')"  />
         </div>
         
-        <div id="password-container" class="form_el" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+        <div id="password-container" class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
             <label for='login-password' class='login-labeler'>Password:</span></label>
             <input type='password' name='login-password' id='login-password' value='' class='field_el password' onkeyup="onkey_checkLoginError('login-password')"  />
         </div>
 
-        <div id="openID-container" class="form_el" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+        <div id="openID-container" class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
             <label for='login-openID' class='login-labeler'>OpenID:</span></label>
             <input type='text' name='login-openID' id='login-openID' value='' class='field_el'  />
         </div>
-        
     </div>
 
     <p class='login-submit'>
     <button onclick="processLogin()" >Submit</button>
     </p>
 
-    <p class='login-submit'>
-    <button onclick="processForgotPassword()" >Forgot Password</button>
+    <div id="forgot-container" class="form_el" style="padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style:initial;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;" >
+    <p class='login-submit' style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
+        Did you forget your password?<br>
+        <button onclick="processForgotPassword()" style="width:80%;" >Forgot Password</button>
     </p>
+    </div>
 
     <iframe id="loginframe" name="loginframe" style="visibility:hidden;" src="about:blank" style="width:0;height:0;border:0px solid #fff;" >
 	</iframe>
     <div style="height:0px;width:0px;display: none;visibility: hidden;">
         <form id="the-login-form" method="POST" action="https://www.copious.world/webcit/ajax_login_username_password" target="loginframe" onsubmit="login_viewchanges()">
-                <input type='text' name='name' id='login-name' value='' class='field_el'  required onkeyup="onkey_checkLoginError('login-name')"  />
-                <input type='password' name='pass' id='login-password' value='' class='field_el password' onkeyup="onkey_checkLoginError('login-password')"  />
+                <input type='hidden' name='name' id='login-cit-name' value='' />
+                <input type='hidden' name='pass' id='login-cit-password' value='' />
         </form>
     </div>
 </div>
@@ -2161,6 +2203,19 @@ viewBox="0 0 360 38">
     var loginStrategyField = document.getElementById("login-strategy-value")
     function login_strategy(strategy) {
         loginStrategyField.value = strategy
+        let fergit = document.getElementById('forgot-container')
+        let methodSign = document.getElementById('login-method-banner')
+        if ( fergit ) {
+            if ( strategy === 'local' ) {
+                fergit.style.display = "block"
+                fergit.style.visibility = "visible"
+                if ( methodSign ) methodSign.innerHTML = 'copious.world'
+            } else {
+                fergit.style.display = "none"
+                fergit.style.visibility = "hidden"
+                if ( methodSign ) methodSign.innerHTML = strategy
+            }
+        }
     }
     var g_passwordContainer = document.getElementById("password-container")
     var g_OpenIDContainer = document.getElementById("openID-container")
@@ -2193,8 +2248,13 @@ viewBox="0 0 360 38">
 
     function loginFailed() {
         // display reason, etc.
+        g_login_Handling.switchCaptchaDisplay(false)
+        g_login_Handling.formErrorMessage("Could not login with the information provided. Please try again.")
     }
-    
+    function registrationFailMessage() {
+        g_login_Handling.switchCaptchaDisplay(false)
+        g_login_Handling.formErrorMessage("It appears you already have an account. Please try logging in.")
+    }
     //
     function login_opening_view() {
         login_strategy('local');show_password_container();hide_openID_container()
@@ -2209,9 +2269,34 @@ viewBox="0 0 360 38">
         }
     }
 
-    function app_tandem_login() {       // get cookie for webcit -- specific to this application
+    function app_tandem_login(tandems) {       // get cookie for webcit -- specific to this application
         let loginForm = document.getElementById('the-login-form')
-	    loginForm.submit()
+        let lname = document.getElementById('login-cit-name')
+        let pname = document.getElementById('login-cit-password')
+        if ( loginForm && lname && pname ) {
+            lname.value = tandems.name
+            pname.value = tandems.pass
+            loginForm.submit()
+        }
+    }
+
+    var g_Loggedin_session_token = ''
+    async function secondary_actions(resp) {
+        try {
+            let url = `${location.protocol}//${g_siteURL}/captcha/secondary/transition`
+            let rdata = resp.data
+            let data = { 'token' : rdata.token, "session_token" : rdata.session_token }
+            let resp = await postData(url, data)
+            if ( resp.OK === "true" ) {
+                g_Loggedin_session_token = resp.token  // should be in COOKIE
+                let elements = resp.elements
+                app_tandem_login(elements.tandem) 
+            } else {
+                g_Loggedin_session_token = '' 
+            }
+        } catch (e) {
+            console.log(e.message)
+        }
     }
 
     function login_password_rules(fld_name,ptext) {
@@ -2227,45 +2312,52 @@ viewBox="0 0 360 38">
     function secondaryVerify(resp) {
         // e.g auto login to another service this uses simultaneously
         if (  resp && resp.OK ) {
-            if ( resp.windowize ) {
-                //
-                try {
-                    g_foreign_login_socket = new WebSocket(`wss://${g_siteURL}/auth_websocket/foreign_auth`, "protocolOne");
-                    g_foreign_login_socket.onmessage = (event) => {     // handle the finalization through the websocket
-                        try {
-                            let login_instructions = JSON.parse(event.data)
-                            if ( login_instructions.OK ) {
-                                finalize_foreign_Login(login_instructions)
-                            }
-                        } catch (e) {
-                        }
-                    }
+            if ( resp.data ) {
+                let datum = resp.data
+                if ( datum.windowize ) {
                     //
-                    // fetch this URL
-                    g_foreign_login_window = window.open(resp.windowize, '_blank');  // resp.windowize = location  + 'start/' + <strategy> + '/' + <email> + '/' + token
-                    //g_foreign_login_window.location;
-                    g_foreign_login_window.focus()
-                    return(false)       // prevent display of logout, etc until finalized
-                } catch(e) {
-                    loginFailed()
-                    return(false)       // prevent display of logout, etc until finalized
+                    try {
+                        // setup a webSocket connection to get finalization data on logging in. -- 
+                        g_foreign_login_socket = new WebSocket(`wss://${g_siteURL}/auth_websocket/foreign_auth`, "protocolOne");
+                        g_foreign_login_socket.onmessage = (event) => {     // handle the finalization through the websocket
+                            try {
+                                let login_instructions = JSON.parse(event.data)
+                                if ( login_instructions.OK ) {      // happens after the windowized redirects.
+                                    finalize_foreign_Login(login_instructions)
+                                }
+                            } catch (e) {
+                            }
+                        }
+                        //
+                        // fetch this URL
+                        g_foreign_login_window = window.open(datum.windowize, '_blank');  // resp.windowize = location  + 'start/' + <strategy> + '/' + <email> + '/' + token
+                        //g_foreign_login_window.location;
+                        g_foreign_login_window.focus()
+                        return(false)       // prevent display of logout, etc until finalized
+                    } catch(e) {
+                        loginFailed(resp)
+                        return(false)       // prevent display of logout, etc until finalized
+                    }
+                } else if ( datum.amelioritive_action ) {
+                    try {
+                        eval(datum.amelioritive_action)
+                    } catch (e) {
+                        loginFailed(resp)
+                    }
+                    return(false)
                 }
-            } else if ( resp.amelioritive_action ) {
-                try {
-                    eval(resp.amelioritive_action)
-                } catch (e) {
-                    loginFailed()
-                }
-                return(false)
-            } else {
-                // now do an app based login for tandem service, etc.
-                app_tandem_login()
+                // else :: now do an app based login for tandem service, etc.
+                // If this application needs to work with another resource -- and all other auths have passed.
+                secondary_actions(resp)
                 return(true)  // accept less defind behavior as a pass (this is basically local login)
+            } else {
+                loginFailed(resp)
+                return(false)
             }
-        } else {
-            loginFailed()
-            return(false)
         }
+        //
+        loginFailed(resp)
+        return(false) 
     }
 
 
@@ -2288,19 +2380,23 @@ viewBox="0 0 360 38">
             "password_rules" : login_password_rules,
 			"fields" : {
 				"email" : document.getElementById('login-email'),
-				"password" : document.getElementById('login-password'),
-                "strategy" : "local"
+                "password" : document.getElementById('login-password'),
+                "openID" : document.getElementById('login-openID'),
+                "strategy" : document.getElementById('login-strategy-value')
 			},
 			"checks" : {
 				"is_empty" : ["password","email"],  // ref into fields above...
 				"email" : ["email"],
                 "passwords" : ["password"]
 			},
-			"modal" : document.getElementById("myLoginModal"),
+            "modal" : document.getElementById("myLoginModal"),
+            "closer" : document.getElementById('myLoginModalCloser'),
 			"form" : document.getElementById('myLoginForm'),
 			"captcha" : document.getElementById('captcha-goes-here-login'),
 			"captcha_field" : document.getElementById("captcha-field-login")
         });
+        if ( g_login_failure === null ) g_login_failure = loginFailed
+        if ( g_registration_failure === null ) g_registration_failure = registrationFailMessage  // display on login screen
     }
 
 
@@ -2315,8 +2411,10 @@ viewBox="0 0 360 38">
             "email" : getVal(c_email),
             "password" : getVal(c_password),
             "strategy" : getVal(c_strategy),
-            "opneID" : getVal(c_openID),
-            'uuid' : g_currenCaptchaUUID
+            "openID" : getVal(c_openID),
+            'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
+            'action' : 'login',
+            'form_key' : 'login'
         }
 		//
 		return(data)
@@ -2333,7 +2431,7 @@ viewBox="0 0 360 38">
         g_login_Handling.service_url = url
 		processUI_captchaService( g_login_Handling,
                                     login_calcAppDataDB,
-									login_completionaAction )
+									login_completionaAction, loginFailed )
 	}
     
     // send users throught the captcha interface
@@ -2401,7 +2499,7 @@ viewBox="0 0 360 38">
 	// streamer-scratchpad  -- in the stream app was using this.
 	// //
 	async function fetchEndPoint(endpoint,port) {
-		port = port.length ? ':' + port : port
+		port = !(port) ? '' : ( port.length ? `:${port}`   : '')
 		let myRequest = new Request(`${location.protocol}//${g_siteURL}${port}/${endpoint}`);
 		try {
 			const body = await fetch(myRequest, {
@@ -2437,6 +2535,9 @@ viewBox="0 0 360 38">
 		referrerPolicy: 'no-referrer', // no-referrer, *client
 		body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
 	  });
+	  if ( response.ok == false ) {
+		  console.log(response.status + ': ' + response.statusText)
+	  }
 	  return await response.json(); // parses JSON response into native JavaScript objects
 	}
 
@@ -2598,6 +2699,7 @@ viewBox="0 0 360 38">
 			this.checks = props.checks
 
 			this.modal = props.modal
+			this.closer = props.closer
 			this.form = props.form
 			this.where_captcha = props.captcha
 			this.captch_input = props.captcha_field
@@ -2701,12 +2803,12 @@ viewBox="0 0 360 38">
 	}
 
 
-	async function processUI_captchaService(handlerDefsValidator,calcAppDataDB,completionaAction) {
+	async function processUI_captchaService(handlerDefsValidator,calcAppDataDB,completionaAction,failureAction) {
 		//
 		g_ComponentErrorsActivated = true	// will be processing errors, etc. some selective behavior permitted
 		g_CurContainer = handlerDefsValidator
 		//
-		if ( g_CurContainer.checkFormValid() ) {
+		if ( g_CurContainer && g_CurContainer.checkFormValid() ) {
 			try {
 				// CAPTCH PROCESSING 
 				let captchaResult = await doCaptcha('','captcha')   // the captcha has to be processed first.
@@ -2714,15 +2816,18 @@ viewBox="0 0 360 38">
 				if ( captchaResult === true ) {
 					if ( g_currenCaptchaTOKEN ) {
 						let data = calcAppDataDB()		// calcAppDataDB
-						postData(g_CurContainer.service_url, data)
-						.then((resp) => {
-							if ( resp.OK ) {
+						try {
+							let resp = await postData(g_CurContainer.service_url, data)
+							if ( resp.OK === "true" ) {
 								g_currenCaptchaTOKEN = null;     // check for duplicates
-                                completionaAction();
+                                if ( completionaAction ) completionaAction(resp);
 							} else {
-                                g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${resp.reason}`)
+								g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${resp.reason}`)
+								if ( failureAction ) failureAction(resp)
                             }
-						});
+						} catch (e) {
+							console.log(e.message)
+						}
 					}
 				} else {
 					if ( captchaResult !== false ) {
@@ -2737,6 +2842,8 @@ viewBox="0 0 360 38">
 			} catch(e) {
 				console.log(e.message)
 			}
+		} else {
+			throw new Error("The current container is not defined in processUI_captchaService.")
 		}
 	}
 
@@ -3002,14 +3109,14 @@ viewBox="0 0 360 38">
 		g_apparition = null;
 		g_current_pin = null;
 		if ( !g_ComponentErrorsActivated ) {
-			g_CurContainer.hideFormErrorMessage();
+			if ( g_CurContainer ) g_CurContainer.hideFormErrorMessage();
 		}
 	}
 
 	function closefader(whichFader) {
 		let fdr = document.querySelector('#' + whichFader);
 		hideFader(fdr)
-		g_CurContainer.hideFormErrorMessage();
+		if ( g_CurContainer ) g_CurContainer.hideFormErrorMessage();
 	}
 
 	function closesolid(whichSolid) {
@@ -3020,12 +3127,14 @@ viewBox="0 0 360 38">
 	// ---- ---- ---- ---- ---- ----
 
 	function unpin_current() {
-		g_CurContainer.switchCaptchaDisplay(false)
+		if ( g_CurContainer )  {
+			g_CurContainer.switchCaptchaDisplay(false)
+			g_CurContainer.hideFormErrorMessage();
+		}
 		if ( g_current_pin != null ) {
 			g_current_pin.style.visibility = "hidden";
 			g_current_pin.style.zIndex = -10
 		}
-		g_CurContainer.hideFormErrorMessage();
 	}
 	function fade_apparition(btn,evt) {
 		if ( g_apparition !== null ) {
@@ -3175,7 +3284,7 @@ viewBox="0 0 360 38">
 	var g_currenCaptchaTOKEN = null; 	// delivered by the authorization handler, which maps this interaction to a session.
 	var g_captaFinalResolution = null;  // will be a function for completing a captcha
 
-	function captchaCheck(callBack) {
+	async function captchaCheck(callBack) {
 		//
 		let captchaGuessField = g_CurContainer.captch_input
 		if ( captchaGuessField ) {
@@ -3183,21 +3292,24 @@ viewBox="0 0 360 38">
 			if ( captchaVal && captchaVal.length && g_currenCaptchaTOKEN ) {
 				//
 				let port = g_CurContainer.auth_port
-				port = port ? '' : ( port.length ? port + ':'  : '')
+				port = !(port) ? '' : ( port.length ? `:${port}`   : '')
 				//
-				postData(`${location.protocol}//${g_siteURL}:${port}/transition/secondary`, { 'captcha_val' : captchaVal, 'token' : g_currenCaptchaTOKEN })
-				.then((resp) => {
-							if ( resp.OK === "true" ) {
-					  				if ( g_captaFinalResolution !== null ) {
-										g_captaFinalResolution(1)
-					  				}
-							} else {
-					  				if ( g_captaFinalResolution !== null ) {
-										g_captaFinalResolution(2,"captcha does not match: try again")
-					  				}
+				try {
+					let url = `${location.protocol}//${g_siteURL}${port}/captcha/secondary/transition`
+					let data = { 'captcha_val' : captchaVal, 'token' : g_currenCaptchaTOKEN }
+					let resp = await postData(url, data)
+					if ( resp.OK === "true" ) {
+							if ( g_captaFinalResolution !== null ) {
+								g_captaFinalResolution(1)
 							}
-					  });
-				//
+					} else {
+							if ( g_captaFinalResolution !== null ) {
+								g_captaFinalResolution(2,"captcha does not match: try again")
+							}
+					}
+				} catch (e) {
+					console.log(e.message)
+				}
 			}
 		}
 		//
@@ -3221,15 +3333,17 @@ viewBox="0 0 360 38">
 
 	async function doCaptcha(port,proxyPath) {
 		//
-		g_CurContainer.switchCaptchaDisplay(true)
+		if (g_CurContainer ) g_CurContainer.switchCaptchaDisplay(true)
+		else {
+			throw new Error("Current container undefined in doCaptcha")
+		}
 		//
 		try {
-			port = port ? '' : ( port.length ? port + ':'  : '')
+			port = !(port) ? '' : ( port.length ? `:${port}`   : '')
 				//
-
 			let endpoint = `${location.protocol}//${g_siteURL}${port}/${proxyPath}/transition/captcha`
 			let captchaObject = await postData(endpoint)
-			if ( (captchaObject.type == "transition") && (captchaObject.OK == true) )  {
+			if ( (captchaObject.type == "transition") && (captchaObject.OK == 'true') )  {
 				let svgText = decodeURIComponent(captchaObject.elements.captcha)
 				let captchaPlacement = g_CurContainer.where_captcha
 				if ( captchaPlacement ) {
@@ -3256,24 +3370,26 @@ viewBox="0 0 360 38">
 	function initContact() {
 		g_contact_Handling = new ValidationContainer({
 			"auth_port" : g_contact_port,
-            "service_url" : `http://${g_siteURL}/captcha/contact`,
+            "service_url" : `${location.protocol}//${g_siteURL}/captcha/transition/contact`,
             "errors_here" : document.getElementById('contact-errors_here'),
             "failure_msg_prefix" : "Cannot Process Captcha",
 			"fields" : {
 				"name" : document.querySelector('#contact-name'),
 				"email" : document.querySelector('#contact-email'),
 				"website" : document.querySelector('#contact-website'),
-				"comment" : document.querySelector('#contact-comment'),
+				"comment" : document.querySelector('#contact-comment')
 			},
 			"checks" : {
 				"is_empty" : ["name","comment","email"],  // ref into fields above...
 				"email" : ["email"]
 			},
 			"modal" : document.querySelector('#contactModal'),
+			"closer" : document.querySelector('#contactModalCloser'),
 			"form" : document.querySelector('#myContactForm'),
 			"captcha" : document.querySelector('#captcha-goes-here'),
 			"captcha_field" : document.querySelector("#captcha-field")
 		})
+		g_CurContainer = g_contact_Handling; // has to be initlialized in the function
 	}
 
 
@@ -3328,7 +3444,15 @@ viewBox="0 0 360 38">
 			login.style.visibility = "visible"
 			login.style.display = "block";
 			//
+			unpin_current();
 			g_CurContainer = g_login_Handling
+			//
+			//hide other things
+			let register = document.querySelector("#register")
+			if ( register ) {
+				register.style.visibility = "hidden"
+				register.style.display = "none";
+			}
 		}
 		login_opening_view()
 	}
@@ -3341,12 +3465,31 @@ viewBox="0 0 360 38">
 			register.style.visibility = "visible"
 			register.style.display = "block";
 			//
+			unpin_current();
 			g_CurContainer = g_register_Handling
 			g_ComponentErrorsActivated = true
+			//
+			//hide other things
+			let login = document.querySelector("#login")
+			if ( login ) {
+				login.style.visibility = "hidden"
+				login.style.display = "none";
+			}
 		}
 		register_opening_view()
 	}
-	
+
+	var g_login_failure = null
+	function retry_password() {
+		login_process()
+		if ( g_login_failure ) g_login_failure()
+	}
+	var g_registration_failure = null
+	function already_registered() {
+		login_process()
+		if ( g_registration_failure ) g_registration_failure()
+	}
+
 
 	//  === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
 
@@ -3379,29 +3522,34 @@ viewBox="0 0 360 38">
 	// // // ----------------- // // // ----------------- // // // -----------------
 
 	// initial validation application is contact
-	g_CurContainer = g_contact_Handling
+	g_CurContainer = null // will be initilialized within the finalizers
 
 	// EXTRA STUFF for some gracefull clicing
 	var the_thankyou_box = document.getElementById("thankyou_box");
 
 	// Get the <span> element that closes the modal
-	var span = document.getElementsByClassName("close")[0];
-
-	// When the user clicks on <span> (x), close the modal
-	span.onclick = function() {
-		switchCaptchaDisplay(false)
-		if ( g_captaFinalResolution ) g_captaFinalResolution(3)
+	function setupCaptchaClose() {
+		let closerList = document.getElementsByClassName("close");
+		let n = closerList.length
+		for ( let i = 0; i < n; i++ ) {
+			let span = closerList[i]
+			span.onclick = function() {
+				switchCaptchaDisplay(false)
+				if ( g_captaFinalResolution ) g_captaFinalResolution(3)
+			}
+		}
 	}
 
 	// When the user clicks anywhere outside of the modal, close it
 	window.onclick = function(event) {
-	  if ( g_CurContainer && (event.target == g_CurContainer.modal) ) {
+	  if ( g_CurContainer && (event.target == g_CurContainer.closer) ) {
 		g_CurContainer.switchCaptchaDisplay(false)
 		g_CurContainer.hideFormErrorMessage();
 	  }
 	  hide_thankyou_box(the_thankyou_box)
 	}
 
+	setupCaptchaClose()
 
 	g_finalizers.forEach(fn => { fn()})
 

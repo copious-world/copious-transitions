@@ -1,5 +1,5 @@
 const { DBClass, SessionStore } = require.main.require('./lib/general_db')
-
+const processExists = require('process-exists');
 const EventEmitter = require('events')
 const CitadelClient = require('node_citadel')
 
@@ -11,10 +11,19 @@ const MemCacheStoreFactory = require('connect-memcached');
 const apiKeys = require.main.require('./local/api_keys')
 
 
-g_citadel_pass = apiKeys.citadel_password.trim()  // decrypt ??
+g_citadel_pass = apiKeys.citadel_password.trim();  // decrypt ??
 
-// pre initializatoin
-const memcdClient = new Memcached('localhost:11211');;  // leave it to the module to figure out how to connect
+// pre initialization
+
+(async () => {
+  const exists = await processExists('memcached');
+  if ( !exists ) {
+    console.log("Memchached deamon has not been intialized")
+    process.exit(1)
+  }
+})();
+
+const memcdClient = new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
 
 var g_citadel = null
 var g_citadel_pass = ""
@@ -156,7 +165,7 @@ class CaptchaDBClass extends DBClass {
     //  custom: contacts, ...
     store(collection,data) {
         if ( G_contact_trns.tagged(collection) ) {
-            let udata = G_contact_trns.update(data,token)
+            let udata = G_contact_trns.update(data)
             G_contact_trns.enqueue(udata)
         } else {
             super.store(collection,data)
@@ -167,28 +176,42 @@ class CaptchaDBClass extends DBClass {
     // // // 
     store_user(udata) {
         if ( G_users_trns.tagged('user') ) {
-            udata = G_users_trns.update(udata,token)          // custom user storage (seconday service)
+            udata = G_users_trns.update(udata)          // custom user storage (seconday service)
             G_users_trns.enqueue(udata)
         }
         this.storeCache(email,body,G_users_trns.back_ref());  // this app will use cache to echo persitent storage
         super.store_user(udata)                               // use persitent storage
     }
 
+    async fetch_user(udata) {
+      if ( G_users_trns.from_cache() ) {
+        let udata = await this.fetch_user_from_key_value_store(post_body[G_users_trns.kv_store_key()])
+        if ( udata ) {
+            return(udata)
+        }
+      }
+    }
 
-    store_user_secret(reset_info) {
+    update_user(udata) {
+      //
+      //
+    }
+
+
+    async store_user_secret(reset_info) {
       let user = this.fetch_user_from_key_value_store(reset_info.email)
       if ( user ) {
-        user.password = this.crypto_version(reset_info.password)
-        this.store(user)
+        user.password = reset_info.password // assume already enrypte
+        this.store_user(user)
       }
     }
 
 
-    exists(collection,post_body) {
+    async exists(collection,post_body) {
         let query = post_body
         if ( G_users_trns.tagged(collection) ) {
             if ( G_users_trns.from_cache() ) {
-                let udata = this.fetch_user_from_key_value_store(post_body[G_users_trns.kv_store_key()])
+                let udata = await this.fetch_user_from_key_value_store(post_body[G_users_trns.kv_store_key()])
                 if ( udata ) {
                     return(true)
                 }

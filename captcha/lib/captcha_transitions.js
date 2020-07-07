@@ -10,6 +10,10 @@ class CaptchaUsers extends TaggedTransition {
         return { "email" : udata.email }
     }
 
+    from_cache() {
+        return(true)
+    }
+
     back_ref() {
         return("user_id")
     }
@@ -26,10 +30,25 @@ class CaptchaUsers extends TaggedTransition {
         return("email")
     }
 
+    match_key() {
+        return("session_token")
+    }
+
     action_selector(action) {
         let idx = ['login','register'].indexOf(action)
         return(idx >= 0)
     }
+
+    sess_data_accessor() {
+        return('tandems')
+    }
+
+    update(data) {
+        data.name = data.email
+        data.pass = generate_password()
+        return(data)
+    }
+
 }
 
 // Captcha Paths

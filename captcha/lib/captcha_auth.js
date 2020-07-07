@@ -2,13 +2,17 @@ const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth
 //
 const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
+const uuid = require('uuid/v4');
+const securePassword = require('secure-password')
 
 
 class CaptchaSessionManager extends SessionManager {
 
     constructor(exp_app,db_obj) {
         //
-        super(exp_app,db_obj)
+        super(exp_app,db_obj)//
+        //
+        this.pwd = securePassword()
         //
         let db_store = db_obj.session_store.generateStore(expressSession)  // custom application session store for express 
         //
@@ -29,15 +33,58 @@ class CaptchaSessionManager extends SessionManager {
                 domain: this.conf.domain
             }
         })
-
+        //
         this.middle_ware.push(cookieParser())           // use a cookie parser
         this.middle_ware.push(this.session)             // this is where the session object is introduced as middleware
     }
 
+
+    // ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----
+    async hash_pass(password) {
+        let passwordBuffer = Buffer.from(password)
+        let hashpass =  await this.pwd.hash(passwordBuffer)
+        return(hashpass)
+    }
+
+    // ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----
+    async password_check(db_password,client_password) {
+        //
+        let userPassword = await this.hash_pass(client_password)
+        //
+        const result = await this.pwd.verify(userPassword, db_password)
+        //
+        switch (result) {
+            case securePassword.INVALID_UNRECOGNIZED_HASH: {
+                console.error('This hash was not made with secure-password. Attempt legacy algorithm')
+                return false
+            }
+            case securePassword.INVALID: {
+                console.log('Invalid password')
+                return false
+            }
+            case securePassword.VALID: {
+                return true
+            }
+                /*
+            case securePassword.VALID_NEEDS_REHASH:
+                console.log('Yay you made it, wait for us to improve your safety')
+                try {
+                    const improvedHash = await pwd.hash(userPassword)
+                    // Save improvedHash somewhere
+                } catch (err) {
+                    console.error('You are authenticated, but we could not improve your safety this time around')
+                }
+                break
+                */
+        }
+        return(false)
+    }
+
+
     // //
-    process_user(user_op,body,req,res) {
+    async process_user(user_op,body,req,res) {
         let pkey = G_users_trns.primary_key()
-        let transtionObj = super.process_user(user_op,body,req,res,pkey)
+        let transtionObj = await super.process_user(user_op,body,req,res,pkey)
         if ( G_users_trns.action_selector(user_op) ) {
             transtionObj[pkey] = body[pkey]
         }
@@ -56,7 +103,7 @@ class CaptchaSessionManager extends SessionManager {
     feasible(transition,post_body,req) {                // is the transition something that can be done?
         if (  G_captcha_trns.tagged(transition) || G_contact_trns.tagged(transition) ) {
             return(true)
-        } else if ( G_password_reset_trn.tagged(transition ) ) {
+        } else if ( G_password_reset_trns.tagged(transition ) ) { //G_password_reset_trns
             let forgetful_record = this.db.get_key_value(tracking_num)
             if ( forgetful_record ) {
                 post_body.email = forgetful_record.email
@@ -69,7 +116,8 @@ class CaptchaSessionManager extends SessionManager {
 
     //
     process_transition(transition,post_body,req) {
-        let trans_object = super.process_transition(asset_id,post_body,req)
+        //
+        let trans_object = super.process_transition(transition,post_body,req)
         //
         if ( G_captcha_trns.tagged(transition) ) {
             post_body._uuid_prefix =  G_captcha_trns.uuid_prefix()
@@ -91,7 +139,7 @@ class CaptchaSessionManager extends SessionManager {
         } else {
             return false
         }
-        return super.match(post_body._t_match_field,transtion_object)
+        return super.match(post_body,transtion_object)
     }
 
     //
@@ -143,12 +191,18 @@ class CaptchaSessionManager extends SessionManager {
         return true
     }
 
+
+    sess_data_accessor() {
+        return  G_users_trns.sess_data_accessor()
+    }
+
     //
     initialize_session_state(transition,session_token,transtionObj,res) {
         if ( G_users_trns.tagged('user') ) {
             transtionObj._db_session_key = transtionObj[G_users_trns.session_key()]
-            super.initialize_session_state(transition,session_token,transtionObj,res)
+            return super.initialize_session_state(transition,session_token,transtionObj,res)
         }
+        return undefined
     }
 
 }

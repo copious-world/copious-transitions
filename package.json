@@ -28,6 +28,9 @@
   "dependencies": {
     "clone": "^2.1.2",
     "connect-memcached": "^1.0.0",
-    "memcached": "^2.2.2"
+    "generate-password": "^1.5.1",
+    "memcached": "^2.2.2",
+    "process-exists": "^4.0.0",
+    "secure-password": "^4.0.0"
   }
 }

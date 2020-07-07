@@ -1,9 +1,15 @@
 //
+var g_password_store = []
+const PASSWORD_DEPLETION_MIN = 3
+const PASSWORD_BLOCKSIZE = 100
+//
 const fs = require('fs')
 const crypto = require('crypto')
 const clone = require('clone')
 const WebSocketServer = require('ws').Server;
 const http = require("http");
+const passwordGenerator = require('generate-password');
+
 
 //
 const conf_obj = load_parameters()                  // configuration parameters to select modules, etc.
@@ -108,7 +114,7 @@ g_app.post('/guarded/dynamic/:asset', (req, res) => {
 });
 
 // KEYED MIME_TYPES  - TRANSITION ACCEPTED  -- the body should send back the token it got with the asset.
-g_app.post('/guarded/secondary',(req,res) => {
+g_app.post('/secondary/guarded',(req,res) => {
     let body = req.body
     if ( body.token !== undefined ) {
         let cached_transition = fetch_local_cache_transition(g_secondary_mime_actions,body.token)
@@ -130,12 +136,12 @@ g_app.post('/guarded/secondary',(req,res) => {
 
 // TRANSITIONS - pure state transition dynamics for sessions
 let g_finalize_transitions = {}
-g_app.post('/transition/:transition', function(req, res){           // the transition is a name or key
+g_app.post('/transition/:transition', async (req, res) => {           // the transition is a name or key
     let body = req.body
     let transition = req.params.transition
     if ( g_validator.valid(body,g_validator.field_set[transition]) ) {         // A field set may be in the configuration for named transitions - true by default
         if ( g_session_manager.feasible(transition,body,req) ) {                        // can this session actually make the transition?
-            let transtionObj = g_session_manager.process_transition(transition,body,req)            // either fetch or produced transition data
+            let transtionObj = await g_session_manager.process_transition(transition,body,req)            // either fetch or produced transition data
             if ( transtionObj.secondary_action ) {                                      // Require a seconday action as part of the transition for finalization
                 let [send_elements, store_elements] = g_dynamics.fetch_elements(transition,transtionObj);      // elements is purposely vague and may be application sepecific
                 let tObjCached = { 'tobj' : transtionObj, 'elements' : store_elements, 'transition' : transition }
@@ -156,7 +162,7 @@ g_app.post('/transition/:transition', function(req, res){           // the trans
 });
 
 // TRANSITIONS  - TRANSITION ACCEPTED  -- the body should send back the token it got with the asset.
-g_app.post('/transition/secondary',(req,res) => {
+g_app.post('/secondary/transition',async (req, res) => {
     let body = req.body
     if ( body.token !== undefined ) {
         let cached_transition = fetch_local_cache_transition(g_finalize_transitions,body.token)
@@ -165,7 +171,7 @@ g_app.post('/transition/secondary',(req,res) => {
                 // some kind of transition takes place and becomes the state of the session. It may not be the same as the one
                 // specified in the cached transition, but may be similar depending on how types (categories) are regulated 
                 let elements = cached_transition.elements
-                let finalization_state = g_session_manager.finalize_transition(cached_transition.transition,body,elements,req)      // FINALIZE (not a final state)
+                let finalization_state = await g_session_manager.finalize_transition(cached_transition.transition,body,elements,req)      // FINALIZE (not a final state)
                 if ( finalization_state ) {     // relay the finalized transition and go on with business. 
                     let state = finalization_state.state
                     let OK = finalization_state.OK
@@ -184,44 +190,50 @@ if ( conf_obj.login_app ) {   // LOGIN APPS OPTION (START)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 // USER MANAGEMENT - handle authorization and user presence.
 let g_secondary_user_actions = {}
-g_app.post(['/users/login','/users/logout','/users/register','/users/forgot'],(req,res,next) => {
+g_app.post(['/users/login','/users/logout','/users/register','/users/forgot'], async (req,res) => {
     let body = req.body
     let user_op = body['action']
     if ( g_validator.valid(body,g_validator.field_set[user_op]) ) {        // every post that comes through will have validation from configuration
-        let transtionObj = g_session_manager.process_user(user_op,body,req)       // most paths require secondation action (perhaps logout doesn't) (Captch as model)
-        if ( transtionObj.secondary_action || transtionObj.foreign_authorizer_endpoint ) {
-            let tObjCached = { 'tobj' : transtionObj, 'token' : transtionObj.session_token, 'action' : user_op }
-            add_local_cache_transition(g_secondary_user_actions,transtionObj.token,tObjCached)
-            if ( !(transtionObj.foreign_authorizer_endpoint) ) {
-                return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
+        try {
+            let transtionObj = await g_session_manager.process_user(user_op,body,req,res)       // most paths require secondation action (perhaps logout doesn't) (Captch as model)
+            if ( transtionObj.secondary_action || transtionObj.foreign_authorizer_endpoint ) {
+                let tObjCached = { 'tobj' : transtionObj, 'elements' : transtionObj.elements, 'action' : user_op }
+                add_local_cache_transition(g_secondary_user_actions,transtionObj.token,tObjCached)
+                delete transtionObj.elements
+                if ( transtionObj.secondary_action ) {
+                    return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
+                } else if ( transtionObj.foreign_authorizer_endpoint ) {
+                    transtionObj.foreign_authorizer_endpoint += '/' + transtionObj.token  // token of auth process
+                    transtionObj.windowize = transtionObj.foreign_authorizer_endpoint
+                    return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
+                }
             } else {
-                transtionObj.foreign_authorizer_endpoint += '/' + transtionObj.token  // token of auth process
-                return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj,
-                                                                     'windowize' : transtionObj.foreign_authorizer_endpoint })));
+                return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
             }
-        } else {
-            return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
+        } catch (e) {
+            return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : 'broken server' })));
         }
-    } else {
-        return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : 'bad form' })));
-    }   
+    }
+    //
+    return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : 'bad form' })));
+    //
 })
 
 
  
 // USER MANAGEMENT - finalize the user action.
-g_app.post('/users/secondary/:action',(req,res) => {
+g_app.post('/secondary/users/:action', (req, res) => {
     let body = req.body
     let action = req.params['action']
     if ( body.token !== undefined ) {                                   // the token must be present
         let cached_transition = fetch_local_cache_transition(g_secondary_user_actions,body.token)
         if ( (cached_transition !== undefined) && (action == cached_transition.action) ) {      // the action must match (artifac of use an array of paths)
             // this is the asset needed by the client to turn on personlization and key access (aside from sessions and cookies)
-            let session_token = cached_transition.session_token
             if ( g_session_manager.match(body,cached_transition)  ) {        // check the tokens and any other application specific information required
+                let session_token = cached_transition.session_token
                 let transtionObj = cached_transition.tobj
-                g_session_manager.initialize_session_state('user',session_token,transtionObj,res)
-                res.status(200).send(JSON.stringify({ 'type' : transtionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token }));
+                let elements = g_session_manager.initialize_session_state('user',session_token,transtionObj,res)
+                res.status(200).send(JSON.stringify({ 'type' : transtionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token, 'elements' : elements  }));
                 return;
             }
         }
@@ -230,25 +242,23 @@ g_app.post('/users/secondary/:action',(req,res) => {
 })
 
 
-g_app.post('/users/foreign_login',(req,foreign_res) => {  // or use the websockets publication of state....
+g_app.post('/foreign_login/users', (req, foreign_res) => {  // or use the websockets publication of state....
     let body = req.body
     let OK = req.params['success']
     if ( OK ) {                                   // the token must be present
         let cached_transition = fetch_local_cache_transition(g_secondary_user_actions,body.token)
         if ( cached_transition !== undefined ) {      // the action must match (artifac of use an array of paths)
             // this is the asset needed by the client to turn on personlization and key access (aside from sessions and cookies)
-            let session_token = cached_transition.session_token
             if ( g_session_manager.match(body,cached_transition)  ) {        // check the tokens and any other application specific information required
+                let session_token = cached_transition.session_token
                 let transtionObj = cached_transition.tobj
-                let res = cached_transition.waiting_response
-                g_session_manager.initialize_session_state('user',session_token,transtionObj,res)
-                res.status(200).end("SUCCESS")  // message back to local auth service
-                send_ws_outofband(body.token,{ 'type' : transtionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token })
-                return;
+                let elements = g_session_manager.initialize_session_state('user',session_token,transtionObj,null)
+                send_ws_outofband(body.token,{ 'type' : transtionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token, 'elements' : elements })
+                return foreign_res.status(200).end("OK")
             }
         }
     }
-    res.status(514).end("FAILED LOGIN")
+    foreign_res.status(514).end("FAILED LOGIN")
     send_ws_outofband({ 'type' : 'secondary/action', 'OK' : 'false', 'reason' : 'missing data', 'action' : 'login', 'path' : 'user' })
 })
 
@@ -345,6 +355,17 @@ function add_local_cache_transition(cache_map,token,tobject) {
 }
 
 
+function generate_password_block() {
+    //
+    var passwords = passwordGenerator.generateMultiple(PASSWORD_BLOCKSIZE, {
+        length: 10,
+        uppercase: false
+    });
+    //
+    g_password_store = g_password_store.concat(passwords)
+}
+
+
 function load_parameters() {
     //
     global.clonify = (obj) => {
@@ -362,6 +383,16 @@ function load_parameters() {
         hash.update(text);
         let ehash = hash.digest('hex');
         return(ehash)
+    }
+
+    generate_password_block()
+
+    global.generate_password = () => {
+        let password = g_password_store.shift()
+        if ( g_password_store.length < PASSWORD_DEPLETION_MIN ) {
+            setTimeout(generate_password_block,100)
+        }
+        return(password)
     }
 
     let config = "./user-service.conf"

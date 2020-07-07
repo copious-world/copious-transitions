@@ -151,7 +151,7 @@ html {
 			z-index:101;
 			border: rgba(252, 190, 190, 0.4) 2px solid;
 			background-color: white;
-			overflow: auto;
+			overflow:hidden;
 		}
 
 		.solid_able {
@@ -163,7 +163,7 @@ html {
 			z-index:111;
 			border: rgba(252, 190, 190, 0.4) 2px solid;
 			background-color: white;
-			overflow: auto;
+			overflow: hidden;
 		}
 
 		@media screen and (max-width: 950px) {
@@ -505,6 +505,13 @@ html {
 			margin:2px;
 			width:80%;
 		}
+
+		.form_el_inner {
+			border:lightgray solid 1px;
+			padding:6px;
+			margin:2px;
+			width:100%;
+		}
 	
 		label {
 			font-weight:bold;
@@ -599,6 +606,7 @@ html {
 
 		.modal-footer {
 		  padding: 2px 16px;
+		  margin-bottom: 20px;
 		  background-color: darkgreen;
 		  color: white;
 		}
@@ -733,7 +741,7 @@ html {
 			<!-- Modal content -->
 			<div class="modal-content">
 				<div class="modal-header">
-					<span class="close">&times;</span>
+					<span id="contactModalCloser" class="close">&times;</span>
 					<h3><i>Captcha</i> : I am not a robot</h3>
 				</div>
 				<div class="modal-body">
@@ -775,6 +783,9 @@ html {
 			<p class='contact-submit'>
 			<button onclick="processContact()" >Submit</button>
 			</p>
+			<div class="form_el" style="height:20px;background-color:rgb(230,230,240,0.4);font-style: oblique;font-weight: bold;color:rgba(242, 242, 210, 0.3);">
+				copious contact (thank you for your interest and concerns)
+			</div>
 		</div>
 	</div>
 </div>
@@ -874,7 +885,7 @@ html {
 	// streamer-scratchpad  -- in the stream app was using this.
 	// //
 	async function fetchEndPoint(endpoint,port) {
-		port = port.length ? ':' + port : port
+		port = !(port) ? '' : ( port.length ? `:${port}`   : '')
 		let myRequest = new Request(`${location.protocol}//${g_siteURL}${port}/${endpoint}`);
 		try {
 			const body = await fetch(myRequest, {
@@ -910,6 +921,9 @@ html {
 		referrerPolicy: 'no-referrer', // no-referrer, *client
 		body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
 	  });
+	  if ( response.ok == false ) {
+		  console.log(response.status + ': ' + response.statusText)
+	  }
 	  return await response.json(); // parses JSON response into native JavaScript objects
 	}
 
@@ -1071,6 +1085,7 @@ html {
 			this.checks = props.checks
 
 			this.modal = props.modal
+			this.closer = props.closer
 			this.form = props.form
 			this.where_captcha = props.captcha
 			this.captch_input = props.captcha_field
@@ -1174,12 +1189,12 @@ html {
 	}
 
 
-	async function processUI_captchaService(handlerDefsValidator,calcAppDataDB,completionaAction) {
+	async function processUI_captchaService(handlerDefsValidator,calcAppDataDB,completionaAction,failureAction) {
 		//
 		g_ComponentErrorsActivated = true	// will be processing errors, etc. some selective behavior permitted
 		g_CurContainer = handlerDefsValidator
 		//
-		if ( g_CurContainer.checkFormValid() ) {
+		if ( g_CurContainer && g_CurContainer.checkFormValid() ) {
 			try {
 				// CAPTCH PROCESSING 
 				let captchaResult = await doCaptcha('','{{auth_path}}')   // the captcha has to be processed first.
@@ -1187,15 +1202,18 @@ html {
 				if ( captchaResult === true ) {
 					if ( g_currenCaptchaTOKEN ) {
 						let data = calcAppDataDB()		// calcAppDataDB
-						postData(g_CurContainer.service_url, data)
-						.then((resp) => {
-							if ( resp.OK ) {
+						try {
+							let resp = await postData(g_CurContainer.service_url, data)
+							if ( resp.OK === "true" ) {
 								g_currenCaptchaTOKEN = null;     // check for duplicates
-                                completionaAction();
+                                if ( completionaAction ) completionaAction(resp);
 							} else {
-                                g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${resp.reason}`)
+								g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${resp.reason}`)
+								if ( failureAction ) failureAction(resp)
                             }
-						});
+						} catch (e) {
+							console.log(e.message)
+						}
 					}
 				} else {
 					if ( captchaResult !== false ) {
@@ -1210,6 +1228,8 @@ html {
 			} catch(e) {
 				console.log(e.message)
 			}
+		} else {
+			throw new Error("The current container is not defined in processUI_captchaService.")
 		}
 	}
 
@@ -1356,14 +1376,14 @@ html {
 		g_apparition = null;
 		g_current_pin = null;
 		if ( !g_ComponentErrorsActivated ) {
-			g_CurContainer.hideFormErrorMessage();
+			if ( g_CurContainer ) g_CurContainer.hideFormErrorMessage();
 		}
 	}
 
 	function closefader(whichFader) {
 		let fdr = document.querySelector('#' + whichFader);
 		hideFader(fdr)
-		g_CurContainer.hideFormErrorMessage();
+		if ( g_CurContainer ) g_CurContainer.hideFormErrorMessage();
 	}
 
 	function closesolid(whichSolid) {
@@ -1374,12 +1394,14 @@ html {
 	// ---- ---- ---- ---- ---- ----
 
 	function unpin_current() {
-		g_CurContainer.switchCaptchaDisplay(false)
+		if ( g_CurContainer )  {
+			g_CurContainer.switchCaptchaDisplay(false)
+			g_CurContainer.hideFormErrorMessage();
+		}
 		if ( g_current_pin != null ) {
 			g_current_pin.style.visibility = "hidden";
 			g_current_pin.style.zIndex = -10
 		}
-		g_CurContainer.hideFormErrorMessage();
 	}
 	function fade_apparition(btn,evt) {
 		if ( g_apparition !== null ) {
@@ -1529,7 +1551,7 @@ html {
 	var g_currenCaptchaTOKEN = null; 	// delivered by the authorization handler, which maps this interaction to a session.
 	var g_captaFinalResolution = null;  // will be a function for completing a captcha
 
-	function captchaCheck(callBack) {
+	async function captchaCheck(callBack) {
 		//
 		let captchaGuessField = g_CurContainer.captch_input
 		if ( captchaGuessField ) {
@@ -1537,21 +1559,24 @@ html {
 			if ( captchaVal && captchaVal.length && g_currenCaptchaTOKEN ) {
 				//
 				let port = g_CurContainer.auth_port
-				port = port ? '' : ( port.length ? port + ':'  : '')
+				port = !(port) ? '' : ( port.length ? `:${port}`   : '')
 				//
-				postData(`${location.protocol}//${g_siteURL}:${port}/transition/secondary`, { 'captcha_val' : captchaVal, 'token' : g_currenCaptchaTOKEN })
-				.then((resp) => {
-							if ( resp.OK === "true" ) {
-					  				if ( g_captaFinalResolution !== null ) {
-										g_captaFinalResolution(1)
-					  				}
-							} else {
-					  				if ( g_captaFinalResolution !== null ) {
-										g_captaFinalResolution(2,"captcha does not match: try again")
-					  				}
+				try {
+					let url = `${location.protocol}//${g_siteURL}${port}/{{auth_path}}/secondary/transition`
+					let data = { 'captcha_val' : captchaVal, 'token' : g_currenCaptchaTOKEN }
+					let resp = await postData(url, data)
+					if ( resp.OK === "true" ) {
+							if ( g_captaFinalResolution !== null ) {
+								g_captaFinalResolution(1)
 							}
-					  });
-				//
+					} else {
+							if ( g_captaFinalResolution !== null ) {
+								g_captaFinalResolution(2,"captcha does not match: try again")
+							}
+					}
+				} catch (e) {
+					console.log(e.message)
+				}
 			}
 		}
 		//
@@ -1575,15 +1600,17 @@ html {
 
 	async function doCaptcha(port,proxyPath) {
 		//
-		g_CurContainer.switchCaptchaDisplay(true)
+		if (g_CurContainer ) g_CurContainer.switchCaptchaDisplay(true)
+		else {
+			throw new Error("Current container undefined in doCaptcha")
+		}
 		//
 		try {
-			port = port ? '' : ( port.length ? port + ':'  : '')
+			port = !(port) ? '' : ( port.length ? `:${port}`   : '')
 				//
-
 			let endpoint = `${location.protocol}//${g_siteURL}${port}/${proxyPath}/transition/captcha`
 			let captchaObject = await postData(endpoint)
-			if ( (captchaObject.type == "transition") && (captchaObject.OK == true) )  {
+			if ( (captchaObject.type == "transition") && (captchaObject.OK == 'true') )  {
 				let svgText = decodeURIComponent(captchaObject.elements.captcha)
 				let captchaPlacement = g_CurContainer.where_captcha
 				if ( captchaPlacement ) {
@@ -1610,24 +1637,26 @@ html {
 	function initContact() {
 		g_contact_Handling = new ValidationContainer({
 			"auth_port" : g_contact_port,
-            "service_url" : `http://${g_siteURL}/captcha/contact`,
+            "service_url" : `${location.protocol}//${g_siteURL}/{{auth_path}}/transition/contact`,
             "errors_here" : document.getElementById('contact-errors_here'),
             "failure_msg_prefix" : "Cannot Process Captcha",
 			"fields" : {
 				"name" : document.querySelector('#contact-name'),
 				"email" : document.querySelector('#contact-email'),
 				"website" : document.querySelector('#contact-website'),
-				"comment" : document.querySelector('#contact-comment'),
+				"comment" : document.querySelector('#contact-comment')
 			},
 			"checks" : {
 				"is_empty" : ["name","comment","email"],  // ref into fields above...
 				"email" : ["email"]
 			},
 			"modal" : document.querySelector('#contactModal'),
+			"closer" : document.querySelector('#contactModalCloser'),
 			"form" : document.querySelector('#myContactForm'),
 			"captcha" : document.querySelector('#captcha-goes-here'),
 			"captcha_field" : document.querySelector("#captcha-field")
 		})
+		g_CurContainer = g_contact_Handling; // has to be initlialized in the function
 	}
 
 
@@ -1682,7 +1711,15 @@ html {
 			login.style.visibility = "visible"
 			login.style.display = "block";
 			//
+			unpin_current();
 			g_CurContainer = g_login_Handling
+			//
+			//hide other things
+			let register = document.querySelector("#register")
+			if ( register ) {
+				register.style.visibility = "hidden"
+				register.style.display = "none";
+			}
 		}
 		login_opening_view()
 	}
@@ -1695,12 +1732,31 @@ html {
 			register.style.visibility = "visible"
 			register.style.display = "block";
 			//
+			unpin_current();
 			g_CurContainer = g_register_Handling
 			g_ComponentErrorsActivated = true
+			//
+			//hide other things
+			let login = document.querySelector("#login")
+			if ( login ) {
+				login.style.visibility = "hidden"
+				login.style.display = "none";
+			}
 		}
 		register_opening_view()
 	}
-	
+
+	var g_login_failure = null
+	function retry_password() {
+		login_process()
+		if ( g_login_failure ) g_login_failure()
+	}
+	var g_registration_failure = null
+	function already_registered() {
+		login_process()
+		if ( g_registration_failure ) g_registration_failure()
+	}
+
 
 	//  === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
 
@@ -1733,29 +1789,34 @@ html {
 	// // // ----------------- // // // ----------------- // // // -----------------
 
 	// initial validation application is contact
-	g_CurContainer = g_contact_Handling
+	g_CurContainer = null // will be initilialized within the finalizers
 
 	// EXTRA STUFF for some gracefull clicing
 	var the_thankyou_box = document.getElementById("thankyou_box");
 
 	// Get the <span> element that closes the modal
-	var span = document.getElementsByClassName("close")[0];
-
-	// When the user clicks on <span> (x), close the modal
-	span.onclick = function() {
-		switchCaptchaDisplay(false)
-		if ( g_captaFinalResolution ) g_captaFinalResolution(3)
+	function setupCaptchaClose() {
+		let closerList = document.getElementsByClassName("close");
+		let n = closerList.length
+		for ( let i = 0; i < n; i++ ) {
+			let span = closerList[i]
+			span.onclick = function() {
+				switchCaptchaDisplay(false)
+				if ( g_captaFinalResolution ) g_captaFinalResolution(3)
+			}
+		}
 	}
 
 	// When the user clicks anywhere outside of the modal, close it
 	window.onclick = function(event) {
-	  if ( g_CurContainer && (event.target == g_CurContainer.modal) ) {
+	  if ( g_CurContainer && (event.target == g_CurContainer.closer) ) {
 		g_CurContainer.switchCaptchaDisplay(false)
 		g_CurContainer.hideFormErrorMessage();
 	  }
 	  hide_thankyou_box(the_thankyou_box)
 	}
 
+	setupCaptchaClose()
 
 	g_finalizers.forEach(fn => { fn()})
 
