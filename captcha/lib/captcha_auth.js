@@ -3,16 +3,14 @@ const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth
 const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
 const uuid = require('uuid/v4');
-const securePassword = require('secure-password')
 
 
 class CaptchaSessionManager extends SessionManager {
 
-    constructor(exp_app,db_obj) {
+    constructor(exp_app,db_obj,bussiness) {
         //
-        super(exp_app,db_obj)//
+        super(exp_app,db_obj,bussiness)//
         //
-        this.pwd = securePassword()
         //
         let db_store = db_obj.session_store.generateStore(expressSession)  // custom application session store for express 
         //
@@ -41,41 +39,13 @@ class CaptchaSessionManager extends SessionManager {
 
     // ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----
     async hash_pass(password) {
-        let passwordBuffer = Buffer.from(password)
-        let hashpass =  await this.pwd.hash(passwordBuffer)
-        return(hashpass)
+        return(global_hasher(password))
     }
 
     // ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----
     async password_check(db_password,client_password) {
-        //
-        let userPassword = await this.hash_pass(client_password)
-        //
-        const result = await this.pwd.verify(userPassword, db_password)
-        //
-        switch (result) {
-            case securePassword.INVALID_UNRECOGNIZED_HASH: {
-                console.error('This hash was not made with secure-password. Attempt legacy algorithm')
-                return false
-            }
-            case securePassword.INVALID: {
-                console.log('Invalid password')
-                return false
-            }
-            case securePassword.VALID: {
-                return true
-            }
-                /*
-            case securePassword.VALID_NEEDS_REHASH:
-                console.log('Yay you made it, wait for us to improve your safety')
-                try {
-                    const improvedHash = await pwd.hash(userPassword)
-                    // Save improvedHash somewhere
-                } catch (err) {
-                    console.error('You are authenticated, but we could not improve your safety this time around')
-                }
-                break
-                */
+        if ( db_password === client_password ) {
+            return(true)
         }
         return(false)
     }

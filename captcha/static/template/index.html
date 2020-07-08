@@ -45,7 +45,6 @@ html {
     display: block;
 }
 
-		
 		.items {
 			display: flex;
 			flex-wrap: wrap;
@@ -183,8 +182,6 @@ html {
 			background-color: lightgoldenrodyellow;
 			overflow: auto;
 		}
-
-
 
 		@media screen and (max-width: 1040px) {
 			.fade_able {
@@ -518,6 +515,7 @@ html {
 			color:darkgreen;
 			width:35%;
 		}
+
 		.field_el {
 			width:65%;
 		}
@@ -540,9 +538,9 @@ html {
 			margin:3%;
 		}
 	
-		#errors_here {
+		.error-message {
 			visibility:hidden;
-			width:100%;
+			width:75%;
 			font-weight:bolder;
 			color:red;
 			background-color:white;
@@ -760,7 +758,7 @@ html {
 		</div>
 		
 		<div id="myContactForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
-			<div id="contact-errors_here" >no error</div>
+			<div class="error-message" id="contact-errors_here" >no error</div>
 			<div class="form_el" >
 				<label for='contact-name' class='name'>Name<span> (required) </span></label>
 				<input type='text' name='contact-name' id='contact-name' value='' class='field_el name' required onkeyup="onkey_checkContactError('contact-name')" />
@@ -826,7 +824,7 @@ html {
 <div id="thankyou_box" class="fade_able" onclick="hide_thankyou_box(this)">
 	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('thankyou_box')">x</span></div>
 	<div class="fade_able_content" >
-		<span style="color:coral;font-weight: 900;font-size:xx-large;">Thank you for your message.</span>
+		<span id="thankyou_box-message" style="color:coral;font-weight: 900;font-size:xx-large;">Thank you for your message.</span>
 	</div>
 </div>
 
@@ -1028,7 +1026,7 @@ html {
             data.append('email', email)
 		}
 
-		success_report(json){
+		success_report(json) {
 			if ( this.positiveCompletion ) this.errorMessage(this.positiveCompletion)
 			document.querySelector(this.errorDiv).style.color = "blue"
 		}
@@ -1121,21 +1119,30 @@ html {
 			this.formErrorMessage(msg);
 		}
 
-
 		emailFormatError() {
 			this.formErrorMessage("Email does not match a known email format.");
 		}
 
+		matchFieldError(whichFields) {
+			this.formErrorMessage(`${whichFields} are required to have the same value`);
+		}
 
+		//
 		checkFormValid() {
 			if ( !g_ComponentErrorsActivated ) {
 				return(true);
 			}
+
+			for ( let field in this.fields ) {
+				let c = this.fields[field]
+				colorize(c,"black")
+			}
+
 			//
 			let mustHaveValue = this.checks.is_empty
 			let empty_fields = mustHaveValue.filter((field) => {
 				let c = this.fields[field]
-				colorize(c,"black")
+				//colorize(c,"black")
 				return(is_empty(c))
 			})
 			//
@@ -1160,16 +1167,23 @@ html {
 			//
 			if ( this.password_rules && (typeof this.password_rules === "function") ) {
 				if ( this.checks.passwords && (this.checks.passwords.length) ) {
-					this.checks.passwords.forEach(
-						pfield => {
+					let pvalues = this.checks.passwords.map(pfield => {
 							let c = this.fields[pfield]
 							if ( c ) {
-								return(this.password_rules(pfield,c.value))
+								return(c.value)
 							} else {
-								return(false)
+								return(null)
 							}
-						}
-					)
+						})
+					//
+					let check = this.password_rules(pvalues)
+					//
+					if ( !check ) {
+						this.matchFieldError("passwords")
+						return(false)
+					}
+					//
+					this.hideFormErrorMessage()
 				}
 			}
 			//
@@ -1212,7 +1226,8 @@ html {
 								if ( failureAction ) failureAction(resp)
                             }
 						} catch (e) {
-							console.log(e.message)
+							g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${e.message}`)
+							if ( failureAction ) failureAction(resp)
 						}
 					}
 				} else {
@@ -1289,9 +1304,14 @@ html {
 		theBox.style.display = "none";
 	}
 
-	function show_thankyou_box() {
+	function show_thankyou_box(msg) {
 		let theBox = document.querySelector("#thankyou_box")
 		if ( theBox ) {
+			if ( msg ) {
+				let mbox = document.querySelector("#thankyou_box-message")
+				if ( mbox ) mbox.innerHTML = msg
+
+			}
 			theBox.style.visibility = "visible"
 			theBox.style.display = "block";
 		}
@@ -1680,7 +1700,7 @@ html {
 
 	function contact_completionaAction() {
 		unpin_current();
-		show_thankyou_box();
+		show_thankyou_box("Thank you for your message");
 	}
 	
 	function processContact() {
@@ -1746,6 +1766,23 @@ html {
 		register_opening_view()
 	}
 
+	function hide_join_process() {
+		let register = document.querySelector("#register")
+		if ( register ) {
+			register.style.visibility = "hidden"
+			register.style.display = "none";
+		}
+	}
+
+	function hide_login_process() {
+		//hide other things
+		let login = document.querySelector("#login")
+		if ( login ) {
+			login.style.visibility = "hidden"
+			login.style.display = "none";
+		}
+	}
+
 	var g_login_failure = null
 	function retry_password() {
 		login_process()
@@ -1801,7 +1838,7 @@ html {
 		for ( let i = 0; i < n; i++ ) {
 			let span = closerList[i]
 			span.onclick = function() {
-				switchCaptchaDisplay(false)
+				if ( g_CurContainer ) g_CurContainer.switchCaptchaDisplay(false)
 				if ( g_captaFinalResolution ) g_captaFinalResolution(3)
 			}
 		}

@@ -19,7 +19,7 @@ class CaptchaUsers extends TaggedTransition {
     }
 
     kv_store_key() {
-        return("user_id")
+        return("email")
     }
 
     primary_key() {

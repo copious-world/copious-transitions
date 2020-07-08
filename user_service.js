@@ -211,7 +211,7 @@ g_app.post(['/users/login','/users/logout','/users/register','/users/forgot'], a
                 return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transtionObj })));
             }
         } catch (e) {
-            return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : 'broken server' })));
+            return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : e.message })));
         }
     }
     //
@@ -365,7 +365,7 @@ function generate_password_block() {
     g_password_store = g_password_store.concat(passwords)
 }
 
-
+var g_hex_re = /^[0-9a-fA-F]+$/;
 function load_parameters() {
     //
     global.clonify = (obj) => {
@@ -376,6 +376,12 @@ function load_parameters() {
         }
         return(obj)
         */
+    }
+
+    global.isHex = (str) => {
+        let check = g_hex_re.test(str)
+        g_hex_re.lastIndex = 0; // be sure to reset the index after using .text()
+        return(check)
     }
 
     global.do_hash = (text) => {
@@ -393,6 +399,15 @@ function load_parameters() {
             setTimeout(generate_password_block,100)
         }
         return(password)
+    }
+
+    global.global_hasher = (str) => {
+        if ( str ) {
+            const hash = crypto.createHash('sha256');
+            hash.update(str);
+            return(hash.digest('hex'))
+        }
+        return('')
     }
 
     let config = "./user-service.conf"

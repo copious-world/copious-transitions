@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/rleddy/copious-transitions#readme",
   "dependencies": {
+    "cached": "^5.0.2",
     "clone": "^2.1.2",
     "connect-memcached": "^1.0.0",
     "generate-password": "^1.5.1",

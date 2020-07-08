@@ -45,7 +45,6 @@ html {
     display: block;
 }
 
-		
 		.items {
 			display: flex;
 			flex-wrap: wrap;
@@ -183,8 +182,6 @@ html {
 			background-color: lightgoldenrodyellow;
 			overflow: auto;
 		}
-
-
 
 		@media screen and (max-width: 1040px) {
 			.fade_able {
@@ -518,6 +515,7 @@ html {
 			color:darkgreen;
 			width:35%;
 		}
+
 		.field_el {
 			width:65%;
 		}
@@ -540,9 +538,9 @@ html {
 			margin:3%;
 		}
 	
-		#errors_here {
+		.error-message {
 			visibility:hidden;
-			width:100%;
+			width:75%;
 			font-weight:bolder;
 			color:red;
 			background-color:white;
@@ -979,7 +977,7 @@ viewBox="0 0 360 38">
 		</div>
 		
 		<div id="myContactForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
-			<div id="contact-errors_here" >no error</div>
+			<div class="error-message" id="contact-errors_here" >no error</div>
 			<div class="form_el" >
 				<label for='contact-name' class='name'>Name<span> (required) </span></label>
 				<input type='text' name='contact-name' id='contact-name' value='' class='field_el name' required onkeyup="onkey_checkContactError('contact-name')" />
@@ -1879,7 +1877,7 @@ viewBox="0 0 360 38">
 <div id="thankyou_box" class="fade_able" onclick="hide_thankyou_box(this)">
 	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('thankyou_box')">x</span></div>
 	<div class="fade_able_content" >
-		<span style="color:coral;font-weight: 900;font-size:xx-large;">Thank you for your message.</span>
+		<span id="thankyou_box-message" style="color:coral;font-weight: 900;font-size:xx-large;">Thank you for your message.</span>
 	</div>
 </div>
 
@@ -1921,7 +1919,7 @@ viewBox="0 0 360 38">
 		</div>
 	</div>
 
-	<div id="register-errors_here" >no error</div>
+	<div class="error-message" id="register-errors_here" >no error</div>
 	<div id="the-register-form-secure" style="color:darkorange;background-color: palegreen;visibility:hidden;display:none;">
         switching to a secure version of this page
     </div>
@@ -1929,7 +1927,7 @@ viewBox="0 0 360 38">
 
     <div class="form_el" >
         <label for='register-name' class='email'>Name:</span></label>
-        <input type='email' name='register-name' id='register-name' value=''class='field_el name'  required onkeyup="onkey_checkRegisterError(this)"  />
+        <input type='text' name='register-name' id='register-name' value=''class='field_el name'  required onkeyup="onkey_checkRegisterError(this)"  />
     </div>
  
     <div class="form_el" >
@@ -1970,12 +1968,22 @@ viewBox="0 0 360 38">
 	}
 
 	function registrationFailed(resp) {
-
+        g_register_Handling.switchCaptchaDisplay(false)
+        g_register_Handling.formErrorMessage("Our registration process is experience difficulties. Please try again later.")
 	}
 
-    //
-    function register_password_rules(fld_name,ptext) {
-        return(true)
+	//
+	var g_password_checks = {}
+    function register_password_rules(fld_list) {
+		if ( fld_list.length ) {
+			if ( fld_list.some(val => {return val === null}) ) {
+				return false // some field was not represented in the HTML
+			}
+			let test_val = fld_list[0]
+			let check = fld_list.every(val => { return val === test_val})
+			return(check)
+		}
+        return(false)
     }
 	// REGISTRATION APPLICATION
 	//
@@ -1983,7 +1991,7 @@ viewBox="0 0 360 38">
 	function initRegistration() {
 		g_register_Handling = new ValidationContainer({
 				"auth_port" : "",
-				"serice_url" : `http://${g_siteURL}/captcha/users/register`,
+				"service_url" : `https://${g_siteURL}/captcha/users/register`,
 				"errors_here" : document.getElementById('register-errors_here'),
 				"failure_msg_prefix" : "Registration failed",
 				"password_rules" : register_password_rules,
@@ -2017,7 +2025,7 @@ viewBox="0 0 360 38">
 			"name" : getVal(c_name),
 			"email" : getVal(c_email),
 			"password" : getVal(c_password),
-			"password-verify" : getVal(c_password_verify),
+			"verify_password" : getVal(c_password_verify),
 			'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
 			'action' : 'register',
             'form_key' : 'register'
@@ -2028,8 +2036,23 @@ viewBox="0 0 360 38">
 		return(data)
 	}
 
-	function registration_completionaAction() {
-		show_thankyou_box()
+	function registration_completionaAction(resp) {
+		if ( resp ) {
+			let data = resp.data
+			if ( data.amelioritive_action ) {
+				try {
+					eval(data.amelioritive_action)
+				} catch(e) {
+					console.log(e)
+				}
+				return
+			}
+		}
+		if ( g_register_Handling ) {
+			g_register_Handling.switchCaptchaDisplay(false)
+		}
+		hide_join_process()
+		show_thankyou_box("Thank you for joining our community.")
 	}
 
 	function processRegister() {
@@ -2120,7 +2143,7 @@ viewBox="0 0 360 38">
 </div>
 
 <div id="myLoginForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
-    <div id="login-errors_here" >no error</div>
+    <div class="error-message" id="login-errors_here" >no error</div>
 
     <div id="the-login-form-secure" style="color:darkorange;background-color: palegreen;visibility:hidden;display:none;">
         switching to a secure version of this page
@@ -2642,7 +2665,7 @@ viewBox="0 0 360 38">
             data.append('email', email)
 		}
 
-		success_report(json){
+		success_report(json) {
 			if ( this.positiveCompletion ) this.errorMessage(this.positiveCompletion)
 			document.querySelector(this.errorDiv).style.color = "blue"
 		}
@@ -2735,21 +2758,30 @@ viewBox="0 0 360 38">
 			this.formErrorMessage(msg);
 		}
 
-
 		emailFormatError() {
 			this.formErrorMessage("Email does not match a known email format.");
 		}
 
+		matchFieldError(whichFields) {
+			this.formErrorMessage(`${whichFields} are required to have the same value`);
+		}
 
+		//
 		checkFormValid() {
 			if ( !g_ComponentErrorsActivated ) {
 				return(true);
 			}
+
+			for ( let field in this.fields ) {
+				let c = this.fields[field]
+				colorize(c,"black")
+			}
+
 			//
 			let mustHaveValue = this.checks.is_empty
 			let empty_fields = mustHaveValue.filter((field) => {
 				let c = this.fields[field]
-				colorize(c,"black")
+				//colorize(c,"black")
 				return(is_empty(c))
 			})
 			//
@@ -2774,16 +2806,23 @@ viewBox="0 0 360 38">
 			//
 			if ( this.password_rules && (typeof this.password_rules === "function") ) {
 				if ( this.checks.passwords && (this.checks.passwords.length) ) {
-					this.checks.passwords.forEach(
-						pfield => {
+					let pvalues = this.checks.passwords.map(pfield => {
 							let c = this.fields[pfield]
 							if ( c ) {
-								return(this.password_rules(pfield,c.value))
+								return(c.value)
 							} else {
-								return(false)
+								return(null)
 							}
-						}
-					)
+						})
+					//
+					let check = this.password_rules(pvalues)
+					//
+					if ( !check ) {
+						this.matchFieldError("passwords")
+						return(false)
+					}
+					//
+					this.hideFormErrorMessage()
 				}
 			}
 			//
@@ -2826,7 +2865,8 @@ viewBox="0 0 360 38">
 								if ( failureAction ) failureAction(resp)
                             }
 						} catch (e) {
-							console.log(e.message)
+							g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${e.message}`)
+							if ( failureAction ) failureAction(resp)
 						}
 					}
 				} else {
@@ -2903,9 +2943,14 @@ viewBox="0 0 360 38">
 		theBox.style.display = "none";
 	}
 
-	function show_thankyou_box() {
+	function show_thankyou_box(msg) {
 		let theBox = document.querySelector("#thankyou_box")
 		if ( theBox ) {
+			if ( msg ) {
+				let mbox = document.querySelector("#thankyou_box-message")
+				if ( mbox ) mbox.innerHTML = msg
+
+			}
 			theBox.style.visibility = "visible"
 			theBox.style.display = "block";
 		}
@@ -3413,7 +3458,7 @@ viewBox="0 0 360 38">
 
 	function contact_completionaAction() {
 		unpin_current();
-		show_thankyou_box();
+		show_thankyou_box("Thank you for your message");
 	}
 	
 	function processContact() {
@@ -3479,6 +3524,23 @@ viewBox="0 0 360 38">
 		register_opening_view()
 	}
 
+	function hide_join_process() {
+		let register = document.querySelector("#register")
+		if ( register ) {
+			register.style.visibility = "hidden"
+			register.style.display = "none";
+		}
+	}
+
+	function hide_login_process() {
+		//hide other things
+		let login = document.querySelector("#login")
+		if ( login ) {
+			login.style.visibility = "hidden"
+			login.style.display = "none";
+		}
+	}
+
 	var g_login_failure = null
 	function retry_password() {
 		login_process()
@@ -3534,7 +3596,7 @@ viewBox="0 0 360 38">
 		for ( let i = 0; i < n; i++ ) {
 			let span = closerList[i]
 			span.onclick = function() {
-				switchCaptchaDisplay(false)
+				if ( g_CurContainer ) g_CurContainer.switchCaptchaDisplay(false)
 				if ( g_captaFinalResolution ) g_captaFinalResolution(3)
 			}
 		}

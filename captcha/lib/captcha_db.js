@@ -2,11 +2,14 @@ const { DBClass, SessionStore } = require.main.require('./lib/general_db')
 const processExists = require('process-exists');
 const EventEmitter = require('events')
 const CitadelClient = require('node_citadel')
-
+const cached = require('cached')
 //
 //
 const Memcached = require("memcached")
 const MemCacheStoreFactory = require('connect-memcached');
+
+
+
 
 const apiKeys = require.main.require('./local/api_keys')
 
@@ -24,6 +27,11 @@ g_citadel_pass = apiKeys.citadel_password.trim();  // decrypt ??
 })();
 
 const memcdClient = new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
+
+const userCache = cached('users', { backend: {
+  type: 'memcached',
+  client: memcdClient
+}});
 
 var g_citadel = null
 var g_citadel_pass = ""
@@ -145,7 +153,7 @@ class CaptchaDBClass extends DBClass {
 
     //
     constructor() {
-        super(CaptchaSessionStore,memcdClient)
+        super(CaptchaSessionStore,userCache)
     }
 
     // // // 
@@ -165,31 +173,43 @@ class CaptchaDBClass extends DBClass {
     //  custom: contacts, ...
     store(collection,data) {
         if ( G_contact_trns.tagged(collection) ) {
-            let udata = G_contact_trns.update(data)
-            G_contact_trns.enqueue(udata)
+          let udata = G_contact_trns.update(data)
+          G_contact_trns.enqueue(udata)
         } else {
-            super.store(collection,data)
+          super.store(collection,data)
         }
     }
 
 
     // // // 
-    store_user(udata) {
+    store_user(fdata) {
         if ( G_users_trns.tagged('user') ) {
-            udata = G_users_trns.update(udata)          // custom user storage (seconday service)
-            G_users_trns.enqueue(udata)
+          let udata = G_users_trns.update(fdata)          // custom user storage (seconday service)
+          G_users_trns.enqueue(udata)
+          //
+          let key_key = G_users_trns.kv_store_key()
+          let key = udata[key_key]
+          this.store_cache(key,udata,G_users_trns.back_ref());  // this app will use cache to echo persitent storage
+          super.store_user(udata,key_key)                               // use persitent storage
         }
-        this.storeCache(email,body,G_users_trns.back_ref());  // this app will use cache to echo persitent storage
-        super.store_user(udata)                               // use persitent storage
     }
 
-    async fetch_user(udata) {
+    async fetch_user(fdata) {
       if ( G_users_trns.from_cache() ) {
-        let udata = await this.fetch_user_from_key_value_store(post_body[G_users_trns.kv_store_key()])
+        let udata = await this.fetch_user_from_key_value_store(fdata[G_users_trns.kv_store_key()])
         if ( udata ) {
+          return(udata)
+        } else {
+          let key_key = G_users_trns.kv_store_key()
+          let key = fdata[key_key]
+          udata = super.fetch_user(key)
+          if ( udata ) {
+            this.store_cache(key,udata,G_users_trns.back_ref());
             return(udata)
+          }
         }
       }
+      return(false)
     }
 
     update_user(udata) {

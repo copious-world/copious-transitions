@@ -32,7 +32,7 @@
 		</div>
 	</div>
 
-	<div id="register-errors_here" >no error</div>
+	<div class="error-message" id="register-errors_here" >no error</div>
 	<div id="the-register-form-secure" style="color:darkorange;background-color: palegreen;visibility:hidden;display:none;">
         switching to a secure version of this page
     </div>
@@ -40,7 +40,7 @@
 
     <div class="form_el" >
         <label for='register-name' class='email'>Name:</span></label>
-        <input type='email' name='register-name' id='register-name' value=''class='field_el name'  required onkeyup="onkey_checkRegisterError(this)"  />
+        <input type='text' name='register-name' id='register-name' value=''class='field_el name'  required onkeyup="onkey_checkRegisterError(this)"  />
     </div>
  
     <div class="form_el" >
@@ -81,12 +81,22 @@
 	}
 
 	function registrationFailed(resp) {
-
+        g_register_Handling.switchCaptchaDisplay(false)
+        g_register_Handling.formErrorMessage("Our registration process is experience difficulties. Please try again later.")
 	}
 
-    //
-    function register_password_rules(fld_name,ptext) {
-        return(true)
+	//
+	var g_password_checks = {}
+    function register_password_rules(fld_list) {
+		if ( fld_list.length ) {
+			if ( fld_list.some(val => {return val === null}) ) {
+				return false // some field was not represented in the HTML
+			}
+			let test_val = fld_list[0]
+			let check = fld_list.every(val => { return val === test_val})
+			return(check)
+		}
+        return(false)
     }
 	// REGISTRATION APPLICATION
 	//
@@ -94,7 +104,7 @@
 	function initRegistration() {
 		g_register_Handling = new ValidationContainer({
 				"auth_port" : "",
-				"serice_url" : `http://${g_siteURL}/{{auth_path}}/users/register`,
+				"service_url" : `https://${g_siteURL}/{{auth_path}}/users/register`,
 				"errors_here" : document.getElementById('register-errors_here'),
 				"failure_msg_prefix" : "Registration failed",
 				"password_rules" : register_password_rules,
@@ -128,7 +138,7 @@
 			"name" : getVal(c_name),
 			"email" : getVal(c_email),
 			"password" : getVal(c_password),
-			"password-verify" : getVal(c_password_verify),
+			"verify_password" : getVal(c_password_verify),
 			'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
 			'action' : 'register',
             'form_key' : 'register'
@@ -139,8 +149,23 @@
 		return(data)
 	}
 
-	function registration_completionaAction() {
-		show_thankyou_box()
+	function registration_completionaAction(resp) {
+		if ( resp ) {
+			let data = resp.data
+			if ( data.amelioritive_action ) {
+				try {
+					eval(data.amelioritive_action)
+				} catch(e) {
+					console.log(e)
+				}
+				return
+			}
+		}
+		if ( g_register_Handling ) {
+			g_register_Handling.switchCaptchaDisplay(false)
+		}
+		hide_join_process()
+		show_thankyou_box("Thank you for joining our community.")
 	}
 
 	function processRegister() {
