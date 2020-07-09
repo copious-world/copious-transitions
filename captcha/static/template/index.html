@@ -1123,7 +1123,7 @@ html {
 			this.formErrorMessage("Email does not match a known email format.");
 		}
 
-		matchFieldError(whichFields) {
+		passwordFieldError(whichFields) {
 			this.formErrorMessage(`${whichFields} are required to have the same value`);
 		}
 
@@ -1176,10 +1176,11 @@ html {
 							}
 						})
 					//
-					let check = this.password_rules(pvalues)
+					let [check,violation] = this.password_rules(pvalues)
 					//
 					if ( !check ) {
-						this.matchFieldError("passwords")
+						let message = violation()
+						this.passwordFieldError(message)
 						return(false)
 					}
 					//

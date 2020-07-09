@@ -94,7 +94,7 @@
 			}
 			let test_val = fld_list[0]
 			let check = fld_list.every(val => { return val === test_val})
-			return(check)
+			return([check,()=>{return "Passwords must have the same value"}])
 		}
         return(false)
     }

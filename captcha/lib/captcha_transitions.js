@@ -81,12 +81,11 @@ class ContactPaths extends TaggedTransition {
 }
 
 // Password Reset
-class PasswordReset extends TaggedTransition {
+class PasswordReset extends CaptchaUsers {
     constructor() {
         super("password-reset")
     }
     //
-
 }
 
 

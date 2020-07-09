@@ -103,6 +103,11 @@
             <input type='password' name='login-password' id='login-password' value='' class='field_el password' onkeyup="onkey_checkLoginError('login-password')"  />
         </div>
 
+        <div id="password-verify-container" class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+            <label for='login-password-match' class='login-labeler'>Password Verify:</span></label>
+            <input type='password' name='login-password-match' id='login-password-match' value='' class='field_el password' onkeyup="onkey_checkLoginError('login-password-match')"  />
+        </div>
+
         <div id="openID-container" class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
             <label for='login-openID' class='login-labeler'>OpenID:</span></label>
             <input type='text' name='login-openID' id='login-openID' value='' class='field_el'  />
@@ -116,7 +121,13 @@
     <div id="forgot-container" class="form_el" style="padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style:initial;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;" >
     <p class='login-submit' style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
         Did you forget your password?<br>
-        <button onclick="processForgotPassword()" style="width:80%;" >Forgot Password</button>
+        <button onclick="presentForgotPassword()" style="width:80%;" >Forgot Password</button>
+    </p>
+    </div>
+
+    <div id="forgot-container-submit" class="form_el" style="visibility:hidden;display:none;padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style:initial;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;" >
+    <p class='login-submit' style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
+        <button onclick="processForgotPassword()" style="width:80%;" >Submit Password Update</button>
     </p>
     </div>
 
@@ -141,23 +152,27 @@
 
     var loginStrategyField = document.getElementById("login-strategy-value")
     function login_strategy(strategy) {
+        hide_password_verify_container()
         loginStrategyField.value = strategy
         let fergit = document.getElementById('forgot-container')
         let methodSign = document.getElementById('login-method-banner')
         if ( fergit ) {
             if ( strategy === 'local' ) {
-                fergit.style.display = "block"
-                fergit.style.visibility = "visible"
+                show_fergit_container()
                 if ( methodSign ) methodSign.innerHTML = '{{companyShortLink}}'
             } else {
-                fergit.style.display = "none"
-                fergit.style.visibility = "hidden"
+                hide_fergit_container()
                 if ( methodSign ) methodSign.innerHTML = strategy
             }
         }
     }
+    //
     var g_passwordContainer = document.getElementById("password-container")
     var g_OpenIDContainer = document.getElementById("openID-container")
+    var g_passwordVerifyContainer = document.getElementById("password-container-verify")
+    var g_forgotSubmitContainer = document.getElementById("forgot-container-submit")
+    var g_fergit = document.getElementById('forgot-container')
+    //
     function show_password_container() {
         if ( g_passwordContainer ) {
             g_passwordContainer.style.visibility = "visible"
@@ -168,6 +183,44 @@
         if ( g_passwordContainer ) {
             g_passwordContainer.style.visibility = "hidden"
             g_passwordContainer.style.display = "none"
+        }
+    }
+    function show_fergit_container() {
+        if ( g_fergit ) {
+            g_fergit.style.visibility = "visible"
+            g_fergit.style.display = "block"
+        }
+        hide_forgot_submit_container()
+    }
+    function hide_fergit_container() {
+        if ( g_fergit ) {
+            g_fergit.style.visibility = "hidden"
+            g_fergit.style.display = "none"
+        }
+    }
+    function show_password_verify_container() {
+        if ( g_passwordVerifyContainer ) {
+            g_passwordVerifyContainer.style.visibility = "visible"
+            g_passwordVerifyContainer.style.display = "block"
+        }
+    }
+    function hide_password_verify_container() {
+        if ( g_passwordVerifyContainer ) {
+            g_passwordVerifyContainer.style.visibility = "hidden"
+            g_passwordVerifyContainer.style.display = "none"
+        }
+    }
+    function show_forgot_submit_container() {
+        hide_fergit_container()
+        if ( g_forgotSubmitContainer ) {
+            g_forgotSubmitContainer.style.visibility = "visible"
+            g_forgotSubmitContainer.style.display = "block"
+        }
+    }
+    function hide_forgot_submit_container() {
+        if ( g_forgotSubmitContainer ) {
+            g_forgotSubmitContainer.style.visibility = "hidden"
+            g_forgotSubmitContainer.style.display = "none"
         }
     }
     function show_openID_container() {
@@ -239,7 +292,9 @@
     }
 
     function login_password_rules(fld_name,ptext) {
-        return(true)
+        let violation_msg = "Passwords must be at eight seven"
+        violation_msg = "Passwords should have at least one number, at least one alphabetic character, and at least on punctuation character"
+        return([true,()=>{return violation_msg}])
     }
 
     function presentLogout(accountData) {
@@ -310,6 +365,7 @@
 
     // LOGIN APPLICATION
     var g_login_Handling = null
+    var g_forgot_Handling = null
     
     function initLogin() {
         g_login_Handling = new ValidationContainer({
@@ -327,6 +383,27 @@
 				"is_empty" : ["password","email"],  // ref into fields above...
 				"email" : ["email"],
                 "passwords" : ["password"]
+			},
+            "modal" : document.getElementById("myLoginModal"),
+            "closer" : document.getElementById('myLoginModalCloser'),
+			"form" : document.getElementById('myLoginForm'),
+			"captcha" : document.getElementById('captcha-goes-here-login'),
+			"captcha_field" : document.getElementById("captcha-field-login")
+        });
+        g_forgot_Handling = new ValidationContainer({  // basically uses the login form
+            "service_url" : `/captcha/`,
+            "errors_here" : document.getElementById('login-errors_here'),
+            "failure_msg_prefix" : "Password Reset Failed",
+            "password_rules" : register_password_rules,         // this application knows that the registration password rules are available.
+			"fields" : {
+				"email" : document.getElementById('login-email'),
+                "password" : document.getElementById('login-password'),
+                "password-match" : document.getElementById('login-password-match'),
+			},
+			"checks" : {
+				"is_empty" : ["password","email"],  // ref into fields above...
+				"email" : ["email"],
+                "passwords" : ["password","password-match"]
 			},
             "modal" : document.getElementById("myLoginModal"),
             "closer" : document.getElementById('myLoginModalCloser'),
@@ -363,24 +440,66 @@
         if ( secondaryVerify(resp) ) {
             presentLogout(resp)
         }
-	}
+    }
+    
+    function forgot_calcAppDataDB() {
+        let c_email =  g_login_Handling.fields["email"]
+        let c_password = g_login_Handling.fields["password"]
+        let c_password_verify = g_register_Handling.fields["password-match"]
+		//
+        let data = {
+            "email" : getVal(c_email),
+            "password" : getVal(c_password),
+			"verify_password" : getVal(c_password_verify),
+            'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
+            'action' : 'forgot',
+            'form_key' : 'forgot'
+        }
+		//
+		return(data)
+    }
+    
+    function forgot_completionaAction(resp) {
+        if ( resp && reps.data ) {
+            let data = resp.data
+            let message = "Please try again later"
+            if ( data.forgetfulness_proceed ) {
+                message = "You will receive an email with a link to a password restoration page"
+            }
+            if ( g_forgot_Handling ) {
+                g_forgot_Handling.switchCaptchaDisplay(false)
+            }
+            hide_login_process()
+            show_thankyou_box(message)
+            login_strategy('local');show_password_container();hide_openID_container()
+            hide_password_verify_container()
+            hide_forgot_submit_container()
+        }
+    }
 
-	function processAuthEndpoint(endpoint) {
+	function processAuthEndpoint(endpoint,handler,calcAppDataDB,completionaAction,failedAction) {
         let url = `${location.protocol}//${g_siteURL}/{{auth_path}}/${endpoint}`
         g_login_Handling.service_url = url
-		processUI_captchaService( g_login_Handling,
-                                    login_calcAppDataDB,
-									login_completionaAction, loginFailed )
+		processUI_captchaService(handler, login_calcAppDataDB, completionaAction, failedAction)
 	}
     
     // send users throught the captcha interface
     function processLogin() {
-        processAuthEndpoint("users/login")
+        processAuthEndpoint("users/login", g_login_Handling, login_calcAppDataDB, login_completionaAction, loginFailed)
     }
 
     // send users throught the captcha interface
     function processForgotPassword() {
-        processAuthEndpoint("users/forgot")
+        processAuthEndpoint("users/forgot", g_forgot_Handling, forgot_calcAppDataDB, forgot_completionaAction, () => {})
+    }
+
+    function presentForgotPassword() {
+        login_strategy('local');show_password_container();hide_openID_container()
+        show_password_verify_container()
+        show_forgot_submit_container()
+        if ( g_forgot_Handling ) {
+            g_forgot_Handling.formErrorMessage("Please enter your password twice (just like registration). Later, you will receive an email with a link for activating this change.")
+        }
     }
 
 	function onkey_checkLoginError(srcField) {
