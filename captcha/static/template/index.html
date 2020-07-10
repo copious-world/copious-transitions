@@ -1742,7 +1742,7 @@ html {
 				register.style.display = "none";
 			}
 		}
-		login_opening_view()
+		login_opening_view()	// app implements
 	}
 
 	// 
@@ -1768,6 +1768,10 @@ html {
 	}
 
 	function hide_join_process() {
+		if ( g_register_Handling ) {
+			g_register_Handling.switchCaptchaDisplay(false)
+		}
+
 		let register = document.querySelector("#register")
 		if ( register ) {
 			register.style.visibility = "hidden"
@@ -1776,6 +1780,9 @@ html {
 	}
 
 	function hide_login_process() {
+		if ( g_login_Handling ) {
+			g_login_Handling.switchCaptchaDisplay(false)
+		}
 		//hide other things
 		let login = document.querySelector("#login")
 		if ( login ) {
@@ -1798,22 +1805,25 @@ html {
 
 	//  === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
 
-	function logout() {
+	async function logout() {
 		// send synch message
+		g_LoggedIn = await app_process_logout()
 		// then
-		for ( let key in g_loginStateViewHolders ) {
-			let stateHolder = g_loginStateViewHolders[key]
-			let element = stateHolder.element
-			element.innerHTML = stateHolder.unauthed
-			element.style.visibility = true
-			element.style.display = "block"
+		if ( !g_LoggedIn ) {
+			for ( let key in g_loginStateViewHolders ) {
+				let stateHolder = g_loginStateViewHolders[key]
+				let element = stateHolder.element
+				element.innerHTML = stateHolder.unauthed
+				element.style.visibility = true
+				element.style.display = "block"
+			}
 		}
 		//
-		g_LoggedIn = false
 		resize()
 	}
 
 	function loginView() {
+		hide_login_process()
 		g_LoggedIn = true
 		for ( let key in g_loginStateViewHolders ) {
 			let stateHolder = g_loginStateViewHolders[key]

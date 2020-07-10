@@ -2,12 +2,12 @@ const { DBClass, SessionStore } = require.main.require('./lib/general_db')
 const processExists = require('process-exists');
 const EventEmitter = require('events')
 const CitadelClient = require('node_citadel')
-const cached = require('cached')
+//const cached = require('cached')
 //
 //
 const Memcached = require("memcached")
 const MemCacheStoreFactory = require('connect-memcached');
-
+var MemcachePlus = require('memcache-plus');
 
 
 
@@ -26,12 +26,15 @@ g_citadel_pass = apiKeys.citadel_password.trim();  // decrypt ??
   }
 })();
 
-const memcdClient = new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
+const memcdClient = new MemcachePlus(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
 
+/*
 const userCache = cached('users', { backend: {
   type: 'memcached',
   client: memcdClient
 }});
+*/
+
 
 var g_citadel = null
 var g_citadel_pass = ""
@@ -153,7 +156,7 @@ class CaptchaDBClass extends DBClass {
 
     //
     constructor() {
-        super(CaptchaSessionStore,userCache)
+        super(CaptchaSessionStore,memcdClient)
     }
 
     // // // 
@@ -184,8 +187,8 @@ class CaptchaDBClass extends DBClass {
     // // // 
     store_user(fdata) {
         if ( G_users_trns.tagged('user') ) {
-          let udata = G_users_trns.update(fdata)          // custom user storage (seconday service)
-          G_users_trns.enqueue(udata)
+          let [udata,tandems] = G_users_trns.update(fdata)          // custom user storage (seconday service)
+          G_users_trns.enqueue(tandems)
           //
           let key_key = G_users_trns.kv_store_key()
           let key = udata[key_key]
@@ -202,7 +205,7 @@ class CaptchaDBClass extends DBClass {
         } else {
           let key_key = G_users_trns.kv_store_key()
           let key = fdata[key_key]
-          udata = super.fetch_user(key)
+          udata = super.fetch_user(key)  // no callback, just get value
           if ( udata ) {
             this.store_cache(key,udata,G_users_trns.back_ref());
             return(udata)
@@ -214,16 +217,11 @@ class CaptchaDBClass extends DBClass {
 
     update_user(udata) {
       //
+      let key_key = G_users_trns.kv_store_key()
+      let key = udata[key_key]
       //
-    }
-
-
-    async store_user_secret(reset_info) {
-      let user = this.fetch_user_from_key_value_store(reset_info.email)
-      if ( user ) {
-        user.password = reset_info.password // assume already enrypte
-        this.store_user(user)
-      }
+      this.store_cache(key,udata,G_users_trns.back_ref());  // this app will use cache to echo persitent storage
+      super.update_user(udata,key_key)                               // use persitent storage
     }
 
 

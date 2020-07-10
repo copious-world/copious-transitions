@@ -129,16 +129,17 @@ app.get('/fauth/fail',(req,res) => {
 
 
 function auth_successful(profile, strategy, accessToken, refreshToken) {
+  let body = profile
   let options =  {
     'method': 'POST',
-    'body': profile
+    'body': body
   }
   try {
     let stratAttempts = g_current_auth_attempts[strategy]
     if ( stratAttempts ) {
       let userKey = null
-      let foundUser = profile.emails.some((email) => {
-        userKey = email.value
+      let foundUser = body.emails.some((email) => {
+        userKey = email.value   // conforms to standard profile layout
         return(userKey in stratAttempts)
       })
       if ( foundUser ) {
@@ -146,24 +147,24 @@ function auth_successful(profile, strategy, accessToken, refreshToken) {
         authState.attempt = 1
         authState.logged_in = true
         authState.when = Date.now()
-        authState.accessToken = accessToken
+        authState.accessToken = accessToken   // OAuth tokens
         authState.refreshToken = refreshToken
       } else {
-        throw `unkown user:${profile.id}`
+        throw `unkown user:${body.id}`
       }
     } else {
       throw `unkown:${strategy}`
     }
     //
-    profile.success = true
-    profile.token = authState.token
+    body.success = true
+    body.token = authState.token  // the token associates this activity with a login attempt.
     //
   } catch (e) {
-    options.success = false
+    options.body.success = false
     console.warn(`No token from ${strategy}`)
   }
   //
-  fetch('https://' + g_domain + '://users/foreign_login', options);
+  fetch(`https://${g_domain}/users/foreign_login/${body.token}`, options);
   //
 }
 

@@ -57,6 +57,10 @@ class CaptchaSessionManager extends SessionManager {
         let transtionObj = await super.process_user(user_op,body,req,res,pkey)
         if ( G_users_trns.action_selector(user_op) ) {
             transtionObj[pkey] = body[pkey]
+        } else {
+            if ( user_op === 'logout' ) {
+                // req.logout() // an express app method...
+            }
         }
         return(transtionObj)
     }
@@ -99,6 +103,8 @@ class CaptchaSessionManager extends SessionManager {
             post_body._t_match_field = post_body[G_captcha_trns.match_key()]
         } else if ( G_users_trns.action_selector(transtion_object.action) ) {
             post_body._t_match_field = post_body[G_users_trns.match_key()]
+        } else if ( G_users_trns.secondary_action_selector(transtion_object.action) ) {
+            post_body._t_match_field = post_body[G_users_trns.secondary_match_key()]
         } else {
             return false
         }
@@ -125,7 +131,7 @@ class CaptchaSessionManager extends SessionManager {
             return(finalization_state)
         } else if ( G_password_reset_trns.tagged(transition) ) {
             post_body._t_u_key = G_password_reset_trns.primary_key()
-            let pkey = await this.update_user(post_body)
+            let pkey = await this.update_user_password(post_body)
             if ( pkey ) {
                 this.bussiness.cleanup(transition,pkey,post_body)
             }
@@ -159,11 +165,15 @@ class CaptchaSessionManager extends SessionManager {
         return  G_users_trns.sess_data_accessor()
     }
 
+    key_for_user() {    // communicate to the general case which key to use
+        let key_key = G_users_trns.kv_store_key()
+        return(key_key)
+    }
     //
-    initialize_session_state(transition,session_token,transtionObj,res) {
+    async initialize_session_state(transition,session_token,transtionObj,res) {
         if ( G_users_trns.tagged('user') ) {
             transtionObj._db_session_key = transtionObj[G_users_trns.session_key()]
-            return super.initialize_session_state(transition,session_token,transtionObj,res)
+            return await super.initialize_session_state(transition,session_token,transtionObj,res)
         }
         return undefined
     }

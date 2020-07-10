@@ -30,6 +30,8 @@
     "clone": "^2.1.2",
     "connect-memcached": "^1.0.0",
     "generate-password": "^1.5.1",
+    "http-shutdown": "^1.2.2",
+    "memcache-plus": "^0.2.21",
     "memcached": "^2.2.2",
     "process-exists": "^4.0.0",
     "secure-password": "^4.0.0"

@@ -34,8 +34,17 @@ class CaptchaUsers extends TaggedTransition {
         return("session_token")
     }
 
+    secondary_match_key() {
+        return("token")
+    }
+
     action_selector(action) {
         let idx = ['login','register'].indexOf(action)
+        return(idx >= 0)
+    }
+
+    secondary_action_selector(action) {
+        let idx = ['login-secondary'].indexOf(action)
         return(idx >= 0)
     }
 
@@ -44,9 +53,10 @@ class CaptchaUsers extends TaggedTransition {
     }
 
     update(data) {
-        data.name = data.email
-        data.pass = generate_password()
-        return(data)
+        data.tandems = {}
+        data.tandems.name = data.email
+        data.tandems.pass = generate_password()
+        return([data,data.tandems])
     }
 
 }
