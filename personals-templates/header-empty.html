@@ -721,32 +721,46 @@ html {
 		}
 	}
 
+	function hide_box(bxname) {
+		let display = document.getElementById(bxname)
+		if ( display ) {
+			display.style.visibility = "hidden"
+			display.style.display = "none"
+		}
+	}
+
+	function show_box(bxname) {
+		let display = document.getElementById(bxname)
+		if ( display ) {
+			display.style.visibility = "visible"
+			display.style.display = "block"
+		}
+	}
+
+	hide_box('error-box')
+	hide_box('success-box')
+
 	async function post_submit(fields) {
 		let bdy = {}
 		fields.forEach(element => {
 			let fld = document.getElementById(element)
 			if ( fld ) {
-				let url = bdy.post_url
-				delete bdy.post_url
 				bdy[element] = fld.value
-				let resp = await postData(url, bdy)
-				if ( resp && (resp.OK === 'true') ) {
-					hide_interface_box()
-					let success = document.getElementById('success-box')
-					if ( success ) {
-						success.style.visibility = "visible"
-						success.style.display = "block"
-					}
-				} else {
-					hide_interface_box
-					let error = document.getElementById('error-box')
-					if ( error ) {
-						error.style.visibility = "visible"
-						error.style.display = "block"
-					}
-				}
 			}
 		});
+		let url = bdy.post_url
+		if ( url ) {
+			delete bdy.post_url
+			//
+			let resp = await postData(url, bdy)
+			//
+			if ( resp ) hide_interface_box()
+			if ( resp && (resp.OK === 'true') ) {
+				show_box('success-box')
+			} else {
+				show_box('error-box')
+			}
+		}
 	}
 
 </script>

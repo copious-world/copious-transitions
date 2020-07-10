@@ -70,10 +70,8 @@ class CaptchaSessionManager extends SessionManager {
         if (  G_captcha_trns.tagged(transition) || G_contact_trns.tagged(transition) ) {
             return(true)
         } else if ( G_password_reset_trns.tagged(transition ) ) { //G_password_reset_trns
-            let forgetful_record = this.db.get_key_value(tracking_num)
-            if ( forgetful_record ) {
-                post_body.email = forgetful_record.email
-                return(true)
+            if ( (post_body.trackable !== undefined ) && (this.db !== undefined) ) {
+                return true
             }
             return(false)
         }
@@ -81,7 +79,7 @@ class CaptchaSessionManager extends SessionManager {
     }
 
     //
-    process_transition(transition,post_body,req) {
+    async process_transition(transition,post_body,req) {
         //
         let trans_object = super.process_transition(transition,post_body,req)
         //
@@ -91,7 +89,7 @@ class CaptchaSessionManager extends SessionManager {
             trans_object.secondary_action = false
         } else if ( G_password_reset_trns.tagged(transition) ) {
             trans_object.secondary_action = false
-            trans_object.token = post_body.tracking_num
+            trans_object.token = post_body.trackable
         }
         //
         return(trans_object)
@@ -133,7 +131,7 @@ class CaptchaSessionManager extends SessionManager {
             post_body._t_u_key = G_password_reset_trns.primary_key()
             let pkey = await this.update_user_password(post_body)
             if ( pkey ) {
-                this.bussiness.cleanup(transition,pkey,post_body)
+                this.business.cleanup(transition,pkey,post_body)
             }
             let finalization_state = {
                 "state" : "stored",

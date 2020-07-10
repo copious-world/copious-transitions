@@ -114,7 +114,7 @@
         </div>
     </div>
 
-    <p class='login-submit'>
+    <p id="login-submitter" class='login-submit' >
     <button onclick="processLogin()" >Submit</button>
     </p>
 
@@ -153,6 +153,7 @@
     var loginStrategyField = document.getElementById("login-strategy-value")
     function login_strategy(strategy) {
         hide_password_verify_container()
+        show_login_submitter()
         loginStrategyField.value = strategy
         let fergit = document.getElementById('forgot-container')
         let methodSign = document.getElementById('login-method-banner')
@@ -172,6 +173,7 @@
     var g_passwordVerifyContainer = document.getElementById("password-verify-container")
     var g_forgotSubmitContainer = document.getElementById("forgot-container-submit")
     var g_fergit = document.getElementById('forgot-container')
+    var g_login_submitter = document.getElementById('login-submitter')
     //
     function show_password_container() {
         if ( g_passwordContainer ) {
@@ -235,9 +237,21 @@
             g_OpenIDContainer.style.display = "none"
         }
     }
+    function show_login_submitter() {
+        if ( g_login_submitter ) {
+            g_login_submitter.style.visibility = "visible"
+            g_login_submitter.style.display = "block"
+        }
+    }
+    function hide_login_submitter() {
+        if ( g_login_submitter ) {
+            g_login_submitter.style.visibility = "hidden"
+            g_login_submitter.style.display = "none"
+        }
+    }
     //
 
-
+// 
     function loginFailed() {
         // display reason, etc.
         g_login_Handling.switchCaptchaDisplay(false)
@@ -251,6 +265,10 @@
         g_login_Handling.switchCaptchaDisplay(false)
         g_login_Handling.formErrorMessage("You are already logged in.")
         loginView()
+    }
+    function login_retry_password() {
+        g_login_Handling.switchCaptchaDisplay(false)
+        g_login_Handling.formErrorMessage("Did you forget your password?")
     }
     //
     function login_opening_view() {
@@ -473,9 +491,9 @@
     }
     
     function forgot_calcAppDataDB() {
-        let c_email =  g_login_Handling.fields["email"]
-        let c_password = g_login_Handling.fields["password"]
-        let c_password_verify = g_register_Handling.fields["password-match"]
+        let c_email =  g_forgot_Handling.fields["email"]
+        let c_password = g_forgot_Handling.fields["password"]
+        let c_password_verify = g_forgot_Handling.fields["password-match"]
 		//
         let data = {
             "email" : getVal(c_email),
@@ -490,7 +508,7 @@
     }
     
     function forgot_completionaAction(resp) {
-        if ( resp && reps.data ) {
+        if ( resp && resp.data ) {
             let data = resp.data
             let message = "Please try again later"
             if ( data.forgetfulness_proceed ) {
@@ -509,8 +527,8 @@
 
 	function processAuthEndpoint(endpoint,handler,calcAppDataDB,completionaAction,failedAction) {
         let url = `${location.protocol}//${g_siteURL}/{{auth_path}}/${endpoint}`
-        g_login_Handling.service_url = url
-		processUI_captchaService(handler, login_calcAppDataDB, completionaAction, failedAction)
+        handler.service_url = url
+		processUI_captchaService(handler, calcAppDataDB, completionaAction, failedAction)
 	}
     
     // send users throught the captcha interface
@@ -527,6 +545,7 @@
         login_strategy('local');show_password_container();hide_openID_container()
         show_password_verify_container()
         show_forgot_submit_container()
+        hide_login_submitter()
         if ( g_forgot_Handling ) {
             g_forgot_Handling.formErrorMessage("Please enter your password twice (just like registration). Later, you will receive an email with a link for activating this change.")
         }

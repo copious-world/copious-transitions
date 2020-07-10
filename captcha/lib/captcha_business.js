@@ -72,47 +72,55 @@ class CaptchaBusines extends GeneralBusiness {
     process(use_case,post_body) {
         switch ( use_case ) {
             case "forgot" : {
-                if ( g_MailToForgetfulUser ) {
-                    let email = post_body.email
-                    let emailer = this.get_recently_forgetful(email)        // for repetitions on this pathway
-                    let trackable = ""
-                    if ( !emailer ) {
-                        emailer = { 'count' : 0, 'email' : email, 'html' : '', 'text' : '', 'trackable' : '' }
-                        let whokey = do_hash(email + 'FORGETFUL' + this.forgetfulness_tag)
-                        //  HTML
-                        let html = g_MailToForgetfulUser.html
-                        html = html.replace("$$who",email)
-                        html =  html.replace("$$whokey",whokey)
-                        emailer.html = html     // emailer
-                        // TEXT
-                        let text = g_MailToForgetfulUser.text
-                        text = text.replace("$$who",email)
-                        text =  text.replace("$$whokey",whokey)
-                        emailer.text = text     // emailer
-                        // STORE WHOKEY IN KEY VALUE
-                        trackable = this.get_password_update_form(whokey)  // made the whokey once ... generated once
-                        emailer.trackable = trackable
-                        this.store_recent_forgetfulness(email,emailer)  // store for later repetitions for a while.
-                    } else {
-                        trackable = emailer.trackable
+                try {
+                    if ( g_MailToForgetfulUser ) {
+                        let email = post_body.email
+                        let emailer = this.get_recently_forgetful(email)        // for repetitions on this pathway
+                        let trackable = ""
+                        let whokey  = ""
+                        if ( !emailer ) {
+                            emailer = { 'count' : 0, 'email' : email, 'html' : '', 'text' : '', 'trackable' : '' }
+                            whokey = do_hash(email + 'FORGETFUL' + this.forgetfulness_tag)
+                            emailer.whokey = whokey
+                            //  HTML
+                            let html = g_MailToForgetfulUser.html
+                            html =  html.replace("$$whokey",whokey)
+                            html = html.replace("$$who",email)
+                            emailer.html = html     // emailer
+                            // TEXT
+                            let text = g_MailToForgetfulUser.text
+                            text =  text.replace("$$whokey",whokey)
+                            text = text.replace("$$who",email)
+                            emailer.text = text     // emailer
+                            // STORE WHOKEY IN KEY VALUE
+                            trackable = this.get_password_update_form(whokey)  // made the whokey once ... generated once
+                            emailer.trackable = trackable
+                            this.store_recent_forgetfulness(email,emailer)  // store for later repetitions for a while.
+                        } else {
+                            trackable = emailer.trackable
+                            whokey = emailer.whokey
+                        }
+                        //
+                        emailer.count++
+                        // new tracking number each time
+                        let tracking_num = do_hash(whokey + 'A' + emailer.count + 'B' + ((11*emailer.count - 3)%13)) // just some weird thing
+                        let viewable = trackable.replace("$$tracking_num",tracking_num).replace("$$tracking_num",tracking_num)
+                        // send the email with the link to the form that is being updated here
+                        g_MailToForgetfulUser.emit('email_this',emailer.email,emailer)
+                        //
+                        // update this form and store it.  // this will be sent... when the user clicks the link in his email
+                        this.db.put_static_store(whokey,viewable,'text/html')   // the whokey points to the web page that will be displayed (key,asset)
+                        //
+                        this.db.del_key_value(tracking_num) // no buildup of tracking numbers
+                        emailer.tracking_num = tracking_num // save for next time (it is stored by this class or parent)
+                        this.db.set_key_value(tracking_num, email)  // information that links the user to the reset password
+                        //
                     }
-                    //
-                    emailer.count++
-                    // new tracking number each time
-                    let tracking_num = do_hash(whokey + 'A' + emailer.count + 'B' + ((11*emailer.count - 3)%13)) // just some weird thing
-                    let viewable = trackable.replace("$$tracking_num",tracking_num)
-                    // send the email with the link to the form that is being updated here
-                    g_MailToForgetfulUser.emit('email_this',emailer.email,emailer)
-                    //
-                    // update this form and store it.  // this will be sent... when the user clicks the link in his email
-                    this.db.put_static_store(whokey,viewable,'text/html')   // the whokey points to the web page that will be displayed (key,asset)
-                    //
-                    this.db.del_key_value(tracking_num) // no buildup of tracking numbers
-                    emailer.tracking_num = tracking_num // save for next time (it is stored by this class or parent)
-                    this.db.set_key_value(tracking_num, email)  // information that links the user to the reset password
-                    //
-                }            
-                break
+                    return true    
+                } catch(e) {
+                    console.log(e)
+                }
+                return false
             }
             case "new-user" : {
                 if ( g_MailToNewUser ) {
@@ -121,9 +129,10 @@ class CaptchaBusines extends GeneralBusiness {
                 break
             }
             default: {
-                break
+                return false
             }
         }
+        return true
     }
 
     cleanup(transition,pkey,post_body) {
@@ -136,27 +145,23 @@ class CaptchaBusines extends GeneralBusiness {
         }
     }
 
-
+// "https://${this.conf.domain}/captcha/transition/password-reset"
+// https://${this.conf.domain}>${this.conf.domain}
     get_password_update_form(whokey) {  // put the form into the cached body and return the html page
         let html = `
         <div id="interface-box" >
-        <form method='POST' action="https://${this.conf.domain}/captcha/transition/password-reset" >
-            <input type="hidden" name='tracking' value='$$tracking' />
-            <div>
-                <label>Enter the same password you typed into the login page:</label>
-                <input type="password" id='password' value='' />
-                <input type="hidden" id='who' value='${whokey}' />
-                <input type="hidden" id='trackable' value='$$tracking_num' />
-                <input type="hidden" id='post_url' value='https://${this.conf.domain}/captcha/transition/password-reset' >
-            </div>
-            <button onclick="post_submit(['password','who','trackable'])" />
-        </form>
+            <label>Enter the same password you typed into the login page:</label>
+            <input type="password" id='password' value='' />
+            <input type="hidden" id='who' value='${whokey}' />
+            <input type="hidden" id='trackable' value='$$$tracking_num' />
+            <input type="hidden" id='post_url' value='https://localhost/captcha/transition/password-reset' >
+            <button onclick="post_submit(['password','who','trackable','post_url'])" style="width:70%">update password</button>
         </div>
         <div id="success-box" >
-            Your password has been reset. You may now login at <a href='https://${this.conf.domain}">${this.conf.domain}</a>
+            Your password has been reset. You may now login at <a href='https://localhost'>${this.conf.domain}</a>
         </div>
         <div id="error-box" >
-            There was an error while attempting to reset your password. Have you already registerd? <a href='https://${this.conf.domain}">${this.conf.domain}</a>
+            There was an error while attempting to reset your password. Have you already registerd? <a href='https://${this.conf.domain}'>${this.conf.domain}</a>
         </div>
         `
         let logo_body = this.logo_body

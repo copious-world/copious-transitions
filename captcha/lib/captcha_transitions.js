@@ -2,8 +2,12 @@ const TaggedTransition = require.main.require("./lib/tagged_transitions")
 
 // Captcha Users
 class CaptchaUsers extends TaggedTransition {
-    constructor() {
-        super("user")
+    constructor(descendant) {
+        if ( descendant ) {
+            super(descendant)
+        } else {
+            super("user")
+        }
     }
 
     existence_query(udata) {

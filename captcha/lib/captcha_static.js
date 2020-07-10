@@ -52,7 +52,7 @@ class CaptchaStatic extends GeneralStatic {
     }
 
     fetch(asset) {
-        if ( asset == "login" ) {
+        if ( asset == "login" ) {       // these are likely not going to be used
             if ( !(this.login_asset_media_object) ) {
                 return("empty")
             } else {
@@ -71,7 +71,7 @@ class CaptchaStatic extends GeneralStatic {
                 return(this.forgetful_asset_media_object)
             }
         } else {
-            return(super.fetch())
+            return(super.fetch(asset))
         }
     }
     
