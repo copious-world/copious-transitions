@@ -33,6 +33,12 @@
     "http-shutdown": "^1.2.2",
     "memcache-plus": "^0.2.21",
     "memcached": "^2.2.2",
+    "passport": "^0.4.1",
+    "passport-github": "^1.1.0",
+    "passport-google-oauth": "^2.0.0",
+    "passport-openid": "^0.4.0",
+    "passport-spotify": "^1.1.0",
+    "passport-twitter": "^1.0.4",
     "process-exists": "^4.0.0",
     "secure-password": "^4.0.0"
   }

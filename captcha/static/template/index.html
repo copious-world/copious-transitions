@@ -872,6 +872,16 @@ html {
 	// CONTENT EXCHANGE
 	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
 
+	function clonify(obj) {
+		if ( typeof obj === 'string' ) return(obj)
+		try {
+			let out = JSON.parse(JSON.stringify(obj))
+			return(out)
+		} catch(e) {
+			return(null)
+		}
+	}
+
 	function addscript(script,whereScipt) {
 		var scriptEl = document.createElement('script');
 		scriptEl.type = 'text/javascript';
@@ -1093,6 +1103,7 @@ html {
 
 			this.errline.style.visibility = "hidden"
 			this.failure_msg_prefix = props.failure_msg_prefix
+			this.empty_checker = props.is_empty ? props.is_empty : is_empty
 		}
 
 		hideFormErrorMessage() {
@@ -1143,7 +1154,7 @@ html {
 			let empty_fields = mustHaveValue.filter((field) => {
 				let c = this.fields[field]
 				//colorize(c,"black")
-				return(is_empty(c))
+				return(this.empty_checker(c))
 			})
 			//
 			if ( empty_fields.length ) {

@@ -2218,7 +2218,7 @@ viewBox="0 0 360 38">
     <iframe id="loginframe" name="loginframe" style="visibility:hidden;" src="about:blank" style="width:0;height:0;border:0px solid #fff;" >
 	</iframe>
     <div style="height:0px;width:0px;display: none;visibility: hidden;">
-        <form id="the-login-form" method="POST" action="https://www.copious.world/webcit/ajax_login_username_password" target="loginframe" onsubmit="login_viewchanges()">
+        <form id="the-login-form" method="POST" action="/webcit/ajax_login_username_password" target="loginframe" onsubmit="login_viewchanges()">
                 <input type='hidden' name='name' id='login-cit-name' value='' />
                 <input type='hidden' name='pass' id='login-cit-password' value='' />
         </form>
@@ -2234,11 +2234,14 @@ viewBox="0 0 360 38">
 	// Get the modal
     var g_login_port = "2101"
 
-    var loginStrategyField = document.getElementById("login-strategy-value")
+    var g_loginStrategyField = document.getElementById("login-strategy-value")
+    var g_backup_local_strategy_check = null
+    var g_backup_openID_strategy_check = null
+    var g_backup_OAuth_strategy_check = null
     function login_strategy(strategy) {
         hide_password_verify_container()
         show_login_submitter()
-        loginStrategyField.value = strategy
+        g_loginStrategyField.value = strategy
         let fergit = document.getElementById('forgot-container')
         let methodSign = document.getElementById('login-method-banner')
         if ( fergit ) {
@@ -2250,6 +2253,21 @@ viewBox="0 0 360 38">
                 if ( methodSign ) methodSign.innerHTML = strategy
             }
         }
+        //
+        switch (strategy) {
+            case "local" : {
+                g_login_Handling.check = g_backup_local_strategy_check
+                break
+            }
+            case "openID" : {
+                g_login_Handling.checks = g_backup_openID_strategy_check
+                break
+            }
+            default : {
+                g_login_Handling.checks = g_backup_OAuth_strategy_check
+                break
+            }
+        }
     }
     //
     var g_passwordContainer = document.getElementById("password-container")
@@ -2258,6 +2276,7 @@ viewBox="0 0 360 38">
     var g_forgotSubmitContainer = document.getElementById("forgot-container-submit")
     var g_fergit = document.getElementById('forgot-container')
     var g_login_submitter = document.getElementById('login-submitter')
+    //
     //
     function show_password_container() {
         if ( g_passwordContainer ) {
@@ -2374,7 +2393,7 @@ viewBox="0 0 360 38">
             let lname = document.getElementById('login-cit-name')
             let pname = document.getElementById('login-cit-password')
             if ( loginForm && lname && pname ) {
-                lname.value = tandems.name
+                lname.value = tandems.name.replace('@','')  // testing.... this should be removed from here on out
                 pname.value = tandems.pass
                 loginForm.submit()
             }
@@ -2408,7 +2427,7 @@ viewBox="0 0 360 38">
             if ( scnd_resp.OK === "true" ) {
                 g_Loggedin_session_token = scnd_resp.token  // should be in COOKIE
                 let elements = scnd_resp.elements
-                app_tandem_login(elements.tandem)
+                app_tandem_login(elements.tandems)
                 return(true)
             } else {
                 g_Loggedin_session_token = '' 
@@ -2452,8 +2471,7 @@ viewBox="0 0 360 38">
                             }
                         }
                         //
-                        // fetch this URL
-                        g_foreign_login_window = window.open(datum.windowize, '_blank');  // resp.windowize = location  + 'start/' + <strategy> + '/' + <email> + '/' + token
+                        g_foreign_login_window = window.open(datum.windowize, '_blank', 'height=300,width=300,menubar=0,status=0,toolbar=0', false);  // resp.windowize = location  + 'start/' + <strategy> + '/' + <email> + '/' + token
                         //g_foreign_login_window.location;
                         g_foreign_login_window.focus()
                         return(false)       // prevent display of logout, etc until finalized
@@ -2542,6 +2560,18 @@ viewBox="0 0 360 38">
 			"captcha" : document.getElementById('captcha-goes-here-login'),
 			"captcha_field" : document.getElementById("captcha-field-login")
         });
+        g_backup_local_strategy_check = clonify(g_login_Handling.checks)
+        g_backup_openID_strategy_check = {
+				"is_empty" : ["openID","email"],  // ref into fields above...
+				"email" : ["email"],
+                "passwords" : ["openID"]
+			}
+        g_backup_OAuth_strategy_check = {
+				"is_empty" : ["email"],  // ref into fields above...
+				"email" : ["email"]
+			}
+
+
         if ( g_login_failure === null ) g_login_failure = loginFailed
         if ( g_registration_failure === null ) g_registration_failure = registrationFailMessage  // display on login screen
     }
@@ -2562,6 +2592,21 @@ viewBox="0 0 360 38">
             'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
             'action' : 'login',
             'form_key' : 'login'
+        }
+        //
+        switch (data.strategy) {         // perhaps more customization on the server side.
+            case "local" : {
+                break
+            }
+            case "openID" : {
+                data.password = "NONE"
+                break
+            }
+            default : {
+                data.password = "NONE"
+                data.openID = "NONE"
+                break
+            }
         }
 		//
 		return(data)
@@ -2678,6 +2723,16 @@ viewBox="0 0 360 38">
 	// ---- ---- ---- ---- ---- ----
 	// CONTENT EXCHANGE
 	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
+
+	function clonify(obj) {
+		if ( typeof obj === 'string' ) return(obj)
+		try {
+			let out = JSON.parse(JSON.stringify(obj))
+			return(out)
+		} catch(e) {
+			return(null)
+		}
+	}
 
 	function addscript(script,whereScipt) {
 		var scriptEl = document.createElement('script');
@@ -2900,6 +2955,7 @@ viewBox="0 0 360 38">
 
 			this.errline.style.visibility = "hidden"
 			this.failure_msg_prefix = props.failure_msg_prefix
+			this.empty_checker = props.is_empty ? props.is_empty : is_empty
 		}
 
 		hideFormErrorMessage() {
@@ -2950,7 +3006,7 @@ viewBox="0 0 360 38">
 			let empty_fields = mustHaveValue.filter((field) => {
 				let c = this.fields[field]
 				//colorize(c,"black")
-				return(is_empty(c))
+				return(this.empty_checker(c))
 			})
 			//
 			if ( empty_fields.length ) {
