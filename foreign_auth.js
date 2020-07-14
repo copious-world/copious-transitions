@@ -1,14 +1,27 @@
 const fs = require('fs')
 const express = require('express')
-const passport = require("passport")
+const passport = require('passport')
 const fetch = require('node-fetch');
-const crypto = require('crypto')
-const uuid = require('uuid/v4')
-
+const session = require('express-session');
+//
 const DEFAULT_FOREIGN_LOGIN_ATTEMPTS = 10
 const g_port = 2009
 //
 var app = express()
+app.use(session({
+  secret: 's3cr3t',
+  resave: true,
+  saveUninitialized: true
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+passport.serializeUser((user, cb) => {
+  cb(null, user);
+});
+
+passport.deserializeUser((obj, cb) => {
+  cb(null, obj);
+});
 
 //
 //
@@ -18,29 +31,29 @@ const keys = require('./local/api_keys')
 load_parameters()
 
 //
-
-const GitHubStrategy = ( keys.openID.in_use ) ? require('passport-github').Strategy : null
-const TwitterStrategy = ( keys.openID.in_use ) ? require('passport-twitter').Strategy : null
-const GoogleStrategy = ( keys.openID.in_use ) ? require('passport-google-oauth20').Strategy : null
-const AmazonStrategy = ( keys.openID.in_use ) ? require('passport-amazon').Strategy : null
-const LinkedInStrategy = ( keys.openID.in_use ) ? require('passport-linkedin').Strategy : null
-const FacebookStrategy = ( keys.openID.in_use ) ? require('passport-facebook').Strategy : null
-const SoundCloudStrategy = ( keys.openID.in_use ) ? require('passport-soundcloud').Strategy : null
-const SpotifyStrategy = ( keys.openID.in_use ) ? require('passport-spotify').Strategy : null
+const GitHubStrategy = ( keys.GitHub.in_use ) ? require('passport-github').Strategy : null
+const TwitterStrategy = ( keys.Twitter.in_use ) ? require('passport-twitter').Strategy : null
+const GoogleStrategy = ( keys.Google.in_use ) ? require('passport-google-oauth20').Strategy : null
+const AmazonStrategy = ( keys.Amazon.in_use ) ? require('passport-amazon').Strategy : null
+const LinkedInStrategy = ( keys.LinkedIn.in_use ) ? require('passport-linkedin').Strategy : null
+const FacebookStrategy = ( keys.Facebook.in_use ) ? require('passport-facebook').Strategy : null
+const SoundCloudStrategy = ( keys.SoundCloud.in_use ) ? require('passport-soundcloud').Strategy : null
+const SpotifyStrategy = ( keys.Spotify.in_use ) ? require('passport-spotify').Strategy : null
 //
 
 
-var g_foreign_authorizer_api_enpoint = conf_obj.foreign_auth.foreign_authorizer_api_enpoint
-var g_domain = conf_obj.domain
+var g_foreign_authorizer_api_enpoint = conf_obj.foreign_authorizer_api_enpoint
+var g_domain = 'www.' + conf_obj.domain
 
 
 // OPEN ID -- there is a better way 
-if ( OpenIDStrategy ) {
+if ( keys.openID.in_use ) {
 }
 
 
 // MARKETING
 if ( AmazonStrategy ) {
+  console.log("Setting up AmazonStrategy")
   passport.use(
     new AmazonStrategy({
         clientID: keys.Amazon.client_id,
@@ -59,12 +72,13 @@ if ( AmazonStrategy ) {
   
   app.get('/amazon', passport.authenticate('amazon'));
   app.get('/amazon/callback', passport.authenticate('amazon'),(req, res, next) => {
-    res.redirect("/complete")
+    res.redirect("/fauth/complete")
   });
 
 }
 
 if ( LinkedInStrategy ) {
+  console.log("Setting up LinkedInStrategy")
   passport.use(
     new LinkedInStrategy({
         consumerKey: keys.LinkedIn.client_id,
@@ -83,13 +97,14 @@ if ( LinkedInStrategy ) {
 
   app.get('/linkedin', passport.authenticate('linkedin'));
   app.get('/linkedin/callback', passport.authenticate('linkedin'),(req, res, next) => {
-    res.redirect("/complete")
+    res.redirect("/fauth/complete")
   });
 
 }
 
 
 if ( TwitterStrategy ) {
+  console.log("Setting up TwitterStrategy")
   passport.use(
     new TwitterStrategy({
         consumerKey: keys.Twitter.client_id,
@@ -108,12 +123,12 @@ if ( TwitterStrategy ) {
 
   app.get('/twitter', passport.authenticate('twitter'));
   app.get('/twitter/callback', passport.authenticate('twitter'),(req, res, next) => {
-    res.redirect("/complete")
+    res.redirect("/fauth/complete")
   });
-
 }
 
 if ( GoogleStrategy ) {
+  console.log("Setting up GoogleStrategy")
   passport.use(
     new GoogleStrategy({
         consumerKey: keys.Google.client_id,
@@ -132,13 +147,14 @@ if ( GoogleStrategy ) {
 
   app.get('/google', passport.authenticate('google'));
   app.get('/google/callback', passport.authenticate('google'),(req, res, next) => {
-    res.redirect("/complete")
+    res.redirect("/fauth/complete")
   });
 
 }
 
 
 if ( FacebookStrategy ) {
+  console.log("Setting up FacebookStrategy")
   passport.use(
     new FacebookStrategy({
         clientID: keys.Facebook.client_id,
@@ -157,7 +173,7 @@ if ( FacebookStrategy ) {
 
   app.get('/facebook', passport.authenticate('facebook'));
   app.get('/facebook/callback', passport.authenticate('facebook'),(req, res, next) => {
-    res.redirect("/complete")
+    res.redirect("/fauth/complete")
   });
 
 }
@@ -165,32 +181,35 @@ if ( FacebookStrategy ) {
 // DEVELOPMENT
 
   if ( GitHubStrategy ) {
-  passport.use(
-    new GitHubStrategy({
-        clientID: keys.GitHub.client_id,
-        clientSecret: keys.GitHub.client_secret,
-        callbackURL: g_foreign_authorizer_api_enpoint + "/github/callback"
-      },
-      (accessToken, refreshToken, profile, done) => {
-        try {
-          let user = auth_successful(profile, 'github', accessToken, refreshToken)
-          done(null,user)
-        } catch(e) {
-          done(e, null)
+    console.log("Setting up GitHubStrategy")
+    passport.use(
+      new GitHubStrategy({
+          clientID: keys.GitHub.client_id,
+          clientSecret: keys.GitHub.client_secret,
+          callbackURL: g_foreign_authorizer_api_enpoint + "/github/callback"
+        },
+        (accessToken, refreshToken, profile, done) => {
+          try {
+            let user = auth_successful(profile, 'github', accessToken, refreshToken)
+            done(null,user)
+          } catch(e) {
+            done(e, null)
+          }
         }
-      }
   ));
 
   app.get('/github', passport.authenticate('github'));
   app.get('/github/callback', passport.authenticate('github'),(req, res, next) => {
-    res.redirect("/complete")
+    res.redirect("/fauth/complete")
   });
 }
+
 
 
 // MUSIC
 
 if ( SoundCloudStrategy ) {
+  console.log("Setting up SoundCloudStrategy")
   passport.use(
     new SoundCloudStrategy({
       clientID: keys.SoundCloud.client_id,
@@ -199,7 +218,7 @@ if ( SoundCloudStrategy ) {
       },
       (accessToken, refreshToken, profile, done)  => {
         try {
-          let user = auth_successful(profile, 'github', accessToken, refreshToken)
+          let user = auth_successful(profile, 'soundcloud', accessToken, refreshToken)
           done(null,user)
         } catch(e) {
           done(e, null)
@@ -209,13 +228,14 @@ if ( SoundCloudStrategy ) {
 
   app.get('/soundcloud', passport.authenticate('soundcloud'));
   app.get('/soundcloud/callback', passport.authenticate('soundcloud'),(req, res, next) => {
-    res.redirect("/complete")
+    res.redirect("/fauth/complete")
   });
 
 }
 
-
+//
 if ( SpotifyStrategy ) {
+  console.log("Setting up SpotifyStrategy")
   passport.use(
     new SpotifyStrategy(
       {
@@ -225,7 +245,7 @@ if ( SpotifyStrategy ) {
       },
       (accessToken, refreshToken, expires_in, profile, done) =>  {
         try {
-          let user = auth_successful(profile, 'github', accessToken, refreshToken)
+          let user = auth_successful(profile, 'spotify', accessToken, refreshToken)
           done(null,user)
         } catch(e) {
           done(e, null)
@@ -237,13 +257,10 @@ if ( SpotifyStrategy ) {
   app.get('/spotify', passport.authenticate('spotify'));
   app.get('/spotify/callback', passport.authenticate('spotify'),(req, res, next) => {
       // Successful authentication, redirect home.
-      res.redirect("/complete")
+      res.redirect("/fauth/complete")
   });
 
 }
-
-
-
 
 
 
@@ -263,7 +280,7 @@ var g_current_auth_attempts = {
 app.get('/start/:strategy/:userkey/:token',(req,res) => {
     //
     let strategy = req.params.strategy
-    let userKey = req.params.userKey
+    let userKey = req.params.userkey
     let token = req.params.token
     //
     if ( strategy && userKey && token ) {
@@ -275,9 +292,11 @@ app.get('/start/:strategy/:userkey/:token',(req,res) => {
           res.status(200).sendFile(__dirname + "/local/fauth_logged_in_closer.html")
         } else {
           authState.attempt++
-          if ( (authState < conf_obj.foreign_attempts_max) ) {
+          if ( (authState.attempt < conf_obj.foreign_attempts_max) ) {
             authState.when = Date.now()
             return(res.redirect(`/fauth/${strategy}`))
+          } else {
+            return(res.redirect(`/fauth/fail/attempts`)) 
           }
         }
       } else {
@@ -293,12 +312,13 @@ app.get('/start/:strategy/:userkey/:token',(req,res) => {
       }
       //
     } else {
-      return(res.redirect(`/fail`)) 
+      return(res.redirect(`/fauth/fail/no_token`)) 
     }
 });
 
 
-app.get('/fail',(req,res) => {
+app.get('/fail/:reason',(req,res) => {
+  console.log(req.params.reason)
   res.status(200).sendFile(__dirname + "/local/fauth_fail_closer.html")
 })
 
@@ -313,15 +333,20 @@ function auth_successful(profile, strategy, accessToken, refreshToken) {
     'body': body
   }
   try {
+    let authState = { "token" : "nothing" }
     let stratAttempts = g_current_auth_attempts[strategy]
     if ( stratAttempts ) {
       let userKey = null
       let foundUser = body.emails.some((email) => {
-        userKey = email.value   // conforms to standard profile layout
-        return(userKey in stratAttempts)
+        if ( email.value in stratAttempts ) {
+          userKey = email.value   // conforms to standard profile layout
+          return(true)
+        }
+        return(false)
       })
+      //
       if ( foundUser ) {
-        let authState = stratAttempts[userKey]
+        authState = stratAttempts[userKey]
         authState.attempt = 1
         authState.logged_in = true
         authState.when = Date.now()
@@ -338,13 +363,16 @@ function auth_successful(profile, strategy, accessToken, refreshToken) {
     body.token = authState.token  // the token associates this activity with a login attempt.
     //
   } catch (e) {
+    console.log(e)
     options.body.success = false
     console.warn(`No token from ${strategy}`)
+    return(null)
   }
   //
   // SEND INFORMATION BACK TO THE WAITING USER SERVICE
   fetch(`https://${g_domain}/users/foreign_login/${body.token}`, options);
   //
+  return(body)
 }
 
 
