@@ -1,1 +1,28 @@
-{}
+<div>
+    Thank you for loggin in!
+    <br>
+    When this page closes, you should be able to find your account information on your login page.
+    <br>
+    You may click anywhere on this page to speed the process along.
+</div>
+<script lang="javascript">
+    var to = setTimeout(() => {
+        RefreshParent()
+        window.close()
+    },10000)
+
+    document.addEventListener('click',(ev) => {
+        if ( to ) clearTimeout(to)
+        RefreshParent()
+        window.close()
+
+    })
+
+    function RefreshParent() {
+        if (window.opener != null && !window.opener.closed) {
+            //window.opener.location.reload();
+            window.opener.focus()
+        }
+    }
+    window.onbeforeunload = RefreshParent;
+</script>

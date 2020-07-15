@@ -370,7 +370,7 @@ function auth_successful(profile, strategy, accessToken, refreshToken) {
   }
   //
   // SEND INFORMATION BACK TO THE WAITING USER SERVICE
-  fetch(`https://${g_domain}/users/foreign_login/${body.token}`, options);
+  fetch(`https://${g_domain}/foreign_login/${body.token}`, options);
   //
   return(body)
 }

@@ -261,7 +261,7 @@ g_app.post('/secondary/users/:action', async (req, res) => {
 })
 
 
-g_app.post('/foreign_login/users/:token', async (req, foreign_res) => {  // or use the websockets publication of state....
+g_app.post('/foreign_login/:token', async (req, foreign_res) => {  // or use the websockets publication of state....
     let body = req.body
     let token = req.params.token
     let OK = body.success

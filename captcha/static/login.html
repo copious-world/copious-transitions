@@ -387,6 +387,7 @@
                             }
                         }
                         //
+                        // The URL is the first URL addressed by the foreign authorizor.
                         g_foreign_login_window = window.open(datum.windowize, '_blank', 'height=300,width=300,menubar=0,status=0,toolbar=0', false);  // resp.windowize = location  + 'start/' + <strategy> + '/' + <email> + '/' + token
                         //g_foreign_login_window.location;
                         g_foreign_login_window.focus()
@@ -421,7 +422,7 @@
 
 
     function finalize_foreign_login(cmds) {
-        if ( g_foreign_login_window ) {
+        if ( g_foreign_login_window && !(g_foreign_login_window.closed) ) {
             g_foreign_login_window.close()
             presentLogout(resp)
             window.focus()
