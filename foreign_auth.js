@@ -360,7 +360,7 @@ function auth_successful(profile, strategy, accessToken, refreshToken) {
     }
     //
     body.success = true
-    body.token = authState.token  // the token associates this activity with a login attempt.
+    body.session_token = authState.token
     //
   } catch (e) {
     console.log(e)
@@ -370,7 +370,10 @@ function auth_successful(profile, strategy, accessToken, refreshToken) {
   }
   //
   // SEND INFORMATION BACK TO THE WAITING USER SERVICE
-  fetch(`https://${g_domain}/foreign_login/${body.token}`, options);
+  (async (token)=> {
+    console.log(`https://${g_domain}/foreign_login/${token}`)
+    await fetch(`https://${g_domain}/foreign_login/${token}`, options);
+  })(body.session_token)
   //
   return(body)
 }

@@ -1,0 +1,22 @@
+<html>
+    <head>
+        
+    </head>
+    <body>
+        <form id="tester-sender" method="POST" action="https://localhost/captcha/foreign_login/user+cb82d22a-84ba-4390-aaae-c209590bfbd7" >
+            <input type="text" name="email" value="richardaleddy@gmail.com" />
+            <input type="hidden" name="success" value="true" />
+            <input id="tester-token" type="text" name="session_token" value="user+cb82d22a-84ba-4390-aaae-c209590bfbd7" />
+            <input type="submit" />
+        </form>
+        <button onclick="fix_action()">fix it</button>
+    </body>
+</html>
+<script>
+    function fix_action() {
+        let token_el = document.getElementById('tester-token')
+        let token = token_el.value
+        let frm = document.getElementById('tester-sender')
+        frm.action = "https://localhost/captcha/foreign_login/" + token
+    }
+</script>

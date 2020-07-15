@@ -219,7 +219,14 @@ g_app.post(['/users/login','/users/logout','/users/register','/users/forgot'], a
                 if ( transitionObj.secondary_action ) {
                     return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));
                 } else if ( transitionObj.foreign_authorizer_endpoint ) {
-                    transitionObj.foreign_authorizer_endpoint += '/' + transitionObj.token  // token of auth process
+                    if ( g_going_ws_session[transitionObj.token] ) {
+                        try {
+                            g_going_ws_session[transitionObj.token].close()
+                        } catch(e) {
+                            //
+                        }
+                    }
+                    g_going_ws_session[transitionObj.token] = null
                     transitionObj.windowize = transitionObj.foreign_authorizer_endpoint
                     return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));
                 }
@@ -266,16 +273,18 @@ g_app.post('/foreign_login/:token', async (req, foreign_res) => {  // or use the
     let token = req.params.token
     let OK = body.success
     if ( OK ) {                                   // the token must be present
-        let cached_transition = fetch_local_cache_transition(g_secondary_user_actions,body.token)
+        let cached_transition = fetch_local_cache_transition(g_secondary_user_actions,token)
         if ( cached_transition !== undefined ) {      // the action must match (artifac of use an array of paths)
             // this is the asset needed by the client to turn on personlization and key access (aside from sessions and cookies)
             if ( g_session_manager.match(body,cached_transition)  ) {        // check the tokens and any other application specific information required
                 cached_transition.action += '-secondary'
-                let session_token = cached_transition.session_token
                 let transitionObj = cached_transition.tobj
-                let elements = await g_session_manager.initialize_session_state('user',session_token,transitionObj,null)
-                send_ws_outofband(token,{ 'type' : transitionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token, 'elements' : elements })
-                return foreign_res.status(200).end("OK")
+                let session_token = g_session_manager.unstash_session_token(cached_transition.elements)
+                if ( session_token ) {
+                    let elements = await g_session_manager.initialize_session_state('user',session_token,transitionObj,null)
+                    send_ws_outofband(token,{ 'type' : transitionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token, 'elements' : elements })
+                    return foreign_res.status(200).end("OK")
+                }
             }
         }
     }
@@ -312,19 +321,19 @@ server.listen(conf_obj.ws_port);
 var g_going_ws_session = {}
 
 var g_auth_wss = new WebSocketServer({server: server});
-g_auth_wss.on("connection", function (ws) {
+g_auth_wss.on("connection", (ws) => {
     //
-    var timestamp = new Date().getTime();
+    // var timestamp = new Date().getTime();
+    // ws.send(JSON.stringify({ 'msgType': 'onOpenConnection', 'msg': { 'connectionId': timestamp }  }));
 
-    ws.send(JSON.stringify({ 'msgType': 'onOpenConnection', 'msg': { 'connectionId': timestamp }  }));
-
-    ws.on("message", function (data, flags) {
+    ws.on("message",  (data, flags) => {
         let clientIdenifier = JSON.parse(data.toString());
-        g_going_ws_session[clientIdenifier.id] = ws    // associate the client with the DB
+        console.log(clientIdenifier.token)
+        g_going_ws_session[clientIdenifier.token] = ws    // associate the client with the DB
 
     });
 
-    ws.on("close", function () {
+    ws.on("close", () => {
         let token = null
         for ( let tk in g_going_ws_session ) {
             if ( g_going_ws_session[tk] === ws ) {
@@ -344,7 +353,7 @@ function send_ws_outofband(token_key,data) {
     if ( g_auth_wss && token_key ) {
         let ws = g_going_ws_session[token_key]
         if ( ws ) {
-            g_auth_ws.send(data);
+            ws.send(JSON.stringify(data));
         }
     }
 }
