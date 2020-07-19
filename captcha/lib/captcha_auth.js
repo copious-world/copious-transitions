@@ -9,8 +9,8 @@ class CaptchaSessionManager extends SessionManager {
 
     constructor(exp_app,db_obj,bussiness) {
         //
-        super(exp_app,db_obj,bussiness)//
-        //
+        super(exp_app,db_obj,bussiness)         //
+        //  ----  ----  ----  ----  ----  ----  ----  ----  ----
         //
         let db_store = db_obj.session_store.generateStore(expressSession)  // custom application session store for express 
         //
@@ -34,6 +34,11 @@ class CaptchaSessionManager extends SessionManager {
         //
         this.middle_ware.push(cookieParser())           // use a cookie parser
         this.middle_ware.push(this.session)             // this is where the session object is introduced as middleware
+        let access_session_from_res = (req, res, next) => {
+            res.locals.session = req.session;   // for apps using sessions...
+            next();
+          }
+        this.middle_ware.push(access_session_from_res)
     }
 
 
@@ -118,6 +123,7 @@ class CaptchaSessionManager extends SessionManager {
                     "state" : "captcha-in-flight",
                     "OK" : "true"
                 }
+                // set a cookie for use by other micro services
                 return(finalization_state)
             }
         } else if ( G_contact_trns.tagged(transition) ) {
@@ -147,6 +153,28 @@ class CaptchaSessionManager extends SessionManager {
         return(finalization_state)
     }
 
+
+    app_set_user_cookie(res,session_token) {
+        res.cookie(this.user_cookie,session_token, { maxAge: this.max_age_user_cookie, httpOnly: true });
+    }
+    //
+    app_user_release_cookie(res) {
+        res.clearCookie(this.user_cookie); // delete the cookie
+    }
+    //
+    set_cookie(res,cookie_id,value,age) {
+        res.cookie(cookie_id,value, { maxAge: age, httpOnly: true });
+    }
+    //
+    release_cookie(res,cookie_id) {
+        res.clearCookie(cookie_id);
+    }
+
+    which_uploaded_files(req,post_body) {
+        let files = req.files
+        return(files)      // the application should handle this
+    }
+
     //
     update_session_state(transition,session_token,req) {    // req for session cookies if any
         if (  G_users_trns.action_selector(body.action) ) {
@@ -158,15 +186,17 @@ class CaptchaSessionManager extends SessionManager {
         return true
     }
 
-
+    // 
     sess_data_accessor() {
         return  G_users_trns.sess_data_accessor()
     }
 
+    //
     key_for_user() {    // communicate to the general case which key to use
         let key_key = G_users_trns.kv_store_key()
         return(key_key)
     }
+
     //
     async initialize_session_state(transition,session_token,transtionObj,res) {
         if ( G_users_trns.tagged('user') ) {
