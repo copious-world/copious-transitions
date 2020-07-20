@@ -200,7 +200,8 @@ class CaptchaSessionManager extends SessionManager {
     //
     async initialize_session_state(transition,session_token,transtionObj,res) {
         if ( G_users_trns.tagged('user') ) {
-            transtionObj._db_session_key = transtionObj[G_users_trns.session_key()]
+            transtionObj._t_u_key = G_users_trns.session_key()
+            transtionObj._db_session_key = transtionObj[transtionObj._t_u_key]
             return await super.initialize_session_state(transition,session_token,transtionObj,res)
         }
         return undefined

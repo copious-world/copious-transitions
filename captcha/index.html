@@ -2519,6 +2519,9 @@ viewBox="0 0 360 38">
             g_foreign_login_window.close()
             presentLogout(resp)
             window.focus()
+            g_Loggedin_session_token = cmds.token  // should be in COOKIE
+            let elements = cmds.elements
+            app_tandem_login(elements.tandems)
         }
     }
 
