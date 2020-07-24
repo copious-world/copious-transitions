@@ -7,3 +7,4 @@ node_modules/*
 backend/*
 package-lock.json
 *.db
+examples/web*

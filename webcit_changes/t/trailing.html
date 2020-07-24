@@ -1,0 +1,64 @@
+<!-- start trailing.html -->
+
+
+
+<div id="important_message"
+<??("COND:IMPMSG", 1)>
+style="visibility: hidden;"
+<?!("X", 1)>
+>
+<span class="imsg">
+<?IMPORTANTMESSAGE("X")>
+</span><br>
+</div>
+<?!("COND:IMPMSG", 2)>
+<script type="text/javascript">
+  setTimeout('hide_imsg_popup()', 5000);
+</script>
+<?!("X", 2)>
+
+<noscript><div id="noscript_warning">
+	<?_("WARNING: You have JavaScript disabled in your web browser.  Many functions of this system will not work properly.")>
+	</div></noscript>
+	<script type="text/javascript">
+		<?TRAILING_JAVASCRIPT>
+		/*
+		if ( $("room_banner_override") && $("room_banner") ) {
+			$("room_banner").innerHTML = $("room_banner_override").innerHTML;
+		}
+		*/
+	</script>
+
+
+</main>
+
+<footer class="footer-list">
+	<ul >
+		<li>
+			<a href="http://www.copious.world">copyright &copy; 2020 copious.world</a>
+		</li>
+		<li>
+				<a href="www.citadel.org" style="text-decoration:none;cursor:pointer">
+					<img src="static/citadel-logo.gif" alt="<?_("Powered by Citadel")>"  width="80" height="20">
+				</a>
+		</li>
+	</ul>
+</footer>
+
+</body>
+</html>
+<script>
+// Script to open and close sidebar
+function w3_open() {
+	let sbar = document.getElementById("ICONSidebar")
+	if ( sbar.style.display === 'none' ) {
+		sbar.style.display = "block";
+	} else {
+		sbar.style.display = "none";
+	}
+}
+ 
+function w3_close() {
+  document.getElementById("ICONSidebar").style.display = "none";
+}
+</script>
