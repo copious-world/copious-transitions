@@ -316,11 +316,64 @@
         }
     }
 
-    async function app_process_logout() {
+
+    function token_from_cookie() {
+        return(getCookie('webCit'))
+    }
+
+    var g_sitewide_socket = null
+    function setup_sitewide(token) {
+        try {
+            // setup a webSocket connection to get finalization data on logging in. -- 
+            g_sitewide_socket = new WebSocket(`wss://${g_siteURL}/auth_ws/site_wide`);
+            g_sitewide_socket.onmessage = (event) => {	// handle the finalization through the websocket
+                                    try {
+                                        let handler = JSON.parse(event.data)
+                                        if ( handler.token === token ) {
+                                            if ( handler.action === "logout" ) {
+                                                logout(false)
+                                            } else {
+                                                eval(handler.action)
+                                            }
+                                        }
+                                    } catch (e) {
+                                    }
+                                }
+            //
+            setTimeout(() => {
+                let msg = {
+                    'token' : token,
+                    'action' : 'setup'
+                }
+                g_sitewide_socket.send(JSON.stringify(msg))
+            },500)
+            //
+            return(true)       // prevent display of logout, etc until finalized
+        } catch(e) {
+            return(false)       // prevent display of logout, etc until finalized
+        }
+        
+    }
+
+
+    function site_wide_logout(token,req_logout = true) {
+        if ( req_logout ) {
+            let msg = {
+                'action' : 'logout',
+                'token' : token
+            }
+            g_sitewide_socket.send(JSON.stringify(msg))
+            //window.close()  // not for the main page
+        }
+    }
+
+
+    async function app_process_logout(site_wide = true) {
         try {
             let url = `${location.protocol}//${g_siteURL}/{{auth_path}}/users/logout`
             let data = { 'action' : 'logout', 'token' : g_Loggedin_session_token }
             let resp = await postData(url, data)
+            site_wide_logout(g_Loggedin_session_token,site_wide)
             if ( resp.OK === "true" ) {
                 return false    // no longer logged in
             } else {
@@ -342,6 +395,7 @@
             let scnd_resp = await postData(url, data)
             if ( scnd_resp.OK === "true" ) {
                 g_Loggedin_session_token = scnd_resp.token  // should be in COOKIE
+                setup_sitewide(g_Loggedin_session_token)
                 let elements = scnd_resp.elements
                 app_tandem_login(elements.tandems)
                 return(true)

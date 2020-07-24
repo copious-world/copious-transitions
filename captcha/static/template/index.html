@@ -635,6 +635,10 @@ html {
 			display: none;
 		}
 
+		a {
+			cursor: pointer;
+		}
+
 	</style>
 </head>
 <script>
@@ -648,7 +652,7 @@ html {
 		<table style="width:100%">
 			<tr>
 				<td style="width:62;height:63">
-					<a class="nav-link" href="/">
+					<a class="nav-link" href="/"  target="{{canonical}}-again" >
 						{{{svgLogo.content}}}
 					</a>
 				</td>
@@ -723,7 +727,7 @@ html {
 <footer>
 	<ul class="footer-list">
 		<li>
-			<a href="{{canonical}}">copyright &copy; {{copyRightYear}} {{companyShortLink}}</a>
+			<a href="{{canonical}}" target="{{canonical}}-again">copyright &copy; {{copyRightYear}} {{companyShortLink}}</a>
 		</li>
 	</ul>
 </footer>
@@ -889,6 +893,20 @@ html {
 		whereScipt.appendChild(scriptEl);
 	}
 
+    function getCookie(cname) {  // modified from w3school
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(let i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            if ( typeof c === 'string' ) {
+                c = c.trim()
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length);
+                }
+            }
+        }
+        return "";
+	}
 
 	// streamer-scratchpad  -- in the stream app was using this.
 	// //
@@ -1816,9 +1834,9 @@ html {
 
 	//  === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
 
-	async function logout() {
+	async function logout(originator = true) {
 		// send synch message
-		g_LoggedIn = await app_process_logout()
+		g_LoggedIn = await app_process_logout(originator)
 		// then
 		if ( !g_LoggedIn ) {
 			for ( let key in g_loginStateViewHolders ) {

@@ -200,7 +200,7 @@ g_app.post('/secondary/transition',async (req, res) => {
 })
 
 
-
+var setup_foreign_auth = () => {}
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 if ( conf_obj.login_app ) {   // LOGIN APPS OPTION (START)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
@@ -293,6 +293,42 @@ g_app.post('/foreign_login/:token', async (req, foreign_res) => {  // or use the
 })
 
 
+var g_going_ws_session = {}
+
+setup_foreign_auth = (ws) => {
+    //
+    ws.on("message",  (data, flags) => {
+        let clientIdenifier = JSON.parse(data.toString());
+        console.log(clientIdenifier.token)
+        g_going_ws_session[clientIdenifier.token] = ws    // associate the client with the DB
+    });
+
+    ws.on("close", () => {
+        let token = null
+        for ( let tk in g_going_ws_session ) {
+            if ( g_going_ws_session[tk] === ws ) {
+                token = tk
+                break
+            }
+        }
+        if ( token ) {
+            delete g_going_ws_session[token]
+        }
+    });
+    //
+}
+
+
+function send_ws_outofband(token_key,data) {
+    if ( g_auth_wss && token_key ) {
+        let ws = g_going_ws_session[token_key]
+        if ( ws ) {
+            ws.send(JSON.stringify(data));
+        }
+    }
+}
+
+
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 }       // LOGIN APPS OPTION (END)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
@@ -313,55 +349,121 @@ var g_exp_server = g_app.listen(conf_obj.port);
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 if ( conf_obj.ws_port ) {   // WEB SCOCKETS OPTION (START)
     // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-    
 
 let server = http.createServer(g_app);
 server.listen(conf_obj.ws_port);
-
-var g_going_ws_session = {}
-
 var g_auth_wss = new WebSocketServer({server: server});
-g_auth_wss.on("connection", (ws) => {
+
+
+var g_going_sitewide_ws_session = {}
+
+g_auth_wss.on("connection", (ws,req) => {
     //
-    // var timestamp = new Date().getTime();
-    // ws.send(JSON.stringify({ 'msgType': 'onOpenConnection', 'msg': { 'connectionId': timestamp }  }));
 
-    ws.on("message",  (data, flags) => {
-        let clientIdenifier = JSON.parse(data.toString());
-        console.log(clientIdenifier.token)
-        g_going_ws_session[clientIdenifier.token] = ws    // associate the client with the DB
+    if ( req.path === "foreign_auth" ) {
 
-    });
+        if ( setup_foreign_auth ) setup_foreign_auth(ws)
 
-    ws.on("close", () => {
-        let token = null
-        for ( let tk in g_going_ws_session ) {
-            if ( g_going_ws_session[tk] === ws ) {
-                token = tk
-                break
+    } else if (  req.path === "site_wide"  ) {
+
+        function send_to_ws(ws,data) {
+            if ( g_auth_wss && token_key ) {
+                if ( ws ) {
+                    ws.send(JSON.stringify(data));
+                }
             }
         }
-        if ( token ) {
-            delete g_going_ws_session[token]
-        }
-    });
+
+        ws.on("message",  (data, flags) => {
+            
+            let body = JSON.parse(data.toString());
+
+            let token = body.token
+            if ( token ) {
+                if ( body.action === 'setup' ) {
+                    let ws_data = g_going_sitewide_ws_session[token]
+                    if ( ws_data === undefined ) {
+                        g_going_sitewide_ws_session[token] = [ ws ]
+                    } else {
+                        let ws_list = g_going_sitewide_ws_session[token]
+                        if ( ws_list.indexOf(ws) < 0 ) {
+                            ws_list.push(ws)
+                        }
+                    }    
+                } else if ( body.action === "logout" ) {
+                    let ws_list = g_going_sitewide_ws_session[token]
+                    let command = {
+                        'action' : 'logout',
+                        'token' : token
+                    }
+                    ws_list.forEach(ws => {
+                        send_to_ws(ws,command)
+                    })
+                } else { // transitional
+    
+                }
+            }
+
+        });
+
+        ws.on("close", () => {
+            let token = null
+            for ( let tk in g_going_ws_session ) {
+                let ws_dex = g_going_ws_session[tk].indexOf(ws)
+                if ( ws_dex >= 0 ) {
+                    token = tk
+                    g_going_ws_session[token].splice(ws_dex,1)
+                    break
+                }
+            }
+            if ( token && (g_going_ws_session[token].length == 0) ) {
+                delete g_going_ws_session[token]
+            }
+        });
+
+    }
+
 
 });
 
 
-function send_ws_outofband(token_key,data) {
-    if ( g_auth_wss && token_key ) {
-        let ws = g_going_ws_session[token_key]
-        if ( ws ) {
-            ws.send(JSON.stringify(data));
-        }
-    }
+
+wss.on('connection', function connection(ws, req) {
+    const ip = req.socket.remoteAddress;
+  });
+
+
+function noop() {}
+
+function heartbeat() {
+  this.isAlive = true;
 }
+
+const wss = new WebSocket.Server({ port: 8080 });
+
+wss.on('connection', function connection(ws) {
+  ws.isAlive = true;
+  ws.on('pong', heartbeat);
+});
+
+const interval = setInterval(function ping() {
+  wss.clients.forEach(function each(ws) {
+    if (ws.isAlive === false) return ws.terminate();
+
+    ws.isAlive = false;
+    ws.ping(noop);
+  });
+}, 30000);
+
+wss.on('close', function close() {
+  clearInterval(interval);
+});
 
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 }       // WEB SCOCKETS OPTION (END)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+
 
 
 

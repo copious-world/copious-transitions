@@ -61,4 +61,68 @@ function w3_open() {
 function w3_close() {
   document.getElementById("ICONSidebar").style.display = "none";
 }
+
+
+function getCookie(cname) {  // modified from w3school
+  var name = cname + "=";
+  var ca = document.cookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+	var c = ca[i];
+	if ( typeof c === 'string' ) {
+		c = c.trim()
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length);
+		}
+	}
+  }
+  return "";
+}
+
+
+function token_from_cookie() {
+	return(getCookie('webCit'))
+}
+
+var g_sitewide_socket = null
+function setup_sitewide() {
+	try {
+		// setup a webSocket connection to get finalization data on logging in. -- 
+		g_sitewide_socket = new WebSocket(`wss://${g_siteURL}/auth_ws/site_wide`);
+		g_sitewide_socket.onmessage = (event) => {	// handle the finalization through the websocket
+								try {
+									let handler = JSON.parse(event.data)
+									if ( handler.token === token_from_cookie() ) {
+										if ( handler.action === "logout" ) {
+											site_wide_logout(false)
+										} else {
+											eval(handler.action)
+										}
+									}
+								} catch (e) {
+								}
+							}
+		//
+		return(true)       // prevent display of logout, etc until finalized
+	} catch(e) {
+		return(false)       // prevent display of logout, etc until finalized
+	}
+}
+
+
+function site_wide_logout(req_logout = true) {
+	if ( req_logout ) {
+		let token = token_from_cookie()
+		let msg = {
+			'action' : 'logout',
+			'token' : token
+		}
+		g_sitewide_socket.send(JSON.stringify(msg))
+	}
+	window.close()
+}
+
+// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- 
+setup_sitewide()
+// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- 
+
 </script>

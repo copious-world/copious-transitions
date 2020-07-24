@@ -2,7 +2,7 @@
 	width="360"
 	height="40"
 	viewBox="0 0 360 40">
-		<a id="a4187" xlink:href="/webcit/dotgoto?room=Copious.World"   style="cursor:pointer">
+		<a id="a4187" xlink:href="/webcit/dotgoto?room=Copious.World"   style="cursor:pointer" target="CITBLOG">
 		<rect
 			y="0"
 			x="10"
@@ -23,7 +23,7 @@
 				x="60"
 				id="tspan4339">Blog</tspan></text>
 		</a>
-		<a id="a4193" xlink:href="/webcit/dotgoto?room=Demo-notes"  style="cursor:pointer">
+		<a id="a4193" xlink:href="/webcit/dotgoto?room=Demo-notes"  style="cursor:pointer" target="CITBLOG">
 		<rect
 			y="0"
 			x="144"
