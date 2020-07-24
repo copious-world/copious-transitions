@@ -646,6 +646,7 @@ html {
 		var g_siteURL = "{{site_url}}";
 		var g_finalizers = []
 		var g_loginStateViewHolders = {}
+		var g_loginValueViews = {}
 </script>
 <body>
 	<nav id="mainNav">
@@ -1361,14 +1362,17 @@ html {
 		g_loginStateViewHolders["gAndM1"] = {
 			'element' : greetAndMeetContainer1,
 			'unauthed' : g_originalGreetAndMeet1,
-			'authed' : `{{{yourProileLinks.content}}}`
+			'authed' : `{{{yourProileLinks.content}}}`,
+			'action' : `{{yourProileLinks.instantiate}}`
 		}
 		g_loginStateViewHolders["gAndM2"] = {
 			'element' : greetAndMeetContainer2,
 			'unauthed' : g_originalGreetAndMeet2,
-			'authed' : `{{{yourDashboardLinks.content}}}`
+			'authed' : `{{{yourDashboardLinks.content}}}`,
+			'action' : `{{yourDashboardLinks.instantiate}}`
 		}
 	}
+
 
 	function menuHandler(mHandle) {
 		if ( squashMenuContainer.style.visibility !== "visible" && (mHandle !== null) ) {
@@ -1851,13 +1855,16 @@ html {
 		resize()
 	}
 
-	function loginView() {
+	function loginView(accountData) {
 		hide_login_process()
 		g_LoggedIn = true
 		for ( let key in g_loginStateViewHolders ) {
 			let stateHolder = g_loginStateViewHolders[key]
 			let element = stateHolder.element
 			element.innerHTML = stateHolder.authed
+			if ( stateHolder.action ) {
+				g_loginValueViews[stateHolder.action](accountData)
+			}
 		}
 		resize()
 	}

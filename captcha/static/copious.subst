@@ -97,10 +97,12 @@
     },
     "yourProileLinks" : {
          "name" : "profile-links",
+         "instantiate" : "profile_view",
          "file" : "./profile_access.html"
     },
     "yourDashboardLinks" : {
          "name" : "profile-links",
+         "instantiate" : "dashboard_view",
          "file" : "./dashboard_access.html"
     }
 }
