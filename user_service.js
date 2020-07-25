@@ -12,6 +12,8 @@ const passwordGenerator = require('generate-password');
 const ShutdownManager = require('./lib/shutdown-manager')
 const shutdown_server_helper_factory = require('http-shutdown')
 
+// https://github.com/fastify/fastify
+
 //
 //
 const conf_obj = load_parameters()                  // configuration parameters to select modules, etc.
@@ -427,7 +429,7 @@ g_auth_wss.on("connection", (ws,req) => {
 });
 
 
-
+/*
 wss.on('connection', function connection(ws, req) {
     const ip = req.socket.remoteAddress;
   });
@@ -458,6 +460,7 @@ const interval = setInterval(function ping() {
 wss.on('close', function close() {
   clearInterval(interval);
 });
+*/
 
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------

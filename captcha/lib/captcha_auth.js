@@ -155,24 +155,35 @@ class CaptchaSessionManager extends SessionManager {
 
 
     app_set_user_cookie(res,session_token) {
-        res.cookie(this.user_cookie,session_token, { maxAge: this.max_age_user_cookie, httpOnly: true });
+        if ( res ) {
+            res.cookie(this.user_cookie,session_token, { maxAge: this.max_age_user_cookie, httpOnly: true });
+        }
     }
     //
     app_user_release_cookie(res) {
-        res.clearCookie(this.user_cookie); // delete the cookie
+        if ( res ) {
+            res.clearCookie(this.user_cookie); // delete the cookie
+        }
     }
     //
     set_cookie(res,cookie_id,value,age) {
-        res.cookie(cookie_id,value, { maxAge: age, httpOnly: true });
+        if ( res ) {
+            res.cookie(cookie_id,value, { maxAge: age, httpOnly: true });
+        }
     }
     //
     release_cookie(res,cookie_id) {
-        res.clearCookie(cookie_id);
+        if ( res ) {
+            res.clearCookie(cookie_id);
+        }
     }
 
     which_uploaded_files(req,post_body) {
-        let files = req.files
-        return(files)      // the application should handle this
+        if ( req ) {
+            let files = req.files
+            return(files)      // the application should handle this
+        }
+        return([])
     }
 
     //

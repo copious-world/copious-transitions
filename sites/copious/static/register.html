@@ -1,0 +1,188 @@
+<div id="myRegisterModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="myRegisterModalCloser" class="close">&times;</span>
+            <h3><i>Captcha</i> : I am not a robot</h3>
+        </div>
+        <div class="modal-body">
+            <div id="captcha-goes-here-register" style="border:1px solid lime;margin:2px;" >
+                ------
+            </div>
+            <div id="captcha-entry-register" >
+                Type in the text that you see above:
+                <input type="text" id="captcha-field-register" class="svgFormTextField" style="font-size:14px;margin-top:1px;margin-left:2px;border:1px solid black;"/>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="captchaCheck('register')">submit</button>
+        </div>
+    </div>
+</div>
+
+<div id="myRegisterForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
+
+	<div class="form_el" style="padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style: oblique;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+		<div style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
+			Please join our community at {{companyShortLink}}. 
+			Take part in our conversation, and make use of the tools we provide.
+			<blockquote style="border-top: 1px dotted darkmagenta;background-color:beige;padding:3px;font-size: 0.8em;font-weight:normal;color:slategray;font-style:italic;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+				You may use social login on this site with e-mails matching the one you provide here. 
+			</blockquote>
+		</div>
+	</div>
+
+	<div class="error-message" id="register-errors_here" >no error</div>
+	<div id="the-register-form-secure" style="color:darkorange;background-color: palegreen;visibility:hidden;display:none;">
+        switching to a secure version of this page
+    </div>
+
+
+    <div class="form_el" >
+        <label for='register-name' class='email'>Name:</span></label>
+        <input type='text' name='register-name' id='register-name' value=''class='field_el name'  required onkeyup="onkey_checkRegisterError(this)"  />
+    </div>
+ 
+    <div class="form_el" >
+        <label for='register-email' class='email'>Email:</span></label>
+        <input type='email' name='register-email' id='register-email' value=''class='field_el email'  required onkeyup="onkey_checkRegisterError(this)"  />
+    </div>
+    
+    <div class="form_el" >
+        <label for='register-password' class='url'>Password:</span></label>
+        <input type='password' name='register-password' id='register-password' value='' class='field_el password' onkeyup="onkey_checkRegisterError(this)"  />
+    </div>
+        
+    <div class="form_el" >
+        <label for='register-password-match' class='url'>Validate Password:</span></label>
+        <input type='password' name='register-password-match' id='register-password-match' value='' class='field_el password' onkeyup="onkey_checkRegisterError(this)"  />
+    </div>
+
+    <p class='register-submit'>
+    <button onclick="processRegister()" >Submit</button>
+    </p>
+</div>
+
+<noscript><div id="noscript_warning">
+	WARNING: You have JavaScript disabled in your web browser.  Many functions of this system will not work properly.
+</div></noscript>
+
+<script>
+
+	// Get the modal
+	
+	function register_opening_view() {
+		if (location.protocol !== 'https:') {           // start from a secure page
+            let lformMSG = document.getElementById('the-register-form-secure')
+            lformMSG.style.visibility = "visible"
+            lformMSG.style.display = "block"
+            setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
+        }
+	}
+
+	function registrationFailed(resp) {
+        g_register_Handling.switchCaptchaDisplay(false)
+        g_register_Handling.formErrorMessage("Our registration process is experience difficulties. Please try again later.")
+	}
+
+	//
+	var g_password_checks = {}
+    function register_password_rules(fld_list) {
+		if ( fld_list.length ) {
+			if ( fld_list.some(val => {return val === null}) ) {
+				return false // some field was not represented in the HTML
+			}
+			let test_val = fld_list[0]
+			let check = fld_list.every(val => { return val === test_val})
+			return([check,()=>{return "Passwords must have the same value"}])
+		}
+        return(false)
+    }
+	// REGISTRATION APPLICATION
+	//
+	var g_register_Handling = null
+	function initRegistration() {
+		g_register_Handling = new ValidationContainer({
+				"auth_port" : "",
+				"service_url" : `https://${g_siteURL}/{{auth_path}}/users/register`,
+				"errors_here" : document.getElementById('register-errors_here'),
+				"failure_msg_prefix" : "Registration failed",
+				"password_rules" : register_password_rules,
+				"fields" : {
+					"name" : document.getElementById('register-name'),
+					"email" : document.getElementById('register-email'),
+					"password" : document.getElementById('register-password'),
+					"password-match" : document.getElementById('register-password-match'),
+				},
+				"checks" : {
+					"is_empty" : ["password","email"],  // ref into fields above...
+					"email" : ["email"],
+					"passwords" : ["password","password-match"]
+				},
+				"modal" : document.getElementById("myRegisterModal"),
+				"closer" : document.getElementById('myRegisterModalCloser'),
+				"form" : document.getElementById('myRegisterForm'),
+				"captcha" : document.getElementById('captcha-goes-here-register'),
+				"captcha_field" : document.getElementById("captcha-field-register")
+		});
+	}
+
+	function register_calcAppDataDB() {
+		//
+		let c_name =  g_register_Handling.fields["name"]
+		let c_email =  g_register_Handling.fields["email"]
+		let c_password = g_register_Handling.fields["password"]
+		let c_password_verify = g_register_Handling.fields["password-match"]
+		//
+		let data = {
+			"name" : getVal(c_name),
+			"email" : getVal(c_email),
+			"password" : getVal(c_password),
+			"verify_password" : getVal(c_password_verify),
+			'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
+			'action' : 'register',
+            'form_key' : 'register'
+		}
+		// register application
+		data.name = data.name.length === 0 ? "anonymous" : data.name
+		//
+		return(data)
+	}
+
+	function registration_completionaAction(resp) {
+		if ( resp ) {
+			let data = resp.data
+			if ( data.amelioritive_action ) {
+				try {
+					eval(data.amelioritive_action)
+				} catch(e) {
+					console.log(e)
+				}
+				return
+			}
+		}
+		if ( g_register_Handling ) {
+			g_register_Handling.switchCaptchaDisplay(false)
+		}
+		hide_join_process()
+		show_thankyou_box("Thank you for joining our community.")
+	}
+
+	function processRegister() {
+		processUI_captchaService( g_register_Handling,
+									register_calcAppDataDB,
+									registration_completionaAction, registrationFailed )
+	}
+
+
+	function onkey_checkRegisterError(focusEl) {
+	   if ( g_register_Handling.checkFormValid() ) {
+		   if ( focusEl ) focusEl.style.borderColor = 'black'
+		   g_register_Handling.hideFormErrorMessage()
+	   }
+	}
+
+	g_finalizers.push(initRegistration)
+	
+</script>
+

@@ -1,5 +1,5 @@
 dir=$1
 echo $dir
 pushd ./tools
-node genpage.js ../${dir}/static/copious.subst ../${dir}/static/template/index.html ../${dir}/index.html
+node genpage.js ../sites/${dir}/static/${dir}.subst ../sites/${dir}/static/template/index.html ../sites/${dir}/index.html
 popd

@@ -1,0 +1,108 @@
+{
+    "pageTitle" : "Copious World",
+    "pageDescription" : "An entry point into the our world of AI, IoT, and Communities built around songs, etc.",
+    "conversation" : "Copious World",
+    "middleBoxHook" : "Freedom of Movement is Out of The Box Thinking for the IoT Generation",
+    "rightBoxHook" : "Including Humanity in Social Internet",
+    "site_url" : "localhost",
+    "canonical" : "http://www.copious.world",
+    "companyShortLink" : "copious.world",
+    "copyRightYear" : "2020",
+    "auth_path" : "captcha",
+    "auth_websocket" : "auth_ws",
+    "svgLogo" : {
+        "link" : "/",
+        "file" : "./copiousLogo.svg",
+        "svg" : ""
+    },
+    "relatedAsset" : {
+        "name" : "GitGHub",
+        "link" : "https://github.com/copious-world",
+        "file" : "./GitHub.svg",
+        "svg" : ""
+    },
+    "svgBannerFrame" :  {
+        "file" : "./intro.svg",
+        "svg" : ""
+    },
+    "aboutBox" : {
+        "name" : "about",
+        "content" : {
+            "svg" : "",
+            "file" : "./about.svg"
+        },
+        "output_height" : "inherit",
+        "output_width" : "inherit"
+    },
+    "lowerFillerRef" : [
+        {
+            "Attributes" : "test"
+        }
+    ],
+    "topicBox_1" : {
+        "name" : "technology",
+        "content" : {
+            "file" : "./technology.svg"
+        },
+        "output_height" : "inherit",
+        "output_width" : "inherit"
+    },
+    "topicBox_2" : {
+        "name" : "deboxing",
+        "content" : {
+            "file" : "./deboxing.svg"
+        },
+        "output_height" : "inherit",
+        "output_width" : "inherit"
+    },
+    "topicBox_3" : {
+        "name" : "locating",
+        "content" : {
+            "file" : "./locating.svg"
+        },
+        "output_height" : "inherit",
+        "output_width" : "inherit"
+    },
+    "registerBox" : {
+         "name" : "register",
+        "content" : {
+            "file" : "./register.html"
+        }
+    },
+    "loginBox" : {
+         "name" : "login",
+        "content" : {
+            "file" : "./login.html"
+        }
+    },
+    "join" : {
+        "button" : {
+            "name" : "register",
+            "file" : "./joinButton.svg"
+        }
+    },
+    "login" : {
+        "button" : {
+            "name" : "login",
+            "file" : "./loginButton.svg"
+        }
+    },
+    "public_content_access" : {
+        "name" : "blog",
+        "file" : "./contentButtons.svg"
+    },
+    "decoratedLinks" : {
+        "name" : "",
+        "file" : "./decoratedLinks.html"
+    },
+    "yourProileLinks" : {
+         "name" : "profile-links",
+         "instantiate" : "profile_view",
+         "file" : "./profile_access.html"
+    },
+    "yourDashboardLinks" : {
+         "name" : "profile-links",
+         "instantiate" : "dashboard_view",
+         "file" : "./dashboard_access.html"
+    }
+}
