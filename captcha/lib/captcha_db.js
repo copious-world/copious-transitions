@@ -164,14 +164,13 @@ class CaptchaDBClass extends DBClass {
         setTimeout(post_new_user,5000)
         setTimeout(post_contact_message,5000)
         super.initialize(conf)
+        this.dashboard_application_initialize()
     }
 
     // // // 
     drop() {
         dropConnections()
     }
-
-
 
     //  custom: contacts, ...
     store(collection,data) {
@@ -243,6 +242,22 @@ class CaptchaDBClass extends DBClass {
     last_step_initalization() {
         run_citadel()
     }
+
+    // 
+    dashboard_application_initialize() {
+      let users = this.pdb.all_keys()
+      users.forEach(user => {
+        let static_dash = 'dashboard+' + user
+        let dashboard_characteristics = {
+          'owner' : user,
+          'date'  : ('' + Date.now()),
+          'panel_key' : generate_password(),
+          'which_dashboard' : 'test dashboard'
+        }
+        this.put_static_store(static_dash,JSON.stringify(dashboard_characteristics),"application/json")
+      })
+    }
+    
 }
 
 

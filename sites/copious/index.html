@@ -2808,42 +2808,62 @@ viewBox="0 0 360 38">
       projects dashboard
    </button>
 </div>
+<div id="dashboard_response_messages" style="border:honeydew 1px solid;padding:4px;background-color: rgba(245, 245, 245, 0.842);" >
+
+</div>
 </div>
 
 <script>
 
    var g_dashboard_url = ''
+   var g_dashboard_owner = ''
    var g_app_dashboard = null
 
    async function project_dashboards() {
       if ( g_dashboard_url.length ) {
-         let dashboardResponse = postData(g_dashboard_url)
-         if ( dashboardResponse.OK ) {
-            if ( !g_app_dashboard ){
-               var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
-               let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard/${dashboardResponse.which_dashboard}`,
-                                             `${dashboardResponse.which_dashboard}`,windowFeatures)
-               g_app_dashboard = dashboard
-               if ( dashboard ) {
-                  dashboard.onload = (ev) => {
-                     try {
-                        dashboard.setup_user_dashboard(dashboardResponse)
-                     } catch (e) {
+         try {
+            if ( !g_app_dashboard ) {
+               let dashboardResponse = await postData(g_dashboard_url)
+               if ( dashboardResponse.owner === g_dashboard_owner ) {
+                  var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
+                  let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,
+                                                   `${dashboardResponse.which_dashboard}`,windowFeatures)
+                  if ( dashboard ) {
+                     dashboard.onload = (ev) => {
+                        try {
+                           dashboard.setup_user_dashboard(dashboardResponse)
+                           g_app_dashboard = dashboard
+                           dashboard.focus()
+                        } catch (e) {
+                        }
+                     }
+
+                     dashboard.onunload = (ev) => {
+                        g_app_dashboard = null
                      }
                   }
+               } else {
+                  let msgbox = document.getElementById('dashboard_response_messages')
+                  if ( msgbox ) msgbox.innerHTML = "The user information does not match."
                }
             } else {
                g_app_dashboard.focus()
             }
-            
+         } catch (e) {
+            let msgbox = document.getElementById('dashboard_response_messages')
+            if ( msgbox ) msgbox.innerHTML = e.message
          }
+      } else {
+         let msgbox = document.getElementById('dashboard_response_messages')
+         if ( msgbox ) msgbox.innerHTML = "The dashboard URL is not defined"
       }
    }
 
    g_loginValueViews[`dashboard_view`] = (acctData,html) => {
       try {
          let uid = acctData.data.email
-         g_dashboard_url = `${location.protocol}//${g_siteURL}/guarded/static/dashboard+${uid}`
+         g_dashboard_owner = uid
+         g_dashboard_url = `${location.protocol}//${g_siteURL}/captcha/guarded/static/dashboard+${uid}`
          html = html.replace('$$WHOAMI',uid)
       } catch (e) {
       }
@@ -2954,8 +2974,10 @@ viewBox="0 0 360 38">
 	  });
 	  if ( response.ok == false ) {
 		  console.log(response.status + ': ' + response.statusText)
+		  return {}
+	  } else {
+		return await response.json(); // parses JSON response into native JavaScript objects
 	  }
-	  return await response.json(); // parses JSON response into native JavaScript objects
 	}
 
 
@@ -3492,6 +3514,8 @@ viewBox="0 0 360 38">
 			'authed' : dashboardHTML,
 			'action' : `dashboard_view`
 		}
+		profileHTML.textContent = '';
+		dashboardHTML.textContent = '';
 	}
 
 
@@ -3966,10 +3990,12 @@ viewBox="0 0 360 38">
 		if ( !g_LoggedIn ) {
 			for ( let key in g_loginStateViewHolders ) {
 				let stateHolder = g_loginStateViewHolders[key]
-				let element = stateHolder.element
-				element.innerHTML = stateHolder.unauthed
-				element.style.visibility = true
-				element.style.display = "block"
+				if ( stateHolder ) {
+					let element = stateHolder.element
+					element.innerHTML = stateHolder.unauthed
+					element.style.visibility = true
+					element.style.display = "block"
+				}
 			}
 		}
 		//
@@ -3982,10 +4008,12 @@ viewBox="0 0 360 38">
 		for ( let key in g_loginStateViewHolders ) {
 			let stateHolder = g_loginStateViewHolders[key]
 			let element = stateHolder.element
-			if ( stateHolder.action ) {
-				element.innerHTML = g_loginValueViews[stateHolder.action](accountData,stateHolder.authed)
-			} else {
-				element.innerHTML = stateHolder.authed
+			if ( stateHolder.authed ) {
+				if ( stateHolder.action ) {
+					element.innerHTML = g_loginValueViews[stateHolder.action](accountData,stateHolder.authed)
+				} else {
+					element.innerHTML = stateHolder.authed
+				}
 			}
 		}
 		resize()

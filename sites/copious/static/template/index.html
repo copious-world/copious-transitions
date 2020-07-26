@@ -960,8 +960,10 @@ html {
 	  });
 	  if ( response.ok == false ) {
 		  console.log(response.status + ': ' + response.statusText)
+		  return {}
+	  } else {
+		return await response.json(); // parses JSON response into native JavaScript objects
 	  }
-	  return await response.json(); // parses JSON response into native JavaScript objects
 	}
 
 
@@ -1383,6 +1385,8 @@ html {
 			'authed' : dashboardHTML,
 			'action' : `{{yourDashboardLinks.instantiate}}`
 		}
+		profileHTML.textContent = '';
+		dashboardHTML.textContent = '';
 	}
 
 
@@ -1857,10 +1861,12 @@ html {
 		if ( !g_LoggedIn ) {
 			for ( let key in g_loginStateViewHolders ) {
 				let stateHolder = g_loginStateViewHolders[key]
-				let element = stateHolder.element
-				element.innerHTML = stateHolder.unauthed
-				element.style.visibility = true
-				element.style.display = "block"
+				if ( stateHolder ) {
+					let element = stateHolder.element
+					element.innerHTML = stateHolder.unauthed
+					element.style.visibility = true
+					element.style.display = "block"
+				}
 			}
 		}
 		//
@@ -1873,10 +1879,12 @@ html {
 		for ( let key in g_loginStateViewHolders ) {
 			let stateHolder = g_loginStateViewHolders[key]
 			let element = stateHolder.element
-			if ( stateHolder.action ) {
-				element.innerHTML = g_loginValueViews[stateHolder.action](accountData,stateHolder.authed)
-			} else {
-				element.innerHTML = stateHolder.authed
+			if ( stateHolder.authed ) {
+				if ( stateHolder.action ) {
+					element.innerHTML = g_loginValueViews[stateHolder.action](accountData,stateHolder.authed)
+				} else {
+					element.innerHTML = stateHolder.authed
+				}
 			}
 		}
 		resize()

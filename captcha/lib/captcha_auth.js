@@ -218,6 +218,15 @@ class CaptchaSessionManager extends SessionManager {
         return undefined
     }
 
+
+    guard(asset,req) {
+        if ( asset.substr(0,'dashboard'.length) === 'dashboard' ) {
+            let email = asset.substr('dashboard'.length + 1)
+            return(this.inSession(email))
+        }
+        return(true)    // true by default
+    }
+
 }
 
 class CaptchaAuth  extends GeneralAuth {
