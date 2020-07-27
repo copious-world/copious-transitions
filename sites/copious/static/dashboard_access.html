@@ -62,7 +62,7 @@
       try {
          let uid = acctData.data.email
          g_dashboard_owner = uid
-         g_dashboard_url = `${location.protocol}//${g_siteURL}/captcha/guarded/static/dashboard+${uid}`
+         g_dashboard_url = `${location.protocol}//${g_siteURL}/dashboard/guarded/static/dashboard+${uid}`
          html = html.replace('$$WHOAMI',uid)
       } catch (e) {
       }

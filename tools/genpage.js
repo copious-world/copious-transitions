@@ -38,42 +38,57 @@ function subcompile(src,datObj) {
     return(src)
 }
 
+
+
+function is_file_source(descr) {
+    return ((typeof descr === 'object') && ( descr.file || ( descr.content && descr.content.file ) || ( descr.button && descr.button.file ) ))
+}
+
+
+
+var g_compiler_schedule = []
+
+function  process_sub_content(datObj,descr) {
+    let src_file = descr.file ? descr.file : ( descr.content ? descr.content.file : descr.button.file );
+    try {
+        if ( src_file[0] === '.' ) {
+            src_file = datObj.srcPath + src_file.substr(1)
+        }
+        let src = fs.readFileSync(src_file,'utf8').toString()
+        //
+        let operator = { 'data' : datObj, 'source' : src, 'target' : descr }
+        //
+        if ( descr.button && descr.button.file ) {
+            operator.target = descr.button
+        }
+        let ext = extension_from_path(src_file)
+        descr.ext = ext
+        if ( ext === "svg" ) {
+            if ( descr.output_height || descr.output_width ) {
+                operator.alteration = () => {  return(reset_svg_height_width(descr.content, descr.output_width, descr.output_height))  }
+            }
+        }
+        g_compiler_schedule.unshift(operator)
+    } catch (e) {
+        g_forgotten_files.push(src_file)
+        console.log(e.message)
+    }
+}
+
+
 var g_forgotten_files = []
-function load_source_data(datObj) {
+function load_source_data(datObj,src) {
+    g_compiler_schedule.unshift({ 'data' : datObj, 'source' : src })
     for ( let field in datObj ) {
         let descr = datObj[field]
-        if ( (typeof descr === 'object') && ( descr.file || ( descr.content && descr.content.file ) || ( descr.button && descr.button.file ) ) ) {
-            let src_file = descr.file ? descr.file : ( descr.content ? descr.content.file : descr.button.file );
-            try {
-                if ( src_file[0] === '.' ) {
-                    src_file = datObj.srcPath + src_file.substr(1)
+        if ( (typeof descr === 'object') && descr.length ) {
+            descr.forEach(element => {
+                if ( is_file_source(element) ) {
+                    process_sub_content(datObj,element)
                 }
-                let src = fs.readFileSync(src_file,'utf8').toString()
-                //
-                src = subcompile(src,datObj)
-                //
-                let ext = extension_from_path(src_file)
-                if ( descr.file ) {
-                    descr.content = src
-                } else if ( descr.content && descr.content.file ) {
-                    descr.content = src
-                } else if ( descr.button && descr.button.file ) {
-                    descr.button.content = src
-                }
-                descr.ext = ext
-                if ( ext === "svg" ) {
-                    if ( descr.output_height || descr.output_width ) {
-                        //
-                        if ( descr.content ) {
-                            descr.content = reset_svg_height_width(descr.content, descr.output_width, descr.output_height)
-                        }
-                        //
-                    }
-                }
-            } catch (e) {
-                g_forgotten_files.push(src_file)
-                console.log(e.message)
-            }
+            })
+        } else if ( is_file_source(descr) ) {
+            process_sub_content(datObj,descr)
         }
     }
 }
@@ -94,18 +109,31 @@ var data = fs.readFileSync(data_file,'ascii').toString()
 var confObj = JSON.parse(data)
 //
 confObj.srcPath = path.dirname(data_file)
-load_source_data(confObj)
+var source = fs.readFileSync(source_file,'utf8').toString()
+load_source_data(confObj,source)
 
 //console.dir(confObj)
 //
 
-var source = fs.readFileSync(source_file,'utf8').toString()
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-var template = Handlebars.compile(source);
-var result = template(confObj);
+var result = "nothing"
+g_compiler_schedule.forEach(operator => {
+    //let operator = { 'data' : datObj, 'source' : src, 'target' : descr }
+    let source = operator.source
+    let template = Handlebars.compile(source);
+    let confObj = operator.data
+    let content = template(confObj);
+    if ( operator.alteration ) {
+        content = operator.content
+    }
+    if ( operator.target ) {
+        operator.target.content = content
+    }
+    result = content
+})
+
 
 console.log("OUTPUT FILE: " + output)
-
 fs.writeFileSync(output,result)
 
 if ( g_forgotten_files.length ) {

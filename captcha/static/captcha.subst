@@ -107,23 +107,23 @@
     },
     "foreign_login" : [
         {
-            "supported" : true,
-            "service" : "GitGHub",
+            "supported" : false,
+            "service" : "GitGHub"
             "file" : "./foreign_auth/github.html"
         },
         {
-            "supported" : true,
-            "service" : "Twitter",
+            "supported" : false,
+            "service" : "Twitter"
             "file" : "./foreign_auth/twitter.html"
         },
         {
-            "supported" : true,
-            "service" : "Google",
-            "file" : "./foreign_auth/google.html"
+            "supported" : false,
+            "service" : "Google"
+            "file" : "./foreign_auth/goolge.html"
         },
         {
-            "supported" : true,
-            "service" : "OpenId",
+            "supported" : false,
+            "service" : "OpenId"
             "file" : "./foreign_auth/openid.html"
         }
     ]
