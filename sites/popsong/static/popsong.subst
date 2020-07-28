@@ -1,24 +1,24 @@
 {
-    "pageTitle" : "Copious World",
-    "pageDescription" : "An entry point into the our world of AI, IoT, and Communities built around songs, etc.",
-    "conversation" : "Copious World",
-    "middleBoxHook" : "Freedom of Movement is Out of The Box Thinking for the IoT Generation",
-    "rightBoxHook" : "Including Humanity in Social Internet",
+    "pageTitle" : "Pop Song Now",
+    "pageDescription" : "Make you songs safe as soon as you think of them.",
+    "conversation" : "Pop Song",
+    "middleBoxHook" : "Creation Freedom. Record you ideas safely and make them your own.",
+    "rightBoxHook" : "The singer joy loop. Sing. Listen.",
     "site_url" : "localhost",
-    "canonical" : "http://www.copious.world",
-    "companyShortLink" : "copious.world",
+    "canonical" : "http://www.popsongnow.com",
+    "companyShortLink" : "popsongnow.com",
     "copyRightYear" : "2020",
     "auth_path" : "captcha",
     "auth_websocket" : "auth_ws",
     "svgLogo" : {
         "link" : "/",
-        "file" : "./copiousLogo.svg",
+        "file" : "./popSongLogo.svg",
         "svg" : ""
     },
     "relatedAsset" : {
-        "name" : "GitGHub",
-        "link" : "https://github.com/copious-world",
-        "file" : "./GitHub.svg",
+        "name" : "SoundCloud",
+        "link" : "http://www.soundcloud.com/leddy-sound",
+        "file" : "./SoundCloud-01.svg",
         "svg" : ""
     },
     "svgBannerFrame" :  {
@@ -30,9 +30,7 @@
         "content" : {
             "svg" : "",
             "file" : "./about.svg"
-        },
-        "output_height" : "inherit",
-        "output_width" : "inherit"
+        }
     },
     "lowerFillerRef" : [
         {
@@ -40,28 +38,22 @@
         }
     ],
     "topicBox_1" : {
-        "name" : "technology",
+        "name" : "catcher",
         "content" : {
-            "file" : "./technology.svg"
-        },
-        "output_height" : "inherit",
-        "output_width" : "inherit"
+            "file" : "./catcher.html"
+        }
     },
     "topicBox_2" : {
-        "name" : "deboxing",
+        "name" : "streamer",
         "content" : {
-            "file" : "./deboxing.svg"
-        },
-        "output_height" : "inherit",
-        "output_width" : "inherit"
+            "file" : "./streamer.html"
+        }
     },
     "topicBox_3" : {
-        "name" : "locating",
+        "name" : "singer",
         "content" : {
-            "file" : "./locating.svg"
-        },
-        "output_height" : "inherit",
-        "output_width" : "inherit"
+            "file" : "./singer.html"
+        }
     },
     "registerBox" : {
          "name" : "register",
@@ -97,19 +89,17 @@
     },
     "yourProileLinks" : {
          "name" : "profile-links",
-         "instantiate" : "profile_view",
          "file" : "./profile_access.html"
     },
     "yourDashboardLinks" : {
          "name" : "dashboard-links",
-         "instantiate" : "dashboard_view",
          "file" : "./dashboard_access.html"
     },
     "foreign_login" : [
         {
             "supported" : true,
-            "service" : "GitGHub",
-            "file" : "./foreign_auth/github.html"
+            "service" : "Spotify",
+            "file" : "./foreign_auth/spotify.html"
         },
         {
             "supported" : false,

@@ -10,7 +10,7 @@ class DashboardStatic extends GeneralStatic {
 
     initialize(db_obj,conf) {
         super.initialize(db_obj,conf)
-        dashboard_application_initialize()
+        this.dashboard_application_initialize()
     }
 
     // 

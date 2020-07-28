@@ -1,17 +1,25 @@
-const { DBClass, SessionStore }  = require('lib/general_db')
-const crypto = require('crypto')
-const EventEmitter = require('events')
-const CitadelClient = require('node_citadel')
-
+const { DBClass, SessionStore } = require.main.require('./lib/general_db')
+const processExists = require('process-exists');
+//const EventEmitter = require('events')
+//const cached = require('cached')
 //
 //
-const  redis = require("redis")
-const RedisStoreFactory = require('connect-redis');
+const MemCacheStoreFactory = require('connect-memcached');
+var MemcachePlus = require('memcache-plus');
 
+//const apiKeys = require.main.require('./local/api_keys')
 
-// pre initializatoin
-const redClient = redis.createClient();  // leave it to the module to figure out how to connect
+// pre initialization
 
+(async () => {
+  const exists = await processExists('memcached');
+  if ( !exists ) {
+    console.log("Memchached deamon has not been intialized")
+    process.exit(1)
+  }
+})();
+
+const memcdClient = new MemcachePlus(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
@@ -25,15 +33,14 @@ class UploaderSessionStore extends SessionStore {
     generateStore(expressSession) {
         if ( super.can_generate_store(expressSession,true) ) {
             // custom code goes here
-            let RedisStore = new RedisStoreFactory(expressSession)
-            return (new RedisStore({ client: redClient }))
+            let MemcachedStore = new MemCacheStoreFactory(expressSession)
+            return (new MemcachedStore({ client: memcdClient }))
         } else {
             process.exit(1)
         }
     }
     //
 }
-
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
@@ -45,7 +52,6 @@ class UploaderDBClass extends DBClass {
     }
 
 }
-
 
 //
 //

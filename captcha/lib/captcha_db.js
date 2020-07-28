@@ -164,7 +164,6 @@ class CaptchaDBClass extends DBClass {
         setTimeout(post_new_user,5000)
         setTimeout(post_contact_message,5000)
         super.initialize(conf)
-        this.dashboard_application_initialize()
     }
 
     // // // 

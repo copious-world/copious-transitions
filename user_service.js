@@ -98,7 +98,8 @@ let g_secondary_mime_actions = {}
 g_app.post('/guarded/static/:asset', async (req, res) => {
     let asset = req.params['asset']
     let body = req.body
-    if ( g_session_manager.guard(asset,req) ) {             // asset exits, permission granted, etc.
+    let proceed = await g_session_manager.guard(asset,body,req)
+    if ( proceed ) {             // asset exits, permission granted, etc.
         let transitionObj = await g_session_manager.process_asset(asset,body)  // not checking sesion, key the asset and use any search refinement in the body.
         if ( transitionObj.secondary_action ) {                          // return a transition object to go to the client. 
             let asset_obj = await g_statics.fetch(asset);                     // get the asset for later
@@ -117,7 +118,8 @@ g_app.post('/guarded/static/:asset', async (req, res) => {
 g_app.post('/guarded/dynamic/:asset', async (req, res) => {
     let asset = req.params['asset']
     let body = req.body
-    if ( g_session_manager.guard(asset,req) ) {             // asset exits, permission granted, etc.
+    let proceed = await g_session_manager.guard(asset,body,req)
+    if ( proceed ) {             // asset exits, permission granted, etc.
         let transitionObj = await g_session_manager.process_asset(asset,body)  // not checking sesion, key the asset and use any search refinement in the body.
         if ( transitionObj.secondary_action ) {                          // return a transition object to go to the client. 
             let asset_obj = await g_dynamics.fetch(asset);                     // get the asset for later

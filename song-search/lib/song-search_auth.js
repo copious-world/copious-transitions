@@ -1,4 +1,4 @@
-const { GeneralAuth, SessionManager } = require('lib/general_auth')
+const { GeneralAuth, SessionManager } = require('general_auth_session_lite')
 //
 const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
@@ -69,5 +69,5 @@ class SongSearchAuth  extends GeneralAuth {
     }
 }
 
-var session_producer = new SongSearchAuth()
-module.exports = session_producer;
+var session_checker = new SongSearchAuth()
+module.exports = session_checker;

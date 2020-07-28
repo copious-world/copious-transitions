@@ -1,0 +1,681 @@
+    <style>
+        .login-menu-horizontal {
+            width: inherit;
+            white-space: nowrap;
+        }
+
+        .login-strat-choice {
+            font-weight: bold;
+            cursor: pointer;
+            font-size:medium;
+        }
+
+        .login-strat-choice:hover {
+            color:teal;
+            background-color: wheat;
+        }
+        .login-labeler {
+            font-weight: bold;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+        }
+
+        .button1 {border-radius: 2px;}
+        .button2 {border-radius: 4px;}
+        .button3 {border-radius: 8px;}
+        .button4 {border-radius: 12px;}
+        .button5 {border-radius: 90%;}
+</style>
+<div id="myLoginModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="myLoginModalCloser" class="close">&times;</span>
+            <h3><i>Captcha</i> : I am not a robot</h3>
+        </div>
+        <div class="modal-body">
+            <div id="captcha-goes-here-login" style="border:1px solid lime;margin:2px;" >
+                ------
+            </div>
+            <div id="captcha-entry-login" >
+                Type in the text that you see above:
+                <input type="text" id="captcha-field-login" class="svgFormTextField" style="font-size:14px;margin-top:1px;margin-left:2px;border:1px solid black;"/>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="captchaCheck('login')">submit</button>
+        </div>
+    </div>
+</div>
+
+<div id="myLoginForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
+    <div class="error-message" id="login-errors_here" >no error</div>
+
+    <div id="the-login-form-secure" style="color:darkorange;background-color: palegreen;visibility:hidden;display:none;">
+        switching to a secure version of this page
+    </div>
+
+    <div class="form_el" style="padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style:initial;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+		<div style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
+			Login to: {{companyShortLink}}. 
+			If you have already provided us with an e-mail, you may login using your prefered method.
+		</div>
+	</div>
+
+     
+    <div id='login-strategy' class="form_el" style="border:solid 1px darkmagenta;margin: 3px;width: fit-content;">
+        <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;font-weight: bold;overflow-x: scroll;height:fit-content;" >
+            Current login method: <span id="login-method-banner">{{companyShortLink}}</span>
+        </div>
+        <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;font-weight: bold;overflow-x: scroll;height:fit-content;" >
+            <span class="form_el_inner login-menu-horizontal" > Login Methods: 
+            <span class="form_el_inner login-menu-horizontal" style="height:fit-content;">
+                <button class="login-strat-choice button5" onclick="login_strategy('local');show_password_container();hide_openID_container()" >
+                    <svg version="1.0" width="30" height="30" viewBox="0 0 250 250" preserveAspectRatio="xMidYMid meet" id="login-local" >
+                        <title>Local</title>
+                        <path fill="navy" id="path6" d="m 30.107062,7.4672872 c 4.67725,2.6985208 8.37554,8.6930958 12.94402,20.5087688 7.17904,19.072767 24.58277,67.337762 29.69511,82.950634 l 5.32989,15.9502 -13.70543,-0.25058 -10.468161,2.57106 -8.132079,2.99946 -4.78602,5.90784 0.76141,-6.91979 c 0.65264,-6.50536 0.32632,-7.85462 -5.43866,-25.31791 C 27.822822,80.549048 20.535012,60.127019 12.703332,40.215781 5.4155222,21.730904 4.4365622,15.57249 7.8085322,10.503124 11.941922,4.43145 22.384152,2.9954505 30.107062,7.4672872 Z M 238.08162,22.742849 c 3.69828,2.110631 6.52639,6.669206 6.52639,10.379672 0,1.686578 -2.93688,12.740881 -6.63517,24.469814 -19.68797,64.138095 -30.34775,107.931245 -30.34775,124.806655 0,4.6453 -1.08775,7.68113 -18.60024,50.80931 l -4.35093,10.79409 -67.76577,0 -67.765758,0 -14.35808,-35.35063 -14.35808,-35.3603 17.62128,-20.75934 17.5125,-20.75935 29.36879,0 c 32.631998,0 5.455822,5.28877 29.390108,7.16797 -3.81133,6.98972 7.16732,11.29772 7.16732,11.29772 l 2.51778,3.43975 c -1.74038,3.20932 -4.92039,6.69891 -9.3801,9.5709 l -3.2632,2.11064 -9.78959,-2.62144 c -8.593088,-2.27446 -11.312428,-2.61179 -22.080978,-2.61179 -13.0528,-0.0964 -14.35808,0.2506 -14.35808,4.29837 0,2.70817 3.15443,3.63336 12.72648,3.63336 21.42834,0 38.723308,8.01847 47.533928,22.10863 3.58951,5.73436 7.17904,15.86345 7.17904,20.50876 0,2.86236 4.45971,5.05973 7.50536,3.79721 2.82811,-1.09868 2.93687,-4.64531 0.65264,-14.01306 -2.28424,-9.36772 -7.83169,-17.88734 -15.77214,-24.29632 -5.32988,-4.30799 -6.30884,-5.49342 -5.11233,-6.24517 1.19649,-0.76135 2.06669,-0.51077 4.0246,1.08906 6.30885,5.23321 19.03534,7.00654 27.73719,3.88395 5.87377,-2.11064 11.85631,-7.17036 15.11951,-12.74088 1.52281,-2.53468 5.98253,-16.03694 9.89835,-29.9536 10.98611,-38.396111 22.08098,-72.320389 30.13021,-92.665317 5.54744,-14.176879 12.40016,-19.737762 23.16871,-18.812555 2.93688,0.250577 6.63517,1.175785 8.15801,2.023891 z m -126.72091,50.03831 c 2.28424,0.510792 5.76499,2.11063 7.72291,3.633367 5.87375,4.558576 6.20008,7.257098 3.80705,29.278954 -1.1965,10.71701 -1.94404,26.93071 -2.27035,27.1042 -0.32632,0.25057 -8.38942,-6.50868 -17.41761,-6.25812 l -16.533538,0.42407 0.65264,-6.66922 c 0.32632,-3.62372 1.19651,-13.83956 1.84915,-22.619385 0.65264,-9.19425 1.74037,-17.125977 2.50179,-18.561977 3.2632,-5.907835 10.550998,-8.269041 19.687958,-6.331889 z m 48.5129,9.454465 c 2.06668,1.011946 4.56848,3.209314 5.54744,4.89589 1.84914,2.871998 1.84914,4.22126 -0.8702,33.750816 -1.52282,17.04886 -3.37196,32.575 -4.24216,35.02295 -3.15442,8.51961 -9.13695,13.07819 -18.16513,13.67573 -4.78601,0.25056 -6.41762,0 -9.46327,-1.69622 -5.87376,-3.12256 -6.41764,-4.29838 -2.93689,-7.42094 6.20008,-5.744 4.00097,-11.09854 1.92352,-15.89687 0,0 -0.33391,-1.79223 -2.65798,-4.24016 l -2.01123,-1.92782 3.94219,-26.79768 c 1.95792,-22.869967 2.17547,-23.795174 5.11237,-26.667174 4.89478,-4.89589 16.96861,-6.24515 23.82134,-2.698522 z" />
+                    </svg>
+                </button>
+                {{#each foreign_login}}
+                    {{#if supported}}
+                    <button class="login-strat-choice button5" onclick="login_strategy('{{service}}');hide_password_container();hide_openID_container()" >
+                        {{{content}}}
+                    </button>
+                    {{/if}}
+                {{/each}}
+            </span></span>
+        </div>
+        <input type="hidden" id="login-strategy-value" name="strategy" value="local">
+        <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+            <label for='login-email' class='login-labeler '>Email:</span></label>
+            <input type='email' name='login-email' id='login-email' value=''class='field_el email'  required onkeyup="onkey_checkLoginError('login-email')"  />
+        </div>
+        
+        <div id="password-container" class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+            <label for='login-password' class='login-labeler'>Password:</span></label>
+            <input type='password' name='login-password' id='login-password' value='' class='field_el password' onkeyup="onkey_checkLoginError('login-password')"  />
+        </div>
+
+        <div id="password-verify-container" class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+            <label for='login-password-match' class='login-labeler'>Password Verify:</span></label>
+            <input type='password' name='login-password-match' id='login-password-match' value='' class='field_el password' onkeyup="onkey_checkLoginError('login-password-match')"  />
+        </div>
+
+        <div id="openID-container" class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+            <label for='login-openID' class='login-labeler'>OpenID:</span></label>
+            <input type='text' name='login-openID' id='login-openID' value='' class='field_el'  />
+        </div>
+    </div>
+
+    <p id="login-submitter" class='login-submit' >
+    <button onclick="processLogin()" >Submit</button>
+    </p>
+
+    <div id="forgot-container" class="form_el" style="padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style:initial;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;" >
+    <p class='login-submit' style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
+        Did you forget your password?<br>
+        <button onclick="presentForgotPassword()" style="width:80%;" >Forgot Password</button>
+    </p>
+    </div>
+
+    <div id="forgot-container-submit" class="form_el" style="visibility:hidden;display:none;padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style:initial;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;" >
+    <p class='login-submit' style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
+        <button onclick="processForgotPassword()" style="width:80%;" >Submit Password Update</button>
+    </p>
+    </div>
+
+    <iframe id="loginframe" name="loginframe" style="visibility:hidden;" src="about:blank" style="width:0;height:0;border:0px solid #fff;" >
+	</iframe>
+    <div style="height:0px;width:0px;display: none;visibility: hidden;">
+        <form id="the-login-form" method="POST" action="/webcit/ajax_login_username_password" target="loginframe" onsubmit="login_viewchanges()">
+                <input type='hidden' name='name' id='login-cit-name' value='' />
+                <input type='hidden' name='pass' id='login-cit-password' value='' />
+        </form>
+    </div>
+</div>
+
+<noscript><div id="noscript_warning">
+	WARNING: You have JavaScript disabled in your web browser.  Many functions of this system will not work properly.
+</div></noscript>
+
+<script>
+
+	// Get the modal
+    var g_login_port = "2101"
+
+    var g_loginStrategyField = document.getElementById("login-strategy-value")
+    var g_backup_local_strategy_check = null
+    var g_backup_openID_strategy_check = null
+    var g_backup_OAuth_strategy_check = null
+    function login_strategy(strategy) {
+        strategy = strategy.toLowerCase()
+        hide_password_verify_container()
+        show_login_submitter()
+        g_loginStrategyField.value = strategy
+        let fergit = document.getElementById('forgot-container')
+        let methodSign = document.getElementById('login-method-banner')
+        if ( fergit ) {
+            if ( strategy === 'local' ) {
+                show_fergit_container()
+                if ( methodSign ) methodSign.innerHTML = '{{companyShortLink}}'
+            } else {
+                hide_fergit_container()
+                if ( methodSign ) methodSign.innerHTML = strategy
+            }
+        }
+        //
+        switch (strategy) {
+            case "local" : {
+                g_login_Handling.check = g_backup_local_strategy_check
+                break
+            }
+            case "openID" : {
+                g_login_Handling.checks = g_backup_openID_strategy_check
+                break
+            }
+            default : {
+                g_login_Handling.checks = g_backup_OAuth_strategy_check
+                break
+            }
+        }
+    }
+    //
+    var g_passwordContainer = document.getElementById("password-container")
+    var g_OpenIDContainer = document.getElementById("openID-container")
+    var g_passwordVerifyContainer = document.getElementById("password-verify-container")
+    var g_forgotSubmitContainer = document.getElementById("forgot-container-submit")
+    var g_fergit = document.getElementById('forgot-container')
+    var g_login_submitter = document.getElementById('login-submitter')
+    //
+    //
+    function show_password_container() {
+        if ( g_passwordContainer ) {
+            g_passwordContainer.style.visibility = "visible"
+            g_passwordContainer.style.display = "block"
+        }
+    }
+    function hide_password_container() {
+        if ( g_passwordContainer ) {
+            g_passwordContainer.style.visibility = "hidden"
+            g_passwordContainer.style.display = "none"
+        }
+    }
+    function show_fergit_container() {
+        if ( g_fergit ) {
+            g_fergit.style.visibility = "visible"
+            g_fergit.style.display = "block"
+        }
+        hide_forgot_submit_container()
+    }
+    function hide_fergit_container() {
+        if ( g_fergit ) {
+            g_fergit.style.visibility = "hidden"
+            g_fergit.style.display = "none"
+        }
+    }
+    function show_password_verify_container() {
+        if ( g_passwordVerifyContainer ) {
+            g_passwordVerifyContainer.style.visibility = "visible"
+            g_passwordVerifyContainer.style.display = "block"
+        }
+    }
+    function hide_password_verify_container() {
+        if ( g_passwordVerifyContainer ) {
+            g_passwordVerifyContainer.style.visibility = "hidden"
+            g_passwordVerifyContainer.style.display = "none"
+        }
+    }
+    function show_forgot_submit_container() {
+        hide_fergit_container()
+        if ( g_forgotSubmitContainer ) {
+            g_forgotSubmitContainer.style.visibility = "visible"
+            g_forgotSubmitContainer.style.display = "block"
+        }
+    }
+    function hide_forgot_submit_container() {
+        if ( g_forgotSubmitContainer ) {
+            g_forgotSubmitContainer.style.visibility = "hidden"
+            g_forgotSubmitContainer.style.display = "none"
+        }
+    }
+    function show_openID_container() {
+        if ( g_OpenIDContainer ) {
+            g_OpenIDContainer.style.visibility = "visible"
+            g_OpenIDContainer.style.display = "block"
+        }
+    }
+    function hide_openID_container() {
+        if ( g_OpenIDContainer ) {
+            g_OpenIDContainer.style.visibility = "hidden"
+            g_OpenIDContainer.style.display = "none"
+        }
+    }
+    function show_login_submitter() {
+        if ( g_login_submitter ) {
+            g_login_submitter.style.visibility = "visible"
+            g_login_submitter.style.display = "block"
+        }
+    }
+    function hide_login_submitter() {
+        if ( g_login_submitter ) {
+            g_login_submitter.style.visibility = "hidden"
+            g_login_submitter.style.display = "none"
+        }
+    }
+    //
+    // 
+    function loginFailed() {
+        // display reason, etc.
+        g_login_Handling.switchCaptchaDisplay(false)
+        g_login_Handling.formErrorMessage("Could not login with the information provided. Please try again.")
+    }
+    function registrationFailMessage() {
+        g_login_Handling.switchCaptchaDisplay(false)
+        g_login_Handling.formErrorMessage("It appears you already have an account. Please try logging in.")
+    }
+    function already_logged_in() {
+        g_login_Handling.switchCaptchaDisplay(false)
+        g_login_Handling.formErrorMessage("You are already logged in.")
+        loginView()
+    }
+    function login_retry_password() {
+        g_login_Handling.switchCaptchaDisplay(false)
+        g_login_Handling.formErrorMessage("Did you forget your password?")
+    }
+    //
+    function login_opening_view() {
+        login_strategy('local');show_password_container();hide_openID_container()
+        if (location.protocol !== 'https:') {           // start from a secure page
+            let lform = document.getElementById('the-login-form')
+            lform.style.visibility = "hidden"
+            lform.style.display = "none"
+            let lformMSG = document.getElementById('the-login-form-secure')
+            lformMSG.style.visibility = "visible"
+            lformMSG.style.display = "block"
+            setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
+        }
+    }
+
+    function app_tandem_login(tandems) {       // get cookie for webcit -- specific to this application
+        if ( tandems ) {
+            let loginForm = document.getElementById('the-login-form')
+            let lname = document.getElementById('login-cit-name')
+            let pname = document.getElementById('login-cit-password')
+            if ( loginForm && lname && pname ) {
+                lname.value = tandems.name.replace('@','')  // testing.... this should be removed from here on out
+                pname.value = tandems.pass
+                loginForm.submit()
+            }
+        }
+    }
+
+
+    function token_from_cookie() {
+        return(getCookie('webCit'))
+    }
+
+    var g_sitewide_socket = null
+    function setup_sitewide(token) {
+        try {
+            // setup a webSocket connection to get finalization data on logging in. -- 
+            g_sitewide_socket = new WebSocket(`wss://${g_siteURL}/auth_ws/site_wide`);
+            g_sitewide_socket.onmessage = (event) => {	// handle the finalization through the websocket
+                                    try {
+                                        let handler = JSON.parse(event.data)
+                                        if ( handler.token === token ) {
+                                            if ( handler.action === "logout" ) {
+                                                logout(false)
+                                            } else {
+                                                eval(handler.action)
+                                            }
+                                        }
+                                    } catch (e) {
+                                    }
+                                }
+            //
+            setTimeout(() => {
+                let msg = {
+                    'token' : token,
+                    'action' : 'setup'
+                }
+                g_sitewide_socket.send(JSON.stringify(msg))
+            },500)
+            //
+            return(true)       // prevent display of logout, etc until finalized
+        } catch(e) {
+            return(false)       // prevent display of logout, etc until finalized
+        }
+        
+    }
+
+
+    function site_wide_logout(token,req_logout = true) {
+        if ( req_logout ) {
+            let msg = {
+                'action' : 'logout',
+                'token' : token
+            }
+            g_sitewide_socket.send(JSON.stringify(msg))
+            //window.close()  // not for the main page
+        }
+    }
+
+
+    async function app_process_logout(site_wide = true) {
+        try {
+            let url = `${location.protocol}//${g_siteURL}/{{auth_path}}/users/logout`
+            let data = { 'action' : 'logout', 'token' : g_Loggedin_session_token }
+            let resp = await postData(url, data)
+            site_wide_logout(g_Loggedin_session_token,site_wide)
+            if ( resp.OK === "true" ) {
+                return false    // no longer logged in
+            } else {
+                // error message
+                return true     // still logged in
+            }
+        } catch (e) {
+            console.log(e)
+        }
+	}
+
+
+    var g_Loggedin_session_token = ''
+    async function secondary_actions(resp) {
+        try {
+            let trans_obj = resp.data  // transition object
+            let url = `${location.protocol}//${g_siteURL}/{{auth_path}}/secondary/users/${trans_obj.user_op}`
+            let data = { 'token' : trans_obj.token }
+            let scnd_resp = await postData(url, data)
+            if ( scnd_resp.OK === "true" ) {
+                g_Loggedin_session_token = scnd_resp.token  // should be in COOKIE
+                setup_sitewide(g_Loggedin_session_token)
+                let elements = scnd_resp.elements
+                app_tandem_login(elements.tandems)
+                return(true)
+            } else {
+                g_Loggedin_session_token = '' 
+                return(false)
+            }
+        } catch (e) {
+            console.log(e.message)
+            return(false)
+        }
+    }
+
+    function login_password_rules(fld_name,ptext) {
+        let violation_msg = "Passwords must be at eight seven"
+        violation_msg = "Passwords should have at least one number, at least one alphabetic character, and at least on punctuation character"
+        return([true,()=>{return violation_msg}])
+    }
+
+    function presentLogout(accountData) {
+        loginView(accountData)
+    }
+
+    var g_foreign_login_window = null
+    var g_foreign_login_socket = null
+    function secondaryVerify(resp) {
+        // e.g auto login to another service this uses simultaneously
+        if (  resp && resp.OK ) {
+            if ( resp.data ) {
+                let datum = resp.data
+                if ( datum.windowize ) {
+                    //
+                    try {
+                        // setup a webSocket connection to get finalization data on logging in. -- 
+                        g_foreign_login_socket = new WebSocket(`wss://${g_siteURL}/auth_ws/foreign_auth`);
+                        g_foreign_login_socket.onmessage = (
+                            (rsp) => { 
+                                        return (event) => {     // handle the finalization through the websocket
+                                                try {
+                                                    let login_instructions = JSON.parse(event.data)
+                                                    if ( login_instructions.OK ) {      // happens after the windowized redirects.
+                                                        finalize_foreign_login(rsp,login_instructions)
+                                                    }
+                                                } catch (e) {
+                                                }
+                                            }
+                            })(resp)
+                        let msg = {
+                            'token' : datum.token
+                        }
+                        setTimeout(() => {
+                            g_foreign_login_socket.send(JSON.stringify(msg))
+                            //
+                            // The URL is the first URL addressed by the foreign authorizor.
+                            g_foreign_login_window = window.open(datum.windowize, '_blank', 'height=300,width=300,menubar=0,status=0,toolbar=0', false);  // resp.windowize = location  + 'start/' + <strategy> + '/' + <email> + '/' + token
+                            //g_foreign_login_window.location;
+                            g_foreign_login_window.focus()
+                        },500)
+                        return(false)       // prevent display of logout, etc until finalized
+                    } catch(e) {
+                        loginFailed(resp)
+                        return(false)       // prevent display of logout, etc until finalized
+                    }
+                } else if ( datum.amelioritive_action ) {
+                    try {
+                        eval(datum.amelioritive_action)
+                    } catch (e) {
+                        loginFailed(resp)
+                    }
+                    return(false)
+                }
+                // else :: now do an app based login for tandem service, etc.
+                // If this application needs to work with another resource -- and all other auths have passed.
+                let caller = async (rsp) => { return (await secondary_actions(rsp)) }
+                let bval = caller(resp)
+                if (!bval) loginFailed(resp)
+                return(bval)  // accept less defind behavior as a pass (this is basically local login)
+            } else {
+                loginFailed(resp)
+                return(false)
+            }
+        }
+        //
+        loginFailed(resp)
+        return(false) 
+    }
+
+
+    function finalize_foreign_login(resp,cmds) {
+        if ( g_foreign_login_window && !(g_foreign_login_window.closed) ) {
+            g_foreign_login_window.close()
+            presentLogout(resp)
+            window.focus()
+            g_Loggedin_session_token = cmds.token  // should be in COOKIE
+            let elements = cmds.elements
+            app_tandem_login(elements.tandems)
+        }
+    }
+
+    // LOGIN APPLICATION
+    var g_login_Handling = null
+    var g_forgot_Handling = null
+    
+    function initLogin() {
+        g_login_Handling = new ValidationContainer({
+            "service_url" : `/captcha/`,
+            "errors_here" : document.getElementById('login-errors_here'),
+            "failure_msg_prefix" : "Login Failed",
+            "password_rules" : login_password_rules,
+			"fields" : {
+				"email" : document.getElementById('login-email'),
+                "password" : document.getElementById('login-password'),
+                "openID" : document.getElementById('login-openID'),
+                "strategy" : document.getElementById('login-strategy-value')
+			},
+			"checks" : {
+				"is_empty" : ["password","email"],  // ref into fields above...
+				"email" : ["email"],
+                "passwords" : ["password"]
+			},
+            "modal" : document.getElementById("myLoginModal"),
+            "closer" : document.getElementById('myLoginModalCloser'),
+			"form" : document.getElementById('myLoginForm'),
+			"captcha" : document.getElementById('captcha-goes-here-login'),
+			"captcha_field" : document.getElementById("captcha-field-login")
+        });
+        g_forgot_Handling = new ValidationContainer({  // basically uses the login form
+            "service_url" : `/captcha/`,
+            "errors_here" : document.getElementById('login-errors_here'),
+            "failure_msg_prefix" : "Password Reset Failed",
+            "password_rules" : register_password_rules,         // this application knows that the registration password rules are available.
+			"fields" : {
+				"email" : document.getElementById('login-email'),
+                "password" : document.getElementById('login-password'),
+                "password-match" : document.getElementById('login-password-match'),
+			},
+			"checks" : {
+				"is_empty" : ["password","email"],  // ref into fields above...
+				"email" : ["email"],
+                "passwords" : ["password","password-match"]
+			},
+            "modal" : document.getElementById("myLoginModal"),
+            "closer" : document.getElementById('myLoginModalCloser'),
+			"form" : document.getElementById('myLoginForm'),
+			"captcha" : document.getElementById('captcha-goes-here-login'),
+			"captcha_field" : document.getElementById("captcha-field-login")
+        });
+        g_backup_local_strategy_check = clonify(g_login_Handling.checks)
+        g_backup_openID_strategy_check = {
+				"is_empty" : ["openID","email"],  // ref into fields above...
+				"email" : ["email"],
+                "passwords" : ["openID"]
+			}
+        g_backup_OAuth_strategy_check = {
+				"is_empty" : ["email"],  // ref into fields above...
+				"email" : ["email"]
+			}
+
+
+        if ( g_login_failure === null ) g_login_failure = loginFailed
+        if ( g_registration_failure === null ) g_registration_failure = registrationFailMessage  // display on login screen
+    }
+
+
+	function login_calcAppDataDB() {
+		//
+        let c_email =  g_login_Handling.fields["email"]
+        let c_password = g_login_Handling.fields["password"]
+        let c_openID = g_login_Handling.fields["openID"]
+        let c_strategy = g_login_Handling.fields["strategy"]
+		//
+        let data = {
+            "email" : getVal(c_email),
+            "password" : getVal(c_password),
+            "strategy" : getVal(c_strategy),
+            "openID" : getVal(c_openID),
+            'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
+            'action' : 'login',
+            'form_key' : 'login'
+        }
+        //
+        switch (data.strategy) {         // perhaps more customization on the server side.
+            case "local" : {
+                break
+            }
+            case "openID" : {
+                data.password = "NONE"
+                break
+            }
+            default : {
+                data.password = "NONE"
+                data.openID = "NONE"
+                break
+            }
+        }
+		//
+		return(data)
+	}
+
+	async function login_completionaAction(resp) {
+        let verify = secondaryVerify(resp)
+        if ( verify ) {
+            presentLogout(resp)
+        }
+    }
+    
+    function forgot_calcAppDataDB() {
+        let c_email =  g_forgot_Handling.fields["email"]
+        let c_password = g_forgot_Handling.fields["password"]
+        let c_password_verify = g_forgot_Handling.fields["password-match"]
+		//
+        let data = {
+            "email" : getVal(c_email),
+            "password" : getVal(c_password),
+			"verify_password" : getVal(c_password_verify),
+            'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
+            'action' : 'forgot',
+            'form_key' : 'forgot'
+        }
+		//
+		return(data)
+    }
+    
+    function forgot_completionaAction(resp) {
+        if ( resp && resp.data ) {
+            let data = resp.data
+            let message = "Please try again later"
+            if ( data.forgetfulness_proceed ) {
+                message = "You will receive an email with a link to a password restoration page"
+            }
+            if ( g_forgot_Handling ) {
+                g_forgot_Handling.switchCaptchaDisplay(false)
+            }
+            hide_login_process()
+            show_thankyou_box(message)
+            login_strategy('local');show_password_container();hide_openID_container()
+            hide_password_verify_container()
+            hide_forgot_submit_container()
+        }
+    }
+
+	function processAuthEndpoint(endpoint,handler,calcAppDataDB,completionaAction,failedAction) {
+        let url = `${location.protocol}//${g_siteURL}/{{auth_path}}/${endpoint}`
+        handler.service_url = url
+		processUI_captchaService(handler, calcAppDataDB, completionaAction, failedAction)
+	}
+    
+    // send users throught the captcha interface
+    function processLogin() {
+        processAuthEndpoint("users/login", g_login_Handling, login_calcAppDataDB, login_completionaAction, loginFailed)
+    }
+
+    // send users throught the captcha interface
+    function processForgotPassword() {
+        processAuthEndpoint("users/forgot", g_forgot_Handling, forgot_calcAppDataDB, forgot_completionaAction, () => {})
+    }
+
+    function presentForgotPassword() {
+        login_strategy('local');show_password_container();hide_openID_container()
+        show_password_verify_container()
+        show_forgot_submit_container()
+        hide_login_submitter()
+        if ( g_forgot_Handling ) {
+            g_forgot_Handling.formErrorMessage("Please enter your password twice (just like registration). Later, you will receive an email with a link for activating this change.")
+        }
+    }
+
+	function onkey_checkLoginError(srcField) {
+	   if ( g_login_Handling.checkFormValid() ) {
+		   let focusEl = document.getElementById(srcField);
+		   focusEl.style.borderColor = 'black'
+		   g_login_Handling.hideFormErrorMessage()
+	   }
+	}
+
+    g_finalizers.push(initLogin)
+
+
+</script>
+

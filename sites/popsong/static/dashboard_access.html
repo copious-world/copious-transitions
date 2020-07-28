@@ -22,10 +22,7 @@
       if ( g_dashboard_url.length ) {
          try {
             if ( !g_app_dashboard ) {
-               let body = {
-                  'token' : g_Loggedin_session_token
-               }
-               let dashboardResponse = await postData(g_dashboard_url,body)
+               let dashboardResponse = await postData(g_dashboard_url)
                if ( dashboardResponse.owner === g_dashboard_owner ) {
                   var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
                   let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,

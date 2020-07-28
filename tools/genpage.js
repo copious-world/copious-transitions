@@ -32,13 +32,6 @@ function reset_svg_height_width(svg_txt, output_width, output_height) {
 }
 
 
-function subcompile(src,datObj) {
-    var template = Handlebars.compile(src);
-    src = template(confObj);
-    return(src)
-}
-
-
 
 function is_file_source(descr) {
     return ((typeof descr === 'object') && ( descr.file || ( descr.content && descr.content.file ) || ( descr.button && descr.button.file ) ))
@@ -65,7 +58,9 @@ function  process_sub_content(datObj,descr) {
         descr.ext = ext
         if ( ext === "svg" ) {
             if ( descr.output_height || descr.output_width ) {
-                operator.alteration = () => {  return(reset_svg_height_width(descr.content, descr.output_width, descr.output_height))  }
+                operator.alteration = (content) => {
+                    return(reset_svg_height_width(content, descr.output_width, descr.output_height))  
+                }
             }
         }
         g_compiler_schedule.unshift(operator)
@@ -122,9 +117,10 @@ g_compiler_schedule.forEach(operator => {
     let source = operator.source
     let template = Handlebars.compile(source);
     let confObj = operator.data
+    //console.dir(confObj)
     let content = template(confObj);
     if ( operator.alteration ) {
-        content = operator.content
+        content = operator.alteration(content)
     }
     if ( operator.target ) {
         operator.target.content = content

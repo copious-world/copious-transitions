@@ -1,4 +1,4 @@
-const { GeneralAuth, SessionManager } = require('lib/general_auth')
+const { GeneralAuth, SessionManager } = require('general_auth_session_lite')
 //
 const expressSession = require('express-session');
 
@@ -33,20 +33,12 @@ class UploaderSessionManager extends SessionManager {
     }
 
     //process_asset(asset_id,post_body) {}
-    feasible(transition,post_body,req) {                // is the transition something that can be done?
-        if (  G_captcha_trns.tagged(transition) || G_contact_trns.tagged(transition) ) {
-            return(true)
-        }
-        return(super.feasible(transition,post_body,req))
-    }
 
     //
     process_transition(transition,post_body,req) {
         let trans_object = super.process_transition(asset_id,post_body,req)
         //
-        if ( G_captcha_trns.tagged(transition) ) {
-            post_body._uuid_prefix =  G_captcha_trns.uuid_prefix()
-        } else if ( G_uploader_trns.tagged(transition) ) {
+        if ( G_uploader_trns.tagged(transition) ) {
             trans_object.secondary_action = false
         }
         //
@@ -54,27 +46,9 @@ class UploaderSessionManager extends SessionManager {
     }
 
     //
-    match(post_body,transtion_object)  {
-        if ( G_captcha_trns.tagged(transtion_object.tobj.asset_key) ) {
-            post_body._t_match_field = post_body[G_captcha_trns.match_key()]
-        } else {
-            return false
-        }
-        return super.match(post_body._t_match_field,transtion_object)
-    }
-
     //
     finalize_transition(transition,post_body,elements,req) {
-        if ( G_captcha_trns.tagged(transition) ) {
-            if ( post_body._t_match_field ) {
-                super.update_session_state(transition,post_body,req)
-                let finalization_state = {
-                    "state" : "captcha-in-flight",
-                    "OK" : "true"
-                }    
-                return(finalization_state)
-            }
-        } else if ( G_uploader_trns.tagged(transition) ) {
+        if ( G_uploader_trns.tagged(transition) ) {
             return(this.upload_file(post_body,G_uploader_trns,req))
         }
         let finalization_state = {
@@ -92,5 +66,5 @@ class UploaderAuth  extends GeneralAuth {
     }
 }
 
-var session_producer = new UploaderAuth()
-module.exports = session_producer;
+var session_checker = new UploaderAuth()
+module.exports = session_checker;

@@ -7,8 +7,24 @@ g_citadel_pass = apiKeys.citadel_password.trim()  // decrypt ??
 
 //
 //
-const  redis = require("redis")
-const RedisStoreFactory = require('connect-redis');
+const processExists = require('process-exists');
+//
+const MemCacheStoreFactory = require('connect-memcached');
+var MemcachePlus = require('memcache-plus');
+
+//const apiKeys = require.main.require('./local/api_keys')
+
+// pre initialization
+
+(async () => {
+  const exists = await processExists('memcached');
+  if ( !exists ) {
+    console.log("Memchached deamon has not been intialized")
+    process.exit(1)
+  }
+})();
+
+const memcdClient = new MemcachePlus(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
 
 
 
@@ -101,13 +117,12 @@ class UploaderSessionStore extends SessionStore {
     }
     //
     generateStore(expressSession) {
-        if ( super.can_generate_store(expressSession,true) ) {
-            // custom code goes here
-            let RedisStore = new RedisStoreFactory(expressSession)
-            return (new RedisStore({ client: redClient }))
-        } else {
-            process.exit(1)
-        }
+      if ( super.can_generate_store(expressSession,true) ) {
+          let MemcachedStore = new MemCacheStoreFactory(expressSession)
+          return (new MemcachedStore({ client: memcdClient }))
+      } else {
+          process.exit(1)
+      }
     }
     //
 }

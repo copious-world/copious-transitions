@@ -1,0 +1,41 @@
+<div  id="singer-app" class="applink" >
+    <p style="text-align:center;color:firebrick;font-size:120%;">Upload A Demo</p>
+    <blockquote style="text-align:center;padding-bottom:4px;">
+    <button id="upload-singer-demo" style="width:50%" onclick="fetchUploader(this)">Upload Singer Demo</button>
+    </blockquote>
+    <blockquote style="text-align:justify;padding: 8%;padding-top:4px;">
+       We are looking for singers who can bring songs to life. 
+       Upload an mp3 demo and become part of the creator community
+    </blockquote>
+</div>
+<script>
+
+async function fetchUploader(theDiv) {
+    if ( theDiv == document.querySelector('#upload-singer-demo') ) {
+        let myRequest = new Request(`http://${g_siteURL}/singer/`);
+		//
+		try {
+			const uploader = await fetch(myRequest, {
+										 method: 'GET', // *GET, POST, PUT, DELETE, etc.
+										 mode: 'cors', // no-cors, *cors, same-origin
+										 cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+										 credentials: 'omit', // include, *same-origin, omit
+										 redirect: 'follow', // manual, *follow, error
+										 referrerPolicy: 'no-referrer', // no-referrer, *client
+									 });
+			//
+			let formJson = await uploader.json();
+			let formPlacement = document.querySelector("#singer-app");
+			if ( formPlacement ) {
+                formPlacement.innerHTML = decodeURIComponent(formJson.html)
+                addscript(decodeURIComponent(formJson.script),formPlacement)
+				//gStreamerUUID = loaderApp.uuid
+			}
+		} catch (e) {
+            console.log(e.message)
+            return(false)
+        }
+    }
+    return true
+}
+</script>

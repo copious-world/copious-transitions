@@ -67,7 +67,6 @@ function getBaseAccount() {
     //
 }
 
-
 async function relay_app_request(query,offset) {
     let limit = 10
     let market = 'US'
@@ -90,7 +89,7 @@ async function relay_app_request(query,offset) {
     }
     //
 }
-  
+
 
 function selectSpotifyFields(body) {
     if ( body.tracks && body.tracks.items ) {

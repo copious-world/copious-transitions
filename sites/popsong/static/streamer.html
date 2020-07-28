@@ -1,0 +1,134 @@
+<div class="applink" >
+    <p style="text-align:center;color:firebrick;font-size:120%;">Stream of the Day</p>
+    <div style="border:solid 1px darkcyan;margin:2px">
+        <blockquote style="text-align:justify;padding: 8%;padding-top:4px;margin-top: 4px;">
+            Pick of the Day
+            <div style="border:solid 1px darkcyan;margin:2px;color:darkslateblue;background-color: floralwhite;">
+                <span style="font-weight: 900;color:royalblue;">Playing: </span>
+                <span id="streamer-day_title" style="font-weight: 800;color:rebeccapurple">planet</span>
+                &nbsp;by&nbsp;
+                <span id="streamer-day_author" style="font-weight: 800;color :seagreen">planet</span>
+            </div>
+            <br>
+            <audio controls controlsList="nodownload">
+                <source src="https://{{companyShortLink}}/streamer/static/streamoftheday" type="audio/ogg">
+                <source src="https://{{companyShortLink}}/streamer/static/streamoftheday" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio> 
+        </blockquote>
+    </div>
+    <div style="border:solid 1px darkcyan;margin:2px;padding:4px;">
+        <p style="text-align:center;color:firebrick;font-size:105%;">Search for Songs</p>
+        <blockquote style="text-align:center;padding-bottom:4px;">
+            <input type="text" id="search-song-hints" style="width:50%" />
+            <br>
+            <button style="width:50%" onclick="do_search(0)" >Search for songs</button>
+        </blockquote>
+    </div>
+    <div style="border:solid 1px darkcyan;margin:2px;padding:4px;">
+        <p style="text-align:center;color:firebrick;font-size:105%;">Submit to Song of the Day</p>
+        <blockquote style="text-align:center;padding-bottom:4px;">
+            <button style="width:50%" onclick="do_submit()" >Submit Song</button>
+        </blockquote>
+    </div>
+    <div id="streamer-scratchpad" style="border:solid 1px darkcyan;margin:2px;overflow: auto;">
+    </div>
+</div>
+<script>
+
+var g_processPortNum = ':2010'
+
+// 
+var g_songOfDayInterval = 60000
+var g_songOfDayUpdate = null
+// 
+async function song_of_day() {
+    if ( g_songOfDayUpdate ) {
+        clearInterval(g_songOfDayUpdate)
+    }
+    let song_info = await fetchEndPoint('song-search/static/song_of_day_info')
+    if ( song_info ) {
+        // streamer-day_info
+        let spanObj = document.querySelector('#streamer-day_author')
+        if ( spanObj ) {
+            spanObj.innerHTML = song_info.author
+        }
+        spanObj = document.querySelector('#streamer-day_title')
+        if ( spanObj ) {
+            spanObj.innerHTML = song_info.title
+        }
+    }
+    g_songOfDayUpdate = setInterval(song_of_day,g_songOfDayInterval)
+}
+
+
+async function do_submit() {
+    let url = `${location.protocol}//${g_siteURL}/song-search/guarded/static/song_of_day_submit`
+    let data = {
+        'query'  : query,
+        'offset' : offset
+    }
+    let resp = await postData(url, data)
+    let formJson = resp.data
+
+    let formPlacement = document.querySelector('#streamer-scratchpad');
+    if ( formPlacement ) {
+        formPlacement.innerHTML = decodeURIComponent(formJson.html)
+        addscript(decodeURIComponent(formJson.script),formPlacement)
+        //gStreamerUUID = loaderApp.uuid
+    }
+}
+
+// //
+async function do_search(offset) {
+    let input_obj = document.querySelector('#search-song-hints')
+    if ( input_obj ) {
+        if ( offset == undefined || (offset < 0) ) {
+            offset = 0
+        }
+        let value = input_obj.value
+        if ( value && value.length ) {
+            //
+            let query = encodeURIComponent(value)
+            let endpoint = `song-search/guarded/dynamic/spotify_search`
+            let url = `${location.protocol}//${g_siteURL}/song-search/guarded/dynamic/spotify_search`
+            let data = {
+                'query'  : query,
+                'offset' : offset
+            }
+            let resp = await postData(url, data)
+            //
+            let search_results = resp.data
+            //
+            if ( search_results ) {
+                //
+                let items = search_results.map(item => {
+                    let itemHtml = `
+                        <li>
+                            ${item.html}
+                        </li>
+                    `
+                    return(itemHtml)
+                }).join('\n')
+                //
+                let formattedSearch = `
+                    <ul>
+                        ${items}
+                    </ul>
+                    <div>
+                        <button onclick="do_search(${offset-10})">prev</button>
+                        <button onclick="do_search(${offset+10})">next</button>
+                    </div>
+                `
+                let listDiv = document.querySelector('#streamer-scratchpad')
+                if ( listDiv ) {
+                    listDiv.innerHTML = formattedSearch
+                }
+            }
+        }
+    }
+}
+
+
+song_of_day()
+</script>

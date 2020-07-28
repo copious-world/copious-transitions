@@ -1,5 +1,5 @@
-const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth')
 //
+const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth_session_lite')
 const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
 const uuid = require('uuid/v4');
@@ -119,10 +119,18 @@ class DashboardSessionManager extends SessionManager {
         return(key_key)
     }
 
-    guard(asset,req) {
+    async guard(asset,body,req) {
         if ( asset.substr(0,'dashboard'.length) === 'dashboard' ) {
             let email = asset.substr('dashboard'.length + 1)
-            return(this.inSession(email))
+            if ( email.length ) {
+                let token = body.token
+                let active = await this.tokenCurrent(token)
+                return active
+            }
+        } else {
+            let token = body.token
+            let active = await this.tokenCurrent(token)
+            return active
         }
         return(true)    // true by default
     }
@@ -135,11 +143,7 @@ class DashboardAuth  extends GeneralAuth {
     }
 }
 
-var session_producer = new DashboardAuth()
-module.exports = session_producer;
+var session_checker = new DashboardAuth()
+module.exports = session_checker;
 
 
-
-
-
-   
