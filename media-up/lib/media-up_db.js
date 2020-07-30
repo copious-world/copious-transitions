@@ -9,7 +9,6 @@ g_citadel_pass = apiKeys.citadel_password.trim()  // decrypt ??
 //
 const processExists = require('process-exists');
 //
-const MemCacheStoreFactory = require('connect-memcached');
 var MemcachePlus = require('memcache-plus');
 
 //const apiKeys = require.main.require('./local/api_keys')
@@ -116,15 +115,6 @@ class UploaderSessionStore extends SessionStore {
         super()
     }
     //
-    generateStore(expressSession) {
-      if ( super.can_generate_store(expressSession,true) ) {
-          let MemcachedStore = new MemCacheStoreFactory(expressSession)
-          return (new MemcachedStore({ client: memcdClient }))
-      } else {
-          process.exit(1)
-      }
-    }
-    //
 }
 
 
@@ -132,14 +122,15 @@ class UploaderSessionStore extends SessionStore {
 //
 class UploaderDBClass extends DBClass {
 
-    //
     constructor() {
-        super(UploaderSessionStore,redClient)
+      // sessStorage,keyValueDB,persistentDB
+      let persistentDB = undefined
+      super(DashboardSessionStore,memcdClient,persistentDB)
     }
+
 
     // // // 
     initialize(conf) {
-        setTimeout(post_new_user,5000)
         setTimeout(post_uploader_message,5000)
         super.initialize(conf)
     }

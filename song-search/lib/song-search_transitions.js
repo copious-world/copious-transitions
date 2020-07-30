@@ -7,9 +7,9 @@ const uuid = require('uuid/v4')
 class SpotifySearcherPaths extends TaggedTransition {
     constructor() {
         super("spotify-searcher")
+        this.addModule('search-results')
     }
     //
-
     file_entry_id(file_key) {
         return("")
     }

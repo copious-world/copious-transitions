@@ -67,7 +67,9 @@ g_app.get('/', (req, res) => {
 // STATIC FETCH
 g_app.get('/static/:asset', async (req, res) => {
     let asset = req.params['asset']
-    if ( g_session_manager.guard(asset,req) ) {     // returns a true value by default, but may guard some assets
+    let body = {}
+    let proceed = await g_session_manager.guard(asset,body,req)
+    if ( proceed ) {     // returns a true value by default, but may guard some assets
         var asset_obj = await g_statics.fetch(asset);     // returns an object with fields mime_type, and string e.g. text/html with uriEncoded html
         if ( typeof asset_obj !== 'object' || asset_obj.mime_type == undefined ) {
             let hypothetical = asset_obj
@@ -122,12 +124,12 @@ g_app.post('/guarded/dynamic/:asset', async (req, res) => {
     if ( proceed ) {             // asset exits, permission granted, etc.
         let transitionObj = await g_session_manager.process_asset(asset,body)  // not checking sesion, key the asset and use any search refinement in the body.
         if ( transitionObj.secondary_action ) {                          // return a transition object to go to the client. 
-            let asset_obj = await g_dynamics.fetch(asset);                     // get the asset for later
+            let asset_obj = await g_dynamics.fetch(asset,transitionObj);                     // get the asset for later
             let tObjCached = { 'tobj' : transitionObj, 'asset' : asset_obj } 
             add_local_cache_transition(g_secondary_mime_actions,transitionObj.token,tObjCached)
             return(res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));    // transition object has token
         } else {
-            let asset_obj = await g_dynamics.fetch(asset);     // no checks being done, just send the asset. No token field included
+            let asset_obj = await g_dynamics.fetch(asset,transitionObj);     // no checks being done, just send the asset. No token field included
             res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
             return(res.end(asset_obj.string));
         }

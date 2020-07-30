@@ -9,8 +9,7 @@ class MediaUpStatic extends GeneralStatic {
         //
         this.preloaded = {
             "uploader" : { "fname" :__dirname + '/uploader.html', "ftype" : "html" },
-            "song_submit" : { "fname" :__dirname + '/submitter.html', "ftype" : "html" },
-            "song_of_day" : { "fname" :__dirname + '/song_of_day.json', "ftype" : "json" }
+            "song_submit" : { "fname" :__dirname + '/submitter.html', "ftype" : "html" }
         }
         //
         this.singer_asset_media_object = null
@@ -21,7 +20,7 @@ class MediaUpStatic extends GeneralStatic {
         //
         super.preloaded_all()
         //
-        // A) SINGER UPLOAD FORM
+        // A) SINGER UPLOAD FORM -- uploader
         let data = this.preloaded.uploader.data
         let json = this.prepare_asset(data)
         //
@@ -30,7 +29,7 @@ class MediaUpStatic extends GeneralStatic {
             "string" : JSON.stringify(json)
         }
         //
-        // B) SONG OF DAY SUBMISSION FORM
+        // B) SONG OF DAY SUBMISSION FORM -- song_submit
         data = this.preloaded.song_submit.data
         json = this.prepare_asset(data)
         //
@@ -39,20 +38,6 @@ class MediaUpStatic extends GeneralStatic {
             "string" : JSON.stringify(json)
         }
         //
-        // C) SONG OF DAY INFO (FOR DISPLAY)
-        json = this.preloaded.song_of_day_info.data
-        //
-        this.song_of_day_info_asset_media_object = {
-            "mime_type" : "application/json",
-            "string" : JSON.stringify(json)
-        }
-
-        let intervalRef = setInterval(() => { 
-            let json = this.reload(); 
-            this.song_of_day_info_asset_media_object.string = JSON.stringify(json) 
-        },conf.song_of_day_interval)
-
-        this.intervalRefs.push(intervalRef)
         
     }
 
@@ -68,12 +53,6 @@ class MediaUpStatic extends GeneralStatic {
                 return("empty")
             } else {
                 return(this.songofday_asset_media_object)
-            }
-        } else if ( asset == "song_of_day_info" ) {
-            if ( !(this.song_of_day_info_asset_media_object) ) {
-                return("empty")
-            } else {
-                return(this.song_of_day_info_asset_media_object)
             }
         } else {
             return(super.fetch())

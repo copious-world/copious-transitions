@@ -11,8 +11,8 @@
             </div>
             <br>
             <audio controls controlsList="nodownload">
-                <source src="https://{{companyShortLink}}/streamer/static/streamoftheday" type="audio/ogg">
-                <source src="https://{{companyShortLink}}/streamer/static/streamoftheday" type="audio/mpeg">
+                <source src="https://{{companyShortLink}}/streamer/streamoftheday" type="audio/ogg">
+                <source src="https://{{companyShortLink}}/streamer/streamoftheday" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio> 
         </blockquote>
@@ -63,10 +63,11 @@ async function song_of_day() {
 
 
 async function do_submit() {
-    let url = `${location.protocol}//${g_siteURL}/song-search/guarded/static/song_of_day_submit`
+    let url = `${location.protocol}//${g_siteURL}/uploaders/guarded/static/songofday-uploader`
     let data = {
         'query'  : query,
-        'offset' : offset
+        'offset' : offset,
+        'token' : g_Loggedin_session_token
     }
     let resp = await postData(url, data)
     let formJson = resp.data
@@ -91,10 +92,11 @@ async function do_search(offset) {
             //
             let query = encodeURIComponent(value)
             let endpoint = `song-search/guarded/dynamic/spotify_search`
-            let url = `${location.protocol}//${g_siteURL}/song-search/guarded/dynamic/spotify_search`
+            let url = `${location.protocol}//${g_siteURL}/song-search/guarded/dynamic/spotify-searcher`
             let data = {
                 'query'  : query,
-                'offset' : offset
+                'offset' : offset,
+                'token' : g_Loggedin_session_token
             }
             let resp = await postData(url, data)
             //

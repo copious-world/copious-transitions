@@ -108,7 +108,7 @@ class UploaderBusiness {
     //
     process(use_case,post_body) {
         switch ( use_case ) {
-            case "upload" : {
+            case "voice-demo" : {
                 if ( g_MailToUploader ) {
                     let [html,text] = this.helper_populate_message(post_body,g_MailToUploader.html, g_MailToUploader.text)
                     g_MailToUploader.html = html

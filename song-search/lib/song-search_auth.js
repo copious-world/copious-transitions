@@ -1,6 +1,5 @@
 const { GeneralAuth, SessionManager } = require('general_auth_session_lite')
 //
-const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
 
 class SearcherSessionManager extends SessionManager {
@@ -9,31 +8,9 @@ class SearcherSessionManager extends SessionManager {
         //
         super(exp_app,db_obj)
         //
-        let db_store = db_obj.session_store.generateStore(expressSession)  // custom application session store for express 
-        //
-        this.session = expressSession({         // express session middleware
-            secret: conf.sessions.secret,
-            resave: true,
-            saveUninitialized: true,
-            proxy : true,
-            maxAge: 24 * 60 * 60 * 1000,
-            sameSite: false,
-            genid: (req) => {
-                return uuid() // use UUIDs for session IDs
-            },
-            store: db_store,
-            cookie: {
-                secure: false,
-                httpOnly: true,
-                domain: conf.domain
-            }
-        })
-
         this.middle_ware.push(cookieParser())           // use a cookie parser
-        this.middle_ware.push(this.session)             // this is where the session object is introduced as middleware
     }
 
-    //process_asset(asset_id,post_body) {}
     feasible(transition,post_body,req) {                // is the transition something that can be done?
         if (  G_spotify_searcher_trns.tagged(transition) ) {
             return(true)
@@ -41,10 +18,16 @@ class SearcherSessionManager extends SessionManager {
         return(super.feasible(transition,post_body,req))
     }
 
+    process_asset(asset_id,post_body) {
+        if (  G_spotify_searcher_trns.tagged(asset_id) ) {
+            let transObj = super.process_asset(asset_id,post_body)
+            transObj.query = post_body.query
+            transObj.offset = post_body.offset
+        }
+    } 
+
     process_transition(transition,post_body,req) {
-        let transObj = super.process_transition(transition,post_body,req)
-        transObj.query = post_body,query
-        transObj.offset = post_body.offset
+        return super.process_transition(transition,post_body,req)
     }
 
     //

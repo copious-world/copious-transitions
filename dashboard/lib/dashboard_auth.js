@@ -7,9 +7,9 @@ const uuid = require('uuid/v4');
 
 class DashboardSessionManager extends SessionManager {
 
-    constructor(exp_app,db_obj,bussiness) {
+    constructor(exp_app,db_obj,business) {
         //
-        super(exp_app,db_obj,bussiness)         //
+        super(exp_app,db_obj,business)         //
         //  ----  ----  ----  ----  ----  ----  ----  ----  ----
         //
         let db_store = db_obj.session_store.generateStore(expressSession)  // custom application session store for express 
@@ -72,8 +72,8 @@ class DashboardSessionManager extends SessionManager {
         if ( G_dashboard_trns.tagged(transition) ) {
             if ( post_body._t_match_field ) {
                 super.update_session_state(transition,post_body,req)
-                let finalization_state = {
-                    "state" : "captcha-in-flight",
+                let finalization_state = {      // this has to get fancy
+                    "state" : "computed",
                     "OK" : "true"
                 }
                 // set a cookie for use by other micro services

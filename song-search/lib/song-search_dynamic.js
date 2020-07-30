@@ -117,25 +117,27 @@ function selectSpotifyFields(body) {
 }
 
 
-class MediaUpDynamic extends GeneralDynamic {
+class SongSearchDynamic extends GeneralDynamic {
     //
     constructor(conf) {
         super(conf)
         this.db = null
     }
 
-    async fetch_elements(transition,transtionObj) {
-        if ( g_spotify_ready && G_spotify_searcher_trns.tagged(transition,'dynamic') ) {
+    async fetch_elements(asset,transtionObj) {
+        if ( g_spotify_ready && G_spotify_searcher_trns.tagged(asset,'search-results') ) {
             let query = transtionObj.query
             let offset = transtionObj.offset
             if ( query ) {
                 try {
                     let data = await relay_app_request(query,offset)
                     let [srch_rslts,page] = selectSpotifyFields(data)
-                    //                       
-                    let send_elements = { 'srch_rslts' : JSON.stringify(srch_rslts) }       // list of songs
-                    let store_elements = { 'match' : page }                          // keep paging possible (state)
-                    return [send_elements,store_elements]
+                    //
+                    let results = {
+                        'mime_type' : 'application/json',
+                        'string' : JSON.stringify(srch_rslts)
+                    }          
+                    return results
                 } catch (e) {
                     return ([])
                 }
@@ -152,4 +154,4 @@ class MediaUpDynamic extends GeneralDynamic {
 
 
 
-module.exports = new MediaUpDynamic()
+module.exports = new SongSearchDynamic()
