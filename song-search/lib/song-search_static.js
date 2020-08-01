@@ -1,4 +1,4 @@
-const GeneralStatic = require('lib/general_static')
+const GeneralStatic = require.main.require('./lib/general_static')
 
 const myStorageClass = null
 
@@ -6,35 +6,32 @@ class SongSearchStatic extends GeneralStatic {
     //
     constructor() {
         super(myStorageClass)
-    }
-
-    constructor() {
-        super(myStorageClass)
         //
         this.preloaded = {
-            "song_of_day" : { "fname" :__dirname + '/song_of_day.json', "ftype" : "json" }
+            "song_of_day_info" : { "fname" : '/song_of_day.json', "ftype" : "json" }
         }
         //
         this.song_of_day_info_asset_media_object = null
     }
 
-    preloaded_all(conf) {
+    preload_all(conf) {
         //
-        super.preloaded_all()
+        if ( conf.static_files ) {
+            this.generic_prep_cwd_offset(conf)
+        }
         //
-        let data = this.preloaded.uploader.data
-        let json = this.prepare_asset(data)
+        super.preload_all()
         //
         // C) SONG OF DAY INFO (FOR DISPLAY)
-        json = this.preloaded.song_of_day_info.data
+        let json = this.preloaded.song_of_day_info.data
         //
         this.song_of_day_info_asset_media_object = {
             "mime_type" : "application/json",
             "string" : JSON.stringify(json)
         }
 
-        let intervalRef = setInterval(() => { 
-            let json = this.reload(); 
+        let intervalRef = setInterval(async () => { 
+            let json = await this.reload("song_of_day_info"); 
             this.song_of_day_info_asset_media_object.string = JSON.stringify(json) 
         },conf.song_of_day_interval)
 

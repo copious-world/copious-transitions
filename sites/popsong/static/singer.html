@@ -12,7 +12,7 @@
 
 async function fetchUploader(theDiv) {
     if ( theDiv == document.querySelector('#upload-singer-demo') ) {
-        let formJson = await fetchEndPoint('uploaders/static/singer-uploader/')
+        let formJson = await fetchEndPoint('uploaders/static/singer-uploader')
         if ( formJson ) {
             let formPlacement = document.querySelector("#singer-app");
             if ( formPlacement ) {

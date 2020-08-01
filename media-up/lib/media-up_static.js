@@ -1,4 +1,4 @@
-const GeneralStatic = require('lib/general_static')
+const GeneralStatic = require.main.require('./lib/general_static')
 
 const myStorageClass = null
 
@@ -8,17 +8,22 @@ class MediaUpStatic extends GeneralStatic {
         super(myStorageClass)
         //
         this.preloaded = {
-            "uploader" : { "fname" :__dirname + '/uploader.html', "ftype" : "html" },
-            "song_submit" : { "fname" :__dirname + '/submitter.html', "ftype" : "html" }
+            "uploader" : { "fname" : '/uploader.html', "ftype" : "html" },
+            "song_submit" : { "fname" : '/submitter.html', "ftype" : "html" }
         }
         //
         this.singer_asset_media_object = null
         this.songofday_asset_media_object = null
     }
 
-    preloaded_all(conf) {
+    preload_all(conf) {
         //
-        super.preloaded_all()
+        if ( conf.static_files ) {
+            this.generic_prep_cwd_offset(conf)
+        }
+
+        //
+        super.preload_all()
         //
         // A) SINGER UPLOAD FORM -- uploader
         let data = this.preloaded.uploader.data

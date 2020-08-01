@@ -18,7 +18,7 @@ class CaptchaStatic extends GeneralStatic {
         this.forgetful_asset_media_object = null
     }
 
-    preloaded_all(conf) {
+    preload_all(conf) {
         //
         super.preloaded_all()
         //

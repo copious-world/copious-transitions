@@ -1,9 +1,8 @@
-const { DBClass, SessionStore }  = require('lib/general_db')
+const { DBClass, SessionStore }  = require.main.require('./lib/general_db')
 const crypto = require('crypto')
 const EventEmitter = require('events')
 const CitadelClient = require('node_citadel')
-const apiKeys = require('local/aipkeys')
-g_citadel_pass = apiKeys.citadel_password.trim()  // decrypt ??
+const apiKeys = require.main.require('./local/api_keys')
 
 //
 //
@@ -28,12 +27,12 @@ const memcdClient = new MemcachePlus(); //new Memcached('localhost:11211');  // 
 
 
 // pre initializatoin
-const redClient = redis.createClient();  // leave it to the module to figure out how to connect
 
 var g_citadel = null
 var g_citadel_pass = ""
 var g_restarting = false
 
+g_citadel_pass = apiKeys.citadel_password.trim()  // decrypt ??
 
 //
 //
@@ -69,7 +68,7 @@ async function run_citadel() {
 async function post_uploader_message() {
   if ( g_restarting ) {
     setTimeout(() => { post_uploader_message() }, 200 )
-  } else if ( G_contact_trns.empty_queue() ) {
+  } else if ( G_uploader_trns.empty_queue() ) {
     setTimeout(() => { post_uploader_message() }, 1000 )
   } else {
     let citadel = g_citadel
@@ -77,21 +76,21 @@ async function post_uploader_message() {
     while ( g_citadel && !(G_uploader_trns.empty_queue()) ) {
       let udata = G_uploader_trns.get_work()
       await citadel.logout()
-      let isNew = await citadel.create_user(udata.name,udata.password)
+      let isNew = await citadel.create_user(udata.name,udata.pass)  // add the user
       await citadel.logout()
-      await citadel.user('admin')
+      await citadel.user('admin')   // tell admin that it has been done
       await citadel.password(g_citadel_pass)
       let msgObject = {
         'recipient' : "admin",
         'anonymous' : false, 
         'type' : false,
         'subject' : decodeURIComponent(udata.name),
-        'author' : decodeURIComponent(udata.email),
+        'author' : decodeURIComponent(udata.name),
         'references' : udata.file,
-        'text' : `New singer upload: ${udata.email} stored as ${udata.file}`
+        'text' : `New singer upload: ${udata.name} stored as ${udata.file}`
       }
       //
-      await citadel.post_message(msgObject)
+      await citadel.post_message(msgObject)   // message to admin
     }
     setTimeout(() => { post_uploader_message() }, 1000 )
   }
@@ -125,9 +124,8 @@ class UploaderDBClass extends DBClass {
     constructor() {
       // sessStorage,keyValueDB,persistentDB
       let persistentDB = undefined
-      super(DashboardSessionStore,memcdClient,persistentDB)
+      super(UploaderSessionStore,memcdClient,persistentDB)
     }
-
 
     // // // 
     initialize(conf) {
@@ -143,7 +141,7 @@ class UploaderDBClass extends DBClass {
     //  custom: contacts, ...
     store(collection,data) {
         if ( G_uploader_trns.tagged(collection) ) {
-            let udata = G_uploader_trns.update(data,token)
+            let udata = G_uploader_trns.update(data)
             G_uploader_trns.enqueue(udata)
         } else {
             super.store(collection,data)

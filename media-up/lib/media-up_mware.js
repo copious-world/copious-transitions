@@ -1,4 +1,4 @@
-const GeneralMiddleWare = require('lib/general_middleware')
+const GeneralMiddleWare = require.main.require('./lib/general_mware')
 
 
 var bodyParser = require('body-parser');
@@ -31,10 +31,11 @@ class MediaUpMiddleWare extends GeneralMiddleWare {
         }
         // //
         //
+
         this.add(jsonParser)
         this.add(urlencodedParser)
         this.add(appCors)
-        this.add(fileUpload)
+        this.add(fileUpload())
         //
         super.setup(app,db,session_manager)
     }

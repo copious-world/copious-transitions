@@ -1,27 +1,47 @@
-const { GeneralAuth, SessionManager } = require('general_auth_session_lite')
+const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth_session_lite')
+//
+const cookieParser = require('cookie-parser');
 
 class UploaderSessionManager extends SessionManager {
 
-    constructor(exp_app,db_obj) {
-        super(exp_app,db_obj)
+    constructor(exp_app,db_obj,business) {
+        super(exp_app,db_obj,business)
         //
         this.middle_ware.push(cookieParser())           // use a cookie parser
      }
 
     //process_asset(asset_id,post_body) {}
 
+    which_uploaded_files(req,post_body) {
+        //let sampleFile = req.files.mp3file;
+        return(req.files)      // the application should handle this
+    }
+
+
+    feasible(transition,post_body,req) {
+        if (  G_singer_submit_trns.tagged(transition) ) {
+            return(true)
+        }
+        if (  G_song_submit_trns.tagged(transition) ) {
+            return(true)
+        }
+        return(super.feasible(transition,post_body,req))
+    }
+
     //
     process_transition(transition,post_body,req) {
-        let trans_object = super.process_transition(asset_id,post_body,req)
+        let trans_object = super.process_transition(transition,post_body,req)
         //
         if ( G_uploader_trns.tagged(transition) ) {
             trans_object.secondary_action = false
         }
         if ( G_singer_submit_trns.tagged(transition) ) {
             trans_object.secondary_action = false
+            post_body.file_type = "mp3"
         }
         if ( G_song_submit_trns.tagged(transition) ) {
             trans_object.secondary_action = false
+            post_body.file_type = "mp3"
         }
         //
         return(trans_object)
@@ -36,14 +56,14 @@ class UploaderSessionManager extends SessionManager {
         if ( G_singer_submit_trns.tagged(transition) ) {
             let state = this.upload_file(post_body,G_singer_submit_trns,req)
             if ( this.business ) {
-                this.busines.process('voice-demo',post_body)
+                this.business.process('voice-demo',post_body)
             }
             return(state)
         }
         if ( G_song_submit_trns.tagged(transition) ) {
             let state = this.upload_file(post_body,G_song_submit_trns,req)
             if ( this.business ) {
-                this.busines.process('submitter',post_body)
+                this.business.process('submitter',post_body)
             }
             return(state)
         }
@@ -56,7 +76,10 @@ class UploaderSessionManager extends SessionManager {
 
 
     passing(asset) {
-        return( G_uploader_trns.static_entries.indexOf(asset) >= 0 )
+        if ( G_uploader_trns.static_entries ) {
+            return( G_uploader_trns.static_entries.indexOf(asset) >= 0 )
+        }
+        return true
     }
 
     async guard(asset,body,req) {

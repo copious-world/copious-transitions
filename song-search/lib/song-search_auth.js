@@ -1,4 +1,4 @@
-const { GeneralAuth, SessionManager } = require('general_auth_session_lite')
+const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth_session_lite')
 //
 const cookieParser = require('cookie-parser');
 
@@ -23,7 +23,9 @@ class SearcherSessionManager extends SessionManager {
             let transObj = super.process_asset(asset_id,post_body)
             transObj.query = post_body.query
             transObj.offset = post_body.offset
+            return(transObj)
         }
+        return(super.process_asset(asset_id,post_body))
     } 
 
     process_transition(transition,post_body,req) {

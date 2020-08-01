@@ -1,9 +1,9 @@
-const GeneralBusiness = require('lib/general_business')
+const GeneralBusiness = require.main.require('./lib/general_business')
 
 class UploaderBusiness extends GeneralBusiness {
     //
     constructor() {
-        //super(myStorageClass)
+        super()
         this.db = null
         this.rules = null
     }

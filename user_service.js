@@ -35,14 +35,16 @@ var g_app = require(conf_obj.mod_path.expression)(conf_obj,g_db); // exports a f
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
 // INITIALIZE
+
 g_db.initialize(conf_obj)
 g_business.initialize(conf_obj,g_db)
 let g_session_manager = g_authorizer.sessions(g_app,g_db,g_business)   // setup session management, session, cookies, tokens, etc. Use database and Express api.
                                                             // sessions inializes the custom session manager determined in the application authorizer.
 g_middleware.setup(g_app,g_db,g_session_manager)            // use a module to cusomize the use of Express middleware.
 g_validator.initialize(conf_obj,g_db,g_session_manager)     // The validator may refer to stored items and look at other context dependent information
-g_statics.initialize(g_db)                                  // Static assets may be taken out of DB storage or from disk, etc.
+g_statics.initialize(g_db,conf_obj)                         // Static assets may be taken out of DB storage or from disk, etc.
 g_dynamics.initialize(g_db)                                 // Dynamichk assets may be taken out of DB storage or from disk, etc.
+
 
 /*
 /static/:asset            -- previously static_mime.  This just returns a static (not computed) piece of information. The app should be able to set the mime type.
@@ -59,9 +61,14 @@ g_dynamics.initialize(g_db)                                 // Dynamichk assets 
 
 // ROOT ... unauthorized entry point  -- this is likely to be done by Nginx and will not be needed here.
 g_app.get('/', (req, res) => {
-    var html = g_statics.fetch('index.html');
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end(html);
+    try {
+        let html = g_statics.fetch('index.html');
+        console.log(html)
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(html);    
+    } catch (e) {
+        res.end('system check')
+    }
 });
 
 // STATIC FETCH
@@ -103,15 +110,17 @@ g_app.post('/guarded/static/:asset', async (req, res) => {
     let proceed = await g_session_manager.guard(asset,body,req)
     if ( proceed ) {             // asset exits, permission granted, etc.
         let transitionObj = await g_session_manager.process_asset(asset,body)  // not checking sesion, key the asset and use any search refinement in the body.
-        if ( transitionObj.secondary_action ) {                          // return a transition object to go to the client. 
-            let asset_obj = await g_statics.fetch(asset);                     // get the asset for later
-            let tObjCached = { 'tobj' : transitionObj, 'asset' : asset_obj } 
-            add_local_cache_transition(g_secondary_mime_actions,transitionObj.token,tObjCached)
-            return(res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));    // transition object has token
-        } else {
-            let asset_obj = await g_statics.fetch(asset);     // no checks being done, just send the asset. No token field included
-            res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
-            return(res.end(asset_obj.string));
+        if ( transitionObj ) {
+            if ( transitionObj.secondary_action ) {                          // return a transition object to go to the client. 
+                let asset_obj = await g_statics.fetch(asset);                     // get the asset for later
+                let tObjCached = { 'tobj' : transitionObj, 'asset' : asset_obj } 
+                add_local_cache_transition(g_secondary_mime_actions,transitionObj.token,tObjCached)
+                return(res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));    // transition object has token
+            } else {
+                let asset_obj = await g_statics.fetch(asset);     // no checks being done, just send the asset. No token field included
+                res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
+                return(res.end(asset_obj.string));
+            }
         }
     }
     res.status(200).send(JSON.stringify({ 'type' : 'mime', 'OK' : 'false', 'reason' : 'unavailable' }));
@@ -123,15 +132,17 @@ g_app.post('/guarded/dynamic/:asset', async (req, res) => {
     let proceed = await g_session_manager.guard(asset,body,req)
     if ( proceed ) {             // asset exits, permission granted, etc.
         let transitionObj = await g_session_manager.process_asset(asset,body)  // not checking sesion, key the asset and use any search refinement in the body.
-        if ( transitionObj.secondary_action ) {                          // return a transition object to go to the client. 
-            let asset_obj = await g_dynamics.fetch(asset,transitionObj);                     // get the asset for later
-            let tObjCached = { 'tobj' : transitionObj, 'asset' : asset_obj } 
-            add_local_cache_transition(g_secondary_mime_actions,transitionObj.token,tObjCached)
-            return(res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));    // transition object has token
-        } else {
-            let asset_obj = await g_dynamics.fetch(asset,transitionObj);     // no checks being done, just send the asset. No token field included
-            res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
-            return(res.end(asset_obj.string));
+        if ( transitionObj ) {
+            if ( transitionObj.secondary_action ) {                          // return a transition object to go to the client. 
+                let asset_obj = await g_dynamics.fetch(asset,transitionObj);                     // get the asset for later
+                let tObjCached = { 'tobj' : transitionObj, 'asset' : asset_obj } 
+                add_local_cache_transition(g_secondary_mime_actions,transitionObj.token,tObjCached)
+                return(res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));    // transition object has token
+            } else {
+                let asset_obj = await g_dynamics.fetch(asset,transitionObj);     // no checks being done, just send the asset. No token field included
+                res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
+                return(res.end(asset_obj.string));
+            }
         }
     }
     res.status(200).send(JSON.stringify({ 'type' : 'mime', 'OK' : 'false', 'reason' : 'unavailable' }));
@@ -166,18 +177,20 @@ g_app.post('/transition/:transition', async (req, res) => {           // the tra
     if ( g_validator.valid(body,g_validator.field_set[transition]) ) {         // A field set may be in the configuration for named transitions - true by default
         if ( g_session_manager.feasible(transition,body,req) ) {                        // can this session actually make the transition?
             let transitionObj = await g_session_manager.process_transition(transition,body,req)            // either fetch or produced transition data
-            if ( transitionObj.secondary_action ) {                                      // Require a seconday action as part of the transition for finalization
-                let [send_elements, store_elements] = g_dynamics.fetch_elements(transition,transitionObj);      // elements is purposely vague and may be application sepecific
-                let tObjCached = { 'tobj' : transitionObj, 'elements' : store_elements, 'transition' : transition }
-                add_local_cache_transition(g_finalize_transitions,transitionObj.token,tObjCached)
-                return(res.status(200).send(JSON.stringify({ 'type' : 'transition', 'OK' : 'true', 'transition' : transitionObj, 'elements' : send_elements })));
-            } else {
-                body.token = transitionObj.token
-                let finalization_state = await g_session_manager.finalize_transition(transition,body,{},req)      // FINALIZE (not a final state)
-                if ( finalization_state ) {     // relay the finalized transition and go on with business. 
-                    let state = finalization_state.state
-                    let OK = finalization_state.OK
-                    return(res.status(200).send(JSON.stringify({ 'type' : 'finalize', 'OK' : OK, 'state' : state, 'reason' : 'matched' })));
+            if ( transitionObj ) {
+                if ( transitionObj.secondary_action ) {                                      // Require a seconday action as part of the transition for finalization
+                    let [send_elements, store_elements] = g_dynamics.fetch_elements(transition,transitionObj);      // elements is purposely vague and may be application sepecific
+                    let tObjCached = { 'tobj' : transitionObj, 'elements' : store_elements, 'transition' : transition }
+                    add_local_cache_transition(g_finalize_transitions,transitionObj.token,tObjCached)
+                    return(res.status(200).send(JSON.stringify({ 'type' : 'transition', 'OK' : 'true', 'transition' : transitionObj, 'elements' : send_elements })));
+                } else {
+                    body.token = transitionObj.token
+                    let finalization_state = await g_session_manager.finalize_transition(transition,body,{},req)      // FINALIZE (not a final state)
+                    if ( finalization_state ) {     // relay the finalized transition and go on with business. 
+                        let state = finalization_state.state
+                        let OK = finalization_state.OK
+                        return(res.status(200).send(JSON.stringify({ 'type' : 'finalize', 'OK' : OK, 'state' : state, 'reason' : 'matched' })));
+                    }
                 }
             }
         }
@@ -348,7 +361,9 @@ function send_ws_outofband(token_key,data) {
 // APPLICATION STARTUP
 //
 g_db.last_step_initalization()
-var g_exp_server = g_app.listen(conf_obj.port);
+var g_exp_server = g_app.listen(conf_obj.port,() => {
+    console.log(`listening on ${conf_obj.port}`)
+});
 //var shutdown_server_helper = shutdown_server_helper_factory(g_exp_server)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------

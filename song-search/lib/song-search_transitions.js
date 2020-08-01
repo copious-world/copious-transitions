@@ -1,5 +1,5 @@
 
-const TaggedTransition = require("lib/tagged_transitions")
+const TaggedTransition = require.main.require('./lib/tagged_transitions')
 const uuid = require('uuid/v4')
 
 

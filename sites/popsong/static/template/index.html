@@ -944,26 +944,36 @@ html {
 	}
 
 	//
-	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true) {
-	  // Default options are marked with *
-	  const response = await fetch(url, {
-		method: 'POST', // *GET, POST, PUT, DELETE, etc.
-		mode: 'cors', // no-cors, *cors, same-origin
-		cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-		credentials: creds, // include, *same-origin, omit
-		headers: {
-		  'Content-Type': 'application/json'
-		},
-		redirect: 'follow', // manual, *follow, error
-		referrerPolicy: 'no-referrer', // no-referrer, *client
-		body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
-	  });
-	  if ( response.ok == false ) {
-		  console.log(response.status + ': ' + response.statusText)
-		  return {}
-	  } else {
-		return await response.json(); // parses JSON response into native JavaScript objects
-	  }
+	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true,ctype) {
+		let content_type = 'application/json'
+		if ( ctype !== undefined ) {
+			content_type = ctype
+		}
+		let options = {
+			method: 'POST', // *GET, POST, PUT, DELETE, etc.
+			mode: 'cors', // no-cors, *cors, same-origin
+			cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+			credentials: creds, // include, *same-origin, omit
+			headers: {
+				'Content-Type': content_type
+			},
+			redirect: 'follow', // manual, *follow, error
+			referrerPolicy: 'no-referrer', // no-referrer, *client
+			body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
+		}
+
+		if ( ctype === 'multipart/form-data') {
+			delete options.headers['Content-Type']  // content type will be set automatically with a boundary
+		}
+
+		// Default options are marked with *
+		const response = await fetch(url, options);
+		if ( response.ok == false ) {
+			console.log(response.status + ': ' + response.statusText)
+			return {}
+		} else {
+			return await response.json(); // parses JSON response into native JavaScript objects
+		}
 	}
 
 
@@ -992,7 +1002,8 @@ html {
                 errDiv.innerHTML = emsg
                 this._msgTimeout = setTimeout(() => {
                     let errDivNxt = document.querySelector(this.errorDiv)
-                    errDivNxt.innerHTML = ""
+					errDivNxt.innerHTML = ""
+					this._msgTimeout = false
                 },1500)
             }
         }
@@ -1010,9 +1021,9 @@ html {
         }
 
         checkForm(event) {
+			let errField = document.querySelector(this.errorDiv)
 			if ( this.emailField ) {
 				let inspect_field = document.querySelector(this.emailField)
-				let errField = document.querySelector(this.errorDiv)
 				if ( inspect_field && !checkEmailField(inspect_field) ) {
 					inspect_field.style.borderColor="red"
 					if (errField) errField.style.color = "red"
@@ -1046,7 +1057,7 @@ html {
                 try {
 					let data = new FormData()
 					this.app_prepData(data)
-					let json =  await postData(this.uploadEndpoint,data,'omit',false)
+					let json =  await postData(this.uploadEndpoint,data,'omit',false,'multipart/form-data')
 					this.success_report(json)
                     this.errorMessage(this.positiveCompletion)
                     document.querySelector(this.errorDiv).style.color = "blue"

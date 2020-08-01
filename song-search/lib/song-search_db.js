@@ -48,7 +48,7 @@ class UploaderDBClass extends DBClass {
 
     //
     constructor() {
-        super(UploaderSessionStore,redClient)
+        super(UploaderSessionStore,memcdClient)
     }
 
 }

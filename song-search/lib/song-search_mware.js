@@ -1,4 +1,4 @@
-const GeneralMiddleWare = require('lib/general_middleware')
+const GeneralMiddleWare = require.main.require('./lib/general_mware')
 
 
 var bodyParser = require('body-parser');

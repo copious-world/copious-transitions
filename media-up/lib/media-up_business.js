@@ -1,11 +1,13 @@
 //const GeneralStatic = require('lib/general_static')
 
 const nodemailer = require("nodemailer");
-const ReMailer = require("lib/remailer");
+const ReMailer = require.main.require('./lib/remailer');
 
 const myStorageClass = null
 
-const apiKeys = require('local/aipkeys')
+
+const apiKeys = require.main.require('./local/api_keys')
+
 
 var g_mail_transport = nodemailer.createTransport({
     host: "smtp.sendgrid.net",

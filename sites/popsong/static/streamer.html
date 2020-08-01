@@ -11,8 +11,8 @@
             </div>
             <br>
             <audio controls controlsList="nodownload">
-                <source src="https://{{companyShortLink}}/streamer/streamoftheday" type="audio/ogg">
-                <source src="https://{{companyShortLink}}/streamer/streamoftheday" type="audio/mpeg">
+                <source src="https://{{site_url}}/streamer/streamoftheday" type="audio/ogg">
+                <source src="https://{{site_url}}/streamer/streamoftheday" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio> 
         </blockquote>
@@ -28,15 +28,13 @@
     <div style="border:solid 1px darkcyan;margin:2px;padding:4px;">
         <p style="text-align:center;color:firebrick;font-size:105%;">Submit to Song of the Day</p>
         <blockquote style="text-align:center;padding-bottom:4px;">
-            <button style="width:50%" onclick="do_submit()" >Submit Song</button>
+            <button style="width:50%" onclick="do_song_submit()" >Submit Song</button>
         </blockquote>
     </div>
     <div id="streamer-scratchpad" style="border:solid 1px darkcyan;margin:2px;overflow: auto;">
     </div>
 </div>
 <script>
-
-var g_processPortNum = ':2010'
 
 // 
 var g_songOfDayInterval = 60000
@@ -62,21 +60,14 @@ async function song_of_day() {
 }
 
 
-async function do_submit() {
-    let url = `${location.protocol}//${g_siteURL}/uploaders/guarded/static/songofday-uploader`
-    let data = {
-        'query'  : query,
-        'offset' : offset,
-        'token' : g_Loggedin_session_token
-    }
-    let resp = await postData(url, data)
-    let formJson = resp.data
-
-    let formPlacement = document.querySelector('#streamer-scratchpad');
-    if ( formPlacement ) {
-        formPlacement.innerHTML = decodeURIComponent(formJson.html)
-        addscript(decodeURIComponent(formJson.script),formPlacement)
-        //gStreamerUUID = loaderApp.uuid
+async function do_song_submit() {
+    let formJson = await fetchEndPoint('uploaders/static/songofday-uploader')
+    if ( formJson ) {
+        let formPlacement = document.querySelector('#streamer-scratchpad');
+        if ( formPlacement ) {
+            formPlacement.innerHTML = decodeURIComponent(formJson.html)
+            addscript(decodeURIComponent(formJson.script),formPlacement)
+        }
     }
 }
 
@@ -98,9 +89,9 @@ async function do_search(offset) {
                 'offset' : offset,
                 'token' : g_Loggedin_session_token
             }
-            let resp = await postData(url, data)
+            let search_results = await postData(url, data)
             //
-            let search_results = resp.data
+            //let search_results = resp.data
             //
             if ( search_results ) {
                 //
@@ -131,6 +122,8 @@ async function do_search(offset) {
     }
 }
 
+window.addEventListener('load', (event) => {
+    song_of_day()
+});
 
-song_of_day()
 </script>
