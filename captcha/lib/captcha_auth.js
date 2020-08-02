@@ -4,6 +4,7 @@ const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
 const uuid = require('uuid/v4');
 
+var cnt = 0
 
 class CaptchaSessionManager extends SessionManager {
 
@@ -41,6 +42,29 @@ class CaptchaSessionManager extends SessionManager {
         this.middle_ware.push(access_session_from_res)
     }
 
+    app_set_user_cookie(res,session_token) {
+        if ( res ) {
+            res.cookie(this.user_cookie,session_token, { maxAge: this.max_age_user_cookie, httpOnly: true });
+        }
+    }
+    //
+    app_user_release_cookie(res) {
+        if ( res ) {
+            res.clearCookie(this.user_cookie); // delete the cookie
+        }
+    }
+    //
+    set_cookie(res,cookie_id,value,age) {
+        if ( res ) {
+            res.cookie(cookie_id,value, { maxAge: age, httpOnly: true });
+        }
+    }
+    //
+    release_cookie(res,cookie_id) {
+        if ( res ) {
+            res.clearCookie(cookie_id);
+        }
+    }
 
     // ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----/ ----
     async hash_pass(password) {
@@ -58,6 +82,7 @@ class CaptchaSessionManager extends SessionManager {
 
     // //
     async process_user(user_op,body,req,res) {
+        this.set_cookie(res,'copious+tester',`yozie-dozie${cnt++}`,60000)
         let pkey = G_users_trns.primary_key()
         let transtionObj = await super.process_user(user_op,body,req,res,pkey)
         if ( G_users_trns.action_selector(user_op) ) {
@@ -153,30 +178,6 @@ class CaptchaSessionManager extends SessionManager {
         return(finalization_state)
     }
 
-
-    app_set_user_cookie(res,session_token) {
-        if ( res ) {
-            res.cookie(this.user_cookie,session_token, { maxAge: this.max_age_user_cookie, httpOnly: true });
-        }
-    }
-    //
-    app_user_release_cookie(res) {
-        if ( res ) {
-            res.clearCookie(this.user_cookie); // delete the cookie
-        }
-    }
-    //
-    set_cookie(res,cookie_id,value,age) {
-        if ( res ) {
-            res.cookie(cookie_id,value, { maxAge: age, httpOnly: true });
-        }
-    }
-    //
-    release_cookie(res,cookie_id) {
-        if ( res ) {
-            res.clearCookie(cookie_id);
-        }
-    }
 
     which_uploaded_files(req,post_body) {
         if ( req ) {

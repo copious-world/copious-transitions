@@ -6,7 +6,8 @@ const PASSWORD_BLOCKSIZE = 100
 const fs = require('fs')
 const crypto = require('crypto')
 const clone = require('clone')
-const WebSocketServer = require('ws').Server;
+const WebSocket = require('ws')
+const WebSocketServer = WebSocket.Server;
 const http = require("http");
 const passwordGenerator = require('generate-password');
 const ShutdownManager = require('./lib/shutdown-manager')
@@ -371,7 +372,7 @@ var g_exp_server = g_app.listen(conf_obj.port,() => {
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 if ( conf_obj.ws_port ) {   // WEB SCOCKETS OPTION (START)
-    // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
 let server = http.createServer(g_app);
 server.listen(conf_obj.ws_port);
@@ -488,8 +489,46 @@ wss.on('close', function close() {
 }       // WEB SCOCKETS OPTION (END)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
+var g_proc_ws_token = ''
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+if ( conf_obj.ws_client_port ) {   // SUPPORT SERVICE WEB SCOCKETS OPTION (START)
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+    try {
+        // setup a webSocket connection to get finalization data on logging in. -- 
+        let socket_host =  conf_obj.ws_client_server
 
+        g_sitewide_socket = new WebSocket(`ws://${socket_host}/auth_ws/site_wide`);
+        g_sitewide_socket.onmessage = async (event) => {	// handle the finalization through the websocket
+                                try {
+                                    let handler = JSON.parse(event.data)
+                                    if ( handler.token === token ) {
+                                        if ( handler.action === "logout" ) {
+                                            await g_session_manager.process_user('logout',handler,null,null)
+                                        } else {
+                                            eval(handler.action)
+                                        }
+                                    }
+                                } catch (e) {
+                                }
+                            }
+        //
+        setTimeout(() => {
+            let msg = {
+                'token' : g_proc_ws_token,
+                'action' : 'setup'
+            }
+            g_sitewide_socket.send(JSON.stringify(msg))
+        },500)
+        //
+    } catch(e) {
+        console.log(e.message)
+        console.dir(e)
+        process.exit(1)
+    }
 
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+}       // SUPPORT SERVICE WEB SCOCKETS OPTION (END)
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
 function fetch_local_cache_transition(cache_map,token) {
     if ( cache_map ) {
@@ -572,6 +611,9 @@ function load_parameters() {
     if ( process.argv[2] !== undefined ) {
         config = process.argv[2];
     }
+
+    g_proc_ws_token = do_hash('' + config + '+=+' + Date.now())
+
     try {
         let data = fs.readFileSync(config,'ascii').toString()
         //

@@ -944,7 +944,7 @@ html {
 	}
 
 	//
-	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true,ctype) {
+	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true, ctype) {
 		let content_type = 'application/json'
 		if ( ctype !== undefined ) {
 			content_type = ctype
@@ -1271,7 +1271,7 @@ html {
 					if ( g_currenCaptchaTOKEN ) {
 						let data = calcAppDataDB()		// calcAppDataDB
 						try {
-							let resp = await postData(g_CurContainer.service_url, data)
+							let resp = await postData(g_CurContainer.service_url, data,'include')
 							if ( resp.OK === "true" ) {
 								g_currenCaptchaTOKEN = null;     // check for duplicates
                                 if ( completionaAction ) completionaAction(resp);

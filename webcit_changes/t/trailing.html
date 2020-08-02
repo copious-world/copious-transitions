@@ -116,7 +116,9 @@ function site_wide_logout(req_logout = true) {
 			'action' : 'logout',
 			'token' : token
 		}
-		g_sitewide_socket.send(JSON.stringify(msg))
+		if ( g_sitewide_socket ) {
+			g_sitewide_socket.send(JSON.stringify(msg))
+		}
 	}
 	window.close()
 }

@@ -1702,9 +1702,9 @@ async function do_search(offset) {
                 'offset' : offset,
                 'token' : g_Loggedin_session_token
             }
-            let resp = await postData(url, data)
+            let search_results = await postData(url, data)
             //
-            let search_results = resp.data
+            //let search_results = resp.data
             //
             if ( search_results ) {
                 //
@@ -2365,7 +2365,7 @@ async function fetchUploader(theDiv) {
         try {
             let url = `${location.protocol}//${g_siteURL}/captcha/users/logout`
             let data = { 'action' : 'logout', 'token' : g_Loggedin_session_token }
-            let resp = await postData(url, data)
+            let resp = await postData(url, data, 'include')
             site_wide_logout(g_Loggedin_session_token,site_wide)
             if ( resp.OK === "true" ) {
                 return false    // no longer logged in
@@ -2385,7 +2385,7 @@ async function fetchUploader(theDiv) {
             let trans_obj = resp.data  // transition object
             let url = `${location.protocol}//${g_siteURL}/captcha/secondary/users/${trans_obj.user_op}`
             let data = { 'token' : trans_obj.token }
-            let scnd_resp = await postData(url, data)
+            let scnd_resp = await postData(url, data, 'include')
             if ( scnd_resp.OK === "true" ) {
                 g_Loggedin_session_token = scnd_resp.token  // should be in COOKIE
                 setup_sitewide(g_Loggedin_session_token)
@@ -2860,7 +2860,7 @@ async function fetchUploader(theDiv) {
 	}
 
 	//
-	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true,ctype) {
+	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true, ctype) {
 		let content_type = 'application/json'
 		if ( ctype !== undefined ) {
 			content_type = ctype
@@ -3187,7 +3187,7 @@ async function fetchUploader(theDiv) {
 					if ( g_currenCaptchaTOKEN ) {
 						let data = calcAppDataDB()		// calcAppDataDB
 						try {
-							let resp = await postData(g_CurContainer.service_url, data)
+							let resp = await postData(g_CurContainer.service_url, data,'include')
 							if ( resp.OK === "true" ) {
 								g_currenCaptchaTOKEN = null;     // check for duplicates
                                 if ( completionaAction ) completionaAction(resp);
