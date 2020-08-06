@@ -110,21 +110,25 @@ class UploaderBusiness {
     //
     process(use_case,post_body) {
         switch ( use_case ) {
-            case "voice-demo" : {
+            case "demo" : {
                 if ( g_MailToUploader ) {
-                    let [html,text] = this.helper_populate_message(post_body,g_MailToUploader.html, g_MailToUploader.text)
-                    g_MailToUploader.html = html
-                    g_MailToUploader.text = text
-                    g_MailToUploader.emit('email_this',post_body.email)
+                    if ( body.category === "singer-demo" ) {
+                        let [html,text] = this.helper_populate_message(post_body,g_MailToUploader.html, g_MailToUploader.text)
+                        g_MailToUploader.html = html
+                        g_MailToUploader.text = text
+                        g_MailToUploader.emit('email_this',post_body.email)
+                    }
                 }            
                 break
             }
             case "submitter" : {
                 if ( g_MailToSODSubmittter ) {
-                    let [html,text] = this.helper_populate_message(post_body,g_MailToSODSubmittter.html, g_MailToSODSubmittter.text)
-                    g_MailToSODSubmittter.html = html
-                    g_MailToSODSubmittter.text = text
-                    g_MailToSODSubmittter.emit('email_this',post_body.email)
+                    if ( body.category ===  "song-of-the-day" ) {
+                        let [html,text] = this.helper_populate_message(post_body,g_MailToSODSubmittter.html, g_MailToSODSubmittter.text)
+                        g_MailToSODSubmittter.html = html
+                        g_MailToSODSubmittter.text = text
+                        g_MailToSODSubmittter.emit('email_this',post_body.email)
+                    }
                 }
                 break
             }

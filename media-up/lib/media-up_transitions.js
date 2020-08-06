@@ -6,7 +6,7 @@ const uuid = require('uuid/v4')
 class UploaderPaths extends TaggedTransition {
     constructor() {
         super("upload")
-        this.static_entries = [ "singer-uploader", "songofday-uploader" ] // for this app used by  passing(asset)
+        this.static_entries = [ "demo-uploader", "publication-uploader" ] // for this app used by  passing(asset)
     }
     //
     transform_file_name(file_name) {
@@ -48,18 +48,18 @@ class MediaSubmitTransition extends TaggedTransition {
 
 }
 
-class SingerSubmissionPaths extends MediaSubmitTransition {
+class DemoSubmissionPaths extends MediaSubmitTransition {
     constructor() {
-        super("do_singer_upload")
+        super("do_demo_upload")
     }
     file_entry_id(file_key) {
         return('_singer')
     }
 }
 
-class SongSubmissionPaths extends MediaSubmitTransition {
+class PubSubmissionPaths extends MediaSubmitTransition {
     constructor() {
-        super("do_song_of_day_upload")
+        super("do_publication_upload")
     }
 
     file_entry_id(file_key) {
@@ -71,16 +71,15 @@ class SongSubmissionPaths extends MediaSubmitTransition {
 class MediaUpCustomTransitions {
     constructor() {
         this.uploader_keyed = new UploaderPaths()
-        this.singer_submission_keyed = new SingerSubmissionPaths()
-        this.song_submission_keyed = new SongSubmissionPaths()
+        this.demo_submission_keyed = new DemoSubmissionPaths()
+        this.pub_submission_keyed = new PubSubmissionPaths()
     }
 
     initialize() {
         global.G_uploader_trns = this.uploader_keyed
-        global.G_singer_submit_trns = this.singer_submission_keyed
-        global.G_song_submit_trns = this.song_submission_keyed
+        global.G_demo_submit_trns = this.demo_submission_keyed
+        global.G_publication_submit_trns = this.pub_submission_keyed
     }
-    
 }
 
 module.exports = new MediaUpCustomTransitions()

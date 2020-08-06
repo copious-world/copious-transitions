@@ -23,9 +23,10 @@
     var g_SongUploader = new Uploader({
         "errorDiv" : "#login_errmsg-song",
         "fileDiv" : "#song-demo",
-        "uploadEndpoint" :`http://${g_siteURL}/uploaders/transition/do_song_of_day_upload`,
+        "uploadEndpoint" :`http://${g_siteURL}/uploaders/transition/do_publication_upload`,
         "emailField" : "#email-song",
-        "positiveCompletion" : "Your demo has been uploaded. Thank you!"
+        "positiveCompletion" : "Your song has been uploaded. Thank you!",
+        "category" : "song-of-the-day"
     })
 
     function song_demo_uploader() {

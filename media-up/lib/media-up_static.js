@@ -8,12 +8,12 @@ class MediaUpStatic extends GeneralStatic {
         super(myStorageClass)
         //
         this.preloaded = {
-            "uploader" : { "fname" : '/uploader.html', "ftype" : "html" },
-            "song_submit" : { "fname" : '/submitter.html', "ftype" : "html" }
+            "demo_uploader" : { "fname" : '/uploader.html', "ftype" : "html" },
+            "pub_submit" : { "fname" : '/submitter.html', "ftype" : "html" }
         }
         //
-        this.singer_asset_media_object = null
-        this.songofday_asset_media_object = null
+        this.demo_asset_media_object = null
+        this.publication_asset_media_object = null
     }
 
     preload_all(conf) {
@@ -25,20 +25,20 @@ class MediaUpStatic extends GeneralStatic {
         //
         super.preload_all()
         //
-        // A) SINGER UPLOAD FORM -- uploader
-        let data = this.preloaded.uploader.data
+        // A) DEMO UPLOAD FORM -- uploader  --- e.g. singer demo, program demo..
+        let data = this.preloaded.demo_uploader.data
         let json = this.prepare_asset(data)
         //
-        this.singer_asset_media_object = {
+        this.demo_asset_media_object = {
             "mime_type" : "appliation/json",
             "string" : JSON.stringify(json)
         }
         //
-        // B) SONG OF DAY SUBMISSION FORM -- song_submit
-        data = this.preloaded.song_submit.data
+        // B) PUBLICATION SUBMISSION FORM -- pub_submit  -- e.g. song of day submission, article, etc.
+        data = this.preloaded.pub_submit.data
         json = this.prepare_asset(data)
         //
-        this.songofday_asset_media_object = {
+        this.publication_asset_media_object = {
             "mime_type" : "application/json",
             "string" : JSON.stringify(json)
         }
@@ -47,17 +47,17 @@ class MediaUpStatic extends GeneralStatic {
     }
 
     fetch(asset) {
-        if ( asset == "singer-uploader" ) {
-            if ( !(this.singer_asset_media_object) ) {
+        if ( asset == "demo-uploader" ) {
+            if ( !(this.demo_asset_media_object) ) {
                 return("empty")
             } else {
-                return(this.singer_asset_media_object)
+                return(this.demo_asset_media_object)
             }
-        } else if ( asset == "songofday-uploader" ) {
-            if ( !(this.songofday_asset_media_object) ) {
+        } else if ( asset == "publication-uploader" ) {
+            if ( !(this.publication_asset_media_object) ) {
                 return("empty")
             } else {
-                return(this.songofday_asset_media_object)
+                return(this.publication_asset_media_object)
             }
         } else {
             return(super.fetch())

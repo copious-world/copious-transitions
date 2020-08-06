@@ -1,5 +1,4 @@
 const { DBClass, SessionStore }  = require.main.require('./lib/general_db')
-const crypto = require('crypto')
 const EventEmitter = require('events')
 const CitadelClient = require('node_citadel')
 const apiKeys = require.main.require('./local/api_keys')
@@ -24,9 +23,7 @@ var MemcachePlus = require('memcache-plus');
 
 const memcdClient = new MemcachePlus(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
 
-
-
-// pre initializatoin
+// pre initialization
 
 var g_citadel = null
 var g_citadel_pass = ""

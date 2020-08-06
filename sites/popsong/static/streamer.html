@@ -61,7 +61,7 @@ async function song_of_day() {
 
 
 async function do_song_submit() {
-    let formJson = await fetchEndPoint('uploaders/static/songofday-uploader')
+    let formJson = await fetchEndPoint('uploaders/static/publication-uploader')
     if ( formJson ) {
         let formPlacement = document.querySelector('#streamer-scratchpad');
         if ( formPlacement ) {

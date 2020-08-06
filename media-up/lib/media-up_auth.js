@@ -19,10 +19,10 @@ class UploaderSessionManager extends SessionManager {
 
 
     feasible(transition,post_body,req) {
-        if (  G_singer_submit_trns.tagged(transition) ) {
+        if (  G_demo_submit_trns.tagged(transition) ) {
             return(true)
         }
-        if (  G_song_submit_trns.tagged(transition) ) {
+        if (  G_publication_submit_trns.tagged(transition) ) {
             return(true)
         }
         return(super.feasible(transition,post_body,req))
@@ -35,11 +35,11 @@ class UploaderSessionManager extends SessionManager {
         if ( G_uploader_trns.tagged(transition) ) {
             trans_object.secondary_action = false
         }
-        if ( G_singer_submit_trns.tagged(transition) ) {
+        if ( G_demo_submit_trns.tagged(transition) ) {
             trans_object.secondary_action = false
             post_body.file_type = "mp3"
         }
-        if ( G_song_submit_trns.tagged(transition) ) {
+        if ( G_publication_submit_trns.tagged(transition) ) {
             trans_object.secondary_action = false
             post_body.file_type = "mp3"
         }
@@ -53,15 +53,15 @@ class UploaderSessionManager extends SessionManager {
         if ( G_uploader_trns.tagged(transition) ) {
             return(this.upload_file(post_body,G_uploader_trns,req))
         }
-        if ( G_singer_submit_trns.tagged(transition) ) {
-            let state = this.upload_file(post_body,G_singer_submit_trns,req)
+        if ( G_demo_submit_trns.tagged(transition) ) {
+            let state = this.upload_file(post_body,G_demo_submit_trns,req)
             if ( this.business ) {
-                this.business.process('voice-demo',post_body)
+                this.business.process('demo',post_body)
             }
             return(state)
         }
-        if ( G_song_submit_trns.tagged(transition) ) {
-            let state = this.upload_file(post_body,G_song_submit_trns,req)
+        if ( G_publication_submit_trns.tagged(transition) ) {
+            let state = this.upload_file(post_body,G_publication_submit_trns,req)
             if ( this.business ) {
                 this.business.process('submitter',post_body)
             }

@@ -9,20 +9,21 @@ var client_secret = keys.Spotify.client_secret; // Your secret
 // application requests authorization
 var SpotifyAuthURL = 'https://accounts.spotify.com/api/token'
 var SpofityAuthULock = (Buffer.from(`${client_id}:${client_secret}`).toString('base64'))
+var SpotifyHeaders = {
+  'Content-Type': 'application/x-www-form-urlencoded',
+  'Authorization': 'Basic ' + SpofityAuthULock
+}
 
 var g_spotify_ready = false
 var g_access_token = 'nothing'
 var g_tokenExpireTime = 3600
 var g_tokenTimeoutDelta = 10  // start the request before the token becomes useless.
 //
-async function obtainToken() {
+async function obtainToken(cb) {
     try {
       //
       let url = SpotifyAuthURL;
-      let headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + SpofityAuthULock
-      }
+      let headers = SpotifyHeaders
       let data = 'grant_type=client_credentials'
       // 
       let resp = await fetch(url, { 'method': 'POST', 'headers': headers, 'body': data })
@@ -33,6 +34,7 @@ async function obtainToken() {
         if ( g_tokenTimeoutDelta >= g_tokenExpireTime ) { // fudge some delta 
           g_tokenTimeoutDelta = Math.floor(g_tokenExpireTime/20)
         }
+        setTimeout(() => { obtainToken() },(g_tokenExpireTime - g_tokenTimeoutDelta))
         if ( cb ) {
           cb()
         }

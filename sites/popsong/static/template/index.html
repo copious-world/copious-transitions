@@ -985,9 +985,19 @@ html {
             this.fileDiv = props.fileDiv
 			this.uploadEndpoint = props.uploadEndpoint
 			this.fileType = props.fileType ? props.fileType : '.mp3'
+			this.emailField = props.emailField
+			this.positiveCompletion = props.positiveCompletion
 			//
+			delete props.errorDiv
+			delete props.fileDiv
+			delete props.uploadEndpoint
+			delete props.fileType
+			delete props.emailField
+			delete props.positiveCompletion
+			//
+			this.extra_props = {}
 			for ( let prop in props ) {
-				this[prop] = props[prop]
+				this.extra_props[prop] = props[prop]
 			}
 			//
             this._msgTimeout = null
@@ -1075,7 +1085,10 @@ html {
 			let file = files.files[0]
 			data.append('mp3file', file)
             let email = document.querySelector(this.emailField).value;
-            data.append('email', email)
+			data.append('email', email)
+			for ( let p in this.extra_props ) {
+				data.append(p, this.extra_props[p])
+			}
 		}
 
 		success_report(json) {
