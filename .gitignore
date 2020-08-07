@@ -8,3 +8,7 @@ backend/*
 package-lock.json
 *.db
 examples/web*
+examples/*.txt
+uploads/*
+services/*
+release.json

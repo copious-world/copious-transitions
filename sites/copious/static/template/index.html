@@ -647,8 +647,7 @@ html {
 	</style>
 </head>
 <script>
-		//var g_siteURL = "localhost";
-		var g_siteURL = "{{site_url}}";
+		var g_siteURL = window.location.host;
 		var g_finalizers = []
 		var g_loginStateViewHolders = {}
 		var g_loginValueViews = {}

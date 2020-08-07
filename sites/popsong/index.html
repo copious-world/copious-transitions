@@ -648,7 +648,7 @@ html {
 </head>
 <script>
 		//var g_siteURL = "localhost";
-		var g_siteURL = "localhost";
+		var g_siteURL = window.location.host;
 		var g_finalizers = []
 		var g_loginStateViewHolders = {}
 		var g_loginValueViews = {}
@@ -1674,7 +1674,7 @@ async function song_of_day() {
 
 
 async function do_song_submit() {
-    let formJson = await fetchEndPoint('uploaders/static/songofday-uploader')
+    let formJson = await fetchEndPoint('uploaders/static/publication-uploader')
     if ( formJson ) {
         let formPlacement = document.querySelector('#streamer-scratchpad');
         if ( formPlacement ) {
@@ -1763,7 +1763,7 @@ window.addEventListener('load', (event) => {
 
 async function fetchUploader(theDiv) {
     if ( theDiv == document.querySelector('#upload-singer-demo') ) {
-        let formJson = await fetchEndPoint('uploaders/static/singer-uploader')
+        let formJson = await fetchEndPoint('uploaders/static/demo-uploader')
         if ( formJson ) {
             let formPlacement = document.querySelector("#singer-app");
             if ( formPlacement ) {
@@ -2901,9 +2901,19 @@ async function fetchUploader(theDiv) {
             this.fileDiv = props.fileDiv
 			this.uploadEndpoint = props.uploadEndpoint
 			this.fileType = props.fileType ? props.fileType : '.mp3'
+			this.emailField = props.emailField
+			this.positiveCompletion = props.positiveCompletion
 			//
+			delete props.errorDiv
+			delete props.fileDiv
+			delete props.uploadEndpoint
+			delete props.fileType
+			delete props.emailField
+			delete props.positiveCompletion
+			//
+			this.extra_props = {}
 			for ( let prop in props ) {
-				this[prop] = props[prop]
+				this.extra_props[prop] = props[prop]
 			}
 			//
             this._msgTimeout = null
@@ -2991,7 +3001,10 @@ async function fetchUploader(theDiv) {
 			let file = files.files[0]
 			data.append('mp3file', file)
             let email = document.querySelector(this.emailField).value;
-            data.append('email', email)
+			data.append('email', email)
+			for ( let p in this.extra_props ) {
+				data.append(p, this.extra_props[p])
+			}
 		}
 
 		success_report(json) {
