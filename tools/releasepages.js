@@ -21,17 +21,18 @@ if ( process.argv[3] !== undefined ) {
 }
 
 var g_releaseObject = null
+var g_config_file = 'release.json'
 try {
-    var releaseObj_str = fs.readFileSync('release.json','ascii').toString()
+    var releaseObj_str = fs.readFileSync(g_config_file,'ascii').toString()
     try {
         g_releaseObject = JSON.parse(releaseObj_str)
     } catch (e) {
-        console.error("failed to parse the file 'release.json'")
+        console.error(`failed to parse the file '${g_config_file}'`)
         console.error(e)
         process.exit(0) 
     }
 } catch (e) {
-    console.error("failed to find the file 'release.json'")
+    console.error(`failed to find the file '${g_config_file}'`)
     process.exit(0)
 }
 
@@ -489,6 +490,7 @@ async function stage_html() {
     let releaseDir = g_releaseObject.staging.folder
     try {
         await ensureExists(`./${releaseDir}` )
+        fs.copyFileSync(`${g_config_file} ./${releaseDir}`) 
         Object.keys(g_releaseObject.domains).forEach (async dmn => {
             try {
                 let directive = g_releaseObject.domains[dmn]
