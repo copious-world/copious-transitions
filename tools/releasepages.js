@@ -490,7 +490,7 @@ async function stage_html() {
     let releaseDir = g_releaseObject.staging.folder
     try {
         await ensureExists(`./${releaseDir}` )
-        fs.copyFileSync(`${g_config_file} ./${releaseDir}`) 
+        fs.copyFileSync(`${g_config_file}`,`./${releaseDir}/${g_config_file}`) 
         Object.keys(g_releaseObject.domains).forEach (async dmn => {
             try {
                 let directive = g_releaseObject.domains[dmn]

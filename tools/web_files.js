@@ -8,6 +8,7 @@ const asyc_exec = util.promisify(exec);
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 var g_html_web_directories = []
+var g_releaseObject = {}
 
 async function locate_html_directory(conf) {
 
@@ -44,7 +45,7 @@ async function locate_html_directory(conf) {
 
 
 
-var g_config_file = 'release.json'
+var g_config_file = '../release/release.json'
 try {
     var releaseObj_str = fs.readFileSync(g_config_file,'ascii').toString()
     try {
@@ -61,6 +62,6 @@ try {
 
 
 
-locate_html_directory(g_config_file.nginx)
+locate_html_directory(g_releaseObject.nginx)
 
 
