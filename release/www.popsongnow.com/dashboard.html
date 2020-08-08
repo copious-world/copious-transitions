@@ -6,14 +6,11 @@
 	<meta name="author" content="Richard Leddy" />
 	<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 	<meta id="theme-color" name="theme-color" content="#452770">
-
 	<link rel="canonical" href="http://www.popsongnow.com">
-
 	<title>Pop Song Now</title>
 	<meta name="description" content="Make you songs safe as soon as you think of them.">
 	<style>
 		/*csslint important:false*/
-
 /* ==========================================================================
    Pure Base Extras
    ========================================================================== */
@@ -638,11 +635,12 @@ html {
 	</style>
 </head>
 <script>
-		var g_siteURL = window.location.host;
-		var g_finalizers = []
-		var g_loginStateViewHolders = {}
+	var g_siteURL = window.location.host;
+	var g_finalizers = []
+	var g_loginStateViewHolders = {}
 </script>
 <body>
+	
 	<nav id="mainNav">
 		<table style="width:100%">
 			<tr>
@@ -774,124 +772,62 @@ html {
 			</tr>
 		</table>
 	</nav>
+
 	<main>
 
 	<div class="items">
-		<div class="item">
-			<div>
-    You login was not successful.
-    <br>
-    We did not receive authorization from your identity provider.
-    <br>
-    You may click anywhere on this page to speed the process along.
-</div>
-<script lang="javascript">
-    var to = setTimeout(() => {
-        RefreshParent()
-        window.close()
-    },10000)
-
-    document.addEventListener('click',(ev) => {
-        if ( to ) clearTimeout(to)
-        RefreshParent()
-        window.close()
-
-    })
-
-    function RefreshParent() {
-        if (window.opener != null && !window.opener.closed) {
-            //window.opener.location.reload();
-            window.opener.focus()
-        }
-    }
-    window.onbeforeunload = RefreshParent;
-</script>
+		<div id = 'which_dashboard' style="border: thistle 2px solid;padding: 4px;background-color: wheat;" >
+			
+		</div>
+		<div style="border: thistle 2px solid;padding: 4px;background-color: wheat;">
+			<span id="owner" style="text-decoration: underline;color: #000;"></span>
+			<br>
+			<span id="date" style="text-decoration: underline;color: rgb(88, 13, 13);"></span>
+			<br>
+			<span id="panel_key"></span>
+			<br>
 		</div>
 	</div>
 	
 	</main>
 
-<footer>
-	<ul class="footer-list">
-		<li>
-			<a href="http://www.popsongnow.com">copyright &copy; 2020 popsongnow.com</a>
-		</li>
-	</ul>
-</footer>
 
+	<footer>
+		<ul class="footer-list">
+			<li>
+				<a href="http://www.popsongnow.com">copyright &copy; 2020 popsongnow.com</a>
+			</li>
+		</ul>
+	</footer>
+	
 
 </body>
 </html>
 <script>
 
-	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true) {
-		// Default options are marked with *
-		const response = await fetch(url, {
-			method: 'POST', // *GET, POST, PUT, DELETE, etc.
-			mode: 'cors', // no-cors, *cors, same-origin
-			cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-			credentials: creds, // include, *same-origin, omit
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			redirect: 'follow', // manual, *follow, error
-			referrerPolicy: 'no-referrer', // no-referrer, *client
-			body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
-		});
-		if ( response.ok == false ) {
-			console.log(response.status + ': ' + response.statusText)
-		}
-		return await response.json(); // parses JSON response into native JavaScript objects
-	}
 
-	function hide_interface_box() {
-		let display = document.getElementById('interface-box')
-		if ( display ) {
-			display.style.visibility = "hidden"
-			display.style.display = "none"
+function clonify(obj) {
+	return(JSON.parse(JSON.stringify(obj)))
+}
+
+
+/*
+		{
+          'owner' : user,
+          'date'  : ('' + Date.now()),
+          'panel_key' : generate_password(),
+          'which_dashboard' : 'test dashboard'
+        }
+
+*/
+
+function setup_user_dashboard(dashboardResponse) {
+	for ( let ky in dashboardResponse ) {
+		let el = document.getElementById(ky)
+		if ( el ) {
+			el.innerHTML = dashboardResponse[ky]
 		}
 	}
-
-	function hide_box(bxname) {
-		let display = document.getElementById(bxname)
-		if ( display ) {
-			display.style.visibility = "hidden"
-			display.style.display = "none"
-		}
-	}
-
-	function show_box(bxname) {
-		let display = document.getElementById(bxname)
-		if ( display ) {
-			display.style.visibility = "visible"
-			display.style.display = "block"
-		}
-	}
-
-	hide_box('error-box')
-	hide_box('success-box')
-
-	async function post_submit(fields) {
-		let bdy = {}
-		fields.forEach(element => {
-			let fld = document.getElementById(element)
-			if ( fld ) {
-				bdy[element] = fld.value
-			}
-		});
-		let url = bdy.post_url
-		if ( url ) {
-			delete bdy.post_url
-			//
-			let resp = await postData(url, bdy)
-			//
-			if ( resp ) hide_interface_box()
-			if ( resp && (resp.OK === 'true') ) {
-				show_box('success-box')
-			} else {
-				show_box('error-box')
-			}
-		}
-	}
+}
 
 </script>

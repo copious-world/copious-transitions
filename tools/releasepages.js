@@ -33,18 +33,26 @@ console.dir(g_releaseObject)
 
 // // // // // // // // // // 
 
-
+// extract_vars
+// Finds all instances of variables of the form ${varname}
+// Returns a list of them
 function extract_vars(rm_ctl_tmpl) {
-    let varset = []
+    let varset = {}
+    let varlist = []
     let parts = rm_ctl_tmpl.split('${')
     if ( parts.length ) {
         for ( let i = 1; i < parts.length; i++ ) {
             let var_head = parts[i]
             var_head = var_head.substr(0,var_head.indexOf('}'))
-            varset.push(var_head)
+            if ( varset[var_head] !== undefined ) {
+                varset[var_head]++
+            } else {
+                varset[var_head] = 1
+            }
         }
     }
-    return varset
+    varlist = varlist.concat(Object.keys(varset))
+    return varlist
 }
 
 
@@ -100,11 +108,25 @@ function subst_vars(tmplt,srcObj) {
     return(result)
 }
 
+
+// extracToVar
+// -------------------- -------------------- -------------------- --------------------
+//  Picks a section of a file and puts a variable in its place.
+//  Saves the extracted part for later restoring it to the place of the variable
+//  This is useful in file compressions since some HTML pages stop working if certain sections are compressed.
+//  For example: some plugin code for menu expansion fails if <ul> elements are not on separate lines.
+//
 function extracToVar(replVar,head_region,tail_region,fileString) {
     let results = ['','']
     //   
     let [header,rest] = fileString.split(head_region,2)
+    if ( header === undefined || rest === undefined ) {
+        return [undefined,undefined]
+    }
     let end_parts = rest.split(tail_region)
+    if ( end_parts === undefined ) {
+        return [undefined,undefined]
+    }
     //
     console.log(end_parts.length)
     let salvaged = end_parts.shift()
@@ -117,6 +139,8 @@ function extracToVar(replVar,head_region,tail_region,fileString) {
 }
 
 
+// ensureExists
+// does what it says.
 function ensureExists(path, mask) {
     if (typeof mask == 'undefined') { // allow the `mask` parameter to be optional
         cb = mask;
@@ -289,6 +313,40 @@ function nginx_releaser(config) {
 }
 
 
+function prepare_entry_points(entry_points,nginx) {
+    let configs = entry_points.configs
+    let nginx_prefix = entry_points.config_key_prefix.split('.')
+    let nginx_path = nginx_prefix.map(entry => {
+        let key = entry.trim()
+        if ( key[0] === '(' ) {
+            key = key.replace('-','.').replace('-','.').replace('-','.').replace('-','.')
+            key = key.substr(1,key.length-2)
+        }
+        return(key)
+    })
+    for ( let confky in configs ) {
+        let conf = configs[confky]
+        let file = conf.file
+        delete conf.file
+        let service_conf_obj = fs.readFileSync(file,'ascii').toString()
+        service_conf_obj = JSON.parse(service_conf_obj)
+        //
+        for ( let ky in conf ) {
+            //
+            let val = nginx
+            let path = nginx_path.concat([])
+            let accessor = path.concat(conf[ky].split('.'))
+            accessor.forEach(fld => {
+                val = val[fld]
+            })
+            service_conf_obj[ky] = val
+        }
+        let output = JSON.stringify(service_conf_obj,null,2)
+        fs.writeFileSync(file,output)
+    }
+}
+
+
 function compress_html_file(compressable) {
     let result = minify(compressable, {
         removeAttributeQuotes: false,
@@ -328,6 +386,9 @@ function prepareHtmlFile(filePath,dmn) {
     let tail_region = pure_region_spec.match_tail
 
     let [compressable,salvaged] = extracToVar(replVar,head_region,tail_region,fileString)
+    if ( (compressable === undefined) || (salvaged === undefined) ) {
+        return
+    }
     //
     salvaged = head_region + salvaged + tail_region
     //
@@ -366,18 +427,28 @@ console.log(micros_locations)
 async function stage_html() {
     let releaseDir = g_releaseObject.staging.folder
     try {
-        await ensureExists('./' +  releaseDir)
+        await ensureExists(`./${releaseDir}` )
         Object.keys(g_releaseObject.domains).forEach (async dmn => {
             try {
-                await ensureExists('./' +  releaseDir + '/' + dmn)
                 let directive = g_releaseObject.domains[dmn]
-                let srcpath = directive.html.from
-                let filename = directive.html.file + ".html"
-                fs.copyFileSync(srcpath + '/' + filename,'./' +  releaseDir + '/' + dmn + '/' + filename)
-                try {
-                    prepareHtmlFile('./' +  releaseDir + '/' + dmn + '/' + filename,dmn)
-                } catch (e) {
-                    console.error(e)
+                if ( directive.html ) {
+                    await ensureExists(`./${releaseDir}/${dmn}`)
+                    console.dir(directive)
+                    let srcpath = directive.html.from
+                    let files = directive.html.files
+                    if ( (files === undefined) &&  (undefined !== directive.html.file) ) {
+                        files = [directive.html.file]
+                    }
+                    files.forEach (file => {
+                        let filename = `${file}.html`
+                        let destFile = `./${releaseDir}/${dmn}/${filename}`
+                        fs.copyFileSync(`${srcpath}/${filename}`,destFile)
+                        try {
+                            prepareHtmlFile(destFile,dmn)
+                        } catch (e) {
+                            console.error(e)
+                        }
+                    })
                 }
             } catch (e) {
                 console.error(e)
@@ -575,10 +646,10 @@ function run_releaser() {
 }
 
 // 
-nginx_releaser(g_releaseObject.nginx)
-/*
+//nginx_releaser(g_releaseObject.nginx)
+//prepare_entry_points(g_releaseObject.entry_points,g_releaseObject.nginx)
 stage_html()
-stage_micros()
+/*stage_micros()
 output_ecosystem()
 gen_bash_script()
 zip_release()
