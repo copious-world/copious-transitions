@@ -614,7 +614,7 @@ async function gen_bash_script() {
     if ( g_repeat_process ) {
         script.push(`rm -r "${releaseDir}`)
         script.push(`if [ -d "${releaseDir}-backup"]; then`)
-        script.push(`mv -r ${releaseDir}-backup ${releaseDir}`)
+        script.push(`   mv -r ${releaseDir}-backup ${releaseDir}`)
         script.push(`fi`)
     }
     //

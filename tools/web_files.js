@@ -10,6 +10,71 @@ const asyc_exec = util.promisify(exec);
 var g_html_web_directories = []
 var g_releaseObject = {}
 
+
+
+var g_config_file = '../release/release.json'
+try {
+    var releaseObj_str = fs.readFileSync(g_config_file,'ascii').toString()
+    try {
+        g_releaseObject = JSON.parse(releaseObj_str)
+    } catch (e) {
+        console.error(`failed to parse the file '${g_config_file}'`)
+        console.error(e)
+        process.exit(0) 
+    }
+} catch (e) {
+    console.error(`failed to find the file '${g_config_file}'`)
+    process.exit(0)
+}
+
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+
+
+// ensureExists
+// does what it says.
+function ensureExists(path, mask) {
+    if (typeof mask == 'undefined') { // allow the `mask` parameter to be optional
+        cb = mask;
+        mask = 0777;
+    }
+    var p = new Promise((resolve,reject) => {
+        fs.mkdir(path, mask, function(err) {
+            if (err) {
+                if (err.code == 'EEXIST') resolve(null); // ignore the error if the folder already exists
+                else reject(err); // something else went wrong
+            } else resolve(null); // successfully created folder
+        });
+
+    })
+    return p
+}
+
+function ensurePathExists(path,mask) {
+    let where_all = path.split('/')
+    where = '.'
+    where_all.forEach(async level => {
+        where += '/' + level
+        try {
+            await ensureExists(`./${where}`,mask)
+        } catch (e) {
+            if (e.code != 'EEXIST') {
+                console.log(e)
+            }
+        }
+    })
+    return(where)
+}
+
+
+function get_directory_from_list(dir_list,base_dname) {
+    let dir = dir_list.find(adir => {
+        return(adir.indexOf(base_dname) >= 0 )
+    })
+    return(dir)
+}
+
 async function locate_html_directory(conf) {
 
     let nginx_loc = conf.conf_location
@@ -49,24 +114,26 @@ async function locate_html_directory(conf) {
 }
 
 
+function move_html(doms) {
+    for ( let dom in doms ) {
+        //
+        let dom_dots = dom.split('.')
+        let base_dname = dom_dots[1]
+        let dir = get_directory_from_list(g_html_web_directories,base_dname)
+        //
+        ensurePathExists(dir)
 
-var g_config_file = '../release/release.json'
-try {
-    var releaseObj_str = fs.readFileSync(g_config_file,'ascii').toString()
-    try {
-        g_releaseObject = JSON.parse(releaseObj_str)
-    } catch (e) {
-        console.error(`failed to parse the file '${g_config_file}'`)
-        console.error(e)
-        process.exit(0) 
+        let domObj = doms[dom]
+        
+        let files = domObj.html.files
+        files.forEach(file => {
+            let fpath = `../release/${dom}/${file}.html`
+            let target = `${dir}/${file}.html`
+            fs.copyFileSync(fpath,target) 
+        })
     }
-} catch (e) {
-    console.error(`failed to find the file '${g_config_file}'`)
-    process.exit(0)
 }
 
 
-
 locate_html_directory(g_releaseObject.nginx)
-
-
+move_html(g_releaseObject.domains)
