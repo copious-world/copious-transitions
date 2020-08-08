@@ -3,7 +3,9 @@ const minify = require('html-minifier').minify;
 const tar = require('tar')
 const {exec} = require('child_process')
 const path_util = require('path')
- 
+const util = require('util');
+const asyc_exec = util.promisify(exec);
+
 const scp = require('node-scp')
 
 var g_ssh_pass = process.argv[2]
@@ -11,6 +13,11 @@ console.log(g_ssh_pass)
 if ( g_ssh_pass === undefined ) {
     console.error('No ssh password provided')
     process.exit(1)
+}
+
+var g_repeat_process = false
+if ( process.argv[3] !== undefined ) {
+    g_repeat_process = true
 }
 
 var g_releaseObject = null
@@ -158,6 +165,22 @@ function ensureExists(path, mask) {
     return p
 }
 
+function ensurePathExists(path,mask) {
+    let where_all = path.split('/')
+    where = '.'
+    where_all.forEach(async level => {
+        where += '/' + level
+        try {
+            await ensureExists(`./${where}`,mask)
+        } catch (e) {
+            if (e.code != 'EEXIST') {
+                console.log(e)
+            }
+        }
+    })
+    return(where)
+}
+
 
 function instantiate_top_level(obj,directives) {
     for ( let ky in obj ) {
@@ -212,8 +235,10 @@ function drop_s(str) {
 
 // ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
 
-function output_nginx_dom_conf(dom_config,output) {
-    let where = dom_config.conf + ".conf"
+async function output_nginx_dom_conf(dom_config,output) {
+    let where = dom_config.conf_loc
+    where = ensurePathExists(where)
+    where += dom_config.conf
     fs.writeFileSync(where,output)
 }
 
@@ -341,6 +366,9 @@ function prepare_entry_points(entry_points,nginx) {
             })
             service_conf_obj[ky] = val
         }
+        let rel_dir = entry_points.configs_release_dir
+        rel_dir = ensurePathExists(rel_dir)
+        file = rel_dir + '/' + file
         let output = JSON.stringify(service_conf_obj,null,2)
         fs.writeFileSync(file,output)
     }
@@ -421,7 +449,40 @@ var micros_locations = process_micro_servs_locations()
 console.log(micros_locations)
 */
 
+var g_html_web_directories = []
 
+async function locate_html_directory(conf) {
+
+    let nginx_loc = conf.conf_location
+    let cmd = `grep -rpE 'root\\s+/' ${nginx_loc}/*.conf`
+    try {
+        const { stdout, stderr } = await asyc_exec(cmd)
+
+        let lines = stdout.split('\n')
+        let good_line = lines.filter(line => {
+            if ( line.length == 0 ) return(false)
+            line = line.split(':')[1]
+            let l = line.trim()
+            return(l[0] !== '#')
+        })
+
+        g_html_web_directories = good_line.map(line => {
+            line = line.split(':')[1].trim()
+            line = line.replace('root','')
+            line = line.trim()
+            line = line.replace(';','')
+            return(line)
+        })
+    } catch (e) {
+
+    }
+
+    console.log(g_html_web_directories)
+
+    // /etc/nginx/sites-enabled/default:	root /var/www/html;
+    // /etc/nginx/sites-enabled/popsongnow.conf:	root /var/www/html/popsongnow;
+
+}
 
 
 async function stage_html() {
@@ -454,12 +515,16 @@ async function stage_html() {
                 console.error(e)
             }
         })
+        let static_folders =  g_releaseObject.staging.statics
+        let cmd = `cp -R ${static_folders} ./${releaseDir}/${static_folders}/`
+        await asyc_exec(cmd)
+        fs.copyDir
     } catch(e) {
         console.error(e)
     }
 }
 
-
+/*
 async function stage_micros() {
     //
     let releaseDir = g_releaseObject.staging.folder
@@ -509,7 +574,7 @@ async function stage_micros() {
         console.error(e)
     }
 }
-
+*/
 
 async function zip_release() {
     let releaseDir = g_releaseObject.staging.folder
@@ -540,29 +605,31 @@ async function upload_release() {
 
 async function gen_bash_script() {
     //
+    //
     let script = ["pushd /home"]
     let releaseDir = g_releaseObject.staging.folder
+    let repository_dir = g_releaseObject.staging.repository
+    if ( g_repeat_process ) {
+        script.push(`rm -r "${releaseDir}`)
+        script.push(`if [ -d "${releaseDir}-backup"]; then`)
+        script.push(`mv -r ${releaseDir}-backup ${releaseDir}`)
+        script.push(`fi`)
+    }
     //
+    script.push(`mv ${releaseDir} ${releaseDir}-backup`)
+    script.push(`mkdir ${releaseDir}-backup/sites-enabled`)
+    script.push(`mkdir ${releaseDir}-backup/html`)
+    script.push(`cp ecosystem.config.js ${releaseDir}-backup`)
+    script.push(`cp /etc/nginx/sites-enabled/* ${releaseDir}-backup/sites-enabled/`)
+    script.push(`cp -R /var/www/html/* ${releaseDir}-backup/html/`)
     script.push(`tar xf ${releaseDir}.tgz`)
     script.push(`rm ${releaseDir}.tgz`)
-    Object.keys(g_releaseObject.domains).forEach (dmn => {
-        let dw_d = dmn.replace('www.','')
-        script.push(`cp  ${releaseDir}/${dmn}/home/*.js ${dw_d}/`)
-        script.push(`cp  ${releaseDir}/${dmn}/home/*.html ${dw_d}/`)
-        //
-        let directive = g_releaseObject.domains[dmn]
-
-        let html_path = g_releaseObject.remote_html
-
-        script.push(`cp  ${releaseDir}/${dmn}/${directive.html.file}.html ${html_path}/${directive.html.subdir}`)
-        //
-        let src = `${releaseDir}/${dmn}/home/node_modules/`
-        let dest = `${dw_d}/node_modules/`
-        script.push(`cp -R --no-dereference --preserve=all --force --one-file-system --no-target-directory "${src}" "${dest}"`)
-    });
     //
-    script.push(`cp  ${releaseDir}/ecosystem.config.js ./`)
-    script.push('pm2 start ecosystem.config.js')
+    script.push(`bash ${releaseDir}/boot_it.sh ${repository_dir}`)
+    script.push(`cp ${releaseDir}/ecosystem.config.js ./${repository_dir}`)
+    script.push(`pushd ${repository_dir}`)
+    //script.push('pm2 start ecosystem.config.js')
+    script.push('popd')
     script.push('popd')
     //
     let out_script = script.join('\n')
@@ -576,50 +643,59 @@ async function gen_bash_script() {
 }
 
 
-async function output_ecosystem() {
+async function output_ecosystem(micros,nginx) {
     // first generate ecosystem
     let releaseDir = g_releaseObject.staging.folder
+    fs.copyFileSync("tools/boot_it.sh",`${releaseDir}/boot_it.sh` )
+    //
     let ecosystem = ''
     let allapps = []
+    let nginx_prefix = micros.config_key_prefix.split('.')
+    let nginx_path = nginx_prefix.map(entry => {
+        let key = entry.trim()
+        if ( key[0] === '(' ) {
+            key = key.replace('-','.').replace('-','.').replace('-','.').replace('-','.')
+            key = key.substr(1,key.length-2)
+        }
+        return(key)
+    })
     try {
         await ensureExists('./' +  releaseDir)
-        Object.keys(g_releaseObject.domains).forEach (async dmn => {
-            try {
-                //
-                let directive = g_releaseObject.domains[dmn]
-                let file_map = directive.micros.files
-                let file_list = Object.keys(file_map)
-
-                let homedir = directive.micros.subdir
-                //
-                let appsmap = file_list.map(filename => {
-                    let appOb = null
-                    let ext = path_util.extname(filename)
-                    if ( file_map[filename] && (ext !== '.html') ) {
-                        let basename = filename.replace(ext,'')
-                        appOb = {
-                            "name"        : basename,
-                            "script"      : `/home/${homedir}/${filename}`,
-                            "watch"       : true,
-                            "env": {
-                                "NODE_ENV": "development",
-                            },
-                            "env_production" : {
-                                "NODE_ENV": "production"
-                            }
-                        }
-                    }
-                    return(appOb)
-                })
-                appsmap = appsmap.filter((obj) => { return(obj != null ) })
-                allapps = allapps.concat(appsmap)
-
-               
-
-            } catch(e) {
-                console.error(e)
+        let runners = micros.runners
+        for ( let rnr in runners ) {
+            let rdef = runners[rnr]
+            let jsfile = micros[rdef.run]
+            let argvs = rdef.argv.map(arg => {
+                if ( arg[0] === '@' ) {
+                    let ky_path = arg.substr(1)
+                    //
+                    let val = nginx
+                    let path = nginx_path.concat([])
+                    let accessor = path.concat(ky_path.split('.'))
+                    accessor.forEach(fld => {
+                        val = val[fld]
+                    })
+                    arg = val
+                }
+                return(arg)
+            })
+            //
+            let params = argvs.join(' ')
+            //
+            let appOb = {
+                "name"        : rnr,
+                "script"      : `node ${jsfile} ${params}`,
+                "watch"       : true,
+                "env": {
+                    "NODE_ENV": "development",
+                },
+                "env_production" : {
+                    "NODE_ENV": "production"
+                }
             }
-        })
+            allapps.push(appOb)
+        }
+
         //
         allapps = JSON.stringify(allapps,null,2)
         ecosystem = `module.exports = {  apps : ${allapps} }`
@@ -646,16 +722,16 @@ function run_releaser() {
 }
 
 // 
-//nginx_releaser(g_releaseObject.nginx)
-//prepare_entry_points(g_releaseObject.entry_points,g_releaseObject.nginx)
+locate_html_directory(g_releaseObject.nginx)
+nginx_releaser(g_releaseObject.nginx)
+prepare_entry_points(g_releaseObject.micros,g_releaseObject.nginx)
 stage_html()
-/*stage_micros()
-output_ecosystem()
+/*stage_micros()*/
+output_ecosystem(g_releaseObject.micros,g_releaseObject.nginx)
 gen_bash_script()
 zip_release()
 upload_release()
 run_releaser()
-*/
 ///
 /*
 

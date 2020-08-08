@@ -5,7 +5,7 @@ const fetch = require('node-fetch');
 const session = require('express-session');
 //
 const DEFAULT_FOREIGN_LOGIN_ATTEMPTS = 10
-const g_port = 2009
+
 //
 var app = express()
 app.use(session({
@@ -28,7 +28,7 @@ passport.deserializeUser((obj, cb) => {
 const conf_obj = load_parameters()                  // configuration parameters to select modules, etc.
 const keys = require('./local/api_keys')
 
-load_parameters()
+const g_port = conf_obj.foreign_auth_port ? conf_obj.foreign_auth_port : 2009
 
 //
 const GitHubStrategy = ( keys.GitHub.in_use ) ? require('passport-github').Strategy : null

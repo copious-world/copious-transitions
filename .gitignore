@@ -11,4 +11,8 @@ examples/web*
 examples/*.txt
 uploads/*
 services/*
+release
+releaser.sh
 release.json
+tools/boot*.sh
+*.tgz

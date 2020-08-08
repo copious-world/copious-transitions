@@ -491,7 +491,7 @@ wss.on('close', function close() {
 
 var g_proc_ws_token = ''
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-if ( conf_obj.ws_client_port ) {   // SUPPORT SERVICE WEB SCOCKETS OPTION (START)
+if ( conf_obj.ws_client_port && !(g_debug) ) {   // SUPPORT SERVICE WEB SCOCKETS OPTION (START)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
     try {
         // setup a webSocket connection to get finalization data on logging in. -- 
@@ -563,6 +563,8 @@ function generate_password_block() {
 var g_hex_re = /^[0-9a-fA-F]+$/;
 function load_parameters() {
     //
+    global.g_debug = false
+    //
     global.clonify = (obj) => {
         return(clone(obj))
         /*
@@ -610,6 +612,12 @@ function load_parameters() {
     let config = "./user-service.conf"
     if ( process.argv[2] !== undefined ) {
         config = process.argv[2];
+    }
+
+    if (  process.argv[3] !== undefined ) {
+        if ( process.argv[3] === 'debug' ) {
+            g_debug = true
+        }
     }
 
     g_proc_ws_token = do_hash('' + config + '+=+' + Date.now())
