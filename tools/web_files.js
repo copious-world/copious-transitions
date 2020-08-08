@@ -13,20 +13,25 @@ var g_releaseObject = {}
 async function locate_html_directory(conf) {
 
     let nginx_loc = conf.conf_location
-    let cmd = `grep -rpE 'root\\s+/' ${nginx_loc}/*.conf`
+    let cmd = `grep -rE 'root\\s+/' ${nginx_loc}/*.conf`
+    console.log(cmd)
     try {
         const { stdout, stderr } = await asyc_exec(cmd)
 
         let lines = stdout.split('\n')
         let good_line = lines.filter(line => {
             if ( line.length == 0 ) return(false)
-            line = line.split(':')[1]
+            if ( line.indexOf(':') >= 0 ) {
+                line = line.split(':')[1]
+            }
             let l = line.trim()
             return(l[0] !== '#')
         })
 
         g_html_web_directories = good_line.map(line => {
-            line = line.split(':')[1].trim()
+            if ( line.indexOf(':') >= 0 ) {
+                line = line.split(':')[1]
+            }
             line = line.replace('root','')
             line = line.trim()
             line = line.replace(';','')
