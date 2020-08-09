@@ -63,6 +63,7 @@
     "mime-types": "^2.1.27",
     "nanoassert": "^2.0.0",
     "node-fetch": "^2.6.0",
+    "nodemailer": "^6.4.11",
     "node-scp": "0.0.3",
     "passport": "^0.4.1",
     "passport-amazon": "^1.0.0",
