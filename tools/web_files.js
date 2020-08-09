@@ -11,8 +11,8 @@ var g_html_web_directories = []
 var g_releaseObject = {}
 
 
-
-var g_config_file = '../release/release.json'
+const g_src_dir =  '../release' // 'release'  // 
+var g_config_file = '../release/release.json' //  'release.json'  // 
 try {
     var releaseObj_str = fs.readFileSync(g_config_file,'ascii').toString()
     try {
@@ -53,11 +53,12 @@ function ensureExists(path, mask) {
 
 function ensurePathExists(path,mask) {
     let where_all = path.split('/')
-    where = '.'
+    where_all.shift()
+    where = ''
     where_all.forEach(async level => {
         where += '/' + level
         try {
-            await ensureExists(`./${where}`,mask)
+            await ensureExists(where,mask)
         } catch (e) {
             if (e.code != 'EEXIST') {
                 console.log(e)
@@ -70,6 +71,7 @@ function ensurePathExists(path,mask) {
 
 function get_directory_from_list(dir_list,base_dname) {
     let dir = dir_list.find(adir => {
+        console.log(adir,base_dname)
         return(adir.indexOf(base_dname) >= 0 )
     })
     return(dir)
@@ -119,21 +121,29 @@ function move_html(doms) {
         //
         let dom_dots = dom.split('.')
         let base_dname = dom_dots[1]
+        //console.log(base_dname, g_html_web_directories)
         let dir = get_directory_from_list(g_html_web_directories,base_dname)
-        //
-        ensurePathExists(dir)
-
-        let domObj = doms[dom]
-        
-        let files = domObj.html.files
-        files.forEach(file => {
-            let fpath = `../release/${dom}/${file}.html`
-            let target = `${dir}/${file}.html`
-            fs.copyFileSync(fpath,target) 
-        })
+        //console.log(dir)
+        if ( dir !== undefined ) {
+            //
+            ensurePathExists(dir)
+            //
+            let domObj = doms[dom]
+            let files = domObj.html.files
+            files.forEach(file => {
+                let fpath = `${g_src_dir}/${dom}/${file}.html`
+                let target = `${dir}/${file}.html`
+                fs.copyFileSync(fpath,target) 
+            })
+            //
+        }
     }
 }
 
+async function process_web_files() {
+    //g_html_web_directories = [ '/usr/local/var/www/html/popsongnow', '/usr/local/var/www/html/copious' ]  // /var/www/html/popsongnow
+    await locate_html_directory(g_releaseObject.nginx)
+    move_html(g_releaseObject.domains)
+}
 
-locate_html_directory(g_releaseObject.nginx)
-move_html(g_releaseObject.domains)
+process_web_files()
