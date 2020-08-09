@@ -520,7 +520,26 @@ async function stage_html() {
         let static_folders =  g_releaseObject.staging.statics
         let cmd = `cp -R ${static_folders} ./${releaseDir}/${static_folders}/`
         await asyc_exec(cmd)
-        fs.copyDir
+        //fs.copyDir
+    } catch(e) {
+        console.error(e)
+    }
+}
+
+
+async function state_private_files(staging) {
+    let releaseDir = staging.folder
+    try {
+        await ensureExists(`./${releaseDir}`)
+        let dirs_defs = staging.private_dirs
+        for ( let dir in dirs_defs ) {
+            let dir_def = dirs_defs[dir]
+            let path = dir_def.path
+            let to_release = path.to ? path.to : dir
+            to_release = `./${releaseDir}/${to_release}`
+            let cmd = `cp -R ./${path} ./${to_release}/`
+            await asyc_exec(cmd)
+            }
     } catch(e) {
         console.error(e)
     }
@@ -728,6 +747,7 @@ locate_html_directory(g_releaseObject.nginx)
 nginx_releaser(g_releaseObject.nginx)
 prepare_entry_points(g_releaseObject.micros,g_releaseObject.nginx)
 stage_html()
+state_private_files(g_releaseObject.staging)
 /*stage_micros()*/
 output_ecosystem(g_releaseObject.micros,g_releaseObject.nginx)
 gen_bash_script()
