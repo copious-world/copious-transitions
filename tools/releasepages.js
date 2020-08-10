@@ -527,7 +527,7 @@ async function stage_html() {
 }
 
 
-async function state_private_files(staging) {
+async function stage_private_files(staging) {
     let releaseDir = staging.folder
     try {
         await ensureExists(`./${releaseDir}`)
@@ -545,7 +545,7 @@ async function state_private_files(staging) {
     }
 }
 
-/*
+
 async function stage_micros() {
     //
     let releaseDir = g_releaseObject.staging.folder
@@ -595,7 +595,7 @@ async function stage_micros() {
         console.error(e)
     }
 }
-*/
+
 
 async function zip_release() {
     let releaseDir = g_releaseObject.staging.folder
@@ -705,6 +705,7 @@ async function output_ecosystem(micros,nginx) {
             //
             let appOb = {
                 "name"        : rnr,
+                "cwd"         : `/home/${micros.repository}`,
                 "script"      : `node ${jsfile} ${params}`,
                 "watch"       : true,
                 "env": {
@@ -747,7 +748,7 @@ locate_html_directory(g_releaseObject.nginx)
 nginx_releaser(g_releaseObject.nginx)
 prepare_entry_points(g_releaseObject.micros,g_releaseObject.nginx)
 stage_html()
-state_private_files(g_releaseObject.staging)
+stage_private_files(g_releaseObject.staging)
 /*stage_micros()*/
 output_ecosystem(g_releaseObject.micros,g_releaseObject.nginx)
 gen_bash_script()

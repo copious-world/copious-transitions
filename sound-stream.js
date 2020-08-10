@@ -58,7 +58,7 @@ function update_play_count() {
       let file = __dirname + '/play_count.json';
       fs.readFile(file,(err2,data2) => {
         if ( !err2 ) {
-          let counters = JSON.parse(data.toString())
+          let counters = JSON.parse(data2.toString())
           counters[counters.length-1] = g_play_counter
           //
           if ( (song_of_day_info.title !== g_play_counter.title) || pastMidNight() ) {
@@ -76,6 +76,8 @@ function update_play_count() {
               console.log(err3)
             }
           })
+        } else {
+          console.log(err2)
         }
       })
     } else {
@@ -88,12 +90,15 @@ function update_play_count() {
 
 function init_play_count(cb) {
   let file = __dirname + '/play_count.json';
+  console.log("init play count: " + file)
   fs.access(file, fs.constants.F_OK, (err) => {
     if ( !err ) {
+      console.log("play count read")
       let counters = JSON.parse(fs.readFileSync(file,'ascii').toString())
       g_play_counter = counters[counters.length-1]
       if ( cb ) cb()
     } else {
+      console.log("create play count")
       fs.readFile(gc_song_of_day_info,(err,data) => {
         if ( !err ) {
           try {
