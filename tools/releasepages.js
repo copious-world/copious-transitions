@@ -649,7 +649,8 @@ async function gen_bash_script() {
     script.push(`bash ${releaseDir}/boot_it.sh ${repository_dir}`)
     script.push(`cp ${releaseDir}/ecosystem.config.js ./${repository_dir}`)
     script.push(`pushd ${repository_dir}`)
-    //script.push('pm2 start ecosystem.config.js')
+    script.push('pm2 stop all')
+    script.push('pm2 start ecosystem.config.js')
     script.push('popd')
     script.push('popd')
     //

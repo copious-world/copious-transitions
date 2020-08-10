@@ -13,8 +13,11 @@ examples/drag*
 uploads/*
 services/*
 release
+release/*
+release/*/*
 releaser.sh
 release.json
 tools/boot*.sh
 *.tgz
 play_count.json
+release/www.popsongnow.com/index.html

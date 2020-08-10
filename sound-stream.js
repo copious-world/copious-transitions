@@ -8,7 +8,8 @@ const fs          = require('fs');
 g_streamer_port = process.argv[2]  ?  process.argv[2] :  2011
 
 const gc_song_of_day_info = `${__dirname}/sites/popsong/song_of_day.json`
-
+const gc_song_directory =   process.argv[3] !== undefined ?  `${__dirname}` : '/home/sounds'
+console.log(gc_song_directory)
 /*
 location /mp3/ {
     root data;
@@ -152,14 +153,14 @@ app.get('/streamoftheday', (req, res) => {
       let filename = req.url.toString()
       try {
         let fname = filename + media_extension
-        let stat = fs.statSync(__dirname + fname)
+        let stat = fs.statSync(gc_song_directory + fname)
         play_count()
         res.writeHead(200, {
           'Content-Type': 'audio/mpeg',
           'Content-Length': stat.size
         });
         // We replaced all the event handlers with a simple call to util.pump()
-        fs.createReadStream(__dirname + fname,{start:0}).pipe(res);
+        fs.createReadStream(gc_song_directory + fname,{start:0}).pipe(res);
         return(true)
       } catch (e) {
         if ( !(media_extensions.length) ) {
