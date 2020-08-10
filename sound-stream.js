@@ -7,6 +7,8 @@ const fs          = require('fs');
 
 g_streamer_port = process.argv[2]  ?  process.argv[2] :  2011
 
+const gc_song_of_day_info = `${__dirname}/sites/popsong/song_of_day.json`
+
 /*
 location /mp3/ {
     root data;
@@ -23,7 +25,7 @@ var g_play_counter = {
   'date' : Date.now()
 }
 
-const SONG_OF_DAY_UPDATE_INTERVAL = 60000
+const SONG_OF_DAY_UPDATE_INTERVAL =  60000
 
 var g_waiting_for_midnight = false
 function pastMidNight() {
@@ -42,7 +44,7 @@ function pastMidNight() {
 
 function update_play_count() {
   //
-  fs.readFile(__dirname + '/song_of_day.json',(err,data) => {
+  fs.readFile(gc_song_of_day_info,(err,data) => {
     //
     if ( !err ) {
       let song_of_day_info = null
@@ -69,9 +71,15 @@ function update_play_count() {
             counters.push(g_play_counter)
           }
           //
-          fs.writeFile(file,JSON.stringify(counters))
+          fs.writeFile(file,JSON.stringify(counters),(err3) => {
+            if ( err3 ) {
+              console.log(err3)
+            }
+          })
         }
       })
+    } else {
+      console.log(err)
     }
     //
   })
@@ -84,8 +92,9 @@ function init_play_count(cb) {
     if ( !err ) {
       let counters = JSON.parse(fs.readFileSync(file,'ascii').toString())
       g_play_counter = counters[counters.length-1]
+      if ( cb ) cb()
     } else {
-      fs.readFile(__dirname + '/song_of_day.json',(err,data) => {
+      fs.readFile(gc_song_of_day_info,(err,data) => {
         if ( !err ) {
           try {
             let song_of_day_info = JSON.parse(data.toString())
@@ -96,6 +105,9 @@ function init_play_count(cb) {
           } catch(e) {
             console.error(e)
           }
+        } else {
+          console.log("could not find the song of the day")
+          process.exit(1)
         }
       })
     }
