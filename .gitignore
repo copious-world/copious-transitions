@@ -9,6 +9,7 @@ package-lock.json
 *.db
 examples/web*
 examples/*.txt
+examples/drag*
 uploads/*
 services/*
 release

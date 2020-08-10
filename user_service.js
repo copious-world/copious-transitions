@@ -378,6 +378,7 @@ let server = http.createServer(g_app);
 server.listen(conf_obj.ws_port);
 var g_auth_wss = new WebSocketServer({server: server});
 
+console.log(`web socket listening: ${conf_obj.ws_port}`)
 
 var g_going_sitewide_ws_session = {}
 
@@ -493,38 +494,56 @@ var g_proc_ws_token = ''
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 if ( conf_obj.ws_client_port && !(g_debug) ) {   // SUPPORT SERVICE WEB SCOCKETS OPTION (START)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-    try {
-        // setup a webSocket connection to get finalization data on logging in. -- 
-        let socket_host =  conf_obj.ws_client_server
-
-        g_sitewide_socket = new WebSocket(`ws://${socket_host}/auth_ws/site_wide`);
-        g_sitewide_socket.onmessage = async (event) => {	// handle the finalization through the websocket
-                                try {
-                                    let handler = JSON.parse(event.data)
-                                    if ( handler.token === token ) {
-                                        if ( handler.action === "logout" ) {
-                                            await g_session_manager.process_user('logout',handler,null,null)
-                                        } else {
-                                            eval(handler.action)
+    var g_ws_client_attempt_timeout = null
+    function ws_connection_attempt() {
+        try {
+            // setup a webSocket connection to get finalization data on logging in. -- 
+            let socket_host =  conf_obj.ws_client_server
+    
+            g_sitewide_socket = new WebSocket(`ws://${socket_host}/auth_ws/site_wide`);
+            g_sitewide_socket.on('error',(e) => {
+                g_sitewide_socket = null
+                console.log(e.message)
+                if (  e.code == 'ECONNREFUSED'|| e.message.indexOf('502') > 0 ) {
+                    console.log("try again in 1 seconds")
+                    g_ws_client_attempt_timeout = setTimeout(ws_connection_attempt,1000)
+                } else {
+                    console.dir(e)
+                }
+            })
+            g_sitewide_socket.on('open', () => {
+                //
+                console.log("web sockets connected")
+                if ( g_ws_client_attempt_timeout != g_ws_client_attempt_timeout ) clearTimeout(g_ws_client_attempt_timeout)
+                //
+                let msg = {
+                    'token' : g_proc_ws_token,
+                    'action' : 'setup'
+                }
+                g_sitewide_socket.send(JSON.stringify(msg))
+                //
+            })
+            g_sitewide_socket.onmessage = async (event) => {	// handle the finalization through the websocket
+                                    try {
+                                        let handler = JSON.parse(event.data)
+                                        if ( handler.token === token ) {
+                                            if ( handler.action === "logout" ) {
+                                                await g_session_manager.process_user('logout',handler,null,null)
+                                            } else {
+                                                eval(handler.action)
+                                            }
                                         }
+                                    } catch (e) {
                                     }
-                                } catch (e) {
                                 }
-                            }
-        //
-        setTimeout(() => {
-            let msg = {
-                'token' : g_proc_ws_token,
-                'action' : 'setup'
-            }
-            g_sitewide_socket.send(JSON.stringify(msg))
-        },500)
-        //
-    } catch(e) {
-        console.log(e.message)
-        console.dir(e)
-        process.exit(1)
+        } catch(e) {
+            console.log(e.message)
+            console.dir(e)
+            process.exit(1)
+        }
     }
+
+    ws_connection_attempt()
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 }       // SUPPORT SERVICE WEB SCOCKETS OPTION (END)
