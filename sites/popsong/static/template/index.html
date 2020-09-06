@@ -110,6 +110,46 @@ html {
 			background: -webkit-linear-gradient(to right, white, #FAFAFF);
 			background: linear-gradient(to right, white, #FAFAFF );
 			margin-left: 10px;
+			min-height: fit-content;
+		}
+
+
+		@media (max-width: 1225px) {
+			.fillLowerWrap {
+				visibility : "none";
+				height : 0px;
+			}
+		}
+
+	
+		.fillLower {
+			border: darkred 2px solid;
+			height: fit-content;
+			width: 96%;
+			min-height: fit-content;
+			margin-left: 10px;
+			padding:8px;
+			background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE);
+			background: linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE );
+		}
+	
+
+		@media (min-width: 1220px) {
+			.fillLowerWrap {
+				width: 66%;
+			}
+		}
+
+		@media (max-width: 1219px) {
+			.fillLowerWrap {
+				width: 100%;
+			}
+		}
+
+		@media (max-width: 1100px) {
+			.fillLowerWrap {
+				width: 66%;
+			}
 		}
 	
 		.fitMenuLower {
@@ -221,24 +261,6 @@ html {
 			color: rgb(5, 44, 5);
 		}
 
-		@media (max-width: 1225px) {
-			.fillLowerWrap {
-				visibility : "none";
-				height : 0px;
-			}
-		}
-
-	
-		.fillLower {
-			border: darkred 2px solid;
-			height: 96%;
-			width: 96%;
-			margin-left: 10px;
-			padding:8px;
-			background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE);
-			background: linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE );
-		}
-	
 		button {
 			cursor: pointer;
 			font-size: 101%;
@@ -373,6 +395,28 @@ html {
 			border-left: solid 3px navy;
 			border-top: solid 1px #8833BB;
 			padding : 4px;
+			height: fit-content;
+			margin-bottom: 0%;
+		}
+
+		@media (min-width: 1220px) {
+			main {
+				margin-bottom: 0%;
+				border: none;
+			}
+		}
+
+		@media (max-width: 1219px) {
+			main {
+				margin-bottom: 90px;
+			}
+		}
+
+		@media (max-width: 1100px) {
+			main {
+				margin-bottom: 0%;
+				border: none;
+			}
 		}
 	
 		#mainNav {
@@ -727,7 +771,7 @@ html {
 		</div>
 	</div>
 	
-	</main>
+</main>
 
 <footer>
 	<ul class="footer-list">

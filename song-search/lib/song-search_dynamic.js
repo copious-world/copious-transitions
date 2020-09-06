@@ -34,7 +34,8 @@ async function obtainToken(cb) {
         if ( g_tokenTimeoutDelta >= g_tokenExpireTime ) { // fudge some delta 
           g_tokenTimeoutDelta = Math.floor(g_tokenExpireTime/20)
         }
-        setTimeout(() => { obtainToken() },(g_tokenExpireTime - g_tokenTimeoutDelta))
+        let next_time = (g_tokenExpireTime - g_tokenTimeoutDelta)*1000
+        setTimeout(() => { obtainToken() },next_time)
         if ( cb ) {
           cb()
         }

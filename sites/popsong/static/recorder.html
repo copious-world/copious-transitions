@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Record and save audio</title>
+    <style>
+      audio {
+        display: block;
+        margin: 5px;
+      }
+      button {
+        cursor: pointer;
+        font-weight: 600;
+        background-color: rgb(250, 244, 218);
+        border-radius: 6px;
+        border: 1px double #cccccc;
+      }
+      .like-button {
+        font-weight: 600;
+        font-size:68%;
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: rgb(250, 244, 218);
+        margin-right: 4px;
+        margin-left: 2px;
+      }
+      #saved-audio-messages {
+        max-height: 256px;
+        overflow: auto;
+      }
+      .component-container {
+        border: rgb(126, 79, 9) solid 2px;
+        padding: 4px;
+      }
+      .audio-checks {
+       float: left
+      }
+      .audio-playback {
+        display: inline;
+      }
+      .playback-div {
+        width:100%;
+        text-align:left;
+        vertical-align:bottom;
+        border-bottom: midnightblue solid 1px;
+        padding: 2px;
+      }
+      .pop-name-list {
+        visibility: hidden;
+        display: none;
+      }
+      .pop-name-list-popped {
+        visibility: visible;
+        display: block;
+      }
+    </style>
+</head>
+<body>
+  <div class="component-container">
+    <span style="font-weight: bolder;">Manage Recording Sessions</span>
+    <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 2px;">&nbsp;</div>
+    <button onclick="ask_user_session()" >New Recording Session</button>
+    <!--   -->
+    <div class="like-button" style="display: inline;" >
+    <label  for="sess-names">Edit Existing Session:</label>
+    <select name="sess-names" id="sess-names" onchange="edit_user_session(event)">
+      <option value="none">no selection</option>
+    </select>
+  </div>
+    <!--   -->
+    <button id="send-session" onclick="store_to_servers()" >Send Session to Servers</button>
+    <button id="delete-session" onclick="delete_session()" >Delete Session from Device</button>
+    <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 12px;">&nbsp;</div>
+    <!--   -->
+    <span style="font-weight: bolder;">Record Audio</span>:&nbsp;&nbsp;&nbsp;&nbsp;
+    <span id="show-session-name" style="font-weight: bolder;"></span>
+    <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 2px;">&nbsp;</div>
+    <button id="record" disabled>Record</button>
+    <button id="stop" disabled>Stop</button>
+    <button id="play" disabled>Play</button>
+    <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 12px;">&nbsp;</div>
+
+    <span style="font-weight: bolder;">Save Audio</span>
+    <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 2px;">&nbsp;</div>
+    <button id="save" disabled>Save</button>
+    <button id="delete" disabled>Delete</button>
+    <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 12px;">&nbsp;</div>
+
+    <span style="font-weight: bolder;">Session Components</span>
+    <div style="display: inline;padding:2px;background-color: oldlace">
+      <button onclick="edit_checked()" >edit checked</button>
+      <button onclick="delete_checked()" >delete checked</button>
+    </div>
+    <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 2px;;margin-top: 2px;">&nbsp;</div>
+    <div id="saved-audio-messages">
+    </div>
+  </div>
+</body>
+</html>
+
+<script>
+  const AUDIO_SESSION_STORE = 'audio_sessions'
+
+  let recorder = false
+  let audio = false
+  let app_recoder = false
+  let g_current_session_name = 'none'
+  let g_session_name_list = []
+  //
+  const g_recordButton = document.getElementById('record');
+  const g_stopButton = document.getElementById('stop');
+  const g_playButton = document.getElementById('play');
+  const g_saveButton = document.getElementById('save');
+  const g_deleteButton = document.getElementById('delete');
+  const g_send_session = document.getElementById('send-session')
+  //
+  const savedAudioMessagesContainer = document.querySelector('#saved-audio-messages');
+
+  var g_window_can_process = true
+  // In the following line, you should include the prefixes of implementations you want to test.
+  window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+  // DON'T use "var indexedDB = ..." if you're not in a function.
+  // Moreover, you may need references to some window.IDB* objects:
+  window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction || {READ_WRITE: "readwrite"}; // This line should only be needed if it is needed to support the object's constants for older browsers
+  window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+  // (Mozilla has never prefixed these objects, so we don't need window.mozIDB*)
+
+  if (!window.indexedDB) {
+    g_window_can_process = false
+    console.log("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.");
+  }
+
+  function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  //
+  class AppAudioRecorder {
+    //  //  //
+    constructor(stream) {
+      //
+      this.audioChunks = [];
+      let mediaRecorder = new MediaRecorder(stream);
+      this.mediaRecorder = mediaRecorder
+      this.audio_instance = null
+      //
+      mediaRecorder.addEventListener('dataavailable', event => {
+        this.data_handler(event)
+      });
+
+      mediaRecorder.addEventListener('stop',  event => {
+        this.stop_handler(event)
+      });
+    }
+    //
+    //
+    data_handler(data) {
+      this.audioChunks.push(event.data);
+    }
+    //
+    start() {
+      this.audioChunks = []
+      this.mediaRecorder.start();
+    }
+    //
+    stop_handler(event) {
+      this.audio_results()
+    }
+
+    stop() {
+      this.mediaRecorder.stop();
+    }
+
+    //
+    audio_results() {
+      let audioBlob = new Blob(this.audioChunks);
+      let audioUrl = URL.createObjectURL(audioBlob);
+      this.audioBlob = audioBlob
+      this.audio_instance = new Audio(audioUrl);
+    }
+
+    delete_last_recorderd_audio() {
+      this.audio_instance = null
+      this.audioBlob = null
+    }
+
+    play() {
+      if ( this.audio_instance ) {
+        this.audio_instance.play()
+      }
+    }
+
+  }
+
+  // DATABASE
+  var g_audio_db = null
+  const gc_song_db_name = "SongCatcher"
+  async function init_database(db_name) {
+    // request an open of DB
+    let request = window.indexedDB.open(db_name, 1);
+    //
+    request.onerror = (event) => {
+      alert("This web app will not store recorded audio without the use of computer storage.")
+    };
+    request.onsuccess = (event) => {
+      //
+      let db = event.target.result;
+      db.onerror = (event) => {
+        console.log("Database error: " + event.target.error);
+      };
+      //
+      g_audio_db = db;
+      load_name_list()
+      //
+    };
+
+    request.onupgradeneeded = (event) => {
+        let db = event.target.result;
+
+        let sessionObjectStore = db.createObjectStore(AUDIO_SESSION_STORE, { autoIncrement : true });
+        sessionObjectStore.createIndex("name", "name", { unique: true });
+        sessionObjectStore.createIndex("sess_date_time", "sess_date_time", { unique: true });
+
+        /*
+        // Use transaction oncomplete to make sure the objectStore creation is 
+        // finished before adding data into it.
+        sessionObjectStore.transaction.oncomplete = function(event) {
+          // Store values in the newly created objectStore.
+          let customerObjectStore = db.transaction("customers", "readwrite").objectStore("customers");
+          customerData.forEach(function(customer) {
+            customerObjectStore.add(customer);
+          });
+        };
+        */
+      };
+
+    //
+  }
+
+
+
+  function apply_find_audio_session(sess_name, store, success_callback, not_found_callback) {
+    //
+    var nameIndex = store.index('name');
+    nameIndex.get(sess_name).onsuccess = (evt) => {
+      var value = evt.target.result;
+      if ( value ) {
+        if ( success_callback ) success_callback(value,nameIndex);
+      } else {
+        if ( not_found_callback ) not_found_callback();
+      }
+    };
+    //
+  }
+
+  function add_audio_data(audioBlob) {
+    //
+    if ( g_audio_db === null ) {
+      console.log("db not initialized :: add_audio_data")
+      return;
+    }
+    //
+    let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
+    let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
+
+    let update_list_callback = (value,dbIndex) => {
+      let keyRangeValue = IDBKeyRange.only(value.name);
+      dbIndex.openCursor(keyRangeValue).onsuccess = (event) => {
+        var cursor = event.target.result;
+        if ( cursor ) {
+          let sessionObj = cursor.value
+          let blob_url = URL.createObjectURL(audioBlob);
+          let map_id = uuidv4()
+          sessionObj.data[map_id] = audioBlob
+          //
+          const request = cursor.update(sessionObj);
+          request.onsuccess = () => {
+            add_audio_element(blob_url,map_id)  // visual rep
+          };
+          //
+        }
+      }
+    }
+
+    let add_new_callback = () => {
+      let blob_url = URL.createObjectURL(audioBlob);
+      let sessionObj = {
+        'name' : g_current_session_name,
+        'sess_date_time' : '' + Date.now(),
+        'data' : { }
+      }
+      //
+      let map_id = uuidv4()
+      sessionObj.data[map_id] = audioBlob   // JSON.stringify(audioBlob)
+      //
+      let request = audioStore.add(sessionObj);
+      request.onsuccess = function(event) {
+        add_audio_element(blob_url,map_id)  // visual rep
+      };
+    }
+
+    apply_find_audio_session(g_current_session_name, audioStore, update_list_callback, add_new_callback)
+    //
+  }
+
+
+  function remove_audio_data(audio_key) {
+    //
+    if ( g_audio_db === null ) {
+      console.log("db not initialized :: add_audio_data")
+      return;
+    }
+    //
+    let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
+    let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
+
+    let remove_from_list_callback = (value,dbIndex) => {
+      let keyRangeValue = IDBKeyRange.only(value.name);
+      dbIndex.openCursor(keyRangeValue).onsuccess = (event) => {
+        var cursor = event.target.result;
+        if ( cursor ) {
+          let sessionObj = cursor.value
+          delete sessionObj.data[audio_key]
+          //
+          const request = cursor.update(sessionObj);
+          request.onsuccess = () => {
+            //  item has been removed
+            console.log(`deleted ${audio_key}`)
+          };
+          //
+        }
+      }
+    }
+
+    let not_found_callback = () => {
+      warn(`The session ${sess_name} is not in the database`)
+    }
+
+    apply_find_audio_session(g_current_session_name, audioStore, remove_from_list_callback, not_found_callback)
+
+  }
+
+  function is_new_name(name) {
+    if ( g_session_name_list.indexOf(name) >= 0 ) return(false)
+    return(true)
+  }
+
+  function load_name_list() {
+    let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readonly");
+    let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
+    //
+    g_session_name_list = []
+    var myIndex = audioStore.index('name');
+    myIndex.openCursor().onsuccess = (event) => {
+      var cursor = event.target.result;
+      if(cursor) {
+        g_session_name_list.push(cursor.value.name)
+        cursor.continue();
+      } else {
+        update_session_name_selections(g_current_session_name,g_session_name_list)
+      }
+    };
+    //
+  }
+
+  function update_session_name_selections(sess_name,name_list) {
+    let session_options = name_list.map(name => {
+      let el_html = `<option value='${name}'>${name}</option>`
+      return(el_html)
+    })
+
+    let no_option = `<option value="none">no selection</option>`
+    session_options.unshift(no_option)
+    let options = session_options.join('\n')
+    let sessNameSel = document.getElementById('sess-names')
+    if ( sessNameSel ) {
+      sessNameSel.innerHTML = options
+      sessNameSel.value = sess_name
+    }
+    let sess_name_el = document.getElementById('show-session-name')
+    if ( sess_name_el ) sess_name_el.innerHTML = (sess_name === 'none') ? '<span style="color:orange">select or create a session</span>' : sess_name
+  }
+
+  function warn(str) {
+    //
+  }
+
+  function ask_user_session() {
+    let proceed = confirm("Start a new session?")
+    if ( proceed ) {
+      let name = prompt("Name this session:", "new session");
+      let new_name = is_new_name(name)
+      if ( new_name ) {
+        let sess_name_el = document.getElementById('show-session-name')
+        if ( sess_name_el ) {
+          g_current_session_name = name
+          g_session_name_list.push(name)
+          sess_name_el.innerHTML = name
+          g_recordButton.removeAttribute('disabled');
+          //
+          clear_play_list()
+          update_session_name_selections(g_current_session_name,g_session_name_list)
+        }
+      } else {
+        warn("Session already exists. Do you want to edit it?")
+      }
+    }
+  }
+
+
+  function choose_edit_user_session(name) {
+    if ( name === 'none' ) {
+      let sess_name_el = document.getElementById('show-session-name')
+      if ( sess_name_el ) {
+        g_current_session_name = 'none'
+        sess_name_el.innerHTML = '<span style="color:orange">select or create a session</span>'
+
+        g_recordButton.setAttribute('disabled', true);
+        g_stopButton.setAttribute('disabled', true);
+        g_playButton.setAttribute('disabled', true);
+        g_saveButton.setAttribute('disabled', true);
+        g_deleteButton.setAttribute('disabled', true);
+        clear_play_list()
+        let sess_op_el = null
+        sess_op_el = document.getElementById('send-session')
+        if ( sess_op_el ) {
+          sess_op_el.style.visibility = "hidden"
+        }
+        sess_op_el = document.getElementById('delete-session')
+        if ( sess_op_el ) {
+          sess_op_el.style.visibility = "hidden"
+        }
+      }
+    } else {
+      let sess_name_el = document.getElementById('show-session-name')
+      if ( sess_name_el ) {
+        g_current_session_name = name
+        sess_name_el.innerHTML = name
+        g_recordButton.removeAttribute('disabled');
+        g_stopButton.setAttribute('disabled', true);
+        g_playButton.setAttribute('disabled', true);
+        g_saveButton.setAttribute('disabled', true);
+        g_deleteButton.setAttribute('disabled', true);
+        //
+        clear_play_list()
+        let sess_op_el = null
+        sess_op_el = document.getElementById('send-session')
+        if ( sess_op_el ) {
+          sess_op_el.style.visibility = "visible"
+        }
+        sess_op_el = document.getElementById('delete-session')
+        if ( sess_op_el ) {
+          sess_op_el.style.visibility = "visible"
+        }
+        populate_play_list(g_current_session_name)
+      }
+    }
+  }
+
+  function edit_user_session(event) {
+    let sessNameSel = document.getElementById('sess-names')
+    choose_edit_user_session(sessNameSel.value)
+  }
+
+
+  function delete_session() {
+    if ( g_current_session_name !== 'none ') {
+      let sess_name = g_current_session_name
+      if ( g_audio_db === null ) {
+        console.log("db not initialized :: add_audio_data")
+        return;
+      }
+      //
+      let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
+      let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
+
+      let delete_from_list_callback = (value,dbIndex) => {
+        let sessionObj = value
+        let keyRangeValue = IDBKeyRange.only(value.name);
+        dbIndex.openCursor(keyRangeValue).onsuccess = (event) => {
+          var cursor = event.target.result;
+          if ( cursor ) {
+            var request = cursor.delete();
+            request.onsuccess = function() {
+              g_current_session_name = 'none'
+              load_name_list()
+            };
+          }
+        }
+      }
+
+      let not_found_callback = () => {
+        warn(`The session ${sess_name} is not in the database`)
+      }
+
+      apply_find_audio_session(sess_name, audioStore, delete_from_list_callback, not_found_callback)    
+    }
+  }
+  function store_to_servers() {
+    if ( g_current_session_name !== 'none ') {
+      
+    }
+  }
+
+  
+  // RECORDER
+  async function init_recorder() {
+    const stream = await navigator.mediaDevices.getUserMedia({ 'audio': true });
+    app_recoder = new AppAudioRecorder(stream)
+  }
+
+  //
+  const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+
+  function initialize_global_buttons() {
+    //
+    g_recordButton.setAttribute('disabled', true);
+    g_stopButton.setAttribute('disabled', true);
+    g_playButton.setAttribute('disabled', true);
+    g_saveButton.setAttribute('disabled', true);
+    g_deleteButton.setAttribute('disabled', true);
+    let sess_op_el = null
+    sess_op_el = document.getElementById('send-session')
+    if ( sess_op_el ) {
+      sess_op_el.style.visibility = "hidden"
+    }
+    sess_op_el = document.getElementById('delete-session')
+    if ( sess_op_el ) {
+      sess_op_el.style.visibility = "hidden"
+    }
+
+    // RECORD
+    g_recordButton.addEventListener('click', async () => {
+      g_recordButton.setAttribute('disabled', true);
+      g_stopButton.removeAttribute('disabled');
+      g_playButton.setAttribute('disabled', true);
+      g_saveButton.setAttribute('disabled', true);
+      g_deleteButton.setAttribute('disabled', true);
+      app_recoder.start();
+    });
+
+    // STOP RECORD
+    g_stopButton.addEventListener('click', async () => {
+      g_recordButton.removeAttribute('disabled');
+      g_stopButton.setAttribute('disabled', true);
+      g_playButton.removeAttribute('disabled');
+      g_saveButton.removeAttribute('disabled');
+      g_deleteButton.removeAttribute('disabled');
+      app_recoder.stop();
+    });
+
+    // PLAY
+    g_playButton.addEventListener('click', () => {
+      app_recoder.play();
+    });
+
+    // DELETE
+    g_deleteButton.addEventListener('click', async () => {
+      g_saveButton.setAttribute('disabled', true);
+      g_playButton.setAttribute('disabled', true);
+      g_deleteButton.setAttribute('disabled', true);
+      app_recoder.delete_last_recorderd_audio()
+    })
+
+    // SAVE
+    g_saveButton.addEventListener('click', () => {
+      if ( app_recoder.audioBlob ) {
+        add_audio_data(app_recoder.audioBlob)
+      }
+    });
+
+  }
+
+
+  function add_audio_element(audio_el_url,index) {
+    if ( index === undefined ) index = uuidv4()
+    let audioElement = document.createElement('audio');
+    audioElement.src = audio_el_url;
+    audioElement.setAttribute('data-audio-filename', audio_el_url);
+    audioElement.setAttribute('controls', true);
+    audioElement.className = "audio-playback"
+    // add a playback track
+    let divEl = document.createElement('div')
+    divEl.id = `audio-div-${index}`
+    divEl.className = "playback-div"
+    let checkEl = document.createElement('input')
+    checkEl.type = "checkbox";
+    checkEl.name = `audioSections`;
+    checkEl.className = "checkEl"
+    checkEl.value = "";
+    checkEl.id = `audio-cbox-${index}`;
+    divEl.appendChild(checkEl)
+    divEl.appendChild(audioElement)
+    // add the element
+    savedAudioMessagesContainer.appendChild(divEl);
+  }
+
+
+  function clear_play_list() {
+    if ( savedAudioMessagesContainer ) {
+      savedAudioMessagesContainer.innerHTML = ""
+    }
+  }
+
+
+  function populate_play_list(sess_name) {
+    //
+    if ( g_audio_db === null ) {
+      console.log("db not initialized :: add_audio_data")
+      return;
+    }
+    //
+    let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readonly");
+    let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
+
+    let update_list_callback = (value) => {
+      let sessionObj = value
+      let blob_map = sessionObj.data
+      for ( let blob_id in blob_map ) {
+        let audioBlob = blob_map[blob_id]
+        let blob_url = URL.createObjectURL(audioBlob)
+        add_audio_element(blob_url,blob_id)
+      }
+    }
+
+    let not_found_callback = () => {
+      warn(`The session ${sess_name} is not in the database`)
+    }
+
+    apply_find_audio_session(sess_name, audioStore, update_list_callback, not_found_callback)
+
+  };
+
+  function edit_checked() {
+    var checkedBoxes = document.querySelectorAll('input[name=audioSections]:checked');
+    checkedBoxes.forEach(cbox => {
+      console.log(cbox.id)
+    })
+  }
+
+  function delete_checked() {
+    var checkedBoxes = document.querySelectorAll('input[name=audioSections]:checked');
+    checkedBoxes.forEach(cbox => {
+      let cbox_id = cbox.id
+      let container_id = cbox_id.replace('cbox','div')
+      let container = document.getElementById(container_id)
+      if ( container ) {
+        let parent = savedAudioMessagesContainer //container.parentNode()
+        parent.removeChild(container)
+        remove_audio_data(cbox_id.replace('audio-cbox-',''))
+      }
+    })
+  }
+
+  // ---- ---- ---- ---- ---- ----
+  // ---- ---- ---- ---- ---- ----
+  if ( g_window_can_process ) {
+    init_database(gc_song_db_name)
+    initialize_global_buttons()
+    init_recorder()
+  }
+
+</script>
