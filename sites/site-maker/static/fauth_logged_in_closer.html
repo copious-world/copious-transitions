@@ -1,0 +1,30 @@
+<div>
+    Acccording to our records, you are already logged in to this web page application.
+    <br>
+    Thanks for coming back to our site. 
+    <br>
+    This page will close shortly and the programs here will attempt to redirect you to your going session.
+    <br>
+    You may click anywhere on this page to speed the process along.
+</div>
+<script lang="javascript">
+    var to = setTimeout(() => {
+        RefreshParent()
+        window.close()
+    },10000)
+
+    document.addEventListener('click',(ev) => {
+        if ( to ) clearTimeout(to)
+        RefreshParent()
+        window.close()
+
+    })
+
+    function RefreshParent() {
+        if (window.opener != null && !window.opener.closed) {
+            //window.opener.location.reload();
+            window.opener.focus()
+        }
+    }
+    window.onbeforeunload = RefreshParent;
+</script>

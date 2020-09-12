@@ -24,7 +24,7 @@
       }
       #saved-audio-messages {
         max-height: 256px;
-        overflow: auto;
+        overflow-y: scroll;
       }
       .component-container {
         border: rgb(126, 79, 9) solid 2px;
@@ -50,6 +50,46 @@
       .pop-name-list-popped {
         visibility: visible;
         display: block;
+      }
+
+      .wave-graph-container {
+        left: 10px;
+        top: 10px;
+        width: 80%;
+        height: 40%;
+        position:absolute;
+        display: none;
+        visibility: none;
+        z-index: 100;
+        border: 2px orangered solid;
+        background-color: ivory;
+      }
+      .drag-bar-control {
+        margin:0px;
+        width: 100%;
+        height: 20px;
+        background-color: slateblue;
+        color:goldenrod;
+        cursor:move;
+        text-align: right;
+      }
+      .wave-graph-canvas {
+        width: 100%;
+        height: 100%;
+      }
+      .wv-editor-close {
+        font-size: 120%;
+        height:10px;
+        width:10px;
+        text-align: center;
+        vertical-align: middle;
+        cursor: pointer;
+      }
+      .wave_edit_controls_container {
+        display:inline-block;
+        width: calc(100% - 20px);
+        text-align: center;
+        height: 100%;
       }
     </style>
 </head>
@@ -86,11 +126,37 @@
 
     <span style="font-weight: bolder;">Session Components</span>
     <div style="display: inline;padding:2px;background-color: oldlace">
-      <button onclick="edit_checked()" >edit checked</button>
-      <button onclick="delete_checked()" >delete checked</button>
+      <button onclick="wv_edit_checked()" >edit checked</button>
+      <button onclick="wv_delete_checked()" >delete checked</button>
     </div>
     <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 2px;;margin-top: 2px;">&nbsp;</div>
     <div id="saved-audio-messages">
+    </div>
+  </div>
+  <div id="wave-graph-tmplt" class='wave-graph-container'>
+    <div class="drag-bar-control"
+          onmousedown="wv_capture_cursor(event)"
+          onmouseup="wv_release_captured_cursor(event,false)"
+          onmouseout="wv_release_captured_cursor(event,true)"
+          onmousemove="wv_track_cursor(event)"
+        >
+          <div class="wave_edit_controls_container"
+            onmousedown="wv_capture_cursor(event,1)"
+            onmouseup="wv_release_captured_cursor(event,false,1)"
+            onmouseout="wv_release_captured_cursor(event,true,1)"
+            onmousemove="wv_track_cursor(event,1)"
+          >
+            <button onclick="wv_zoom_in(event)">&downarrow;</button>
+            <button onclick="wv_zoom_out(event)">&uparrow;</button>
+            <button onclick="wv_scroll_left(event)">&leftarrow;</button>
+            <button onclick="wv_scroll_right(event)">&rightarrow;</button>
+            &nbsp;
+            <button onclick="wv_cut_selection(event)">cut</button>
+            <button onclick="wv_restore_selection(event)">undo</button>
+          </div>
+          <span class="wv-editor-close" onclick="wv_closer_editor(event)">x</span></div>
+    <div style="width: 100%;height:calc(100% - 20px);">
+      <canvas class="wave-graph-canvas"></canvas>
     </div>
   </div>
 </body>
@@ -98,12 +164,19 @@
 
 <script>
   const AUDIO_SESSION_STORE = 'audio_sessions'
+  const WV_CONST_MOUSE_DRAG_DIST_TOLERANCE = 82
+  const WAVE_DISPLAY_MAX = 100
+  const ZERO_AXIS_OFFSET = 10
 
   let recorder = false
   let audio = false
   let app_recoder = false
   let g_current_session_name = 'none'
   let g_session_name_list = []
+  //
+
+  let g_wave_open_editors = {}
+  
   //
   const g_recordButton = document.getElementById('record');
   const g_stopButton = document.getElementById('stop');
@@ -122,6 +195,11 @@
   window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction || {READ_WRITE: "readwrite"}; // This line should only be needed if it is needed to support the object's constants for older browsers
   window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
   // (Mozilla has never prefixed these objects, so we don't need window.mozIDB*)
+
+  window.AudioContext = window.AudioContext || window.webkitAudioContext;
+  //
+
+  const g_audioContext = new AudioContext();
 
   if (!window.indexedDB) {
     g_window_can_process = false
@@ -254,7 +332,176 @@
     //
   }
 
+    ////////////////
+
+  class WaveBlob {
+    constructor() {
+      this.recLength = 0
+      this.recBuffer = []
+      this.recordSampleRate = g_audioContext.sampleRate
+    }
+
+    clear() {
+      this.recLength = 0;
+      this.recBuffer = [];
+    }
+
+    record(inputBuffer) {
+      this.recBuffer.push(inputBuffer);
+      this.recLength += inputBuffer.length;
+    }
+
+    toBlob() {
+      var mergedBuffers = this.interleaveLeftAndRight(this.recBuffer);
+      var encodedWav = this.encodeWAV(mergedBuffers);
+      var audioBlob = new Blob([encodedWav], {type: 'audio/wave'});
+      return(audioBlob);
+    }
+
+    mergeBuffers(array_of_buffers, recLength) {
+      let result = new Float32Array(recLength);
+      let offset = 0;
+      let n = array_of_buffers.length
+      for ( let i = 0; i < n; i++ ) {
+        result.set(array_of_buffers[i], offset);
+        offset += array_of_buffers[i].length;
+      }
+      return result;
+    }
+
+    interleaveLeftAndRight(bufferList) {
+      let left = bufferList[0]
+      let right = bufferList[1]
+      let totalLength = left.length + right.length;
+      let data = new Float32Array(totalLength);
+      let n = left.length
+      for ( let i = 0; i < n; i++ ) {
+        let k = i * 2;
+        data[k] = left[i];
+        data[k + 1] = right[i];
+      }
+      return(data)
+    }
+
+
+    // mutate output Int16
+    floatTo16BitPCM(output, offset, input) {
+      let n =  input.length
+      for ( let i = 0; i < n; (i++, offset += 2) ) {
+        let s = Math.max(-1, Math.min(1, input[i]));
+        output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      }
+    }
+
+    writeString(view, offset, string) {
+      for (var i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+
+    encodeWAV(samples) {
+      const WAV_HEAD_SIZE = 44
+      let channels = 2
+      let dat_len = samples.length * 2
+      let buffer = new ArrayBuffer((dat_len * 2) + WAV_HEAD_SIZE)
+
+      let view = new DataView(buffer);
+
+      let recordSampleRate = this.recordSampleRate
+      // RIFF chunk descriptor/identifier
+      this.writeString(view, 0, 'RIFF')
+      // RIFF chunk length
+      view.setUint32(4, WAV_HEAD_SIZE + (dat_len * 2), true)  // 32
+      // RIFF type
+      this.writeString(view, 8, 'WAVE');
+      // format chunk identifier
+      // FMT sub-chunk
+      this.writeString(view, 12, 'fmt ');
+      // format chunk length
+      view.setUint32(16, 16, true);
+      // sample format (raw)
+      view.setUint16(20, 1, true);
+       // stereo (2 channels)
+      view.setUint16(22, channels, true);
+      // sample rate
+      view.setUint32(24, recordSampleRate, true);
+      // byte rate (sample rate * block align)
+      view.setUint32(28, recordSampleRate * 2, true);
+      // block align (channel count * bytes per sample)
+      view.setUint16(32, (channels * 2), true);
+      // bits per sample
+      view.setUint16(34, 16, true);
+      // data sub-chunk
+      // data chunk identifier
+      this.writeString(view, 36, 'data');
+      // data chunk length
+      view.setUint32(40, samples.length * 2, true);
+      this.floatTo16BitPCM(view, 44, samples);
+
+
+      return view;
+    }
+
+  }
+
+
+
+
+  function make_audio_blob(channel_data_list) {
+    let d1 = channel_data_list[0]
+    let d2 = channel_data_list[1]
+    let wb = new WaveBlob()
+    wb.record(d1)
+    wb.record(d2)
+    //
+    let blob = wb.toBlob()
+    //
+    return(blob)
+  }
+
+
+
+  function update_audio_data(map_id,data_list) {
+    //
+    if ( g_audio_db === null ) {
+      console.log("db not initialized :: add_audio_data")
+      return;
+    }
+    //
+    let audioBlob = make_audio_blob(data_list)
+    //
+    let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
+    let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
+
+    let update_list_elem_callback = (value,dbIndex) => {
+      let keyRangeValue = IDBKeyRange.only(value.name);
+      dbIndex.openCursor(keyRangeValue).onsuccess = (event) => {
+        var cursor = event.target.result;
+        if ( cursor ) {
+          let sessionObj = cursor.value
+          if ( sessionObj.data[map_id] != null ) {
+            let blob_url = URL.createObjectURL(audioBlob);
+            sessionObj.data[map_id] = audioBlob
+            //
+            const request = cursor.update(sessionObj);
+            request.onsuccess = () => {
+              update_audio_element(blob_url,map_id,audioBlob)  // visual rep
+            };
+          }
+          //
+        }
+      }
+    }
+
+    let not_found_callback = () => {
+      warn(`The session ${sess_name} is not in the database`)
+    }
+
+    apply_find_audio_session(g_current_session_name, audioStore, update_list_elem_callback, not_found_callback)
+  }
+
   function add_audio_data(audioBlob) {
+
     //
     if ( g_audio_db === null ) {
       console.log("db not initialized :: add_audio_data")
@@ -276,7 +523,7 @@
           //
           const request = cursor.update(sessionObj);
           request.onsuccess = () => {
-            add_audio_element(blob_url,map_id)  // visual rep
+            add_audio_element(blob_url,map_id,audioBlob)  // visual rep
           };
           //
         }
@@ -296,7 +543,7 @@
       //
       let request = audioStore.add(sessionObj);
       request.onsuccess = function(event) {
-        add_audio_element(blob_url,map_id)  // visual rep
+        add_audio_element(blob_url,map_id,audioBlob)  // visual rep
       };
     }
 
@@ -573,16 +820,37 @@
   }
 
 
-  function add_audio_element(audio_el_url,index) {
+  function update_audio_element(audio_el_url,index,audioBlob) {
+    if ( index === undefined ) return
+    else {
+      let audioElement = document.getElementById(`audio-player-${index}`)
+      if ( audioElement ) {
+        audioElement.src = audio_el_url;
+        audioElement.setAttribute('data-audio-filename', audio_el_url);
+        audioElement.pause()
+        audioElement.load()
+        let divEl = document.getElementById(`audio-div-${index}`)
+        if ( divEl ) {
+          divEl._ref_audio_data = audioBlob
+        }
+      }
+    }
+  }
+
+
+  function add_audio_element(audio_el_url,index,audioBlob) {
     if ( index === undefined ) index = uuidv4()
     let audioElement = document.createElement('audio');
     audioElement.src = audio_el_url;
     audioElement.setAttribute('data-audio-filename', audio_el_url);
     audioElement.setAttribute('controls', true);
     audioElement.className = "audio-playback"
+    audioElement.id = `audio-player-${index}`
+    // ontimeupdate
     // add a playback track
     let divEl = document.createElement('div')
     divEl.id = `audio-div-${index}`
+    divEl._ref_audio_data = audioBlob
     divEl.className = "playback-div"
     let checkEl = document.createElement('input')
     checkEl.type = "checkbox";
@@ -599,6 +867,8 @@
 
   function clear_play_list() {
     if ( savedAudioMessagesContainer ) {
+      let wave_keys = Object.keys(g_wave_open_editors)
+      wave_keys.forEach( wave_name => { remove_wave_editor(wave_name) } )
       savedAudioMessagesContainer.innerHTML = ""
     }
   }
@@ -620,7 +890,7 @@
       for ( let blob_id in blob_map ) {
         let audioBlob = blob_map[blob_id]
         let blob_url = URL.createObjectURL(audioBlob)
-        add_audio_element(blob_url,blob_id)
+        add_audio_element(blob_url,blob_id,audioBlob)
       }
     }
 
@@ -632,14 +902,498 @@
 
   };
 
-  function edit_checked() {
-    var checkedBoxes = document.querySelectorAll('input[name=audioSections]:checked');
-    checkedBoxes.forEach(cbox => {
-      console.log(cbox.id)
-    })
+  // WAVE EDITOR FUNCIONALITY
+
+
+  function draw_h_line(ctx, x, y, width, thick, color) {
+    ctx.lineWidth = thick; // how thick the line is
+    ctx.strokeStyle = color; // what color our line is
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo((x + width), y);
+    ctx.stroke();
   }
 
-  function delete_checked() {
+  function draw_v_line(ctx, x, y, height, thick, color) {
+    ctx.lineWidth = thick; // how thick the line is
+    ctx.strokeStyle = color; // what color our line is
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, (y + height));
+    ctx.stroke();
+  }
+
+
+  function draw_short_line(ctx, x0, y0, x1, y1, thick, color) {
+    ctx.lineWidth = thick; // how thick the line is
+    ctx.strokeStyle = color; // what color our line is
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x1, y1);
+    ctx.stroke();
+  }
+
+  function draw_line_chart(ctx,x0,y0,data,offset,n,thick, color) {
+    ctx.lineWidth = thick; // how thick the line is
+    ctx.strokeStyle = color; // what color our line is
+    ctx.beginPath();
+    ctx.closePath();
+    //
+    let x = x0
+    ctx.moveTo(x,y0);
+    for ( let i = 0; i < n; (i++,x++) ) {
+      ctx.lineTo(x, -data[i+offset]);    // canvas is upside down
+    }
+    ctx.stroke();
+  }
+
+
+  function wv_clear_selection(player_info) {
+    if ( player_info.save_selection.startX !== undefined ) {
+      let ctx = player_info.graph
+      let saved_comp = ctx.globalCompositeOperation 
+      let rect = player_info.save_selection
+      ctx.globalCompositeOperation = 'xor'
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(rect.startX, rect.startY, rect.w, rect.h);
+      ctx.globalCompositeOperation = saved_comp
+      player_info.save_selection = {}
+    }
+  }
+
+  const randomArray = (length, max) => [...new Array(length)]
+      .map(() => Math.round(Math.random() * max  - max/2));
+
+  async function get_wave_data(wave_name,channels) {  // sample_ratio up or down sample
+    let player_div = document.getElementById(`audio-div-${wave_name}`)
+    let audio_blob = player_div._ref_audio_data
+    const audioContext = new AudioContext();
+    // audio blob contains blob data
+    let arrayBuffer = await audio_blob.arrayBuffer();
+    let audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+    if ( (channels === undefined) || (channels === 1) ) {
+      let rawData = audioBuffer.getChannelData(0);
+      return rawData      
+    } else {
+      let rawData = []
+      let nchan = Math.min(audioBuffer.numberOfChannels,channels)
+      for ( let i = 0; i < nchan; i++ ) {
+        rawData.push(audioBuffer.getChannelData(i))
+      }
+      return(rawData)
+    }
+  }
+
+  //
+  // spp -- samples per pixel
+  function reduceAudioPeak(data, spp, scroll, width) {
+    if ( spp <= 1 ) return(data)
+    //
+    let drawData = new Array(width);
+    let startSample = scroll * spp; 
+    // For each pixel in draw area
+    for ( let i = 0; i < width; i++ ) {
+        let min = 0; // minimum value in sample range
+        let max = 0; // maximum value in sample range
+        let k = startSample + (i * spp);
+
+        // Iterate over the sample range for this pixel (spp) 
+        // and find the min and max values. 
+        let avg = 0.0
+        for ( let j = 0; j < spp; (j++,k++) ) {
+           if ( k < data.length ) {
+               let val = data[k];
+               avg += val
+           }
+        }
+        avg = avg/spp
+
+        drawData[i] = avg;
+    }
+    return drawData;
+}
+
+
+
+
+function draw_wave(data,ctx,W,h) {
+    // Set up the canvas
+    ctx.clearRect(0,-h,W,(2*h))
+    draw_h_line(ctx, 0, 0, W, 2, '#009')
+    let offset = ZERO_AXIS_OFFSET
+    draw_v_line(ctx, offset, -h, (2*h), 2, '#9999A9')
+    //
+    // size data to visible
+    let n_pixels = (W - offset)
+    let samples_per_pixel = Math.ceil(data.length/n_pixels)
+    let dmax = Math.max(...data)
+    let section_start = 0 //data.indexOf(dmax) - 200
+    let dmin = Math.abs(Math.min(...data))
+    dmax = Math.max(dmin,dmax)
+    let factor = WAVE_DISPLAY_MAX/dmin
+    data = data.map(datum => datum*factor)
+    let draw_data = reduceAudioPeak(data, samples_per_pixel, 0, n_pixels)
+    //
+    draw_line_chart(ctx, 10, 0, draw_data, section_start, n_pixels, 1, '#000')
+  }
+
+  function update_play_marker(ctx,play_info,percent) {
+    let last_tick = play_info.where_ticker
+    let offset = ZERO_AXIS_OFFSET
+    let width = play_info.width - offset
+    let where_now = Math.round(width*percent) + offset
+    play_info.where_ticker = where_now
+    //
+    let saved_comp = ctx.globalCompositeOperation
+    ctx.globalCompositeOperation = 'xor'
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(last_tick,-play_info.height,2,(2*play_info.height));
+    ctx.fillRect(where_now,-play_info.height,2,(2*play_info.height));
+    ctx.globalCompositeOperation = saved_comp
+  }
+
+
+  async function open_wave_editor(wave_name) {
+    let div = document.getElementById('wave-graph-tmplt')
+    let clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
+    clone.id = wave_name;
+    document.body.appendChild(clone);
+    clone.style.display = 'block'
+    clone.style.display = 'visible'
+    clone._app_dragging = false
+    //
+    let canvas = clone.getElementsByTagName('canvas')[0];
+    //
+    const dpr = window.devicePixelRatio || 1;
+    const padding = 20;
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = (canvas.offsetHeight + padding * 2) * dpr;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+    ctx.translate(0, canvas.offsetHeight / 2 + padding); // Set Y = 0 to be in the middle of the canvas
+    //
+    let audio_el = document.getElementById(`audio-player-${wave_name}`)
+    if ( audio_el ) {
+      audio_el.ontimeupdate = (event) => {
+        let aud_el = event.target
+        if ( aud_el ) {
+          let play_time = aud_el.currentTime
+          let duration = aud_el.duration
+          let percent = play_time/duration
+          let play_info = g_wave_open_editors[wave_name]
+          let ctx = play_info.graph
+          let prev_offset = play_info.where_ticker
+          update_play_marker(ctx,play_info,percent)
+        }
+      }
+    }
+    //
+    g_wave_open_editors[wave_name] = { 
+      'display' : clone, 
+      'canvas' : canvas, 
+      'graph' : ctx, 
+      'player' : audio_el, 
+      'where_ticker' : 0, 
+      'width' : canvas.offsetWidth,
+      'height' : canvas.height,
+      'selection_rect' : {},
+      'save_selection' : {},
+      'ops_undo_stack' : [],
+      'dragging' : false
+    }
+    //
+    let data = await get_wave_data(wave_name)
+    let W = canvas.offsetWidth
+    let h = canvas.height
+    //
+    draw_wave(data,ctx,W,h) 
+    //
+    // Editor Drawing Events
+    let player_info = g_wave_open_editors[wave_name]
+    let wv_edit_mouseDown = (e) => {
+      //
+      wv_clear_selection(player_info)
+      //
+      player_info.selection_rect = {}
+      let container = player_info.display
+      player_info.selection_rect.startX = e.pageX - container.offsetLeft;
+      player_info.selection_rect.startY = -player_info.height //e.pageY - canvas.offsetTop;
+      player_info.selection_rect.h = (2*player_info.height)
+      player_info.selection_rect.w = 0
+      player_info.dragging = true;
+    }
+    let wv_edit_mouseUp = (e) => { player_info.dragging = false }
+    let wv_edit_mouseMove = (e) => {
+      if ( player_info.dragging ) {
+        let canvas = player_info.canvas
+        let saved_comp = ctx.globalCompositeOperation
+        let rect = player_info.selection_rect
+        ctx.globalCompositeOperation = 'xor'
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(rect.startX, rect.startY, rect.w, rect.h);
+        let container = player_info.display
+        rect.w = (e.pageX - container.offsetLeft) - rect.startX;
+        ctx.fillRect(rect.startX, rect.startY, rect.w, rect.h);
+        ctx.globalCompositeOperation = saved_comp
+        player_info.save_selection.startX = rect.startX
+        player_info.save_selection.startY = rect.startY
+        player_info.save_selection.w = rect.w
+        player_info.save_selection.h = rect.h
+      }
+    }
+    canvas.addEventListener('mousedown', wv_edit_mouseDown, false);
+    canvas.addEventListener('mouseup', wv_edit_mouseUp, false);
+    canvas.addEventListener('mousemove', wv_edit_mouseMove, false);
+  }
+
+    //g_wave_open_editors[wave_name] = { 'display' : clone, 'graph' : ctx }
+  //
+  var g_wave_current_container = null
+  //
+  function remove_wave_editor(wave_name) {
+    let editor_data = g_wave_open_editors[wave_name]
+    if ( editor_data ) {
+      let container = editor_data.display
+      if ( container ) container.remove()
+      delete  g_wave_open_editors[wave_name]
+    }
+  }
+  //
+  function wv_closer_editor(e) {
+    e = e || window.event;
+    e.preventDefault();
+
+    let t = e.target
+    if ( t ) {
+      try {
+        g_wave_current_container = null
+        let container = t.parentNode.parentNode
+        let wave_name = container.id
+        remove_wave_editor(wave_name)
+      } catch(e) {
+      }
+    }
+  }
+
+  // //
+  // //
+  function wv_zoom_in(ev) {
+    ev = ev || window.event;
+    ev.preventDefault();
+    let the_button = ev.target
+    let container = the_button.parentNode.parentNode
+    if ( container ) {
+
+    }
+  }
+  
+  function wv_zoom_in(ev) {
+    ev = ev || window.event;
+    ev.preventDefault();
+    let the_button = ev.target
+    let container = the_button.parentNode.parentNode
+    if ( container ) {
+
+    }
+  }
+
+  function wv_scroll_left(ev) {
+    ev = ev || window.event;
+    ev.preventDefault();
+    let the_button = ev.target
+    let container = the_button.parentNode.parentNode
+    if ( container ) {
+
+    }
+  }
+
+  function wv_scroll_right(ev) {
+    ev = ev || window.event;
+    ev.preventDefault();
+    let the_button = ev.target
+    let container = the_button.parentNode.parentNode
+    if ( container ) {
+      
+    }
+  }
+
+//update_audio_data(map_id,audioBlob)
+  function wv_cut_data(data,selection_rect,samples_per_pixel) {
+    let start = (selection_rect.startX)*samples_per_pixel
+    let end = (selection_rect.w)*samples_per_pixel + start
+    let tail_data = data.subarray(end)
+    data.set(tail_data,start)
+    let display_data = data.slice(0,(start + tail_data.length))
+    return(display_data)
+  }
+
+  async function wv_cut_selection(ev) {
+    ev = ev || window.event;
+    ev.preventDefault();
+    let the_button = ev.target
+    let container = the_button.parentNode.parentNode.parentNode
+    if ( container ) {
+      let wave_name = container.id
+      let player_info = g_wave_open_editors[wave_name]
+      //
+      let canvas = player_info.canvas
+      if ( canvas && (player_info.save_selection.startX !== undefined) ) {
+        if ( player_info.save_selection.w <= 0 ) {
+          if ( player_info.save_selection.w === 0 ) return
+          else {
+            let w = player_info.save_selection.w
+            let sx = player_info.save_selection.startX + w
+            player_info.save_selection.w = -w
+            player_info.save_selection.startX = sx
+          }
+        }
+        //
+        let data_list = await get_wave_data(wave_name,2)
+        player_info.ops_undo_stack.push({ 'op' : 'cut',
+                                                'data' : new Float32Array(data_list[0]), 
+                                                'data2' : new Float32Array(data_list[1]) })
+        let W = canvas.offsetWidth
+        let h = canvas.height
+        let n_pixels = (W - ZERO_AXIS_OFFSET)
+        let samples_per_pixel = Math.ceil(data_list[0].length/n_pixels)
+        let display_data = wv_cut_data(data_list[0],player_info.save_selection,samples_per_pixel)
+        let c2_data = null
+        if ( data_list.length > 1 ) {
+          c2_data = wv_cut_data(data_list[1],player_info.save_selection,samples_per_pixel)
+        } else {
+          c2_data = new Float32Array(display_data)
+        }
+        
+        //
+        wv_clear_selection(player_info)
+        let ctx = player_info.graph
+        draw_wave(display_data,ctx,W,h)
+        //
+        data_list = [display_data,c2_data]
+        update_audio_data(wave_name,data_list)
+      }
+    }
+  }
+/*
+  function wv_save_current_buffer(ev) {
+    ev = ev || window.event;
+    ev.preventDefault();
+    let the_button = ev.target
+    let container = the_button.parentNode.parentNode
+    if ( container ) {
+      
+    }
+  }
+*/
+  function wv_restore_selection(ev) {
+    ev = ev || window.event;
+    ev.preventDefault();
+    let the_button = ev.target
+    let container = the_button.parentNode.parentNode.parentNode
+    if ( container ) {
+      let wave_name = container.id
+      let player_info = g_wave_open_editors[wave_name]
+      //
+      if (  player_info.ops_undo_stack.length ) {
+        let undo_op = player_info.ops_undo_stack.pop()
+        let data = null
+        if ( undo_op.op === 'cut' ) {
+          let canvas = player_info.canvas
+          if ( canvas ) {
+            data = undo_op.data
+            //
+            let W = canvas.offsetWidth
+            let h = canvas.height
+            let ctx = player_info.graph
+            draw_wave(data,ctx,W,h)
+            //
+            let data2 = undo_op.data2
+            let data_list = [data,data2]
+            update_audio_data(wave_name,data_list)
+          }
+        }
+      }
+    }
+  }
+  // // //
+
+  //
+  function wv_capture_cursor(ev,el_depth)  {
+    ev = ev || window.event;
+    ev.preventDefault();
+
+    let controlBar = ev.target
+    if ( controlBar ) {
+      let container = controlBar.parentNode
+      if ( el_depth ) container = container.parentNode
+      if ( container ) {
+        let x = ev.clientX;
+        let y = ev.clientY; 
+        container._app_mouse_x = x
+        container._app_mouse_y = y
+        container._app_dragging = true
+        g_wave_current_container = container
+        document.addEventListener('mouseup',(ev) => {
+          if ( g_wave_current_container != null ) {
+            g_wave_current_container._app_dragging = false
+          }
+        })
+      }
+    }
+  }
+  //
+  function wv_release_captured_cursor(ev,check_limits,el_depth) {
+    ev = ev || window.event;
+    if ( !check_limits ) ev.preventDefault();
+    //
+    let controlBar = ev.target
+    if ( controlBar ) {
+      let container = controlBar.parentNode
+      if ( el_depth ) container = container.parentNode
+      if ( container ) {
+        if ( check_limits ) {
+          let check_y = Math.abs(container.offsetTop - ev.clientY)
+          let check_x = Math.abs(container._app_mouse_x - ev.clientX)
+          let dist = Math.sqrt((0.25)*check_y*check_y + check_x*check_x)
+          if ( dist < WV_CONST_MOUSE_DRAG_DIST_TOLERANCE ) return
+        }
+        container._app_dragging = false
+      }
+    }
+  }
+  //
+  function wv_track_cursor(ev,el_depth) {
+    ev = ev || window.event;
+    ev.preventDefault();
+    //
+    let controlBar = ev.target
+    if ( controlBar ) {
+      let container = controlBar.parentNode
+      if ( el_depth ) container = container.parentNode
+      if ( container && container._app_dragging ) {
+        // calculate the new cursor position:
+        let prev_x = container._app_mouse_x - ev.clientX;
+        let prev_y = container._app_mouse_y - ev.clientY;
+        container._app_mouse_x = ev.clientX;
+        container._app_mouse_y = ev.clientY;
+        // set the element's new position:
+        let new_y = (container.offsetTop - prev_y)
+        let new_x = (container.offsetLeft - prev_x)
+        if ( new_y > 8 ) container.style.top = new_y + "px";
+        if ( new_x > 8 ) container.style.left = new_x + "px";
+      }
+    }
+  }
+  //
+  function wv_edit_checked() {
+    var checkedBoxes = document.querySelectorAll('input[name=audioSections]:checked');
+    checkedBoxes.forEach(cbox => {
+      let wave_name = cbox.id.replace('audio-cbox-','')
+      open_wave_editor(wave_name)
+    })
+  }
+  // 
+  function wv_delete_checked() {
     var checkedBoxes = document.querySelectorAll('input[name=audioSections]:checked');
     checkedBoxes.forEach(cbox => {
       let cbox_id = cbox.id
