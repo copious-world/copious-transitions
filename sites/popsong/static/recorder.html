@@ -91,11 +91,40 @@
         text-align: center;
         height: 100%;
       }
+
+      dialog {
+        padding: 0;
+        border: 0;
+        border-radius: 0.4rem;
+        padding: 6px;
+        box-shadow: 0 0 1em black;
+        background-color: rgb(221, 214, 221);
+      }
+
+      dialog::backdrop {
+        background: rgba(200, 200, 160, 0.25);
+      }
+
+      .wv-bq-dialog {
+        max-width: 600px;
+        border:rgb(250, 244, 218) solid 1px;
+        background-color: rgba(255, 245, 238, 0.603);
+        color:rgb(24, 57, 83);
+        font-weight:400;
+      }
+
     </style>
 </head>
 <body>
   <div class="component-container">
     <span style="font-weight: bolder;">Manage Recording Sessions</span>
+    <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 2px;">&nbsp;</div>
+    <div class="like-button" style="display: inline;" >
+      <label  for="wv-geo-location">Session Geolocation:</label>
+      <span id="wv-geo-location">NaN,NaN</span>
+    </div>
+    
+    <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 12px;">&nbsp;</div>
     <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 2px;">&nbsp;</div>
     <button onclick="ask_user_session()" >New Recording Session</button>
     <!--   -->
@@ -104,7 +133,7 @@
     <select name="sess-names" id="sess-names" onchange="edit_user_session(event)">
       <option value="none">no selection</option>
     </select>
-  </div>
+    </div>
     <!--   -->
     <button id="send-session" onclick="store_to_servers()" >Send Session to Servers</button>
     <button id="delete-session" onclick="delete_session()" >Delete Session from Device</button>
@@ -159,11 +188,36 @@
       <canvas class="wave-graph-canvas"></canvas>
     </div>
   </div>
+  <!-- wave template-->
+  <dialog id="user-dialog">
+    <h3 class="modal-header">Please enter your information.</h3>
+    <div class="modal-body">
+      <blockquote class="wv-bq-dialog">You are seeing this dialog box because this browser does not know of a user 
+        to associate with new media being created here. This informationis being used to generate a secure key for signing
+        the new media. A private key will be stored within your web browser on your device. A public key will be sent to our storage
+        servers when you being to create media. At a later time you may elect to have your private key stored on our servers in
+        an encrypted format for your later retrieval. <span style="color:slategrey">Providing your information here will not automatically sign you up to our
+        site nor will it make you the target of advertising.
+        </span></blockquote>
+        <blockquote class="wv-bq-dialog">
+          <form method="dialog">
+            <label for="wv-id-email">Your identifying email:</label>
+            <input type="text" id="wv-id-email" name="wv-id-email" />
+          </form>
+        </blockquote>
+    </div>
+    <footer class="modal-footer">
+      <button id="wv-later" type="button">Later</button>
+      <button id="wv-OK" type="button">This is my information</button>
+    </footer>
+  </dialog>
+  <!-- end of dialog-->
 </body>
 </html>
 
 <script>
   const AUDIO_SESSION_STORE = 'audio_sessions'
+  const AUDIO_USERID_STORE = 'audio_users'
   const WV_CONST_MOUSE_DRAG_DIST_TOLERANCE = 82
   const WAVE_DISPLAY_MAX = 100
   const ZERO_AXIS_OFFSET = 10
@@ -176,6 +230,7 @@
   //
 
   let g_wave_open_editors = {}
+  var g_wv_current_locaion = { 'latitude' : NaN,'longitude' : NaN}
   
   //
   const g_recordButton = document.getElementById('record');
@@ -186,6 +241,7 @@
   const g_send_session = document.getElementById('send-session')
   //
   const savedAudioMessagesContainer = document.querySelector('#saved-audio-messages');
+  const g_user_modal = document.getElementById('user-dialog');
 
   var g_window_can_process = true
   // In the following line, you should include the prefixes of implementations you want to test.
@@ -201,6 +257,11 @@
 
   const g_audioContext = new AudioContext();
 
+  var g_crypto = window.crypto ? window.crypto.subtle : null
+  if ( g_crypto === null  ) {
+    alert("No cryptography support in this browser. To claim ownership of assets, please use another browser.")
+  }
+
   if (!window.indexedDB) {
     g_window_can_process = false
     console.log("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.");
@@ -211,6 +272,30 @@
       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
+  }
+
+  let g_ownership_worker = new Worker('./hashers/ownership.js')
+
+
+  g_ownership_worker.onmessage = (msg) => {
+      //
+    if ( msg.data.type === 'status' ) {
+      worker_status_view(msg.data.message)
+    }
+    //
+    if ( msg.data.type === 'op_complete' ) {
+      worker_op_response(msg.data.message);
+    }
+  }
+
+  var g_current_session_signing_key = null
+  var g_current_session_email = ""
+  function set_current_session_signing_key(key) {
+    g_current_session_signing_key = key
+  }
+
+  function set_current_session_email(email) {
+    g_current_session_email = email
   }
 
   //
@@ -234,7 +319,9 @@
     //
     //
     data_handler(data) {
-      this.audioChunks.push(event.data);
+      let chunk = event.data
+      this.audioChunks.push(chunk);
+      this.relayAduioData(chunk)
     }
     //
     start() {
@@ -256,6 +343,7 @@
       let audioUrl = URL.createObjectURL(audioBlob);
       this.audioBlob = audioBlob
       this.audio_instance = new Audio(audioUrl);
+      wv_secure('end-recording',audioBlob)
     }
 
     delete_last_recorderd_audio() {
@@ -269,14 +357,18 @@
       }
     }
 
+    relayAduioData(chunk) {
+      wv_prep_secure_relay(chunk)
+    }
+
   }
 
   // DATABASE
   var g_audio_db = null
   const gc_song_db_name = "SongCatcher"
-  async function init_database(db_name) {
+  async function wv_init_database(db_name) {
     // request an open of DB
-    let request = window.indexedDB.open(db_name, 1);
+    let request = window.indexedDB.open(db_name, 2);
     //
     request.onerror = (event) => {
       alert("This web app will not store recorded audio without the use of computer storage.")
@@ -290,6 +382,7 @@
       //
       g_audio_db = db;
       load_name_list()
+      wv_setup_crypto()
       //
     };
 
@@ -299,6 +392,8 @@
         let sessionObjectStore = db.createObjectStore(AUDIO_SESSION_STORE, { autoIncrement : true });
         sessionObjectStore.createIndex("name", "name", { unique: true });
         sessionObjectStore.createIndex("sess_date_time", "sess_date_time", { unique: true });
+        //
+        db.createObjectStore(AUDIO_USERID_STORE, { autoIncrement : true });
 
         /*
         // Use transaction oncomplete to make sure the objectStore creation is 
@@ -459,6 +554,237 @@
     return(blob)
   }
 
+  var wv_checkEmailField = () => {}
+  var wv_fetchEndPoint = () => {}
+  var wv_postData = () => {}
+
+  if ( reEmail ===  undefined || typeof checkEmailField === 'undefined' ) {
+    var reEmail = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+    function checkEmailField(efield) {
+      let email = efield.value
+      if ( !(reEmail.test(email)) ) {
+        return(false)
+      }
+      return(true)
+    }
+    wv_checkEmailField = checkEmailField
+  } else {
+    wv_checkEmailField = checkEmailField
+  }
+
+  if ( fetchEndPoint === undefined ) {
+    async function fetchEndPoint(endpoint,port) {
+      port = !(port) ? '' : ( port.length ? `:${port}`   : '')
+      let myRequest = new Request(`${location.protocol}//${g_siteURL}${port}/${endpoint}`);
+      try {
+        const body = await fetch(myRequest, {
+                      method: 'GET', // *GET, POST, PUT, DELETE, etc.
+                      mode: 'cors', // no-cors, *cors, same-origin
+                      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                      credentials: 'omit', // include, *same-origin, omit
+                      redirect: 'follow', // manual, *follow, error
+                      referrerPolicy: 'no-referrer', // no-referrer, *client
+                    });
+        //
+        let infoObj = await body.json();
+        return(infoObj)
+        //
+      } catch (e) {
+        console.log(e.message)
+        return(false)
+      }
+    }
+    wv_fetchEndPoint = fetchEndPoint
+  } else {
+    wv_fetchEndPoint = fetchEndPoint
+  }
+
+
+  if ( postData === undefined ) {
+    async function postData(url = '', data = {}, creds = 'omit', do_stringify = true,ctype) {
+      let content_type = 'application/json'
+      if ( ctype !== undefined ) {
+        content_type = ctype
+      }
+      let options = {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        mode: 'cors', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: creds, // include, *same-origin, omit
+        headers: {
+          'Content-Type': content_type
+        },
+        redirect: 'follow', // manual, *follow, error
+        referrerPolicy: 'no-referrer', // no-referrer, *client
+        body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
+      }
+
+      if ( ctype === 'multipart/form-data') {
+        delete options.headers['Content-Type']  // content type will be set automatically with a boundary
+      }
+
+      // Default options are marked with *
+      const response = await fetch(url, options);
+      if ( response.ok == false ) {
+        console.log(response.status + ': ' + response.statusText)
+        return {}
+      } else {
+        return await response.json(); // parses JSON response into native JavaScript objects
+      }
+    }
+    wv_postData = postData
+  } else {
+    wv_postData = postData
+  }
+
+  function init_user_dialog() {
+    const modal = g_user_modal
+    //
+    const do_this_later = document.getElementById('wv-later');
+    const ready_to_go = document.getElementById('wv-OK');
+    //
+    //dialogPolyfill.registerDialog(modal);
+
+    do_this_later.addEventListener('click', () => {
+      modal.close('cancelled');
+    });
+
+    modal.addEventListener('cancel', () => {
+      //modal.close('cancelled');
+    });
+
+    // close when clicking on backdrop
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        modal.close('cancelled');
+      }
+    });
+
+    // 
+    ready_to_go.addEventListener('click', () => {
+      if ( wv_checkEmailField(value_holder) ) {
+        modal.close('ready');          
+      } else {
+        alert("Please enter a valid email address.")
+      }
+    });
+
+   
+  }
+
+
+  async function wv_user_keys() {
+      let keypair = await g_crypto.generateKey({
+              'name': "ECDSA",
+              'namedCurve': "P-384"
+            },
+            true,
+            ["sign", "verify"]
+          )
+
+      let pub_key = keypair.publicKey
+      let priv_key = keypair.privateKey
+      let exported = await g_crypto.exportKey("raw",pub_key);
+      let exportedKeyBuffer = new Uint8Array(exported);
+      let pub_key_str = `${exportedKeyBuffer}`;
+      let wrapped_key_info = await wv_wrap_private_key(priv_key)  // json object :: wrap private for local storage
+
+      let key_info = {
+        "pk_str" : pub_key_str,
+        "priv_key" : priv_key, // access this for now for signing
+        "wrapped_priv" : wrapped_key_info.wrapped_key,
+        "key_session_id" : wrapped_key_info.who,
+        "iv" : wrapped_key_info.iv
+      }
+      return(key_info)
+  }
+
+  function store_user_key(app_user_key,user_information) {
+    let transaction = g_audio_db.transaction(AUDIO_USERID_STORE, "readwrite");
+    let userStore = transaction.objectStore(AUDIO_USERID_STORE);
+    user_information.app_key = app_user_key
+    userStore.put(user_information)
+  }
+
+  async function post_user_key(key_for_server) {
+    await wv_postData('transition/recording-key',key_for_server)
+  }
+
+  function wv_ask_create_user(app_user_key) {
+    //
+    if ( g_audio_db === null ) {
+      console.log("db not initialized :: add_audio_data")
+      return;
+    }
+    //
+    const value_holder = document.getElementById('wv-id-email')
+    g_user_modal.showModal();
+    //
+    const modal = g_user_modal
+    modal.addEventListener('close', async () => {
+      let modal_value = modal.returnValue
+      if ( modal_value === 'ready' ) {
+        //
+        let user_email = value_holder.value
+        let key_info = await wv_user_keys()
+        //
+        set_current_session_signing_key(key_info.priv_key)    // use it now for signing
+        set_current_session_email(user_email)
+        //
+        let user_information = {
+          'email' : user_email,
+          'wrapped_priv' : key_info.wrapped_priv,  // store the private key
+          'iv' : key_info.iv,
+          'server_id' : key_info.key_session_id
+        }
+        store_user_key(app_user_key,user_information)
+        let key_for_server = {
+          'email' : user_email,
+          'pub_key' : key_info.pk_str,  // store the private key
+          'iv' : key_info.iv,
+          'server_id' : key_info.key_session_id,
+          'priv' : key_info.priv_key
+        }
+        post_user_key(key_for_server)
+        wv_user_info_to_worker(user_information)
+        //
+      } else {
+      }
+    });
+
+  }
+
+  function wv_find_user(app_user_key) {
+    //
+    if ( g_audio_db === null ) {
+      console.log("db not initialized :: add_audio_data")
+      return;
+    }
+    //
+    let transaction = g_audio_db.transaction(AUDIO_USERID_STORE, "readwrite");
+    let userStore = transaction.objectStore(AUDIO_USERID_STORE);
+    //
+    let found_user = null
+    let request = userStore.openCursor();
+    let resolver, rejector
+    let p = new Promise( (resolve,reject) => {
+      request.onsuccess = (event) => {
+        var cursor = event.target.result;
+        if ( cursor ) {
+          let test_user = cursor.value
+          let test = test_user.id = app_user_key
+          if ( resolver && test ) {
+            found_user = test_user
+            resolve(found_user)
+          } else cursor.continue();
+        } else {
+          reject(found_user)
+        }
+      };
+    })
+    
+    return p
+  }
 
 
   function update_audio_data(map_id,data_list) {
@@ -482,6 +808,7 @@
           if ( sessionObj.data[map_id] != null ) {
             let blob_url = URL.createObjectURL(audioBlob);
             sessionObj.data[map_id] = audioBlob
+            wv_secure('edit-update',audioBlob,map_id)
             //
             const request = cursor.update(sessionObj);
             request.onsuccess = () => {
@@ -520,6 +847,10 @@
           let blob_url = URL.createObjectURL(audioBlob);
           let map_id = uuidv4()
           sessionObj.data[map_id] = audioBlob
+          let geo_update = JSON.stringify(g_wv_current_locaion)
+          if ( sessionObj.locations.indexOf(geo_update) < 0 ) {
+            sessionObj.locations.push(geo_update)
+          }
           //
           const request = cursor.update(sessionObj);
           request.onsuccess = () => {
@@ -535,7 +866,10 @@
       let sessionObj = {
         'name' : g_current_session_name,
         'sess_date_time' : '' + Date.now(),
-        'data' : { }
+        'sess_geo_location' : JSON.stringify(g_wv_current_locaion),
+        'data' : { },
+        'hashes' : { },
+        'locations' : [JSON.stringify(g_wv_current_locaion)]
       }
       //
       let map_id = uuidv4()
@@ -555,7 +889,7 @@
   function remove_audio_data(audio_key) {
     //
     if ( g_audio_db === null ) {
-      console.log("db not initialized :: add_audio_data")
+      console.log("db not initialized :: remove_audio_data")
       return;
     }
     //
@@ -656,7 +990,12 @@
   }
 
 
-  function choose_edit_user_session(name) {
+  async function choose_edit_user_session(name) {
+    //
+    if ( g_current_session_name !== 'none' ) {
+      await wv_secure_total_session(g_current_session_name)
+    }
+    //
     if ( name === 'none' ) {
       let sess_name_el = document.getElementById('show-session-name')
       if ( sess_name_el ) {
@@ -703,6 +1042,7 @@
         populate_play_list(g_current_session_name)
       }
     }
+    wv_change_session_name()
   }
 
   function edit_user_session(event) {
@@ -752,7 +1092,7 @@
 
   
   // RECORDER
-  async function init_recorder() {
+  async function wv_init_recorder() {
     const stream = await navigator.mediaDevices.getUserMedia({ 'audio': true });
     app_recoder = new AppAudioRecorder(stream)
   }
@@ -760,7 +1100,7 @@
   //
   const sleep = time => new Promise(resolve => setTimeout(resolve, time));
 
-  function initialize_global_buttons() {
+  function wv_initialize_global_buttons() {
     //
     g_recordButton.setAttribute('disabled', true);
     g_stopButton.setAttribute('disabled', true);
@@ -1409,10 +1749,153 @@ function draw_wave(data,ctx,W,h) {
 
   // ---- ---- ---- ---- ---- ----
   // ---- ---- ---- ---- ---- ----
+  function wv_prep_secure_relay(data_chunk) {
+    // relay to worker
+    let message = {
+      'type' : 'chunk',
+      'chunk' : data_chunk,
+      'sess_name' : g_current_session_name
+    }
+    g_ownership_worker.postMessage(message)
+  }
+
+
+  function wv_user_info_to_worker(user_info) {
+    let message = {
+      'type' : 'init',
+      'user' : user_info
+    }
+    g_ownership_worker.postMessage(message)
+  }
+
+  function wv_secure(op,audioBlob,id_param) {  // edit-update, end-recording
+    // relay to worker
+    let message = {
+      'type' : 'benchmark',
+      'blob' : audioBlob,
+      'op' : op,
+      'blob_id' : (id_param ? id_param : ('ER-' + uuidv4()))
+    }
+    g_ownership_worker.postMessage(message)
+  }
+
+  function wv_secure_total_session(sess_name) {
+    // save the entire session make a version of it for downloadings
+    let message = {
+      'type' : 'storage',
+      'sess_id' : g_current_session_name
+    }
+    g_ownership_worker.postMessage(message)
+  }
+
+  function wv_change_session_name() {
+    let message = {
+      'type' : 'session',
+      'db_id' : g_current_session_name
+    }
+    g_ownership_worker.postMessage(message)
+  }
+
+  function worker_status_view(status) {
+    //
+  }
+
+  function worker_op_response(data) {
+    //
+  }
+  // ---- ---- ---- ---- ---- ----
+  // ---- ---- ---- ---- ---- ----
+
+  function wv_getLocation() {
+    if (navigator.geolocation) {
+      var x = document.getElementById("wv-geo-location");
+      navigator.geolocation.getCurrentPosition((position) => {
+        x.innerHTML = `${position.coords.latitude},${position.coords.longitude}`
+        g_wv_current_locaion = JSON.parse(JSON.stringify(position.coords))
+      });
+    } else { 
+      alert("Geolocation is not supported by this browser.");
+    }
+  }
+
+// https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/exportKey
+  /*
+  Convert  an ArrayBuffer into a string
+  from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
+  */
+  function ab2str(buf) {
+    return String.fromCharCode.apply(null, new Uint8Array(buf));
+  }
+
+
+  // ---- ---- ---- ---- ---- ----
+  // ---- ---- ---- ---- ---- ----
+
+  //
+  async function wv_wrap_private_key(key) {
+    //
+    let server_pub_key = await wv_fetchEndPoint('static/key_wrapper_pub_key')
+
+    // get AES key from the server to wrap my public key and an identifier for recovering the AES key
+    let pub_key = await g_crypto.importKey("jwk",server_pub_key.jwk,"AES-CBC", true, ["wrapKey"])
+    let key_session_id = server_pub_key.id
+    //
+    let iv = window.crypto.getRandomValues(new Uint8Array(12));
+    let wrapped_key = await g_crypto.wrapKey("jwk",key,pub_key,{
+      'name' : "AES-CBC",
+      'iv' : iv
+    })
+    //
+    let iv_str = ab2str(iv)
+    let serverReply = {
+      'wrapped_key' : wrapped_key,
+      'who' : key_session_id,
+      'iv' : iv_str
+    }
+    //
+    return(serverReply)
+  }
+
+  async function wv_restore_signing_key(user_info) {
+    //
+    let server_pub_key = await wv_fetchEndPoint(`static/restore_wrapper_key/${user_info.server_id}`)
+    let wrapper_key = await g_crypto.importKey("jwk",server_pub_key.jwk,"AES-CBC", true, ["unwrapKey"])
+    let iv = window.atob(user_info.iv) 
+    let priv_key = await g_crypto.unwrapKey("jwk",user_info.wrapped_priv,wrapper_key,
+                                                    {
+                                                      'name' : "AES-CBC",
+                                                      'iv' : iv
+                                                    },true,["sign"])
+    set_current_session_signing_key(priv_key)
+    set_current_session_email(user_information.email)
+  }
+
+
+  async function wv_setup_crypto() {
+    if ( g_window_can_process && g_crypto && g_audio_db ) {
+      //
+      let user_info = null
+      try {
+        user_info = await wv_find_user('wave_recording_session_user')
+        wv_restore_signing_key(user_info)
+        wv_user_info_to_worker(user_info)
+      } catch (e) {
+        wv_ask_create_user('wave_recording_session_user')
+      }
+      
+    } else {
+      alert("Crypotgraphy processing is not available within this browser at this time.")
+    }
+  }
+
+  // ---- ---- ---- ---- ---- ----
+  // ---- ---- ---- ---- ---- ----
   if ( g_window_can_process ) {
-    init_database(gc_song_db_name)
-    initialize_global_buttons()
-    init_recorder()
+    init_user_dialog()
+    wv_init_database(gc_song_db_name)
+    wv_initialize_global_buttons()
+    wv_init_recorder()
+    wv_getLocation()
   }
 
 </script>
