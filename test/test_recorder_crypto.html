@@ -1,0 +1,1600 @@
+
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="author" content="Richard Leddy" />
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+	<meta id="theme-color" name="theme-color" content="#452770">
+
+    <link rel="manifest" href="manifest.webmanifest">
+    <!-- ios support -->
+    <link rel="apple-touch-icon" href="images/icons/icon-72x72.png" />
+    <link rel="apple-touch-icon" href="images/icons/icon-96x96.png" />
+    <link rel="apple-touch-icon" href="images/icons/icon-128x128.png" />
+    <link rel="apple-touch-icon" href="images/icons/icon-144x144.png" />
+    <link rel="apple-touch-icon" href="images/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" href="images/icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" href="images/icons/icon-384x384.png" />
+    <link rel="apple-touch-icon" href="images/icons/icon-512x512.png" />
+    <meta name="apple-mobile-web-app-status-bar" content="#db4938" />
+
+	<title>TEST - Recorder</title>
+	<meta name="description" content="Own Your Song as Soon as You Sing.">
+	<style>
+		/*csslint important:false*/
+
+/* ==========================================================================
+   Pure Base Extras
+   ========================================================================== */
+
+/**
+ * Extra rules that Pure adds on top of Normalize.css
+
+html {
+
+}
+*/
+
+/**
+ * Always hide an element when it has the `hidden` HTML attribute.
+ */
+
+.hidden,
+[hidden] {
+    display: none !important;
+}
+
+/**
+ * Add this class to an image to make it fit within it's fluid parent wrapper while maintaining
+ * aspect ratio.
+ */
+.pure-img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+		.items {
+			display: flex;
+			flex-wrap: wrap;
+			margin-left: -10px;
+			margin-top: -10px;
+		}
+	
+		.items .item {
+			flex: 1 0 300px;
+			box-sizing: border-box;
+			background: -webkit-linear-gradient(to right, rgba(242, 242, 210, 0.3), white));
+			background: linear-gradient(to right, rgba(242, 242, 210, 0.3), white );
+			color: #171e42;
+			padding: 10px;
+			margin-left: 10px;
+			margin-top: 0px;
+		}
+	
+		.items .extra-i {
+			padding-left: 10%;
+			padding-bottom: 4px;
+			padding-right: 12px;
+			font-size: 110%;
+			font-family: sans-serif;
+		}
+	
+		.middleBanner {
+			text-align: 'center';
+			padding-left: 10%;
+			padding-right: 10%;
+			font-weight:bold;
+			color: darkgreen;
+			padding-top:4%;
+			overflow:auto;
+		}
+
+		.applink {
+			padding:3px;
+			background-color: cornsilk;
+			width:inherit;
+			min-height: 100%;
+			color:darkolivegreen;
+			font-weight: bolder;
+
+		}
+	
+		.extraBanner {
+			text-align: 'center';
+			padding-left: 10%;
+			padding-right: 10%;
+			font-weight:bold;
+			color: #FF4400;
+			padding-top:4%;
+		}
+	
+	
+		.fillLowerWrap {
+			width: 66%;
+			margin-left:0px;
+			margin-right:0px;
+			padding: 8px;
+			margin-top:8px;
+			background: -webkit-linear-gradient(to right, white, #FAFAFF);
+			background: linear-gradient(to right, white, #FAFAFF );
+			margin-left: 10px;
+		}
+	
+		.fitMenuLower {
+			width: 95%;
+			height: 50%;
+			margin-left:0px;
+			margin-right:0px;
+			padding: 8px;
+			margin-top:8px;
+			background: -webkit-linear-gradient(to right, white, #FAFAFF);
+			background: linear-gradient(to right, white, #FAFAFF );
+			margin-left: 10px;
+		}
+	
+		#squashMenu:hover {
+			border: 1px solid rgb(230,230,240,0.4);
+			padding-top:4px;
+			background-color: #EFEFEF;
+		}
+	
+		#squashMenuContainer {
+			position:absolute;
+			visibility:hidden;
+			top : 0; left : 0;
+			height:100%;
+			width: 55%;
+			z-index:100;
+			border: rgba(252, 190, 190, 0.4) 2px solid;
+			background-color: white;
+		}
+	
+		.fade_able {
+			position:absolute;
+			visibility:hidden;
+			top : 10px; left : 10px;
+			height:80%;
+			width: 40%;
+			z-index:101;
+			border: rgba(252, 190, 190, 0.4) 2px solid;
+			background-color: white;
+			overflow:hidden;
+		}
+
+		.solid_able {
+			position:absolute;
+			visibility:hidden;
+			top : 10px; left : 10px;
+			height:80%;
+			width: 40%;
+			z-index:111;
+			border: rgba(252, 190, 190, 0.4) 2px solid;
+			background-color: white;
+			overflow: hidden;
+		}
+
+		@media screen and (max-width: 950px) {
+			.solid_able {
+				width: 90%;
+			}
+		}
+
+		#thankyou_box {
+			position:absolute;
+			visibility:hidden;
+			top : 25%; left : 25%;
+			height:50%;
+			width: 50%;
+			z-index:150;
+			border: rgba(100, 5, 5, 0.6) 2px solid;
+			background-color: lightgoldenrodyellow;
+			overflow: auto;
+		}
+
+		@media screen and (max-width: 1040px) {
+			.fade_able {
+				width: 60%;
+			}
+		}
+
+		@media screen and (max-width: 600px) {
+			.fade_able {
+				width: 90%;
+			}
+		}
+
+		.fade_able_content {
+			height:100%;
+			width: 100%;
+			overflow:auto;
+		}
+
+		.togglebar {
+			height:20px;
+			visibility:inherit;
+			background-color: navy;
+			text-align:right;
+		}
+	
+		.closer_x {
+			padding:2px;
+			color:purple;
+			font-weight:bolder;
+			border: solid 1px red;
+			cursor:pointer;
+		}
+
+		@media (max-width: 1225px) {
+			.fillLowerWrap {
+				visibility : "none";
+				height : 0px;
+			}
+		}
+
+	
+		.fillLower {
+			border: darkred 2px solid;
+			height: 96%;
+			width: 96%;
+			margin-left: 10px;
+			padding:8px;
+			background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE);
+			background: linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE );
+		}
+	
+		button {
+			cursor: pointer;
+			font-size: 101%;
+			font-weight: bold;
+			color: darkblue;
+			margin: 2px;
+			width:120px;
+		}
+	
+		button:hover {
+			background-color : #dfdeca;
+			color: darkred;
+		}
+
+        button:disabled,
+        button[disabled] {
+            border: 1px solid #999999;
+            background-color: #cccccc;
+            color: #666666;
+        }
+
+	
+		@media screen and (max-width: 390px) {
+			.items .extra-i {
+				padding-left: 1%;
+			}
+		}
+	
+		@media screen and (max-width: 600px) {
+			.items .extra-i {
+				padding-left: 3%;
+			}
+		}
+	
+		.longviz {
+			visibility : "visibile";
+			height: 10px;
+			background-color:inherit;
+		}
+	
+		@media (max-width: 1040px) {
+			.longviz {
+				visibility : "none";
+				height : 0px;
+			}
+		}
+	
+		.shortviz {
+			visibility : "none";
+			height:0px;
+			margin-top:6px;
+		}
+
+		@media (max-width: 620px) {
+			.shortviz {
+				visibility : "visible";
+				height:2px;
+				background-color:darkgreen;
+				margin-bottom:12px;
+			}
+		}
+	
+		@media (min-width: 1040px) {
+			.shortviz {
+				visibility : "visible";
+				height:120px;
+				border: 2px darkblue solid;
+				background-color:#FFFFF6;
+				margin-bottom:30px;
+				margin-top:5px;
+			}
+		}
+	
+		@media (min-width: 380px) {
+			.items .item {
+				max-width: calc(100% - 20px);
+			}
+			.items .extra-i {
+				padding-left: 3%;
+			}
+		}
+		@media (min-width: 410px) {
+			.items .item {
+				max-width: calc(100% - 10px);
+			}
+		}
+		@media (min-width: 620px) {
+			.items .item {
+				max-width: calc(50% - 10px);
+			}
+		}
+		@media (min-width: 830px) {
+			.items .item {
+				max-width: calc(50% - 10px);
+			}
+		}
+		@media (min-width: 1040px) {
+			.items .item {
+				max-width: calc(33.33333% - 10px);
+			}
+		}
+		@media (min-width: 1250px) {
+			.items .item {
+				max-width: calc(25%- 10px);
+			}
+		}
+		@media (min-width: 1460px) {
+			.items .item {
+				max-width: calc(20% - 10px);
+			}
+		}
+		@media (min-width: 1670px) {
+			.items .item {
+				min-width: calc(16.66667% - 10px);
+			}
+		}
+	
+	
+		body {
+			border: 1px solid black;
+			
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+
+
+		@media screen and (orientation: portrait) {
+			#mainNav {
+				width: 100%;
+			}
+		}
+
+		@media screen and (orientation: landscape) {
+			#mainNav {
+				width: 100%;
+			}
+		}
+	
+		main {
+			border-left: solid 3px navy;
+			border-top: solid 1px #8833BB;
+			padding : 4px;
+		}
+	
+		#mainNav {
+			font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+			font-weight: 700;
+			text-transform: uppercase;
+			background: blue;
+			border-left: solid 3px navy;
+			border-top: solid 3px navy;
+			border-bottom: solid 3px rgba(252,252,255,0.7);
+			min-height: 90px
+			padding: 20px
+			background: -webkit-linear-gradient(to left, rgba(242, 242, 210, 0.3), white);
+			background: linear-gradient(to left, rgba(242, 242, 210, 0.3), white );
+			
+		}
+	
+		#mainNav table {
+			padding-left: 3%;
+		}
+	
+	
+		#mainNav  table  a:focus { outline: none; }
+		#mainNav  table  .navbar-brand {
+			font-size: 1.1rem;
+			color: white;
+		}
+	
+		#mainNav  table  .navbar-brand.active, #mainNav .navbar-brand:active, #mainNav .navbar-brand:focus, #mainNav .navbar-brand:hover {
+			color: white;
+		}
+	
+		#mainNav  table  .navbar-nav {
+			letter-spacing: 1px; }
+	
+		#mainNav  table  .navbar-nav li.nav-item {
+			display:inline;
+		}
+	
+		
+		
+		#mainNav  table  .navbar-nav li.nav-item a.nav-link {
+			color: darkgreen;
+			text-decoration: none;
+			vertical-align: top;
+			padding-right: 10px;
+		}
+	
+		#mainNav  table  .navbar-nav li.nav-item a.nav-link:hover {
+			color: #18BC9C;
+			outline: none;
+			
+		}
+	
+	
+		#mainNav  table  .navbar-nav a.nav-text {
+			background-color : rgba(242,222,255,0.6);
+			border-radius: 25px;
+			margin-bottom: 9px;
+			margin-right: 6px;
+			white-space: nowrap;
+		}
+
+
+		#mainNav  table  .navbar-nav li.nav-item a.nav-link:active, #mainNav .navbar-nav li.nav-item a.nav-link:focus { color: white; }
+		
+		.footer-list li {
+			list-style-type: none;
+		}
+	
+		.footer-list li a:hover { color: gold; }
+		
+		.hover_group {
+			cursor:pointer;
+		}
+	
+		.hover_group rect {
+			fill:#e6e6e6;
+		}
+	
+		.hover_group:hover rect {
+			fill: #F6F6e6;
+		}
+	
+		footer {
+			padding:10px;
+			background: -webkit-linear-gradient(to left, rgba(252,252,255,0.5), #fffbe2 );
+			background: linear-gradient(to left, rgba(252,252,255,0.5), #fffbe2  );
+			text-align: center;
+			font-size: 0.85em;
+		}
+	
+		footer a {
+			text-decoration:none;
+			color:darkgreen;
+			font-weight:bold;
+			font-style: italic;
+		}
+	
+		.copiouslink:hover {
+			fill:navy;
+		}
+		.copiouslink {
+			fill:black;
+		}
+	
+		* {margin: 0; padding: 0; box-sizing: border-box}
+		
+		.PhIOtjDr_0 {
+			fill:none;
+			stroke:#1c1448;
+			stroke-width:4.59875107;
+			stroke-miterlimit:4;
+			stroke-dasharray: 2948 2950;
+			stroke-dashoffset: 2949;
+			animation: PhIOtjDr_draw 6666ms ease-in forwards;
+		}
+
+		@keyframes PhIOtjDr_draw {
+			100% {stroke-dashoffset: 0}
+		}
+
+		@keyframes PhIOtjDr_fade {
+			0% {stroke-opacity: 1}
+			97.1830985915493% {stroke-opacity: 1}
+			100% {stroke-opacity: 0}
+		}
+	
+		.form_el {
+			border:lightgray solid 1px;
+			padding:6px;
+			margin:2px;
+			width:80%;
+		}
+
+		.form_el_inner {
+			border:lightgray solid 1px;
+			padding:6px;
+			margin:2px;
+			width:100%;
+		}
+	
+		label {
+			font-weight:bold;
+			color:darkgreen;
+			width:35%;
+		}
+
+		.field_el {
+			width:65%;
+		}
+	
+		@media (max-width: 1040px) {
+			.field_el {
+				width:94%;
+				margin-left:3%;
+				margin-right:3%;
+			}
+		}
+
+		#contact_box {
+			background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE));
+			background: linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE );
+		}
+	
+		.textarea_field_el {
+			width: 94%;
+			margin:3%;
+		}
+	
+		.error-message {
+			visibility:hidden;
+			width:75%;
+			font-weight:bolder;
+			color:red;
+			background-color:white;
+			border: solid 1px orange;
+			padding:2px;
+			margin:3px;
+		}
+
+		/* The Modal (background) */
+		.modal {
+		  display: none; /* Hidden by default */
+		  position: relative; /* Stay in place */
+		  z-index: 1; /* Sit on top */
+		  left: 0;
+		  top: 0;
+		  width: 100%; /* Full width */
+		  height: 100%; /* Full height */
+		  overflow: auto; /* Enable scroll if needed */
+		  background-color: rgb(0,0,0); /* Fallback color */
+		  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+		  -webkit-animation-name: fadeIn; /* Fade in the background */
+		  -webkit-animation-duration: 0.4s;
+		  animation-name: fadeIn;
+		  animation-duration: 0.4s
+		}
+
+		/* Modal Content */
+		.modal-content {
+		  position: inherit;
+		  top: 0;
+		  background-color: #fefefe;
+		  width: 100%;
+		  -webkit-animation-name: slideIn;
+		  -webkit-animation-duration: 0.4s;
+		  animation-name: slideIn;
+		  animation-duration: 0.4s
+		}
+
+		/* The Close Button */
+		.close {
+		  color: white;
+		  float: right;
+		  font-size: 18px;
+		  font-weight: bold;
+		}
+
+		.close:hover,
+		.close:focus {
+		  color: #000;
+		  text-decoration: none;
+		  cursor: pointer;
+		}
+
+		.modal-header {
+		  padding: 2px 16px;
+		  background-color: #4ca85c;
+		  color: white;
+		}
+
+		.modal-body {padding: 2px 16px;}
+
+		.modal-footer {
+		  padding: 2px 16px;
+		  margin-bottom: 20px;
+		  background-color: darkgreen;
+		  color: white;
+		}
+
+		/* Add Animation */
+		@-webkit-keyframes slideIn {
+		  from {bottom: -300px; opacity: 0}
+		  to {bottom: 0; opacity: 1}
+		}
+
+		@keyframes slideIn {
+		  from {bottom: -300px; opacity: 0}
+		  to {top: 0; opacity: 1}
+		}
+
+		@-webkit-keyframes fadeIn {
+		  from {opacity: 0}
+		  to {opacity: 1}
+		}
+
+		@keyframes fadeIn {
+		  from {opacity: 0}
+		  to {opacity: 1}
+		}
+
+		#logout-control-top {
+			visibility: hidden;
+			display: none;
+		}
+
+
+		.sw-before-install-button-hide {
+			visibility: hidden;
+			display: none;
+		}
+
+		.sw-before-install-button-show {
+			visibility: visible;
+			display: block;
+		}
+
+
+        caption {
+            background-color:wheat;
+            color:rebeccapurple;
+            font-weight: 700;
+            font-size: 110%;
+            padding: 2px;
+            border:rgb(59, 12, 12) 1px solid;
+        }
+
+        th {
+            border-bottom: rgba(0, 0, 0, 0.76) 1px solid;
+            background-color: rgb(252, 247, 244);
+        }
+
+        tbody#results-body td {
+            border-top: rgba(146, 148, 114, 0.301) 1px solid;
+            border-bottom: rgba(110, 133, 122, 0.301) 1px solid;
+            background-color: rgb(247, 248, 244);
+            color:rgb(59, 12, 12);
+            font-weight: 600;
+            padding: 2px;
+            padding-left: 4px;
+            margin-top: 1px;
+            vertical-align: text-top;
+        }
+
+
+	</style>
+</head>
+<script>
+		//var g_siteURL = "localhost";
+		var g_siteURL = "localhost";
+		var g_finalizers = []
+		var g_loginStateViewHolders = {}
+</script>
+<body>
+	<nav id="mainNav">
+		<table style="width:100%">
+			<tr>
+				<td style="width:62;height:63">
+					<a class="nav-link" href="/">
+						<svg version="1.0" width="60" height="60" viewBox="0 0 250 250" preserveAspectRatio="xMidYMid meet" id="logo" >
+							<defs id="defs10"/>
+							<path class="PhIOtjDr_0"  id="path6" d="m 30.107062,7.4672872 c 4.67725,2.6985208 8.37554,8.6930958 12.94402,20.5087688 7.17904,19.072767 24.58277,67.337762 29.69511,82.950634 l 5.32989,15.9502 -13.70543,-0.25058 -10.468161,2.57106 -8.132079,2.99946 -4.78602,5.90784 0.76141,-6.91979 c 0.65264,-6.50536 0.32632,-7.85462 -5.43866,-25.31791 C 27.822822,80.549048 20.535012,60.127019 12.703332,40.215781 5.4155222,21.730904 4.4365622,15.57249 7.8085322,10.503124 11.941922,4.43145 22.384152,2.9954505 30.107062,7.4672872 Z M 238.08162,22.742849 c 3.69828,2.110631 6.52639,6.669206 6.52639,10.379672 0,1.686578 -2.93688,12.740881 -6.63517,24.469814 -19.68797,64.138095 -30.34775,107.931245 -30.34775,124.806655 0,4.6453 -1.08775,7.68113 -18.60024,50.80931 l -4.35093,10.79409 -67.76577,0 -67.765758,0 -14.35808,-35.35063 -14.35808,-35.3603 17.62128,-20.75934 17.5125,-20.75935 29.36879,0 c 32.631998,0 5.455822,5.28877 29.390108,7.16797 -3.81133,6.98972 7.16732,11.29772 7.16732,11.29772 l 2.51778,3.43975 c -1.74038,3.20932 -4.92039,6.69891 -9.3801,9.5709 l -3.2632,2.11064 -9.78959,-2.62144 c -8.593088,-2.27446 -11.312428,-2.61179 -22.080978,-2.61179 -13.0528,-0.0964 -14.35808,0.2506 -14.35808,4.29837 0,2.70817 3.15443,3.63336 12.72648,3.63336 21.42834,0 38.723308,8.01847 47.533928,22.10863 3.58951,5.73436 7.17904,15.86345 7.17904,20.50876 0,2.86236 4.45971,5.05973 7.50536,3.79721 2.82811,-1.09868 2.93687,-4.64531 0.65264,-14.01306 -2.28424,-9.36772 -7.83169,-17.88734 -15.77214,-24.29632 -5.32988,-4.30799 -6.30884,-5.49342 -5.11233,-6.24517 1.19649,-0.76135 2.06669,-0.51077 4.0246,1.08906 6.30885,5.23321 19.03534,7.00654 27.73719,3.88395 5.87377,-2.11064 11.85631,-7.17036 15.11951,-12.74088 1.52281,-2.53468 5.98253,-16.03694 9.89835,-29.9536 10.98611,-38.396111 22.08098,-72.320389 30.13021,-92.665317 5.54744,-14.176879 12.40016,-19.737762 23.16871,-18.812555 2.93688,0.250577 6.63517,1.175785 8.15801,2.023891 z m -126.72091,50.03831 c 2.28424,0.510792 5.76499,2.11063 7.72291,3.633367 5.87375,4.558576 6.20008,7.257098 3.80705,29.278954 -1.1965,10.71701 -1.94404,26.93071 -2.27035,27.1042 -0.32632,0.25057 -8.38942,-6.50868 -17.41761,-6.25812 l -16.533538,0.42407 0.65264,-6.66922 c 0.32632,-3.62372 1.19651,-13.83956 1.84915,-22.619385 0.65264,-9.19425 1.74037,-17.125977 2.50179,-18.561977 3.2632,-5.907835 10.550998,-8.269041 19.687958,-6.331889 z m 48.5129,9.454465 c 2.06668,1.011946 4.56848,3.209314 5.54744,4.89589 1.84914,2.871998 1.84914,4.22126 -0.8702,33.750816 -1.52282,17.04886 -3.37196,32.575 -4.24216,35.02295 -3.15442,8.51961 -9.13695,13.07819 -18.16513,13.67573 -4.78601,0.25056 -6.41762,0 -9.46327,-1.69622 -5.87376,-3.12256 -6.41764,-4.29838 -2.93689,-7.42094 6.20008,-5.744 4.00097,-11.09854 1.92352,-15.89687 0,0 -0.33391,-1.79223 -2.65798,-4.24016 l -2.01123,-1.92782 3.94219,-26.79768 c 1.95792,-22.869967 2.17547,-23.795174 5.11237,-26.667174 4.89478,-4.89589 16.96861,-6.24515 23.82134,-2.698522 z" />
+							<rect style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:4.80000019;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect4169" width="68.005806" height="55.413109" x="62.964886" y="157.3824"/>
+							<rect style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.60000002;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect4170" width="39.957146" height="46.691494" x="105.05587" y="172.33051"/>
+							<rect style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect4172" width="134.35677" height="7.9790406" x="49.16119" y="238.93228"/>
+							<text xml:space="preserve" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:184.28874207px;line-height:125%;font-family:'Arial Rounded MT Bold';-inkscape-font-specification:'Arial Rounded MT Bold, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" x="6.6644416" y="260.41125" id="text4161" transform="scale(1.041834,0.95984582)"><tspan id="tspan4163" x="6.6644416" y="260.41125">C</tspan></text>
+							<text xml:space="preserve" style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:28.53204727px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" x="90" y="175.07523" id="text4165" transform="scale(0.90874022,1.1004245)"><tspan id="tspan4167" x="90" y="175.07523">opious</tspan></text>
+						</svg>
+					</a>
+				</td>
+				<td>
+                    <button id="start-run_test-btn" >start</button>
+				</td>
+				<td>
+                    <button id="stop-run_test-btn" >stop</button>
+                </td>
+                <td>
+                    <button id="pause-run_test-btn" >pause</button>
+				</td>
+				<td>
+                    <button id="play-run_test-btn" >play</button>
+				</td>
+			</tr>
+		</table>
+	</nav>
+	<main>
+        <div style="width:100%;padding-left: 20%;color:rgb(59, 12, 12);font-weight: 700;" >RUN TESTS FOR CRYPTO ETC.</div>
+        <table id='results' style="width:100%" >
+            <caption>Test Results</caption>
+            <tbody id='results-body'>
+                <tr>
+                  <th scope="col" style="width:20%">Test</th>
+                  <th scope="col" style="width:5%">WORKED</th>
+                  <th scope="col" style="width:15%">TIME</th>
+                  <th scope="col" style="width:60%">Description</th>
+                </tr>
+            </tbody>
+        </table>
+	
+	</main>
+
+    <footer>
+        <ul class="footer-list">
+            <li>
+                <a href="http://www.copious.world">copyright &copy; 2020 copious.world</a>
+            </li>
+        </ul>
+    </footer>
+
+</body>
+</html>
+<!-- <script lang="JavaScript" src="recorder-lib.js" ></script> -->
+<script>
+
+
+    async function postData(url = '', data = {}, creds = 'omit', do_stringify = true) {
+		// Default options are marked with *
+		const response = await fetch(url, {
+			method: 'POST', // *GET, POST, PUT, DELETE, etc.
+			mode: 'cors', // no-cors, *cors, same-origin
+			cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+			credentials: creds, // include, *same-origin, omit
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			redirect: 'follow', // manual, *follow, error
+			referrerPolicy: 'no-referrer', // no-referrer, *client
+			body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
+		});
+		if ( response.ok == false ) {
+			console.log(response.status + ': ' + response.statusText)
+		}
+		return await response.json(); // parses JSON response into native JavaScript objects
+	}
+
+
+
+    var g_crypto = window.crypto ? window.crypto.subtle : null
+    if ( g_crypto === null  ) {
+        alert("No cryptography support in this browser. To claim ownership of assets, please use another browser.")
+    }
+
+
+    var test_result_rows = document.getElementById('results-body')
+
+
+    var start_rec_btn = document.getElementById("start-run_test-btn")
+    var stop_rec_btn = document.getElementById("stop-run_test-btn")
+    var pause_rec_btn = document.getElementById("pause-run_test-btn")
+    var play_rec_btn = document.getElementById("play-run_test-btn")
+
+
+    start_rec_btn.addEventListener('click',(event) => {
+        ui_start_rec()
+        start_tests()
+    })
+    stop_rec_btn.addEventListener('click',(event) => {
+        ui_stop_rec()
+    })
+    pause_rec_btn.addEventListener('click',(event) => {
+        ui_pause_rec()
+    })
+    play_rec_btn.addEventListener('click',(event) => {
+        ui_play_rec()
+    })
+    //
+    function ui_start_rec() {
+        start_rec_btn.disabled = !false
+        stop_rec_btn.disabled = !true
+        pause_rec_btn.disabled = !true
+        play_rec_btn.disabled = !false
+    }
+    function ui_stop_rec() {
+        start_rec_btn.disabled = !true
+        stop_rec_btn.disabled = !false
+        pause_rec_btn.disabled = !false
+        play_rec_btn.disabled = !true
+    }
+    function ui_pause_rec() {
+        start_rec_btn.disabled = !true
+        stop_rec_btn.disabled = !false
+        pause_rec_btn.disabled = !false
+        play_rec_btn.disabled = !true
+    }
+    function ui_play_rec() {
+        start_rec_btn.disabled = !false
+        stop_rec_btn.disabled = !true
+        pause_rec_btn.disabled = !true
+        play_rec_btn.disabled = !false
+    }
+
+
+    function add_results(name,success,time,description) {
+
+        let resRow = document.createElement('tr')
+        //
+        let td_name = document.createElement('td')
+        td_name.innerText = name
+        resRow.appendChild(td_name)
+        //
+        let td_success = document.createElement('td')
+        td_success.innerText = success
+        resRow.appendChild(td_success)
+        //
+        let td_time = document.createElement('td')
+        td_time.innerText = time
+        resRow.appendChild(td_time)
+        //
+        let td_descr = document.createElement('td')
+        td_descr.innerText = description
+        resRow.appendChild(td_descr)
+
+        test_result_rows.appendChild(resRow)
+    }
+
+
+    // 
+
+    // ----  ----  ----  ----  ----  ----  ----  ----  ----  ---- 
+    // ----  ----  ----  ----  ----  ----  ----  ----  ----  ---- 
+
+    //
+    var g_current_session_machine_name = "Mock-goofy"
+    const FETCH_SERVER_WRAPPER_KEY = 'guarded/dynamic/identified_key_wrapper_pub_key'
+    const FETCH_SERVER_WRAPPER_KEY_RESTORE = 'guarded/dynamic/restore_key_wrapper_pub_key'
+    const SEND_WRAPPED_RECORDING_KEY = 'transition/recording-key'
+    const RESTORE_KEY_FROM_SERVER = 'guarded/static/restore_wrapper_key'
+    const REQ_AUDIO_SESSION_TRANSFER = 'guarded/dynamic/audio-session-transfer'
+
+
+    var g_stored_faux_values = {}
+    function mock_testing_store(key,value) {
+        g_stored_faux_values[key] = value
+    }
+    function get_mock_testing_store(key) {
+        return g_stored_faux_values[key]
+    }
+   
+
+    // TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS
+    // TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS
+
+    let success_str = (boolv) => (boolv ? "yes" : "no")
+
+    let g_nonce_buffer = new Uint8Array((128/8))  
+    function start_tests() {
+        make_random_buffer()
+        restore_random_buffer()
+        test_xor_arrays()
+        test_xor_strings()
+        test_xor_strings_array()
+        test_digest_array()
+        test_functional_key_pair()
+        test_wrapper_key()
+    }
+    //
+
+    // ----  ----  ----  ----  ----  ----  ----  ----  ----  ---- 
+    function comp_arrays(a1,a2) {
+        let isEqual = a1.length === a2.length && a1.every((value, index) => value === a2[index]);
+        return(isEqual);
+    }
+
+    // BEGIN TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS
+
+    //
+    // 1) MAKES A RADNDOM BUFFER and covert to hex string and back
+    function make_random_buffer() {
+        crypto.getRandomValues(g_nonce_buffer);   // locally make a random valued IV
+        let rbytes = hex_fromTypedArray(g_nonce_buffer)
+        let bytes_ary = hex_toArrayOfBytes(rbytes)
+        let rbyte2 = hex_fromArrayOfBytes(bytes_ary)
+        //
+        let success = success_str(rbytes === rbyte2)
+        //
+        add_results("nonce hex nonce",success,"na:00:00","matching results: hex_fromTypedArray & hex_toArrayOfBytes & hex_fromArrayOfBytes")
+    }
+
+    // 2) 
+    function restore_random_buffer() {
+        crypto.getRandomValues(g_nonce_buffer);   // locally make a random valued IV
+        let arrayOfBytes = Array.from(g_nonce_buffer)
+        //
+        let aOfB2 = ArrayOfBytes_toByteArray(arrayOfBytes)
+        let n = aOfB2.length
+        let success = true
+        for ( let i = 0; i < n; i++ ) {
+            success = success && (g_nonce_buffer[i] == aOfB2[i])
+        }
+        success = success_str(success)
+        add_results("nonce array nonce",success,"na:00:00","matching results: ArrayOfBytes_toByteArray")
+    }
+
+    // 3)
+    function test_xor_arrays() {
+        crypto.getRandomValues(g_nonce_buffer);   // locally make a random valued IV
+        let aOB1 = Array.from(g_nonce_buffer)
+        crypto.getRandomValues(g_nonce_buffer);   // locally make a random valued IV
+        let aOB2 = Array.from(g_nonce_buffer)
+        //
+        let a3 = xor_arrays(aOB1,aOB2)
+        let a4 = xor_arrays(aOB1,a3)
+        let b1 = comp_arrays(aOB2,a4)
+        //
+        // other length
+        crypto.getRandomValues(g_nonce_buffer);   // locally make a random valued IV
+        let aOB3 = Array.from(g_nonce_buffer)
+        aOB3 = aOB2.concat(aOB3)
+        //
+        let a5 = xor_arrays(aOB1,aOB3)
+        let a6 = xor_arrays(aOB1,a5)
+        //
+        let b2 = comp_arrays(aOB3,a6)
+        //
+        let success = success_str(b1 && b2)
+        add_results("xor arrays ",success,"na:00:00","matching results: xor_arrays")
+    }
+
+
+    // 4) 
+    function test_xor_strings() {
+        crypto.getRandomValues(g_nonce_buffer);   // locally make a random valued IV
+        let rbytes1 = hex_fromTypedArray(g_nonce_buffer)
+        crypto.getRandomValues(g_nonce_buffer);   // locally make a random valued IV
+        let rbytes2 = hex_fromTypedArray(g_nonce_buffer)
+        //
+        let rbytes3 = hex_xor_of_strings(rbytes1,rbytes2)
+        let rbytes4 = hex_xor_of_strings(rbytes1,rbytes3)
+        //
+        let success = success_str(rbytes4 === rbytes2)
+        add_results("test_xor_strings ",success,"na:00:00","matching results: test_xor_strings")
+    }
+
+
+    //5)
+    function test_xor_strings_array() {
+        //
+        let nonces = []
+        //
+        for ( let i = 0; i < 8; i++ ) {
+            crypto.getRandomValues(g_nonce_buffer);   // locally make a random valued IV
+            let bytes = hex_fromTypedArray(g_nonce_buffer)
+            nonces.push(bytes)
+        }
+        //
+        let total_hash = xor_all_to_hext_str(nonces)
+        //
+        let first = nonces.shift()
+        let partial_hash = xor_all_to_hext_str(nonces)
+        //
+        let remnant = hex_xor_of_strings(total_hash,partial_hash)
+        let success = success_str(remnant === first)
+        add_results("test_xor_strings_array ",success,"na:00:00","matching results: test_xor_strings_array")
+    }
+
+
+    // 6)
+    async function test_digest_array() {
+        //
+        let byteArray = new Uint8Array(64)
+        crypto.getRandomValues(byteArray)
+        // Without secret
+        let secret = false
+        let array_digest1 = await digestByteArray(byteArray,secret)
+        let array_digest2 = await digestByteArray(byteArray,secret)
+        //
+        let b_t1 = (array_digest1 === array_digest2)
+        // With secret
+        secret = new Uint8Array(byteArray.length)
+        crypto.getRandomValues(secret)
+        let array_digest3 = await digestByteArray(byteArray,secret)
+        let array_digest4 = await digestByteArray(byteArray,secret)
+        crypto.getRandomValues(secret)
+        let array_digest5 = await digestByteArray(byteArray,secret)
+        let b_t2 = (array_digest3 !== array_digest1) && (array_digest3 === array_digest4) && (array_digest3 !== array_digest5)
+        //
+        let success = success_str(b_t1 && b_t2)
+        add_results("test_digest_array ",success,"na:00:00","matching results: with and without secret")
+    }
+
+
+    // 7)
+    async function test_functional_key_pair() {
+        let keypair = await wv_keypair_promise()
+        //
+        let byteArray = new Uint8Array(64)
+        crypto.getRandomValues(byteArray)
+        let text = hex_fromTypedArray(byteArray)
+        //
+        let signature = await sign_hash(text,keypair.privateKey)
+        //
+        let sigBytes = new Uint8Array(signature)
+        let hx_signature = hex_fromTypedArray(sigBytes)
+        let result = await verify_hash(text,signature,keypair.publicKey)
+        //
+        let success = success_str(result)
+        add_results("test_functional_key_pair ",success,"na:00:00","sign and then verify a nonce")
+    }
+
+    // 8)
+    var wv_postData = (url,uid_obj) => {}
+    async function test_wrapper_key() {
+        let keypair = await wv_keypair_promise()
+        // ---- ---- ---- ----
+        let pub_key = keypair.publicKey
+        let priv_key = keypair.privateKey
+        let remote_aes = null
+        //
+        wv_postData = async (url,uid_obj) => {
+            let wrapper_key = uid_obj.pub_wrapper_key
+            let wrapped_aes = await make_mock_server_key(wrapper_key)
+            remote_aes = wrapped_aes
+            let server_wrapped_key = {
+                "wrapped" : wrapped_aes,
+                "id" : 129387193
+            }
+            return server_wrapped_key
+        }
+
+        let email = "faux@fake.dom"
+
+        let server_reply = await wv_wrap_private_key(priv_key,g_nonce_buffer,email)
+        server_reply.email = email
+        // server_reply has the IV and the encrypted key 
+
+        wv_postData = async (url,uid_obj) => {
+            let wrapper_pair = get_mock_testing_store("wrapper_key_pair")
+            let unwrapper_key = wrapper_pair.privateKey
+            let unwrapped_aes = await wv_unwrapped_key(remote_aes,unwrapper_key)
+            // ----
+            let wrapper_key = uid_obj.pub_wrapper_key
+            let wrapped_aes = await wrap_mock_server_key(wrapper_key,unwrapped_aes)
+            //let wrapper_key = uid_obj.pub_wrapper_key
+            // use same from before
+            let server_wrapped_key = {
+                "wrapped" : wrapped_aes,
+                "id" : 129387193
+            }
+            return server_wrapped_key
+        }
+        //
+        let restored_priv_key = await fetch_restoration_key(server_reply)
+        //
+        let b = await compare_keys(restored_priv_key,priv_key)
+        let success = success_str(b)
+        add_results("test_wrapper_key ",success,"na:00:00","wrap and unwrap key")
+    }
+
+    async function compare_keys(k1,k2) {
+        let k1_exp = await g_crypto.exportKey('jwk',k1)
+        let k2_exp = await g_crypto.exportKey('jwk',k2)
+        /*
+        let k1_hx = hex_fromTypedArray(k1_exp)
+        let k2_hx = hex_fromTypedArray(k1_exp)
+        */
+        let k1_str = JSON.stringify(k1_exp)
+        let k2_str = JSON.stringify(k2_exp)
+        return(k1_str === k2_str)
+    }
+
+    function getKeyMaterial(password) {
+        const enc = new TextEncoder();
+        let encoded = enc.encode(password)
+        return g_crypto.importKey("raw", encoded, {name: "PBKDF2"}, false, ["deriveBits", "deriveKey"]);
+    }
+
+
+    // Given some key material and some random salt derive an AES-GCM key using PBKDF2.
+    function getKey(keyMaterial, salt) {
+        return g_crypto.deriveKey(
+                    {
+                        "name": "PBKDF2",
+                        "salt": salt, 
+                        "iterations": 100000,
+                        "hash": "SHA-256"
+                    },
+                    keyMaterial,
+                    { "name": "AES-GCM", "length": 256},
+                    true,
+                    [ "wrapKey", "unwrapKey" ]
+        );
+    }
+
+
+    async function test_JWK_aes_gcm() {
+        let ky_material = await getKeyMaterial("this+is+my+unit+test")
+        let nonce = new Uint8Array(16)
+        crypto.getRandomValues(nonce);
+        const wrappingKey = await getKey(ky_material, nonce);
+        let received_wrapper_key = await g_crypto.exportKey("jwk",wrappingKey)
+        return received_wrapper_key
+    }
+
+    // END TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS
+
+    // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+    //
+    // FUNCTIONS UNDER TEST ... BELOW
+    //
+
+    //>--
+    function hex_fromArrayOfBytes(arrayOfBytes) {
+        const hexstr = arrayOfBytes.map(b => b.toString(16).padStart(2, '0')).join('');
+        return(hexstr)
+    }
+    //--<
+
+    //>--
+    function hex_fromTypedArray(byteArray){
+        let arrayOfBytes = Array.from(byteArray)
+        return(hex_fromArrayOfBytes(arrayOfBytes))
+    }
+    //--<
+
+
+    //>--
+    function hex_fromByteArray(byteArray){
+        return hex_fromTypedArray(ArrayOfBytes_toByteArray(byteArray))
+    }
+    //--<
+        
+
+    //>--
+    function hex_toArrayOfBytes(hexString) {
+        let result = [];
+        for ( let i = 0; i < hexString.length; i += 2 ) {
+          result.push(parseInt(hexString.substr(i, 2), 16));
+        }
+        return result;
+    }
+    //--<
+
+    //>--
+    function ArrayOfBytes_toByteArray(arrayOfBytes) {
+        let byteArray = new Uint8Array(arrayOfBytes)
+        return(byteArray)
+    }
+    //--<
+
+
+    //>--
+    function hex_toByteArray(hexstr) {
+        let aob = hex_toArrayOfBytes(hexstr)
+        return ArrayOfBytes_toByteArray(aob)
+    }
+    //--<
+
+
+    //>--
+    function xor_arrays(a1,a2) {
+        let n = Math.min(a1.length,a2.length)
+        let N = Math.max(a1.length,a2.length)
+        //
+        let output = []
+        for ( let i = 0; i < n; i++ ) {
+            let a = a1[i]
+            let b = a2[i]
+            output.push(a ^ b)
+        }
+        let rest = a1.length > a2.length ? a1.slice(n,N) :  a2.slice(n,N)
+        output = output.concat(rest)
+        return(output)
+    }
+    //--<
+
+    //>--
+    function hex_xor_of_strings(str1,str2) {
+        let bytes1 = hex_toArrayOfBytes(str1)
+        let bytes2 = hex_toArrayOfBytes(str2)
+        //
+        let xored = xor_arrays(bytes1,bytes2)
+        return(hex_fromArrayOfBytes(xored))
+    }
+    //--<
+
+    //>--
+    // xor_all
+    //  -- 
+    function xor_all_to_hext_str(hexs_chunks) {  // chunks are text hashes
+        let start_chunk = hexs_chunks[0]
+        let encoded = hex_toArrayOfBytes(start_chunk)
+        let n = hexs_chunks.length
+        for ( let i = 1; i < n; i++ ) {
+            let next_source = hex_toArrayOfBytes(hexs_chunks[i]);
+            encoded = xor_arrays(encoded,next_source)
+        }
+        const hashHex = hex_fromArrayOfBytes(encoded); // convert bytes to hex string
+        return hashHex;
+    }
+    //--<
+
+
+
+    //>--
+    // digestByteArray
+    //  -- 
+    async function digestByteArray(byteArray,secret) {
+        if ( secret ) {  // the secret has to match the Uint8Array type
+            byteArray = new Uint8Array(byteArray)  // copy the array
+            let n = byteArray.length
+            for ( let i = 0; i < n; i++ ) {
+                byteArray[i] = byteArray[i] ^ secret[i]
+            }
+        }
+        const hashBuffer = await g_crypto.digest('SHA-256', byteArray);          // hash the message
+        const hashAsBytes = new Uint8Array(hashBuffer)
+        // await encrypt_hash(hashAsBytes)
+        const hashArray = Array.from(hashAsBytes);                // convert buffer to byte array
+        const hashHex = hex_fromArrayOfBytes(hashArray); // convert bytes to hex string
+        return hashHex;
+    }
+    //--<
+
+
+
+
+    //>--
+    function get_client_device_name() {
+        let oscpu = navigator.oscpu
+        let ua = navigator.userAgent
+        let user_given_machine_name = g_current_session_machine_name
+        //
+        let b = `${oscpu}-${ua}-${user_given_machine_name}`
+        b = encodeURIComponent(b.trim())
+        return(b)
+    }
+    //--<
+
+
+
+    //>--
+    // wv_keypair_promise
+    //  -- 
+    function wv_keypair_promise() {  // return 
+        // Generate a local public/private key pair
+        let p =  g_crypto.generateKey({
+                'name': "ECDSA",
+                'namedCurve': "P-384"
+            },
+            true,
+            ["sign", "verify"]
+        )
+        return p  // promise
+    }
+    //--<
+
+    //>--
+    // wv_wrapper_keypair_promise
+    //  -- 
+    function wv_wrapper_keypair_promise() {  // return 
+        // Generate a local public/private key pair
+        let p =  g_crypto.generateKey({
+                name: "RSA-OAEP",
+                modulusLength: 4096, //can be 1024, 2048, or 4096
+                publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+                hash: { name: "SHA-256" }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
+            },
+            false,
+            ["wrapKey","unwrapKey"]
+        )
+        return p  // promise
+    }
+    //--<
+
+    //>--
+    // sign_hash
+    // --
+    // sign with the private key of the user on the device...
+    async function sign_hash(text,signing_key) {
+        //
+        let enc = new TextEncoder();   // one each time or one for app ???
+        let encoded =  enc.encode(text);
+        let signature = await g_crypto.sign({
+                                                name: "ECDSA",
+                                                hash: {name: "SHA-256"},
+                                            },
+                                            signing_key,
+                                            encoded
+                                        );
+        return(signature)
+    }
+    //--<
+
+    //>--
+    // verify_hash
+    // --
+    async function verify_hash(text,signature,verification_key) {
+        //
+        let enc = new TextEncoder();   // one each time or one for app ???
+        let encoded =  enc.encode(text);
+        //
+        let result = await g_crypto.verify({
+                name: "ECDSA",
+                hash: {name: "SHA-256"},
+            },
+            verification_key,
+            signature,
+            encoded
+        );
+        return result
+    }
+    //--<
+
+    //>--
+    // wv_wrapped_key
+    // --
+    async function wv_wrapped_key(key,key_jwk,iv_buffer) {
+        // import a key from JWK format
+        let srvr_pub_key = await g_crypto.importKey("jwk",key_jwk,"AES-GCM", true, ["wrapKey","unwrapKey"])  // really a cipher key at this point
+        //
+        crypto.getRandomValues(iv_buffer);   // locally make a random valued IV
+        let wrapped_key = await g_crypto.wrapKey("jwk",key,srvr_pub_key,{
+            'name' : "AES-GCM",
+            'iv' : iv_buffer
+        })
+        let iv_str = hex_fromTypedArray(iv_buffer)
+        //
+        return [wrapped_key,iv_str]
+    }
+    //--<
+
+
+    //>--
+    // wv_unwrapped_key
+    // --
+    async function wv_unwrapped_key(wrapped_aes,unwrapper_key) {
+        let unwrapped_aes = await g_crypto.unwrapKey(
+            "jwk", // same as wrapped
+            wrapped_aes, //the key you want to unwrap
+            unwrapper_key, //the private key with "unwrapKey" usage flag
+            {   //these are the wrapping key's algorithm options
+                name: "RSA-OAEP"
+            },
+            {   //this what you want the wrapped key to become (same as when wrapping)
+                name: "AES-CBC",
+                length: 256
+            },
+            true, //whether the key is extractable (i.e. can be used in exportKey)
+            ["encrypt", "decrypt"] //the usages you want the unwrapped key to have
+        )
+        //
+        return unwrapped_aes
+    }
+    //--<
+
+
+    //>--
+    // wv_ecrypted_local_priv_key
+    // --
+    async function wv_ecrypted_local_priv_key(key,wrapped_aes,unwrapper_key,nonce_buffer) {
+        //
+        //
+        let unwrapped_aes = await wv_unwrapped_key(wrapped_aes,unwrapper_key)
+        //
+        let key_bytes = await g_crypto.exportKey('jwk',key)
+        let key_bytes_str = JSON.stringify(key_bytes)
+        let enc = new TextEncoder()
+        let encoded = enc.encode(key_bytes_str)
+        crypto.getRandomValues(nonce_buffer)
+        let encd_bytes = await g_crypto.encrypt({
+                                                    'name': "AES-CBC",
+                                                    'iv' : nonce_buffer
+                                                },unwrapped_aes,encoded)
+        let hx_encrypted_key = hex_fromByteArray(encd_bytes)
+        let hx_iv = hex_fromTypedArray(nonce_buffer)
+        return([hx_encrypted_key,hx_iv])
+    }
+    //--<
+
+    //>--
+    // wv_decrypted_local_priv_key
+    // --
+    async function wv_decrypted_local_priv_key(key_bytes,wrapped_aes,unwrapper_key,iv_buffer) {
+        let unwrapped_aes = await wv_unwrapped_key(wrapped_aes,unwrapper_key)
+        let clear_key = await g_crypto.decrypt({
+                                                    name: "AES-CBC",
+                                                    iv : iv_buffer
+                                                },unwrapped_aes,key_bytes)
+        //
+        let dec = new TextDecoder()
+        let txt = dec.decode(clear_key)
+        let clear_jwk = JSON.parse(txt)
+        //
+        let key = await g_crypto.importKey('jwk',clear_jwk,{
+                'name': "ECDSA",
+                'namedCurve': "P-384"
+            },
+            true,
+            ["sign"]
+        )
+        return key
+    }
+    //--<
+
+
+    //>--
+    // fetch_restoration_key
+    // --
+    async function fetch_restoration_key(user_info) {
+        // The server keeps a cipher key to be delivered over TLS... It is for this user. This device keeps an initialization vector
+        // that the server does not have... (at this time, just relying on TLS to send the key unencrypted otherwise.)
+        let wrapper_key_pair = await wv_wrapper_keypair_promise()   // create key each time
+        let PUB_wrapper_key = wrapper_key_pair.publicKey
+        let PRIV_wrapper_key = wrapper_key_pair.privateKey
+
+        let user_identification = {
+            "user_key" : user_info.email,               // A unique name for this user
+            "pub_wrapper_key" : PUB_wrapper_key,        // send public wrapping key
+            "sess_id" : user_info.sess_id,
+            "device_id" : get_client_device_name()      // identify the devices as well as possible without plugins or compicated user interaction
+        }
+        // Ask for the server's public key
+        let server_wrapped_key = await wv_postData(FETCH_SERVER_WRAPPER_KEY_RESTORE,user_identification)
+        let key_jwk = server_wrapped_key.wrapped
+        let iv_buffer = hex_toByteArray(user_info.iv)
+        let enckey = hex_toByteArray(user_info.encrypted_key)
+        let priv_key = await wv_decrypted_local_priv_key(enckey,key_jwk,PRIV_wrapper_key,iv_buffer)
+        //      
+        return(priv_key)
+    }
+    //--<
+
+
+
+    //>--
+    async function wv_wrap_private_key(key,nonce_buffer,email) {
+        //
+        let wrapper_key_pair = await wv_wrapper_keypair_promise()   // create key each time
+        mock_testing_store("wrapper_key_pair",wrapper_key_pair)         // REMOVE REMOVE
+        let PUB_wrapper_key = wrapper_key_pair.publicKey
+        let PRIV_wrapper_key = wrapper_key_pair.privateKey
+        //
+        let user_identification = {
+            "user_key" : email,               // A unique name for this user
+            "pub_wrapper_key" : PUB_wrapper_key,        // send public wrapping key
+            "device_id" : get_client_device_name()      // identify the devices as well as possible without plugins or compicated user interaction
+        }
+        // Ask for the server's public key
+        let server_wrapped_key = await wv_postData(FETCH_SERVER_WRAPPER_KEY,user_identification)
+        let key_jwk = server_wrapped_key.wrapped
+        let sess_id = server_wrapped_key.id
+        let [hx_encrypted_key,hx_iv_str] = await wv_ecrypted_local_priv_key(key,key_jwk,PRIV_wrapper_key,nonce_buffer)
+        //
+        let serverReply = {     // for local use
+            'encrypted_key' : hx_encrypted_key,
+            'who' : sess_id,
+            'iv' : hx_iv_str
+        }
+        //
+        return(serverReply)
+    }
+    //--<
+    
+
+    // END TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS
+    // END TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS
+
+    // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+    // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+    // MOCK MOCK MOCK MOCK MOCK MOCK MOCK MOCK MOCK MOCK MOCK MOCK MOCK
+    // MOCK MOCK MOCK MOCK MOCK MOCK MOCK MOCK MOCK MOCK MOCK MOCK MOCK
+
+    async function try_unwrapping_example() {
+        //
+        let key_pair = await wv_wrapper_keypair_promise()
+        //
+        let wrapper_key = key_pair.publicKey  // wrapper key public
+        let unwrapper_key = key_pair.privateKey  // wrapper key private
+        //
+        let wrapped_aes = await make_mock_server_key(wrapper_key)
+        //
+        console.log(new Uint8Array(wrapped_aes));
+        let export_for_test = true
+        let unwrapped_aes = await g_crypto.unwrapKey(
+            "jwk", //the import format, must be "raw" (only available sometimes)
+            wrapped_aes, //the key you want to unwrap
+            unwrapper_key, //the private key with "unwrapKey" usage flag
+            {   //these are the wrapping key's algorithm options
+                name: key_type_name
+            },
+            {   //this what you want the wrapped key to become (same as when wrapping)
+                name: "AES-CBC",
+                length: 256
+            },
+            export_for_test, //whether the key is extractable (i.e. can be used in exportKey)
+            ["encrypt", "decrypt"] //the usages you want the unwrapped key to have
+        )
+        //
+        console.log(unwrapped_aes);
+
+        let aes_key_raw = await g_crypto.exportKey('raw',aes_key)
+        let uw_aes_key_raw = await g_crypto.exportKey('raw',unwrapped_aes)
+
+        console.log("raw keys:")
+        let hx_aes_key_raw = hex_fromTypedArray(ArrayOfBytes_toByteArray(aes_key_raw))
+        console.log(hx_aes_key_raw)
+        let hx_uw_aes_key_raw = hex_fromTypedArray(ArrayOfBytes_toByteArray(uw_aes_key_raw))
+        console.log(hx_uw_aes_key_raw)
+
+        return("")
+    }
+
+
+    async function wrap_mock_server_key(wrapper_key,aes_key) {
+        let wrapped_aes = await g_crypto.wrapKey(
+            "jwk", //the export format, must be "raw" (only available sometimes)
+            aes_key, //the key you want to wrap, must be able to fit in RSA-OAEP padding
+            wrapper_key, //the public key with "wrapKey" usage flag
+            {   //these are the wrapping key's algorithm options
+                name: "RSA-OAEP",
+            }
+        )
+        return wrapped_aes
+    }
+
+
+    async function make_mock_server_key(wrapper_key) {
+        let aes_key = await g_crypto.generateKey(
+            {
+                name: "AES-CBC",
+                length: 256, //can be  128, 192, or 256
+            },
+            true, //whether the key is extractable (i.e. can be used in exportKey)
+            ["encrypt", "decrypt"] //can be "encrypt", "decrypt", "wrapKey", or "unwrapKey"
+        )
+        let wrapped_aes = await wrap_mock_server_key(wrapper_key,aes_key)
+        return(wrapped_aes)
+    }
+
+
+    // END TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS
+    // END TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS TESTS
+
+    function init_ui() {
+        ui_stop_rec()
+        play_rec_btn.disabled = true
+    }
+
+
+    async function startup_services() {
+        await start_recording_animation()
+        await start_recorder()
+        ui_start_rec()
+    }
+
+    //
+    init_ui()
+
+</script>
