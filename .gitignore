@@ -21,4 +21,4 @@ tools/boot*.sh
 *.tgz
 play_count.json
 release/www.popsongnow.com/index.html
-.DS_Store
+webcrypto*

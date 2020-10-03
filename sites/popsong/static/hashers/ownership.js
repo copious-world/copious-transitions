@@ -3,17 +3,53 @@
 // ---- ---- ---- ---- ---- ---- ---- ---- ----
 // ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-    const CHUNK_POST_URL = `https://${self.location}/hashes/store_hash_progress`
-    const STORE_ASSET_POST_URL = `https://${self.location}/hashes/store_asset`
-
+    const CHUNK_POST_COM_WSSURL_REQ = `https://${self.location}/guarded/dynamic/hash_progress_com_wss_url`
+    const STORE_ASSET_POST_URL = `https://${self.location}/transition/store_waves`  // SESSION STORAGE FOR THIS DEVICE
+    const SESSION_DEVICE_MOVE = `https://${self.location}/transition/move_waves`    // FROM THIS DEVICE TO STORAGE
+    //
+    const AUDIO_SESSION_STORE = 'audio_sessions'
+    const AUDIO_USERID_STORE = 'audio_users'
+    const AUDIO_SESSION_COMPLETE = 'audio_complete'
+  
     var g_user_info = {}
     var g_current_chunks = []       // chunk hashes
+    var g_current_nonces = []
+    let g_nonce_buffer = new Uint8Array((256/8))        // 256 bits or 32 bytes 
     var g_current_session_name = ""
     var g_session_changed = false
 
     var g_crypto = crypto.subtle
     var g_audio_db = null
     const gc_song_db_name = "SongCatcher"
+    var g_app_web_socket = null
+
+    function interaction_state(state,error) {
+        if ( error ) {
+            //
+        } else {
+            self.postMessage({'type': 'status', 'status': state });
+        }
+    }
+
+    function interaction_info(info) {
+        self.postMessage({'type': 'info-ws', 'status': info });
+    }
+
+// ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+    //>--
+    function get_client_device_name() {
+        let oscpu = navigator.oscpu
+        let ua = navigator.userAgent
+        let user_given_machine_name = g_current_session_machine_name
+        //
+        let b = `${oscpu}-${ua}-${user_given_machine_name}`
+        b = encodeURIComponent(b.trim())
+        return(b)
+    }
+    //--<
+
+
     async function wv_init_database(db_name) {
         // request an open of DB
         let request = window.indexedDB.open(db_name, 2);
@@ -47,10 +83,46 @@
         //
     }
     
+
+    function operation_response(data) {
+        self.postMessage({'type': 'op_complete', 'message': data});
+    }
+
     // ---- ---- ---- ---- ---- ---- ---- ---- ----
     // ---- ---- ---- ---- ---- ---- ---- ---- ----
+    // HANDLE HEX AND BYTE ARRAYS
+    //>--
+    function hex_fromArrayOfBytes(arrayOfBytes) {
+        const hexstr = arrayOfBytes.map(b => b.toString(16).padStart(2, '0')).join('');
+        return(hexstr)
+    }
+    //--<
 
+    //>--
+    function hex_fromTypedArray(byteArray){
+        let arrayOfBytes = Array.from(byteArray)
+        return(hex_fromArrayOfBytes(arrayOfBytes))
+    }
+    //--<
 
+    //>--
+    function hex_toArrayOfBytes(hexString) {
+        let result = [];
+        for ( let i = 0; i < hexString.length; i += 2 ) {
+        result.push(parseInt(hexString.substr(i, 2), 16));
+        }
+        return result;
+    }
+    //--<
+
+    //>--
+    function ArrayOfBytes_toByteArray(arrayOfBytes) {
+        let byteArray = new Uint8Array(arrayOfBytes)
+        return(byteArray)
+    }
+    //--<
+
+    //>--
     function xor_arrays(a1,a2) {
         let n = Math.min(a1.length,a2.length)
         let N = Math.max(a1.length,a2.length)
@@ -65,48 +137,77 @@
         output = output.concat(rest)
         return(output)
     }
+    //--<
 
-    function hex_toArrayOfBytes(hexString) {
-        let result = [];
-        for ( let i = 0; i < hexString.length; i += 2 ) {
-          result.push(parseInt(hexString.substr(i, 2), 16));
-        }
-        return result;
+    //>--
+    function hex_xor_of_strings(str1,str2) {
+        let bytes1 = hex_toArrayOfBytes(str1)
+        let bytes2 = hex_toArrayOfBytes(str2)
+        //
+        let xored = xor_arrays(bytes1,bytes2)
+        return(hex_fromArrayOfBytes(xored))
     }
+    //--<
 
-    function hex_fromArrayOfBytes(bytesArray) {
-        const hexstr = bytesArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        return(hexstr)
-    }
-
-    async function xor_all(chunks) {  // chunks are text hashes
-        let encoded = toArrayOfBytes(start_chunk)
-        let n = chunks.length
+    //>--
+    // xor_all
+    //  -- 
+    function xor_all_to_hext_str(hexs_chunks) {  // chunks are text hashes
+        let start_chunk = hexs_chunks[0]
+        let encoded = hex_toArrayOfBytes(start_chunk)
+        let n = hexs_chunks.length
         for ( let i = 1; i < n; i++ ) {
-            let next_source = toArrayOfBytes(chunks[i]);
+            let next_source = hex_toArrayOfBytes(hexs_chunks[i]);
             encoded = xor_arrays(encoded,next_source)
         }
-        const hashHex = hex_fromArrayOfBytes(hashArray); // convert bytes to hex string
+        const hashHex = hex_fromArrayOfBytes(encoded); // convert bytes to hex string
         return hashHex;
     }
+    //--<
+    
+    
+    
+    // ---- ---- ---- ---- ---- ---- ---- ---- ----
+    // HANDLE HEX AND BYTE ARRAYS
+  
+    async function encrypt_hash(hashAsBytes) {
+        // do nothing for now...
+    }
 
-    async function digestArray(byteArray) {
+    //>--
+    // digestByteArray
+    //  -- 
+    async function digestByteArray(byteArray,secret) {
+        if ( secret ) {  // the secret has to match the Uint8Array type
+            byteArray = new Uint8Array(byteArray)  // copy the array
+            let n = byteArray.length
+            for ( let i = 0; i < n; i++ ) {
+                byteArray[i] = byteArray[i] ^ secret[i]
+            }
+        }
         const hashBuffer = await g_crypto.digest('SHA-256', byteArray);          // hash the message
-        const hashArray = Array.from(new Uint8Array(hashBuffer));                // convert buffer to byte array
+        const hashAsBytes = new Uint8Array(hashBuffer)
+        // await encrypt_hash(hashAsBytes)
+        const hashArray = Array.from(hashAsBytes);                // convert buffer to byte array
         const hashHex = hex_fromArrayOfBytes(hashArray); // convert bytes to hex string
         return hashHex;
     }
+    //--<
 
-        
-    function operation_response(data) {
-        self.postMessage({'type': 'op_complete', 'message': data});
+
+    async function hash_of_chunk(a_chunk,secret) {
+        let chunkArray = await a_chunk.arrayBuffer();   // a_chunk is a blobc
+        let hexHash = await digestByteArray(chunkArray,secret)
+        return(hexHash)
     }
 
-
-    async function sign_hash(text) {
+    //>--
+    // sign_hash
+    // --
+    // sign with the private key of the user on the device...
+    async function sign_hash(text,signing_key) {
         //
-        let signing_key = g_user_info.priv
-        let enc = new TextEncoder();
+        let enc = new TextEncoder();   // one each time or one for app ???
         let encoded =  enc.encode(text);
         let signature = await g_crypto.sign({
                                                 name: "ECDSA",
@@ -117,68 +218,87 @@
                                         );
         return(signature)
     }
+    //--<
+    
+    async function sign_hex_of(blob) {
+        let blobArray = await blob.arrayBuffer();
+        let mapable = [...blobArray];
+        const hashHex = mapable.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+        let output = await sign_hash(hashHex,g_user_info.priv)
+        return output
+    }
 
-    function store_hashes(map_id,output,hash_prefix,hashHex) {
-        let sess_name = g_current_session_name
-        let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
-        let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
-        //
-        let update_list_hashes_callback = (value,dbIndex) => {
-        let keyRangeValue = IDBKeyRange.only(value.name);
-        dbIndex.openCursor(keyRangeValue).onsuccess = (event) => {
-                var cursor = event.target.result;
-                if ( cursor ) {
-                    let sessionObj = cursor.value
-                    sessionObj.hashes[map_id] = {
-                        'output' : output,      // signed and sent to server
-                        'combined' : hash_prefix,
-                        'blob_hash' : hashHex
+    function store_hashes_and_nonces(map_id,output,hash_prefix,hashHex,set_nonces) {
+        let p = new Promise((resolve,reject) => {
+            let sess_name = g_current_session_name
+            let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
+            let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
+            //
+            let update_list_hashes_callback = (value,dbIndex) => {
+                let keyRangeValue = IDBKeyRange.only(value.name);
+                dbIndex.openCursor(keyRangeValue).onsuccess = (event) => {
+                    var cursor = event.target.result;
+                    if ( cursor ) {
+                        let sessionObj = cursor.value
+                        let nonces = set_nonces ? g_current_nonces : sessionObj.hashes[map_id].nonces
+                        let last_loc = sessionObj.locations.length ? sessionObj.locations[sessionObj.locations.length-1] : false
+                        let stored_token = last_loc ? hex_xor_of_strings(last_loc,output) : output
+                        sessionObj.hashes[map_id] = {
+                            'hash_combo' : stored_token,      // signed and sent to server
+                            'combined' : hash_prefix,
+                            'blob_hash' : hashHex,
+                            'nonces' : nonces
+                        }
+                        resolve(stored_token)
                     }
+                    //
+                    const request = cursor.update(sessionObj);
+                    request.onsuccess = () => {
+                        reject(false)
+                    };
                 }
-                            //
-                const request = cursor.update(sessionObj);
-                request.onsuccess = () => {
-                     // visual rep
-                };
             }
-        }
-    
-        let not_found_callback = () => {
-            console.log(`The session ${sess_name} is not in the database`)
-        }
-    
-        apply_find_audio_session(sess_name, audioStore, update_list_hashes_callback, not_found_callback)
+        
+            let not_found_callback = () => {
+                console.log(`The session ${sess_name} is not in the database`)
+            }
+        
+            apply_find_audio_session(sess_name, audioStore, update_list_hashes_callback, not_found_callback)
+        })
+        return p
     }
 
-    async function hash_of_chunk(a_chunk) { 
-        let chunkArray = await a_chunk.arrayBuffer();
-        let hexHash = await digestArray(chunkArray)
-        return(hexHash)
-    }
-
-    async function combined_hash(chunk_array,blob_id,new_blob,prev_blob_hash) {
+    async function combined_hash_signed(hexs_chunk_array,blob_id,new_blob,prev_blob_hash) {
+        if ( prev_blob_hash ) {     // store the history of changes if the parameter is provided
+            chunk_aray.push(prev_blob_hash)
+        }
+        // hash
         let blobArray = await new_blob.arrayBuffer();
-        if ( prev_blob_hash ) {
-            g_current_chunks.push(prev_blob_hash)
-        }
         const hashBuffer = await g_crypto.digest('SHA-256', blobArray);
+        //  convert to hex string
         const hashArray = Array.from(new Uint8Array(hashBuffer));                     // convert buffer to byte array
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+        // add to the hash list
         chunk_array.push(hashHex)
-        let hash_prefix = await xor_all(g_current_chunks)
-        let output = hash_prefix + '|{+}|' + hashHex
-        output = await sign_hash(output)
-        store_hashes(blob_id,output,hash_prefix,hashHex)
         //
-        return(output)
+        // get an xor of all the hashes in the chunk array
+        let hash_prefix = xor_all_to_hext_str(hexs_chunk_array)
+        let output = hash_prefix + '|{+}|' + hashHex  // the hex of the xor of chunk hashses... with the hex of the Sha2 hash of blob
+        output = await sign_hash(output,g_user_info.priv)
+        let located_mac = await store_hashes_and_nonces(blob_id,output,hash_prefix,hashHex,(prev_blob_hash ? false : true))
+        //
+        return(located_mac)
     }
 
-    async function retrieve_hash(map_id,sess_name) {
+
+    // retrieve_hash_from_db
+    //      A benchmark has has been stored... This gets it and does no operations on it.
+    async function retrieve_hash_from_db(map_id,sess_name) {
         let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
         let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
         //
         let p = new Promise((resolve,reject) => {
-            let update_list_hashes_callback = (value,dbIndex) => {
+            let get_listed_hash_callback = (value,dbIndex) => {
                 let keyRangeValue = IDBKeyRange.only(value.name);
                 dbIndex.openCursor(keyRangeValue).onsuccess = (event) => {
                     var cursor = event.target.result;
@@ -194,37 +314,65 @@
                 reject(`The session ${sess_name} is not in the database`)
             }
 
-            apply_find_audio_session(sess_name, audioStore, update_list_hashes_callback, not_found_callback)
+            apply_find_audio_session(sess_name, audioStore, get_listed_hash_callback, not_found_callback)
         })
         //
        return p
     }
 
 
-    async function fetch_compressed_session_from_db(sess_name,user_info) {
-        let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
-        let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
+    async function fetch_compressed_session_from_db(sess_name) {
+        let transaction = g_audio_db.transaction(AUDIO_SESSION_COMPLETE, "readwrite");
+        let audioStore = transaction.objectStore(AUDIO_SESSION_COMPLETE);
         //
         let p = new Promise((resolve,reject) => {
-            let update_list_hashes_callback = (value,dbIndex) => {
+            let get_governing_session_callback = (value,dbIndex) => {
                 let keyRangeValue = IDBKeyRange.only(value.name);
                 dbIndex.openCursor(keyRangeValue).onsuccess = (event) => {
                     var cursor = event.target.result;
                     if ( cursor ) {
                         let sessionObj = cursor.value
-                        let result = sessionObj.hashes[map_id]
-                        resolve(result)
+                        resolve(sessionObj)
                     }
                 }
             }
-        
+            //
             let not_found_callback = () => {
                 reject(`The session ${sess_name} is not in the database`)
             }
-
-            apply_find_audio_session(sess_name, audioStore, update_list_hashes_callback, not_found_callback)
+            //
+            apply_find_audio_session(sess_name, audioStore, get_governing_session_callback, not_found_callback)
         })
+        return p
     }
+
+
+    
+    async function fetch_session_from_db(sess_name) {
+        let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
+        let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
+        //
+        let p = new Promise((resolve,reject) => {
+            let get_governing_session_callback = (value,dbIndex) => {
+                let keyRangeValue = IDBKeyRange.only(value.name);
+                dbIndex.openCursor(keyRangeValue).onsuccess = (event) => {
+                    var cursor = event.target.result;
+                    if ( cursor ) {
+                        let sessionObj = cursor.value
+                        resolve(sessionObj)
+                    }
+                }
+            }
+            //
+            let not_found_callback = () => {
+                reject(`The session ${sess_name} is not in the database`)
+            }
+            //
+            apply_find_audio_session(sess_name, audioStore, get_governing_session_callback, not_found_callback)
+        })
+        return p
+    }
+
     
     // ---- ---- ---- ---- ---- ---- ---- ---- ----
     // ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -262,16 +410,24 @@
     }
 
 
-    async function post_chunk(chunk_message) {
-
-        let json =  await postData(CHUNK_POST_URL,chunk_message,'omit',true)
-        return json
+    function post_chunk(chunk_message) {
+        g_app_web_socket.send(chunk_message)
     }
 
     async function remote_data_relay(sess_data) {
+        let blob = sess_data.blob
+        sess_data.blob = sign_hex_of(blob)
         let json =  await postData(STORE_ASSET_POST_URL,sess_data,'omit',true)
         return json
     }
+
+    async function remote_data_transfer(sess_data) {
+        delete sess_data.blob
+        // sending the data array container wav and ogg sections
+        let json =  await postData(SESSION_DEVICE_MOVE,sess_data,'omit',true)
+        return json
+    }
+
 
     // ---- ---- ---- ---- ---- ---- ---- ---- ----
     // ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -279,9 +435,15 @@
         let message = e.data
         switch ( message.type ) {
             case 'init' : {             // setup operation
-                let user_info = message.user
-                g_user_info = user_info // ?? will the key come throug OK?
-                wv_init_database(gc_song_db_name)
+                try {
+                    let user_info = message.user
+                    g_user_info = user_info // ?? will the key come through OK?
+                    wv_init_database(gc_song_db_name)
+                    g_app_web_socket = await web_socket_initializer(user_info)
+                    interaction_state('ready')
+                } catch(error) {
+                    interaction_state('fail-init')
+                }
                 break; 
             }
             case 'session' : {
@@ -289,55 +451,69 @@
                 break
             }
             case 'chunk' : {            // recording chunks
-                let new_chunk = message.new_chunk
-                let chunk_hash = hash_of_chunk(new_chunk)
-                g_current_chunks.push(chunk_hash)
+                // as chunks are gathered during recording save hashes of them
                 g_current_session_name = message.sess_name
+                // The chunk in raw form is in the client for sound playback.
+                let new_chunk = message.new_chunk
+                
+                crypto.getRandomValues(g_nonce_buffer);
+                let chunk_hash = hash_of_chunk(new_chunk,g_nonce_buffer)  // chunk has is a string in the hex alphabet
+                // STORE HASH LOCALLY
+                g_current_chunks.push(chunk_hash)
+                let nonce_hx_str = hex_fromTypedArray(g_nonce_buffer)  // a string
+                g_current_nonces.push(nonce_hx_str)
+                // STORE HASH REMOTELY
                 let remote_cache_op = {
-                    'type' : 'chunk',
-                    'chunk' : chunk_hash,
-                    'user' : g_user_info.email,
-                    'session' : g_current_session_name,
-                    'client-time' : Date.now(),
-                    'id' : g_user_info.server_id
+                    'transition' : 'chunk',
+                    'message' : {
+                        'chunk' : chunk_hash,
+                        'email' : g_user_info.email,
+                        'session' : g_current_session_name,
+                        'client_time' : Date.now(),
+                        'id' : g_user_info.server_id
+                    }       // there is no blob id yet...
                 }
-                post_chunk(remote_cache_op)
+                post_chunk(remote_cache_op)  // send updates to the server (short message)
                 break;
             }
             case 'benchmark' : {        // storage benchmark - hash identifying a whole session
-
+                //
                 let op = message.op
                 //edit-update, end-recording
                 switch ( op ) {
                     case 'end-recording' : {        // recording stop button
-                        let c_hash = await combined_hash(g_current_chunks,message.blob_id,message.blob,null)
+                        let c_hash = await combined_hash_signed(g_current_chunks,message.blob_id,message.blob,null)
                         let remote_cache_op = {
-                            'type' : 'chunk-final',
-                            'chunk-final' : c_hash,
-                            'user' : g_user_info.email,
-                            'session' : g_current_session_name,
-                            'client-time' : Date.now(),
-                            'id' : g_user_info.server_id,
-                            'blob_id' : message.blob_id
+                            'transition' : 'chunk-final',
+                            'message' : {
+                                'chunk-final' : c_hash,
+                                'email' : g_user_info.email,
+                                'session' : g_current_session_name,
+                                'client_time' : Date.now(),
+                                'id' : g_user_info.server_id,
+                                'blob_id' : message.blob_id
+                            }
                         }
-                        await post_chunk(remote_cache_op)
-                        // finish up with data
+                        post_chunk(remote_cache_op)
                         g_current_chunks = []
+                        g_current_nonces = []
                         break;
                     }
                     case 'edit-update' : {          // cut, undo, etc.
-                        let hashes = await retrieve_hash(message.blob_id,g_current_session_name)
-                        let c_hash = await combined_hash(hashes.combined,message.blob_id,message.blob,hashes.blob_hash)
+                        let hashes = await retrieve_hash_from_db(message.blob_id,g_current_session_name)
+                        let c_hash = await combined_hash_signed(hashes.combined,message.blob_id,message.blob,hashes.blob_hash)
                         let remote_cache_op = {
-                            'type' : 'chunk-change',
-                            'chunk-change' : c_hash,
-                            'user' : g_user_info.email,
-                            'session' : g_current_session_name,
-                            'client-time' : Date.now(),
-                            'id' : g_user_info.server_id,
-                            'blob_id' : message.blob_id
+                            'transition' : 'chunk-change',
+                            'message' : {
+                                'chunk-change' : c_hash,
+                                'email' : g_user_info.email,
+                                'session' : g_current_session_name,
+                                'client_time' : Date.now(),
+                                'id' : g_user_info.server_id,
+                                'blob_id' : message.blob_id
+                            }
                         }
-                        await post_chunk(remote_cache_op)
+                        post_chunk(remote_cache_op)
                         break;
                     }
                     default: {      // error condition
@@ -358,6 +534,20 @@
                 }
                 break;
             }
+            case 'device-move' : {          // send a complete session
+                let sess_name = message.sess_id
+                try {
+                    let sess_data = await fetch_session_from_db(sess_name)
+                    sess_data.email = g_user_info.email
+                    sess_data.sess_id = g_user_info.server_id
+                    sess_data.device_id = get_client_device_name()
+                    
+                    await remote_data_transfer(sess_data)    
+                } catch (e) {
+                    // ----
+                }
+                break;
+            }
             case 'shutdown' : {         // unfinished business
                 // ...
                 self.postMessage({'type': 'status', 'status': 'shutdown'});
@@ -373,4 +563,66 @@
 
     // ---- ---- ---- ---- ---- ---- ---- ---- ----
     // ---- ---- ---- ---- ---- ---- ---- ---- ----
-    self.postMessage({'type': 'status', 'status': 'ready' });
+
+    async function web_socket_initializer(user_info) {
+        try {
+            let chunk_com_req = {
+                'email' : user_info.email,
+                'when' : Date.now(),
+                "device_id" : get_client_device_name()
+            }
+            let json =  await postData(CHUNK_POST_COM_WSSURL_REQ,chunk_com_req,'omit',true)
+            if ( json ) {
+                let com_url = json.url
+                let p = new Promise((resolve,reject) => {
+                    let socket = new WebSocket(`wss://${com_url}`);   // wss ... forcing this onto a secure channel
+                    let opened = false
+
+                    socket.onopen = (event) => {
+                        opened = true
+                        resolve(socket)
+                    };
+                    
+                    socket.onmessage = (event) => {
+                        let msg = event.data
+                        if ( g_expected_response ) {
+                            g_expected_response.resolve(msg)
+                        } else {
+                            interaction_info(msg)
+                        }
+                    };
+                    
+                    socket.onclose = (event) => {
+                      if (event.wasClean) {
+                        interaction_state('closed')
+                      } else {
+                        // try to re-open
+                        if ( !opened ) {
+                            interaction_state('error-server')
+                        } else {
+                            try {
+                                g_app_web_socket = await web_socket_initializer(g_user_info)
+                                interaction_state('restored')    
+                            } catch(error) {
+                                interaction_state('fail-ws-no-recover')
+                            }
+                        }
+                      }
+                    };
+                    
+                    socket.onerror = (error)  => {
+                        if ( !opened ) {
+                            interaction_state('error-server')
+                            reject(error)
+                        } else {
+                            if ( g_expected_response ) { g_expected_response.reject(error) }
+                            interaction_state('error-ws',error)
+                        }
+                    };    
+                })
+                return p
+            }
+        } catch (e) {
+            throw e
+        }
+    }
