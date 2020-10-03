@@ -29,6 +29,7 @@ const g_statics = require(conf_obj.mod_path.static_assets)   // Special handling
 const g_dynamics = require(conf_obj.mod_path.dynamic_assets) // Program spends some time creating the asset.
 const g_validator = require(conf_obj.mod_path.validator)     // Custom access to field specification from configuration and the application through DB or inline code
 const g_business = require(conf_obj.mod_path.business)       // backend tasks that don't return values, but may send them out to other services.. (some procesing involved)
+const g_transition_engine = require(conf_obj.mod_path.transition_engine)
 //
 var g_app = require(conf_obj.mod_path.expression)(conf_obj,g_db); // exports a function
 
@@ -36,16 +37,21 @@ var g_app = require(conf_obj.mod_path.expression)(conf_obj,g_db); // exports a f
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
 // INITIALIZE
+async function initialize_all() {
+    g_db.initialize(conf_obj)
+    g_business.initialize(conf_obj,g_db)
+    g_transition_engine.initialize(conf_obj,g_db)
+    //
+    let g_session_manager = g_authorizer.sessions(g_app,g_db,g_business,g_transition_engine)   // setup session management, session, cookies, tokens, etc. Use database and Express api.
+                                                                // sessions inializes the custom session manager determined in the application authorizer.
+    g_middleware.setup(g_app,g_db,g_session_manager)            // use a module to cusomize the use of Express middleware.
+    g_validator.initialize(conf_obj,g_db,g_session_manager)     // The validator may refer to stored items and look at other context dependent information
+    g_statics.initialize(g_db,conf_obj)                         // Static assets may be taken out of DB storage or from disk, etc.
+    await g_dynamics.initialize(g_db,conf_obj)                        // Dynamichk assets may be taken out of DB storage or from disk, etc.
+    g_transition_engine.install(g_statics,g_dynamics)
+}
 
-g_db.initialize(conf_obj)
-g_business.initialize(conf_obj,g_db)
-let g_session_manager = g_authorizer.sessions(g_app,g_db,g_business)   // setup session management, session, cookies, tokens, etc. Use database and Express api.
-                                                            // sessions inializes the custom session manager determined in the application authorizer.
-g_middleware.setup(g_app,g_db,g_session_manager)            // use a module to cusomize the use of Express middleware.
-g_validator.initialize(conf_obj,g_db,g_session_manager)     // The validator may refer to stored items and look at other context dependent information
-g_statics.initialize(g_db,conf_obj)                         // Static assets may be taken out of DB storage or from disk, etc.
-g_dynamics.initialize(g_db)                                 // Dynamichk assets may be taken out of DB storage or from disk, etc.
-
+initialize_all()
 
 /*
 /static/:asset            -- previously static_mime.  This just returns a static (not computed) piece of information. The app should be able to set the mime type.
@@ -110,7 +116,7 @@ g_app.post('/guarded/static/:asset', async (req, res) => {
     let body = req.body
     let proceed = await g_session_manager.guard(asset,body,req)
     if ( proceed ) {             // asset exits, permission granted, etc.
-        let transitionObj = await g_session_manager.process_asset(asset,body)  // not checking sesion, key the asset and use any search refinement in the body.
+        let transitionObj = await g_session_manager.process_asset(asset,body)  // not checking sesssion, key the asset and use any search refinement in the body.
         if ( transitionObj ) {
             if ( transitionObj.secondary_action ) {                          // return a transition object to go to the client. 
                 let asset_obj = await g_statics.fetch(asset);                     // get the asset for later
@@ -176,7 +182,8 @@ g_app.post('/transition/:transition', async (req, res) => {           // the tra
     let body = req.body
     let transition = req.params.transition
     if ( g_validator.valid(body,g_validator.field_set[transition]) ) {         // A field set may be in the configuration for named transitions - true by default
-        if ( g_session_manager.feasible(transition,body,req) ) {                        // can this session actually make the transition?
+        let is_feasible = await g_session_manager.feasible(transition,body,req)
+        if ( is_feasible  ) {                        // can this session actually make the transition?
             let transitionObj = await g_session_manager.process_transition(transition,body,req)            // either fetch or produced transition data
             if ( transitionObj ) {
                 if ( transitionObj.secondary_action ) {                                      // Require a seconday action as part of the transition for finalization
@@ -384,7 +391,6 @@ var g_going_sitewide_ws_session = {}
 
 g_auth_wss.on("connection", (ws,req) => {
     //
-
     if ( req.path === "foreign_auth" ) {
 
         if ( setup_foreign_auth ) setup_foreign_auth(ws)
@@ -399,7 +405,7 @@ g_auth_wss.on("connection", (ws,req) => {
             }
         }
 
-        ws.on("message",  (data, flags) => {
+        ws.on("message",  async (data, flags) => {
             
             let body = JSON.parse(data.toString());
 
@@ -425,7 +431,12 @@ g_auth_wss.on("connection", (ws,req) => {
                         send_to_ws(ws,command)
                     })
                 } else { // transitional
-    
+                    let transition = data.transition
+                    let message = data.message
+                    let finalization_state = await g_session_manager.finalize_transition(transition,message,{},null)      // FINALIZE (not a final state)
+                    if ( finalization_state ) {
+                        ws.send(JSON.stringify(finalization_state));
+                    }
                 }
             }
 
@@ -445,10 +456,7 @@ g_auth_wss.on("connection", (ws,req) => {
                 delete g_going_ws_session[token]
             }
         });
-
     }
-
-
 });
 
 
