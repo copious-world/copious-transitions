@@ -9,9 +9,9 @@ const GET_PUBLIC_KEY_FOR_RESTORE_KEY_WRAPPING_IN_CLIENT = 'restore_key_wrapper_p
 
 class SearcherSessionManager extends SessionManager {
 
-    constructor(exp_app,db_obj,trans_engine) {
+    constructor(exp_app,db_obj,business,trans_engine) {
         //
-        super(exp_app,db_obj,trans_engine)
+        super(exp_app,db_obj,business,trans_engine)
         //
         this.middle_ware.push(cookieParser())           // use a cookie parser
     }
@@ -52,7 +52,7 @@ class SearcherSessionManager extends SessionManager {
     }
 
 
-    process_asset(asset_id,post_body) {
+    async process_asset(asset_id,post_body) {
         if ( G_spotify_searcher_trns.tagged(asset_id) ) {
             let transObj = super.process_asset(asset_id,post_body)
             transObj.query = post_body.query
@@ -70,14 +70,34 @@ class SearcherSessionManager extends SessionManager {
             let transObj = super.process_asset(asset_id,post_body)
             transObj._user_key = post_body.user_key  // say an encrypted email
             transObj._user_machine_differentiator = post_body.device_id  // say an hash of the machine name or something...
-            transObj._pub_wrapper_key = post_body.pub_wrapper_key
+            let key_importer = this.trans_engine ? this.trans_engine.get_import_key_function() : false
+            if ( key_importer ) {
+                let client_wrapper_key = await key_importer(post_body.pub_wrapper_key,["wrapKey"])
+                if ( client_wrapper_key ) {
+                    transObj._pub_wrapper_key = client_wrapper_key
+                } else {
+                    return false
+                }
+            } else {
+                return false
+            }
             transObj.secondary_action = false
             return(transObj)
         } else if ( asset_id === GET_PUBLIC_KEY_FOR_RESTORE_KEY_WRAPPING_IN_CLIENT ) {
             let transObj = super.process_asset(asset_id,post_body)
             transObj._user_key = post_body.user_key  // say an encrypted email
             transObj._user_machine_differentiator = post_body.device_id  // say an hash of the machine name or something...
-            transObj._pub_wrapper_key = post_body.pub_wrapper_key
+            let key_importer = this.trans_engine ? this.trans_engine.get_import_key_function() : false
+            if ( key_importer ) {
+                let client_wrapper_key = await key_importer(post_body.pub_wrapper_key,["wrapKey"])
+                if ( client_wrapper_key ) {
+                    transObj._pub_wrapper_key = client_wrapper_key
+                } else {
+                    return false
+                }
+            } else {
+                return false
+            }
             transObj._sess_id = post_body.sess_id
             transObj.secondary_action = false
             return(transObj)

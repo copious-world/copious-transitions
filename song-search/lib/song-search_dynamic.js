@@ -194,6 +194,8 @@ class SongSearchDynamic extends GeneralDynamic {
         } else if ( asset === GET_PUBLIC_KEY_FOR_KEY_WRAPPING_IN_CLIENT ) {    // GET PUBLIC KEY AND MAKE A RECORDING SESSIONS OBJECT
           // TRY TO USE AN EXISTING AUDIO SESS_ID IF THIS EMAIL HAS BEEN USED ON ANOTHER DEVICE
           // NOTE: This branch does not return a named session, just the keys needed to make one
+          let rslt = {}
+          //
           let key = {'email' : transtionObj._user_key }
           let session_data = await this.trans_engine.retrieve_audio_session(key) // find all the device entries if possible
           //
@@ -201,45 +203,63 @@ class SongSearchDynamic extends GeneralDynamic {
                                                                 'email' : transtionObj._user_key,
                                                                 'device' : transtionObj._user_machine_differentiator
                                                               }
-          let wrapper_key = this.audio_sessions_public_key
           //
-          let clear_aes_key = this.trans_engine.create_aes_key()
-          //
-          let store_wrapped_key = this.trans_engine.wrap_aes_key(wrapper_key,clear_aes_key)
-          let client_wrapper_key = transObj._pub_wrapper_key
-          let wrapped_key = this.trans_engine.wrap_aes_key(client_wrapper_key,clear_aes_key)
-          //
-          audioSessionRep.wrapped_aes_key = store_wrapped_key
-          //
-          let sess_id = await this.trans_engine.store_audio_session(key,audioSessionRep)
-          let rslt = {
-            'jwk' : wrapped_key,   // has been loaded as jwk
-            'id' : sess_id
+          try {
+            let wrapper_key = this.audio_sessions_public_key
+            let clear_aes_key = await this.trans_engine.create_aes_key()
+            //
+            let store_wrapped_key = await this.trans_engine.wrap_aes_key(wrapper_key,clear_aes_key)
+            let client_wrapper_key = transtionObj._pub_wrapper_key
+            if ( client_wrapper_key ) {
+              let wrapped_key = await this.trans_engine.wrap_aes_key(client_wrapper_key,clear_aes_key)
+              //
+              audioSessionRep.wrapped_aes_key = store_wrapped_key
+              //
+              let sess_id = await this.trans_engine.store_audio_session(key,audioSessionRep)
+              rslt = {
+                'wrapped' : wrapped_key,   // has been loaded as jwk
+                'id' : sess_id
+              }
+            } else {
+              rslt = `{ "status" : "FAIL", "reason" : "no wrapper key for AES"}`
+            }  
+          } catch (e) {
+            rslt = `{ "status" : "FAIL", "reason" : "no wrapper key for AES: ${e.message}"}`
           }
           //
-          let results = {
-            'mime_type' : 'application/json',
-            'string' : JSON.stringify(rslt)
-          }
-          return results
-        } else if ( asset === GET_PUBLIC_KEY_FOR_RESTORE_KEY_WRAPPING_IN_CLIENT ) {
-          let rslt = {}
-          let key = {'email' : transtionObj._user_key, 'sess_id' : transObj._sess_id }
-          let session_data = await this.trans_engine.retrieve_audio_session(key) // find all the device entries if possible
-          if ( session_data ) {
-            let unwrapper_key = this.audio_sessions_private_key
-            let clear_aes_key = this.trans_engine.unwrap_aes_key(unwrapper_key,session_data.wrapped_aes_key)
-            let client_wrapper_key = transObj._pub_wrapper_key
-            let wrapped_key = this.trans_engine.wrap_aes_key(client_wrapper_key,clear_aes_key)
-            rslt = {
-              'jwk' : wrapped_key,   // has been loaded as jwk
-              'id' : session_data.sess_id
-            }
-          }
           let results = {
             'mime_type' : 'application/json',
             'string' : JSON.stringify(rslt)
           }       
+          return results
+        } else if ( asset === GET_PUBLIC_KEY_FOR_RESTORE_KEY_WRAPPING_IN_CLIENT ) {
+          let rslt = {}
+          //
+          let key = {'email' : transtionObj._user_key, 'sess_id' : transtionObj._sess_id }
+          let session_data = await this.trans_engine.retrieve_audio_session(key) // find all the device entries if possible
+          if ( session_data ) {
+            try {
+              let unwrapper_key = this.audio_sessions_private_key
+              let clear_aes_key = await this.trans_engine.unwrap_aes_key(unwrapper_key,session_data.wrapped_aes_key)
+              let client_wrapper_key = transtionObj._pub_wrapper_key
+              if ( client_wrapper_key ) {
+                let wrapped_key = await this.trans_engine.wrap_aes_key(client_wrapper_key,clear_aes_key)
+                rslt = {
+                  'wrapped' : wrapped_key,   // has been loaded as jwk
+                  'id' : session_data.sess_id
+                }
+              } else {
+                rslt = `{ "status" : "FAIL", "reason" : "no wrapper key for AES"}`
+              }
+            } catch (e) {
+              rslt = `{ "status" : "FAIL", "reason" : "no wrapper key for AES: ${e.message}"}`
+            }
+          }
+          //
+          let results = {
+            'mime_type' : 'application/json',
+            'string' : JSON.stringify(rslt)
+          }
           return results
         }
         return([]) // empty object, no case matched

@@ -871,11 +871,11 @@ html {
 
     //
     var g_current_session_machine_name = "Mock-goofy"
-    const FETCH_SERVER_WRAPPER_KEY = 'guarded/dynamic/identified_key_wrapper_pub_key'
-    const FETCH_SERVER_WRAPPER_KEY_RESTORE = 'guarded/dynamic/restore_key_wrapper_pub_key'
-    const SEND_WRAPPED_RECORDING_KEY = 'transition/recording-key'
-    const RESTORE_KEY_FROM_SERVER = 'guarded/static/restore_wrapper_key'
-    const REQ_AUDIO_SESSION_TRANSFER = 'guarded/dynamic/audio-session-transfer'
+    const FETCH_SERVER_WRAPPER_KEY = '/song-search/guarded/dynamic/identified_key_wrapper_pub_key'
+    const FETCH_SERVER_WRAPPER_KEY_RESTORE = '/song-search/guarded/dynamic/restore_key_wrapper_pub_key'
+    const SEND_WRAPPED_RECORDING_KEY = '/song-search/transition/recording-key'
+    const RESTORE_KEY_FROM_SERVER = '/song-search/guarded/static/restore_wrapper_key'
+    const REQ_AUDIO_SESSION_TRANSFER = '/song-search/guarded/dynamic/audio-session-transfer'
 
 
     var g_stored_faux_values = {}
@@ -902,6 +902,7 @@ html {
         test_digest_array()
         test_functional_key_pair()
         test_wrapper_key()
+        test_remote_wrapper_key()
     }
     //
 
@@ -1096,6 +1097,30 @@ html {
         add_results("test_wrapper_key ",success,"na:00:00","wrap and unwrap key")
     }
 
+    // 9)
+    async function test_remote_wrapper_key() {
+        let keypair = await wv_keypair_promise()
+        // ---- ---- ---- ----
+        let pub_key = keypair.publicKey
+        let priv_key = keypair.privateKey
+        let remote_aes = null
+        //
+        wv_postData = postData
+        //
+        let email = "faux@fake.dom"
+        let server_reply = await wv_wrap_private_key(priv_key,g_nonce_buffer,email)
+        server_reply.email = email
+        // server_reply has the IV and the encrypted key 
+        wv_postData = postData
+        //
+        let restored_priv_key = await fetch_restoration_key(server_reply)
+        //
+        let b = await compare_keys(restored_priv_key,priv_key)
+        let success = success_str(b)
+        add_results("test_remote_wrapper_key ",success,"na:00:00","from server ... wrap and unwrap key")
+    }
+
+
     async function compare_keys(k1,k2) {
         let k1_exp = await g_crypto.exportKey('jwk',k1)
         let k2_exp = await g_crypto.exportKey('jwk',k2)
@@ -1192,6 +1217,18 @@ html {
     function hex_toByteArray(hexstr) {
         let aob = hex_toArrayOfBytes(hexstr)
         return ArrayOfBytes_toByteArray(aob)
+    }
+    //--<
+
+
+    //>--
+    function bufferToArrayBufferCycle(buffer) {
+        var ab = new ArrayBuffer(buffer.length);
+        var view = new Uint8Array(ab);
+        for (var i = 0; i < buffer.length; ++i) {
+            view[i] = buffer[i];
+        }
+        return ab;
     }
     //--<
 
@@ -1352,6 +1389,15 @@ html {
     //--<
 
     //>--
+    // verify_hash
+    // --
+    async function export_wrapper_key(pub_key) {
+        let exporter = await g_crypto.exportKey("jwk",pub_key)
+        return exporter
+    }
+    //--<
+
+    //>--
     // wv_wrapped_key
     // --
     async function wv_wrapped_key(key,key_jwk,iv_buffer) {
@@ -1452,19 +1498,22 @@ html {
         let wrapper_key_pair = await wv_wrapper_keypair_promise()   // create key each time
         let PUB_wrapper_key = wrapper_key_pair.publicKey
         let PRIV_wrapper_key = wrapper_key_pair.privateKey
+        //
+        let PUB_wrapper_key_transport = await export_wrapper_key(PUB_wrapper_key)
 
         let user_identification = {
             "user_key" : user_info.email,               // A unique name for this user
-            "pub_wrapper_key" : PUB_wrapper_key,        // send public wrapping key
+            "pub_wrapper_key" : PUB_wrapper_key_transport,        // send public wrapping key
             "sess_id" : user_info.sess_id,
             "device_id" : get_client_device_name()      // identify the devices as well as possible without plugins or compicated user interaction
         }
         // Ask for the server's public key
         let server_wrapped_key = await wv_postData(FETCH_SERVER_WRAPPER_KEY_RESTORE,user_identification)
-        let key_jwk = server_wrapped_key.wrapped
+        let wrapped_aes = server_wrapped_key.wrapped
+        wrapped_aes = bufferToArrayBufferCycle(wrapped_aes)
         let iv_buffer = hex_toByteArray(user_info.iv)
         let enckey = hex_toByteArray(user_info.encrypted_key)
-        let priv_key = await wv_decrypted_local_priv_key(enckey,key_jwk,PRIV_wrapper_key,iv_buffer)
+        let priv_key = await wv_decrypted_local_priv_key(enckey,wrapped_aes,PRIV_wrapper_key,iv_buffer)
         //      
         return(priv_key)
     }
@@ -1480,16 +1529,19 @@ html {
         let PUB_wrapper_key = wrapper_key_pair.publicKey
         let PRIV_wrapper_key = wrapper_key_pair.privateKey
         //
+        let PUB_wrapper_key_transport = await export_wrapper_key(PUB_wrapper_key)
+        //
         let user_identification = {
             "user_key" : email,               // A unique name for this user
-            "pub_wrapper_key" : PUB_wrapper_key,        // send public wrapping key
+            "pub_wrapper_key" : PUB_wrapper_key_transport,        // send public wrapping key
             "device_id" : get_client_device_name()      // identify the devices as well as possible without plugins or compicated user interaction
         }
         // Ask for the server's public key
         let server_wrapped_key = await wv_postData(FETCH_SERVER_WRAPPER_KEY,user_identification)
-        let key_jwk = server_wrapped_key.wrapped
+        let wrapped_aes = server_wrapped_key.wrapped
+        wrapped_aes = bufferToArrayBufferCycle(wrapped_aes)
         let sess_id = server_wrapped_key.id
-        let [hx_encrypted_key,hx_iv_str] = await wv_ecrypted_local_priv_key(key,key_jwk,PRIV_wrapper_key,nonce_buffer)
+        let [hx_encrypted_key,hx_iv_str] = await wv_ecrypted_local_priv_key(key,wrapped_aes,PRIV_wrapper_key,nonce_buffer)
         //
         let serverReply = {     // for local use
             'encrypted_key' : hx_encrypted_key,

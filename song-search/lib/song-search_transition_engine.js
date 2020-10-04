@@ -63,7 +63,7 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
 
     get_import_key_function() {
         return (jwk_key,uses) => {
-            g_crypto.importKey('jwk',
+            return g_crypto.importKey('jwk',
                 jwk_key,
                 {
                     name: "RSA-OAEP",
@@ -79,7 +79,7 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
 
               
     async create_aes_key() {
-        let aes_key = await web_crypto.generateKey(
+        let aes_key = await g_crypto.generateKey(
             {
                 name: "AES-CBC",
                 length: 256, //can be  128, 192, or 256
@@ -91,15 +91,19 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
     }
 
     async wrap_aes_key(wrapper_key,aes_key) {
-        let wrapped_aes = await web_crypto.wrapKey(
-            "jwk", //the export format, must be "raw" (only available sometimes)
-            aes_key, //the key you want to wrap, must be able to fit in RSA-OAEP padding
-            wrapper_key, //the public key with "wrapKey" usage flag
-            {   //these are the wrapping key's algorithm options
-                name: "RSA-OAEP"
-            }
-        )
-        return wrapped_aes
+        try {
+            let wrapped_aes = await g_crypto.wrapKey(
+                "jwk", //the export format, must be "raw" (only available sometimes)
+                aes_key, //the key you want to wrap, must be able to fit in RSA-OAEP padding
+                wrapper_key, //the public key with "wrapKey" usage flag
+                {   //these are the wrapping key's algorithm options
+                    name: "RSA-OAEP"
+                }
+            )
+            return wrapped_aes
+        } catch (e) {
+            return false
+        }
     }
 
     async unwrap_aes_key(unwrapper_key,wrapped_aes) {
@@ -184,7 +188,7 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
     // // 
     async retrieve_audio_session(key,sess_name) {
         try {
-            let key_field = key.key(0)
+            let key_field = Object.keys(key)[0]
             let key_value = key[key_field]
             let dbkey = `${key_field}-${key_value}`
             //
