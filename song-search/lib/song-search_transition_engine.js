@@ -1,4 +1,6 @@
 const { GeneralTransitionEngine } = require.main.require('./lib/general_transition_engine')
+const hexUtils = require.main.require('./lib/hex_utils')
+
 //const EventEmitter = require('events')
 //const cached = require('cached')
 //
@@ -7,6 +9,7 @@ var g_crypto = web_crypto.crypto.subtle
 
 const FORCE_FAIL_FETCH = "NotAnObject"
 const APP_STORAGE_CLASS = "WAVE-REC"
+
 
 class SessionObjectOps {
 
@@ -198,17 +201,21 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
                 let session_component = session_data[sess_name]
                 return session_component    
             } else {
-                return JSON.parse(session_data)
+                let audioSessionRep = JSON.parse(session_data)
+                audioSessionRep.wrapped_aes_key = hexUtils.hex_toByteArray(audioSessionRep.wrapped_aes_key)
+                return audioSessionRep
             }
         } catch (e) {
+            console.log(e)
         }
     }
 
     async store_audio_session(key,audioSessionRep) {
         try {
-            let key_field = key.key(0)
+            let key_field = Object.keys(key)[0]
             let key_value = key[key_field]
             let dbkey = `${key_field}-${key_value}`
+            audioSessionRep.wrapped_aes_key = hexUtils.hex_fromByteArray(audioSessionRep.wrapped_aes_key)
             let transfer_id = await this.db.store_file_class('transfer',dbkey,audioSessionRep)
             return transfer_id
         } catch (e) {

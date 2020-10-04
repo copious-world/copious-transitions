@@ -1,5 +1,6 @@
 const GeneralDynamic = require.main.require('./lib/general_dynamic')
 const fetch = require('node-fetch');
+const hexUtils = require.main.require('./lib/hex_utils')
 
 const myStorageClass = null
 const keys = require.main.require('./local/api_keys')
@@ -8,7 +9,7 @@ const RETURN_WSS_URL = 'hash_progress_com_wss_url'
 const AUDIO_SESSION_TRANSFER  = 'audio-session-transfer'
 const GET_PUBLIC_KEY_FOR_KEY_WRAPPING_IN_CLIENT = 'identified_key_wrapper_pub_key'
 const GET_PUBLIC_KEY_FOR_RESTORE_KEY_WRAPPING_IN_CLIENT = 'restore_key_wrapper_pub_key'
- 
+
 // // //
 
 var client_id = keys.Spotify.client_id; // Your client id
@@ -211,11 +212,11 @@ class SongSearchDynamic extends GeneralDynamic {
             let store_wrapped_key = await this.trans_engine.wrap_aes_key(wrapper_key,clear_aes_key)
             let client_wrapper_key = transtionObj._pub_wrapper_key
             if ( client_wrapper_key ) {
-              let wrapped_key = await this.trans_engine.wrap_aes_key(client_wrapper_key,clear_aes_key)
               //
               audioSessionRep.wrapped_aes_key = store_wrapped_key
-              //
               let sess_id = await this.trans_engine.store_audio_session(key,audioSessionRep)
+              //
+              let wrapped_key = await this.trans_engine.wrap_aes_key(client_wrapper_key,clear_aes_key)
               rslt = {
                 'wrapped' : wrapped_key,   // has been loaded as jwk
                 'id' : sess_id

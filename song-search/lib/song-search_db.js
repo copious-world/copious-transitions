@@ -138,15 +138,19 @@ class SongSearchDBClass extends DBClass {
 
     async fetch_file_class(stroge_class,key) {
         let policy_key = `${stroge_class}-${key}`
-        let filename = await super.get_key_value(policy_key)
-        if ( filename ) {
-            let p = new Promise((reslove,reject) => {
-                fs.readFile(filename,(data,error) => {
-                    if ( error ) reject(error)
-                    reslove(data.toString())
+        try {
+            let filename = await super.get_key_value(policy_key)
+            if ( filename ) {
+                let p = new Promise((reslove,reject) => {
+                    fs.readFile(filename,(error,data) => {
+                        if ( error ) reject(error)
+                        reslove(data.toString())
+                    })
                 })
-            })
-            return p
+                return p
+            }
+        } catch (e) {
+            console.log(e)
         }
         return false
     }
@@ -157,7 +161,7 @@ class SongSearchDBClass extends DBClass {
         if ( filename === null || filename === undefined  ) {
             filename = this.root_path + '/' + ('' + uuid())
         }
-        super.set_key_valye(policy_key,filename)
+        super.set_key_value(policy_key,filename)
         let output = JSON.stringify(audioSessionRep)
         let p = new Promise((reslove,reject) => {
             fs.writeFile(filename,output,(error) => {

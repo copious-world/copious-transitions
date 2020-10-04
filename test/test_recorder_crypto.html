@@ -1187,14 +1187,12 @@ html {
     }
     //--<
 
-
     //>--
     function hex_fromByteArray(byteArray){
         return hex_fromTypedArray(ArrayOfBytes_toByteArray(byteArray))
     }
     //--<
         
-
     //>--
     function hex_toArrayOfBytes(hexString) {
         let result = [];
@@ -1211,7 +1209,6 @@ html {
         return(byteArray)
     }
     //--<
-
 
     //>--
     function hex_toByteArray(hexstr) {
@@ -1510,7 +1507,7 @@ html {
         // Ask for the server's public key
         let server_wrapped_key = await wv_postData(FETCH_SERVER_WRAPPER_KEY_RESTORE,user_identification)
         let wrapped_aes = server_wrapped_key.wrapped
-        wrapped_aes = bufferToArrayBufferCycle(wrapped_aes)
+        wrapped_aes = bufferToArrayBufferCycle(wrapped_aes.data)
         let iv_buffer = hex_toByteArray(user_info.iv)
         let enckey = hex_toByteArray(user_info.encrypted_key)
         let priv_key = await wv_decrypted_local_priv_key(enckey,wrapped_aes,PRIV_wrapper_key,iv_buffer)
@@ -1539,7 +1536,7 @@ html {
         // Ask for the server's public key
         let server_wrapped_key = await wv_postData(FETCH_SERVER_WRAPPER_KEY,user_identification)
         let wrapped_aes = server_wrapped_key.wrapped
-        wrapped_aes = bufferToArrayBufferCycle(wrapped_aes)
+        wrapped_aes = bufferToArrayBufferCycle(wrapped_aes.data)
         let sess_id = server_wrapped_key.id
         let [hx_encrypted_key,hx_iv_str] = await wv_ecrypted_local_priv_key(key,wrapped_aes,PRIV_wrapper_key,nonce_buffer)
         //
