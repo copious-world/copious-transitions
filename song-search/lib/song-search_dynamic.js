@@ -119,7 +119,6 @@ function selectSpotifyFields(body) {
     }
 }
 
-
 class SongSearchDynamic extends GeneralDynamic {
     //
     constructor() {
@@ -131,7 +130,7 @@ class SongSearchDynamic extends GeneralDynamic {
       obtainToken(getBaseAccount)
       this.key_location = conf.audio_keys_location
       this.uwrap_key_location = conf.uwrap_audio_keys_location
-      this.default_wss = conf.wss
+      this.default_wss_path = conf.wss_app_path
       let key 
       key = await this.load_key(this.key_location)
       this.add_import(key,["wrapKey"],(ky) => { this.audio_sessions_public_key = ky;})
@@ -158,25 +157,26 @@ class SongSearchDynamic extends GeneralDynamic {
                 }
             }
 
-        } else if ( asset === RETURN_WSS_URL) {
+        } else if ( asset === RETURN_WSS_URL ) {
           // RETURN A URL FOR SEND WSS MESSAGES TO A COPY OF THIS CHUNK LOGIC
-          let email = transtionObj.email
           let invokation_time = transtionObj.when
-          let session_data = await this.trans_engine.retrieve_audio_session(email) // find all the device entries if possible
+          let email = transtionObj._user_key
+          let key = {'email' : email }
+          //
+          let session_data = await this.trans_engine.retrieve_audio_session(key) // find all the device entries if possible
           if ( session_data ) {
-            session_data.update({ "timestamp" : invokation_time })
+            session_data.timestamp = invokation_time
           } else {
-            let audioSessionRep = {
+            session_data = {
               'user' : email,
               'device' : transtionObj.device_id,
               'timestamp' : invokation_time
             }
-            let key = {'email' : transtionObj._user_key }
-            await this.trans_engine.store_audio_session(key,audioSessionRep)
           }
+          await this.trans_engine.store_audio_session(key,session_data)
           let results = {
             'mime_type' : 'application/json',
-            'string' : this.default_wss
+            'string' : JSON.stringify({ "url" : this.default_wss_path + "/transitional" })
           }
           return results
         } else if ( asset === AUDIO_SESSION_TRANSFER ) {
@@ -236,7 +236,7 @@ class SongSearchDynamic extends GeneralDynamic {
         } else if ( asset === GET_PUBLIC_KEY_FOR_RESTORE_KEY_WRAPPING_IN_CLIENT ) {
           let rslt = {}
           //
-          let key = {'email' : transtionObj._user_key, 'sess_id' : transtionObj._sess_id }
+          let key = {'email' : transtionObj._user_key, 'sess_id' : transtionObj._server_id }
           let session_data = await this.trans_engine.retrieve_audio_session(key) // find all the device entries if possible
           if ( session_data ) {
             try {
@@ -247,13 +247,17 @@ class SongSearchDynamic extends GeneralDynamic {
                 let wrapped_key = await this.trans_engine.wrap_aes_key(client_wrapper_key,clear_aes_key)
                 rslt = {
                   'wrapped' : wrapped_key,   // has been loaded as jwk
-                  'id' : session_data.sess_id
+                  'id' : transtionObj._server_id
                 }
               } else {
                 rslt = `{ "status" : "FAIL", "reason" : "no wrapper key for AES"}`
               }
             } catch (e) {
               rslt = `{ "status" : "FAIL", "reason" : "no wrapper key for AES: ${e.message}"}`
+            }
+          } else {
+            if ( session_data === null ) {
+              rslt = { "no_key" : true, "reason" : "database empty"}
             }
           }
           //

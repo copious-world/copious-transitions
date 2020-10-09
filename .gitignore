@@ -22,3 +22,4 @@ tools/boot*.sh
 play_count.json
 release/www.popsongnow.com/index.html
 webcrypto*
+user_keys*

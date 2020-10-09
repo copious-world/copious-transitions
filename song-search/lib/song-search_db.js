@@ -58,8 +58,8 @@ class SongSearchDBClass extends DBClass {
         super(SongSearchSessionStore,memcdClient)
 
         // CACHING AND LOCAL STORAGE
-        this.cached_sessions = {}
-        this.sessions_components = {}
+        this.cached_sessions = {}   // one per user across that user's devices
+        this.sessions_components = {}   // a list of recorder elements
         this.root_path = process.mainModule.path
     }
 
@@ -71,17 +71,17 @@ class SongSearchDBClass extends DBClass {
         return(FORCE_FAIL_FETCH)
     }
 
-    async cache_if_found(session_id,and_with) {
-        let sessObj = this.cached_sessions[session_id]
+    async cache_if_found(session_id,and_with,transformer) {
+        let sessObj = this.cached_sessions[session_id]  // is it in cache?
         if ( sessObj ) {
-            this.cached_sessions[session_id] = sessObj
-            return true
+            return sessObj
         } else {
-            let datum = await super.get_key_value(session_id)
+            let datum = await super.get_key_value(session_id)   // get it out of key value store... (may need file storage)
             if ( datum ) {
-                this.cached_sessions[session_id] = JSON.parse(datum)
-                return true
-            } else if ( and_with ) {
+                if ( transformer === undefined ) transformer = async (dat) => dat
+                this.cached_sessions[session_id] = await transformer(datum)    // if found
+                return this.cached_sessions[session_id]
+            } else if ( and_with ) {    // expand the key and try again..
                 for ( let key in and_with ) {
                     let search_value = and_with[key]
                     let search_key = `${key}-${search_value}`
@@ -91,7 +91,7 @@ class SongSearchDBClass extends DBClass {
                         if ( container[session_id] ) {
                             this.cached_sessions[session_id] = container[session_id]
                             // return from loop
-                            return true
+                            return this.cached_sessions[session_id]
                         }
                     }
                 }
@@ -101,53 +101,107 @@ class SongSearchDBClass extends DBClass {
     }
 
     //
-    async component_cache_if_found(CachableOperationsClass,session_id,sess_name) {
+    // component_cache_if_found --
+    // manages objects that take in data from recording.
+    // An object is located by its session_id and its sess_name
+    // the session_id maps to a collection of recording sessions, each with its name
+    // If the session object is not in caches, this routine create an object and places it in caches
+    async component_cache_if_found(CachableOperationsClass,session_id,sess_name,transformer) {
         let key = `${session_id}-${sess_name}`
-        let sessionComponent = this.sessions_components[key]
+        let sessionComponent = this.sessions_components[key] // look for the object in caches
         if ( sessionComponent ) {
             return(sessionComponent)
-        } else {
-            let sessContainer = this.cache_if_found(session_id)
-            let activeSession = sessContainer.assets[sess_name]
-            if ( !activeSession ) {
-                sessContainer.assets[sess_name] = {
-                    'hashes' : [],
-                    'blob_list' : []
+        } else {    // if not in cache
+            let sessContainer = await this.cache_if_found(session_id,false,transformer)  // load the larger object containing parts of the sessions
+            if ( sessContainer ) {
+                if ( sessContainer.assets === undefined ) {
+                    sessContainer.assets = {}
                 }
-            }
-            //
-            sessionComponent = new CachableOperationsClass(activeSession)
-            this.sessions_components[key] = sessionComponent
-            sessionComponent.need_info
-            return sessionComponent
+                let activeSession = sessContainer.assets[sess_name] // this is the smaller part, with the active session
+                if ( !activeSession ) { // make sure there is an asset container for the named session component.
+                    sessContainer.assets[sess_name] = {
+                        'hashes' : [],
+                        'blob_list' : []
+                    }
+                    activeSession = sessContainer.assets[sess_name] 
+                }
+                //  The object encompases the smaller active session part, and this object lives in caches
+                sessionComponent = new CachableOperationsClass(activeSession) // 
+                this.sessions_components[key] = sessionComponent    // put it into cache
+                return sessionComponent
+            } else return false // no container of active sessions (past and present)
         }
     }
 
-    store_component_section(session_id,sess_name,sessCompFields,update)  {
+    async store_component_section(session_id,sess_name,sessCompFields,update)  {
         let key = `${session_id}-${sess_name}`
-        let sessContainer = this.get_from_cache(session_id)
+        let sessContainer = this.get_from_cache(session_id)  // changed in caches
         let sessionComponent = this.sessions_components[key]
-        if ( sessContainer ) {
-            if ( sessionComponent ) {
-                sessionComponent.add_fields(sessCompFields)
-                this.db.set_key_value(session_id,JSON.stringify(sessContainer))
-            }
+        if ( sessionComponent ) {
+            sessionComponent.add_fields(sessCompFields)
+        }
+        if ( sessContainer && (sessContainer !== FORCE_FAIL_FETCH) ) {
+            let filename = await super.get_key_value(session_id)
+            await this.store_to_file_promise(sessContainer,filename)
         }
         return sessionComponent
     }
 
-    async fetch_file_class(stroge_class,key) {
-        let policy_key = `${stroge_class}-${key}`
+    // // //
+    file_transformer(filename) {
+        let p = new Promise((resolve,reject) => {
+            fs.readFile(filename,(error,data) => {
+                if ( error ) reject(error)
+                resolve(data.toString())
+            })
+        })
+        return p
+    }
+
+    file_transformer_parse(filename) {
+        let p = new Promise((resolve,reject) => {
+            fs.readFile(filename,(error,data) => {
+                if ( error ) reject(error)
+                try {
+                    let obj = JSON.parse(data.toString())
+                    resolve(obj)
+                } catch (e) { // parse
+                    resolve({ "assets" : {} })
+                }
+            })
+        })
+        return p
+    }
+
+
+    store_to_file_promise(obj,filename,returnable) {
+        let output = JSON.stringify(obj)
+        let p = new Promise((resolve,reject) => {
+            fs.writeFile(filename,output,(error) => {
+                if ( error ) reject(error)
+                if ( returnable !== undefined ) resolve(returnable)
+                else resolve(true)
+            })
+        })
+        return p
+    }
+
+    async fetch_file_class(storage_class,key) {
+        let policy_key = `${storage_class}-${key}`
         try {
             let filename = await super.get_key_value(policy_key)
             if ( filename ) {
-                let p = new Promise((reslove,reject) => {
-                    fs.readFile(filename,(error,data) => {
-                        if ( error ) reject(error)
-                        reslove(data.toString())
-                    })
-                })
+                if ( filename.indexOf('/user_keys/') < 0 ) {  // DELETE
+                    let prefix = this.root_path 
+                    let fixer = filename.substr(prefix.length)
+                    fixer = this.root_path + '/user_keys/' + fixer
+                    super.set_key_value(policy_key,fixer)
+                    filename = fixer // moved by hand
+                }
+                let p = this.file_transformer(filename)
                 return p
+            } else if ( filename === null ) {
+                return(null)
             }
         } catch (e) {
             console.log(e)
@@ -155,21 +209,14 @@ class SongSearchDBClass extends DBClass {
         return false
     }
 
-    async store_file_class(stroge_class,key,audioSessionRep) {
-        let policy_key = `${stroge_class}-${key}`
+    async store_file_class(storage_class,key,audioSessionRep) {
+        let policy_key = `${storage_class}-${key}`
         let filename = await super.get_key_value(policy_key)
-        if ( filename === null || filename === undefined  ) {
-            filename = this.root_path + '/' + ('' + uuid())
+        if ( filename === null || filename === undefined || (filename.indexOf('/user_keys/') <= 0) ) {
+            filename = this.root_path + '/user_keys/' + ('' + uuid())
         }
         super.set_key_value(policy_key,filename)
-        let output = JSON.stringify(audioSessionRep)
-        let p = new Promise((reslove,reject) => {
-            fs.writeFile(filename,output,(error) => {
-                if ( error ) reject(error)
-                reslove(policy_key)
-            })
-        })
-        return p
+        return this.store_to_file_promise(audioSessionRep,filename,policy_key)
     }
 
 

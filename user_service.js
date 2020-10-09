@@ -15,6 +15,19 @@ const shutdown_server_helper_factory = require('http-shutdown')
 
 // https://github.com/fastify/fastify
 
+let g_expected_modules = [
+                            "custom_transitions",
+                            "db",
+                            "middleware",
+                            "authorizer",
+                            "validator",
+                            "static_assets",
+                            "dynamic_assets",
+                            "expression",
+                            "business",
+                            "transition_engine"
+                        ]
+
 //
 //
 const conf_obj = load_parameters()                  // configuration parameters to select modules, etc.
@@ -430,16 +443,8 @@ g_auth_wss.on("connection", (ws,req) => {
                     ws_list.forEach(ws => {
                         send_to_ws(ws,command)
                     })
-                } else { // transitional
-                    let transition = data.transition
-                    let message = data.message
-                    let finalization_state = await g_session_manager.finalize_transition(transition,message,{},null)      // FINALIZE (not a final state)
-                    if ( finalization_state ) {
-                        ws.send(JSON.stringify(finalization_state));
-                    }
                 }
             }
-
         });
 
         ws.on("close", () => {
@@ -459,41 +464,6 @@ g_auth_wss.on("connection", (ws,req) => {
     }
 });
 
-
-/*
-wss.on('connection', function connection(ws, req) {
-    const ip = req.socket.remoteAddress;
-  });
-
-
-function noop() {}
-
-function heartbeat() {
-  this.isAlive = true;
-}
-
-const wss = new WebSocket.Server({ port: 8080 });
-
-wss.on('connection', function connection(ws) {
-  ws.isAlive = true;
-  ws.on('pong', heartbeat);
-});
-
-const interval = setInterval(function ping() {
-  wss.clients.forEach(function each(ws) {
-    if (ws.isAlive === false) return ws.terminate();
-
-    ws.isAlive = false;
-    ws.ping(noop);
-  });
-}, 30000);
-
-wss.on('close', function close() {
-  clearInterval(interval);
-});
-*/
-
-
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 }       // WEB SCOCKETS OPTION (END)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
@@ -507,7 +477,7 @@ if ( conf_obj.ws_client_port && !(g_debug) ) {   // SUPPORT SERVICE WEB SCOCKETS
         try {
             // setup a webSocket connection to get finalization data on logging in. -- 
             let socket_host =  conf_obj.ws_client_server
-    
+            //
             g_sitewide_socket = new WebSocket(`ws://${socket_host}/auth_ws/site_wide`);
             g_sitewide_socket.on('error',(e) => {
                 g_sitewide_socket = null
@@ -556,6 +526,95 @@ if ( conf_obj.ws_client_port && !(g_debug) ) {   // SUPPORT SERVICE WEB SCOCKETS
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 }       // SUPPORT SERVICE WEB SCOCKETS OPTION (END)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+
+
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+if ( conf_obj.wss_app_port ) {   // WEB APP SCOCKETS OPTION (START)
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+
+let app_server = http.createServer(g_app);
+app_server.listen(conf_obj.wss_app_port);
+var g_app_wss = new WebSocketServer({server: app_server});
+
+console.log(`web app socket listening: ${conf_obj.wss_app_port}`)
+
+g_app_wss.on("connection", (ws,req) => {
+    //
+    if (  req.url.indexOf("/transitional") > 0  ) {
+
+        if ( g_transition_engine ) {
+            g_transition_engine.set_wss_sender((ws,data) => {
+                if ( g_app_wss ) {
+                    if ( ws ) {
+                        ws.send(JSON.stringify(data));
+                    }
+                }
+            })
+            g_transition_engine.add_ws_session(ws)
+        }
+
+        ws.on("message",  async (data, flags) => {
+            //
+            let body = JSON.parse(data.toString());
+            //
+            let server_id = body.message ? body.message.server_id : false
+            if ( server_id ) {
+                 // transitional
+                let transition = body.transition
+                let message = body.message
+                let is_feasible = await g_session_manager.feasible(transition,message,null)
+                if ( is_feasible ) {
+                    let finalization_state = await g_session_manager.finalize_transition(transition,message,{},null)      // FINALIZE (not a final state)
+                    if ( finalization_state ) {
+                        ws.send(JSON.stringify(finalization_state));
+                    }
+                }
+            }
+        });
+
+        ws.on("close", () => {
+            g_transition_engine.close_wss_session(ws)
+        });
+    }
+});
+    
+/*
+    wss.on('connection', function connection(ws, req) {
+        const ip = req.socket.remoteAddress;
+      });
+    
+    
+    function noop() {}
+    
+    function heartbeat() {
+      this.isAlive = true;
+    }
+    
+    const wss = new WebSocket.Server({ port: 8080 });
+    
+    wss.on('connection', function connection(ws) {
+      ws.isAlive = true;
+      ws.on('pong', heartbeat);
+    });
+    
+    const interval = setInterval(function ping() {
+      wss.clients.forEach(function each(ws) {
+        if (ws.isAlive === false) return ws.terminate();
+    
+        ws.isAlive = false;
+        ws.ping(noop);
+      });
+    }, 30000);
+    
+    wss.on('close', function close() {
+      clearInterval(interval);
+    });
+*/
+    
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+}       // WEB APP SCOCKETS OPTION (END)
+// ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+    
 
 function fetch_local_cache_transition(cache_map,token) {
     if ( cache_map ) {
@@ -657,9 +716,14 @@ function load_parameters() {
         let confJSON = JSON.parse(data)
         let module_path = confJSON.module_path
         confJSON.mod_path = {}
-        for ( let mname in confJSON.modules ) {
-            confJSON.mod_path[mname] = __dirname + '/' + module_path + '/' + confJSON.modules[mname]
-        }
+        g_expected_modules.forEach(mname => {
+            let modName = confJSON.modules[mname]
+            if ( modName ) {
+                confJSON.mod_path[mname] = __dirname + `/${module_path}/${modName}`
+            } else {
+                confJSON.mod_path[mname] = __dirname + `/defaults/lib/default_${mname}`
+            }
+        })
         return(confJSON)
     } catch (e) {
         console.log(e)

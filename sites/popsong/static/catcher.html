@@ -5,8 +5,22 @@
         <br>
         <button id="install-song-catcher" style="width:50%" >Install Song Catcher</button>
     </blockquote>
-    <blockquote style="text-align:justify;padding: 8%;padding-top:4px;">
+    <blockquote id="recorder-scratchpad"  style="text-align:justify;padding: 8%;padding-top:4px;">
         Use the Copious Song Catcher to record your new song ideas.
         Songs will be stored in a distributed database permanently linked to your identity.
     </blockquote>
 </div>
+<script>
+async function do_fetch_recorder() {
+    let formJson = await fetchEndPoint('uploaders/static/recorder')
+    if ( formJson ) {
+        let formPlacement = document.querySelector('#recorder-scratchpad');
+        if ( formPlacement ) {
+            formPlacement.innerHTML = decodeURIComponent(formJson.html)
+            addscript(decodeURIComponent(formJson.script),formPlacement)
+            let loaderBtn = document.getElementById('load-song-catcher')
+            loaderBtn.disabled = true
+        }
+    }
+}
+</script>

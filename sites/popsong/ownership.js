@@ -3,9 +3,9 @@
 // ---- ---- ---- ---- ---- ---- ---- ---- ----
 // ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-    const CHUNK_POST_COM_WSSURL_REQ = `https://${self.location.host}/song-search/guarded/dynamic/hash_progress_com_wss_url`
-    const STORE_ASSET_POST_URL = `https://${self.location.host}/song-search/transition/store_waves`  // SESSION STORAGE FOR THIS DEVICE
-    const SESSION_DEVICE_MOVE = `https://${self.location.host}/song-search/transition/move_waves`    // FROM THIS DEVICE TO STORAGE
+    const CHUNK_POST_COM_WSSURL_REQ = `https://${self.location}/song-search/guarded/dynamic/hash_progress_com_wss_url`
+    const STORE_ASSET_POST_URL = `https://${self.location}/song-search/transition/store_waves`  // SESSION STORAGE FOR THIS DEVICE
+    const SESSION_DEVICE_MOVE = `https://${self.location}/song-search/transition/move_waves`    // FROM THIS DEVICE TO STORAGE
     //
     const AUDIO_SESSION_STORE = 'audio_sessions'
     const AUDIO_USERID_STORE = 'audio_users'
@@ -16,10 +16,8 @@
     var g_current_chunks = []       // chunk hashes
     var g_current_nonces = []
     let g_nonce_buffer = new Uint8Array((256/8))        // 256 bits or 32 bytes 
-    var g_current_session_name = "none"
-    var g_current_session_machine_name = ""
+    var g_current_session_name = ""
     var g_session_changed = false
-    var g_current_geo_location = ""
 
     var g_crypto = crypto.subtle
     var g_audio_db = null
@@ -55,7 +53,7 @@
 
     async function wv_init_database(db_name) {
         // request an open of DB
-        let request = self.indexedDB.open(db_name, 2.2);
+        let request = self.indexedDB.open(db_name, 2);
         //
         request.onerror = (event) => {
             console.log("This web app will not store recorded audio without the use of computer storage.")
@@ -119,13 +117,6 @@
     //--<
 
     //>--
-    function hex_toByteArray(hexstr) {
-        let aob = hex_toArrayOfBytes(hexstr)
-        return ArrayOfBytes_toByteArray(aob)
-    }
-    //--<
-
-    //>--
     function ArrayOfBytes_toByteArray(arrayOfBytes) {
         let byteArray = new Uint8Array(arrayOfBytes)
         return(byteArray)
@@ -174,32 +165,7 @@
         return hashHex;
     }
     //--<
-
-
-
-    //>--
-    // geo_loc_str_to_byte_array
-    //  -- 
-    function geo_loc_str_to_byte_array(loc_str) {
-        let loc = null
-        try {
-            loc = JSON.parse(loc_str)
-            if ( (loc.latitude === undefined) || (loc.longitude === undefined) ) {
-                loc = g_current_geo_location
-            }
-        } catch(e) {
-            loc = g_current_geo_location
-        }
-        let lat = '' + loc.latitude
-        let long = '' + loc.longitude
-        lat = lat.replace('.','')
-        long = long.replace('.','')
-        let stringup = lat + long
-        let array = hex_toArrayOfBytes(stringup)
-        return(array)
-    }
-    //--<
-
+    
 
     //>--
     // wv_nowrap_decrypted_local_priv_key
@@ -229,13 +195,13 @@
     //>--
     // import_signing_key
     //  -- 
-    async function import_signing_key(encrypted_key,aes_key,iv_buffer) {
+    function import_signing_key(user_info,aes_key) {
         if ( aes_key !== null ) {
-            let enckey = hex_toByteArray(encrypted_key)
+            let iv_buffer = hex_toByteArray(user_info.iv)
+            let enckey = hex_toByteArray(user_info.encrypted_key)
             let priv_key = await wv_nowrap_decrypted_local_priv_key(enckey,aes_key,iv_buffer)
-            return priv_key
+            user_info.priv = priv_key
         }
-        return false
     }
     //--<
     
@@ -317,28 +283,25 @@
                     if ( cursor ) {
                         let sessionObj = cursor.value
                         let nonces = set_nonces ? g_current_nonces : sessionObj.hashes[map_id].nonces
-                        let last_loc_bytes = geo_loc_str_to_byte_array(sessionObj.sess_geo_location)
-                        let stored_token = output 
-                        if ( last_loc_bytes ) {
-                            let a_view = new Uint8Array(output)
-                            let o_array = [...a_view]
-                            let xored = xor_arrays(last_loc_bytes,o_array)
-                            stored_token = hex_fromArrayOfBytes(xored)
-                        }
+                        let last_loc = sessionObj.locations.length ? sessionObj.locations[sessionObj.locations.length-1] : false
+                        let stored_token = last_loc ? hex_xor_of_strings(last_loc,output) : output
                         sessionObj.hashes[map_id] = {
                             'hash_combo' : stored_token,      // signed and sent to server
                             'combined' : hash_prefix,
                             'blob_hash' : hashHex,
                             'nonces' : nonces
                         }
-                        cursor.update(sessionObj);
                         resolve(stored_token)
                     }
+                    //
+                    const request = cursor.update(sessionObj);
+                    request.onsuccess = () => {
+                        reject(false)
+                    };
                 }
             }
-
+        
             let not_found_callback = () => {
-                reject(false)
                 console.log(`The session ${sess_name} is not in the database`)
             }
         
@@ -349,7 +312,7 @@
 
     async function combined_hash_signed(hexs_chunk_array,blob_id,new_blob,prev_blob_hash) {
         if ( prev_blob_hash ) {     // store the history of changes if the parameter is provided
-            hexs_chunk_array.push(prev_blob_hash)
+            chunk_aray.push(prev_blob_hash)
         }
         // hash
         let blobArray = await new_blob.arrayBuffer();
@@ -358,7 +321,7 @@
         const hashArray = Array.from(new Uint8Array(hashBuffer));                     // convert buffer to byte array
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
         // add to the hash list
-        hexs_chunk_array.push(hashHex)
+        chunk_array.push(hashHex)
         //
         // get an xor of all the hashes in the chunk array
         let hash_prefix = xor_all_to_hext_str(hexs_chunk_array)
@@ -489,14 +452,7 @@
     }
 
 
-    var g_wss_active_session_id = "nothing"
-    function set_current_app_ws_id(ws_id) {
-        g_wss_active_session_id = ws_id
-    }
-
-
-    function post_chunk(chunk_data) {
-        let chunk_message = JSON.stringify(chunk_data)
+    function post_chunk(chunk_message) {
         g_app_web_socket.send(chunk_message)
     }
 
@@ -527,9 +483,8 @@
             case 'init' : {             // setup operation
                 try {
                     let user_info = message.user
-                    g_current_session_machine_name = user_info.machine_name ? user_info.machine_name : 'tester'
                     g_user_info = user_info // ?? will the key come through OK?
-                    user_info.priv = await import_signing_key(g_user_info.encrypted_key,g_current_aes_key,message.iv)
+                    import_signing_key(g_user_info,g_current_aes_key)
                     wv_init_database(gc_song_db_name)
                     g_app_web_socket = await web_socket_initializer(user_info)
                     interaction_state('ready')
@@ -542,18 +497,14 @@
                 g_current_session_name = message.sess_name
                 break
             }
-            case 'geolocation' : {
-                g_current_geo_location = message.geo_location
-                break;
-            }
             case 'chunk' : {            // recording chunks
                 // as chunks are gathered during recording save hashes of them
                 g_current_session_name = message.sess_name
                 // The chunk in raw form is in the client for sound playback.
-                let new_chunk = message.chunk
+                let new_chunk = message.new_chunk
                 
                 crypto.getRandomValues(g_nonce_buffer);
-                let chunk_hash = await hash_of_chunk(new_chunk,g_nonce_buffer)  // chunk has is a string in the hex alphabet
+                let chunk_hash = hash_of_chunk(new_chunk,g_nonce_buffer)  // chunk has is a string in the hex alphabet
                 // STORE HASH LOCALLY
                 g_current_chunks.push(chunk_hash)
                 let nonce_hx_str = hex_fromTypedArray(g_nonce_buffer)  // a string
@@ -566,7 +517,7 @@
                         'email' : g_user_info.email,
                         'session' : g_current_session_name,
                         'client_time' : Date.now(),
-                        'server_id' : g_user_info.server_id
+                        'id' : g_user_info.server_id
                     }       // there is no blob id yet...
                 }
                 post_chunk(remote_cache_op)  // send updates to the server (short message)
@@ -586,7 +537,7 @@
                                 'email' : g_user_info.email,
                                 'session' : g_current_session_name,
                                 'client_time' : Date.now(),
-                                'server_id' : g_user_info.server_id,
+                                'id' : g_user_info.server_id,
                                 'blob_id' : message.blob_id
                             }
                         }
@@ -605,7 +556,7 @@
                                 'email' : g_user_info.email,
                                 'session' : g_current_session_name,
                                 'client_time' : Date.now(),
-                                'server_id' : g_user_info.server_id,
+                                'id' : g_user_info.server_id,
                                 'blob_id' : message.blob_id
                             }
                         }
@@ -663,7 +614,7 @@
     async function web_socket_initializer(user_info) {
         try {
             let chunk_com_req = {
-                'user_key' : user_info.email,
+                'email' : user_info.email,
                 'when' : Date.now(),
                 "device_id" : get_client_device_name()
             }
@@ -671,26 +622,20 @@
             if ( json ) {
                 let com_url = json.url
                 let p = new Promise((resolve,reject) => {
-                    let socket = new WebSocket(`wss://${self.location.host}/${com_url}`);   // wss ... forcing this onto a secure channel
+                    let socket = new WebSocket(`wss://${com_url}`);   // wss ... forcing this onto a secure channel
                     let opened = false
+
                     socket.onopen = (event) => {
                         opened = true
                         resolve(socket)
                     };
-                    //
+                    
                     socket.onmessage = (event) => {
-                        let msg = JSON.parse(event.data)
-                        if ( msg.data.type === 'ws_id' ) {
-                            let local_ws_id = msg.ws_id
-                            if ( msg.data.status === "connected" ) {
-                                set_current_app_ws_id(local_ws_id)
-                            }
+                        let msg = event.data
+                        if ( g_expected_response ) {
+                            g_expected_response.resolve(msg)
                         } else {
-                            if ( g_expected_response ) {
-                                g_expected_response.resolve(msg)
-                            } else {
-                                interaction_info(msg)
-                            }    
+                            interaction_info(msg)
                         }
                     };
                     

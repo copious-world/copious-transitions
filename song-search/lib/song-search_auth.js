@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const CONST_PROGRAMMED_ASSET_WAVE_KEYS = 7  // just some number a low prime seemed to be a good place to start
 const GET_PUBLIC_KEY_FOR_KEY_WRAPPING_IN_CLIENT = 'identified_key_wrapper_pub_key'
 const GET_PUBLIC_KEY_FOR_RESTORE_KEY_WRAPPING_IN_CLIENT = 'restore_key_wrapper_pub_key'
+const CHUNK_POST_COM_WSSURL_REQ = 'hash_progress_com_wss_url' 
 
 
 class SearcherSessionManager extends SessionManager {
@@ -27,24 +28,38 @@ class SearcherSessionManager extends SessionManager {
             let found_session = await this.db.cache_if_found(post_body.sess_id, { 'audiorecowner' : post_body.email })
             return(found_session)
         }
-        if (  G_get_wss_server_url.tagged(transition) ) {
-            return(true)
+        if ( G_wss_chunk.tagged(transition) || G_wss_chunk_final.tagged(transition) || G_wss_chunk_change.tagged(transition) ) {
+            let fields_present = (post_body.email !== undefined )
+            fields_present = fields_present && (post_body.session !== undefined )
+            fields_present = fields_present && (post_body.client_time !== undefined )
+            fields_present = fields_present && (post_body.server_id !== undefined )
+            return(fields_present)
         }
+
         return(super.feasible(transition,post_body,req))
     }
 
 
     // restore_wrapper_key-${user_info.server_id}
-    async guard(asset,body,req) {
-        let key = 'restore_wrapper_key-'
-        let n = key.length
-        if ( asset.indexOf(key) === 0 ) {
+    async guard(asset,post_body,req) {
+        if ( asset === GET_PUBLIC_KEY_FOR_RESTORE_KEY_WRAPPING_IN_CLIENT ) {
+            if ( post_body.pub_wrapper_key !== undefined ) {
+                if ( Object.keys(post_body.pub_wrapper_key).length != 0 ) {
+                    // make sure the user has been previously stored.
+                    /*
             let session_id = asset.substr(n)
             let info_access = await this.db.cache_if_found(session_id)
             if ( info_access ) {
+                post_body.pub_wrapper_key
                 return true
             } else {
                 return false
+            }
+                    */
+                    return true
+                } else {
+                    return false
+                }
             }
         }
 
@@ -98,12 +113,12 @@ class SearcherSessionManager extends SessionManager {
             } else {
                 return false
             }
-            transObj._sess_id = post_body.sess_id
+            transObj._server_id = post_body.server_id
             transObj.secondary_action = false
             return(transObj)
-        } else if ( asset === 'hash_progress_com_wss_url' ) {
+        } else if ( asset_id === CHUNK_POST_COM_WSSURL_REQ ) {
             let transObj = super.process_asset(asset_id,post_body)
-            transObj.email = post_body.email  // say an encrypted email
+            transObj._user_key = post_body.user_key  // say an encrypted email
             transObj.when = post_body.when
             transObj._user_machine_differentiator = post_body.device_id  // say an hash of the machine name or something...
             return(transObj)

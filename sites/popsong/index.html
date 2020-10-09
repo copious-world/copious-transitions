@@ -269,10 +269,27 @@ html {
 			margin: 2px;
 			width:120px;
 		}
+
+		#topicBox_1 button {
+			font-size: 0.8em;
+			cursor: pointer;
+			font-weight: 600;
+			background-color: rgb(250, 244, 218);
+			border-radius: 6px;
+			border: 1px double #cccccc;
+			width:auto;
+			padding-left: 4px;
+			padding-right: 4px;
+		}
 	
 		button:hover {
 			background-color : #CACAFF;
 			color: darkred;
+		}
+
+		button:disabled {
+			cursor:none;
+			background-color: rgba(220, 220, 220, 0.616);
 		}
 	
 		@media screen and (max-width: 390px) {
@@ -1333,19 +1350,32 @@ viewBox="0 0 360 38">
 	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('topicBox_1')">x</span></div>
 	<div class="fade_able_content" >
 		<div style="min-width: 400px;min-height: 300px;">
-			<div id="catcher-app" class="applink" >
-    <p style="text-align:center;color:firebrick;font-size:120%;">Record New Songs</p>
-    <blockquote style="text-align:center;padding-bottom:4px;">
-        <button id="load-song-catcher" style="width:50%" >Load Song Catcher</button>
-        <br>
-        <button id="install-song-catcher" style="width:50%" >Install Song Catcher</button>
-    </blockquote>
-    <blockquote style="text-align:justify;padding: 8%;padding-top:4px;">
-        Use the Copious Song Catcher to record your new song ideas.
-        Songs will be stored in a distributed database permanently linked to your identity.
-    </blockquote>
+<div id="catcher-app" class="applink" >
+	<p style="text-align:center;color:firebrick;font-size:120%;">Record New Songs</p>
+	<blockquote style="text-align:center;padding-bottom:4px;">
+		<button id="load-song-catcher" style="width:50%" onclick="do_fetch_recorder()" >Load Song Catcher</button>
+		<br>
+		<button id="install-song-catcher" style="width:50%" >Install Song Catcher</button>
+	</blockquote>
+	<blockquote id="recorder-scratchpad" style="text-align:justify;padding: 8%;padding-top:4px;">
+		Use the Copious Song Catcher to record your new song ideas.
+		Songs will be stored in a distributed database permanently linked to your identity.
+	</blockquote>
 </div>
-
+<script>		
+async function do_fetch_recorder() {
+	let formJson = await fetchEndPoint('uploaders/static/recorder')
+	if ( formJson ) {
+		let formPlacement = document.querySelector('#recorder-scratchpad');
+		if ( formPlacement ) {
+			formPlacement.innerHTML = decodeURIComponent(formJson.html)
+			addscript(decodeURIComponent(formJson.script),formPlacement)
+			let loaderBtn = document.getElementById('load-song-catcher')
+			loaderBtn.disabled = true
+		}
+	}
+}
+</script>
 		</div>
 	</div>
 </div>

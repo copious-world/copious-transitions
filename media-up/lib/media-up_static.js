@@ -9,11 +9,14 @@ class MediaUpStatic extends GeneralStatic {
         //
         this.preloaded = {
             "demo_uploader" : { "fname" : '/uploader.html', "ftype" : "html" },
-            "pub_submit" : { "fname" : '/submitter.html', "ftype" : "html" }
+            "pub_submit" : { "fname" : '/submitter.html', "ftype" : "html" },
+            "recorder" : { "fname" : '/recorder.html', "ftype" : "html" }
         }
         //
         this.demo_asset_media_object = null
         this.publication_asset_media_object = null
+        this.recorder_object = null
+        this.ownership_worker = null
     }
 
     preload_all(conf) {
@@ -43,6 +46,15 @@ class MediaUpStatic extends GeneralStatic {
             "string" : JSON.stringify(json)
         }
         //
+        // C) RECORDER APPLICATION -- recorder  -- e.g. recorder app for audio ownership, etc.
+        data = this.preloaded.recorder.data
+        json = this.prepare_asset(data)
+        //
+        this.recorder_object = {
+            "mime_type" : "application/json",
+            "string" : JSON.stringify(json)
+        }
+        //
         
     }
 
@@ -58,6 +70,12 @@ class MediaUpStatic extends GeneralStatic {
                 return("empty")
             } else {
                 return(this.publication_asset_media_object)
+            }
+        } else if ( asset == "recorder" ) {
+            if ( !(this.recorder_object) ) {
+                return("empty")
+            } else {
+                return(this.recorder_object)
             }
         } else {
             return(super.fetch())

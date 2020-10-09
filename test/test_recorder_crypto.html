@@ -874,7 +874,6 @@ html {
     const FETCH_SERVER_WRAPPER_KEY = '/song-search/guarded/dynamic/identified_key_wrapper_pub_key'
     const FETCH_SERVER_WRAPPER_KEY_RESTORE = '/song-search/guarded/dynamic/restore_key_wrapper_pub_key'
     const SEND_WRAPPED_RECORDING_KEY = '/song-search/transition/recording-key'
-    const RESTORE_KEY_FROM_SERVER = '/song-search/guarded/static/restore_wrapper_key'
     const REQ_AUDIO_SESSION_TRANSFER = '/song-search/guarded/dynamic/audio-session-transfer'
 
 
@@ -1386,7 +1385,7 @@ html {
     //--<
 
     //>--
-    // verify_hash
+    // export_wrapper_key
     // --
     async function export_wrapper_key(pub_key) {
         let exporter = await g_crypto.exportKey("jwk",pub_key)
@@ -1505,14 +1504,22 @@ html {
             "device_id" : get_client_device_name()      // identify the devices as well as possible without plugins or compicated user interaction
         }
         // Ask for the server's public key
-        let server_wrapped_key = await wv_postData(FETCH_SERVER_WRAPPER_KEY_RESTORE,user_identification)
-        let wrapped_aes = server_wrapped_key.wrapped
-        wrapped_aes = bufferToArrayBufferCycle(wrapped_aes.data)
-        let iv_buffer = hex_toByteArray(user_info.iv)
-        let enckey = hex_toByteArray(user_info.encrypted_key)
-        let priv_key = await wv_decrypted_local_priv_key(enckey,wrapped_aes,PRIV_wrapper_key,iv_buffer)
-        //      
-        return(priv_key)
+        let server_wrapped_key = false
+        try {
+            server_wrapped_key = await wv_postData(FETCH_SERVER_WRAPPER_KEY_RESTORE,user_identification)
+        } catch (e) {
+            console.log(e)
+        }
+        if ( server_wrapped_key ) {
+            let wrapped_aes = server_wrapped_key.wrapped
+            wrapped_aes = bufferToArrayBufferCycle(wrapped_aes.data)
+            let iv_buffer = hex_toByteArray(user_info.iv)
+            let enckey = hex_toByteArray(user_info.encrypted_key)
+            let priv_key = await wv_decrypted_local_priv_key(enckey,wrapped_aes,PRIV_wrapper_key,iv_buffer)
+            //      
+            return(priv_key)
+        }
+        return false
     }
     //--<
 

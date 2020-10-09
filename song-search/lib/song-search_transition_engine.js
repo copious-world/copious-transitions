@@ -16,6 +16,7 @@ class SessionObjectOps {
     constructor(obj) {
         this.datum = null
         this.set_datum(obj)
+        this.need_info = true
     }
 
     storage_class() {
@@ -30,15 +31,16 @@ class SessionObjectOps {
         this.datum.email = chunk_info.email
         this.datum.session = chunk_info.session
         this.datum.op_time = chunk_info.client_time
+        this.need_info = false
     }
 
-    backup_chunk_hashes() {
-        this.datum.blob_list[sessCompFields.blob_id] = this.datum.hashes
+    backup_chunk_hashes(blob_id) {
+        this.datum.blob_list[blob_id] = this.datum.hashes
         this.datum.hashes = []
     }
 
     add_fields(sessCompFields) {
-        this.datum.blob_list[sessCompFields.blob_id] = false
+        this.datum.blob_list[sessCompFields.blob_id] = false // makes a place holder
         if ( !this.datum.email ) this.datum.email = chunk_info.email
         if ( !this.datum.session ) this.datum.session = chunk_info.session
         if ( !this.datum.op_time ) this.datum.op_time = chunk_info.client_time
@@ -79,7 +81,6 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
             )
         }
     }
-
               
     async create_aes_key() {
         let aes_key = await g_crypto.generateKey(
@@ -131,9 +132,10 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
 
     async store_recording_chunk(post_body) {
         try {
-            let sessions_id = post_body.id
+            let sessions_id = post_body.server_id
             let sess_name = post_body.session
-            let sessionObject = await this.db.component_cache_if_found(SessionObjectOps,sessions_id,sess_name)
+            let transformer = this.db.file_transformer_parse
+            let sessionObject = await this.db.component_cache_if_found(SessionObjectOps,sessions_id,sess_name,transformer)
             if ( sessionObject.need_info ) {
                 sessionObject.set_info(post_body)
             }
@@ -145,7 +147,7 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
 
     async store_audio_session_component_section(post_body,do_update) {
         try {
-            let sessions_id = post_body.id
+            let sessions_id = post_body.server_id
             let sess_name = post_body.session
             let sessionObject = await this.db.store_component_section(sessions_id,sess_name,post_body) 
             if ( sessionObject ) {
@@ -196,20 +198,26 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
             let dbkey = `${key_field}-${key_value}`
             //
             let session_data = await this.db.fetch_file_class('transfer',dbkey)
+            if ( !(session_data) ) {
+                return session_data
+            }
             if ( sess_name ) {
                 session_data = JSON.parse(session_data,2) // ??
                 let session_component = session_data[sess_name]
                 return session_component    
             } else {
                 let audioSessionRep = JSON.parse(session_data)
+                if ( !(audioSessionRep.wrapped_aes_key) || audioSessionRep.wrapped_aes_key.length === 0 ) return false
                 audioSessionRep.wrapped_aes_key = hexUtils.hex_toByteArray(audioSessionRep.wrapped_aes_key)
                 return audioSessionRep
             }
         } catch (e) {
             console.log(e)
         }
+        return false
     }
 
+    // //
     async store_audio_session(key,audioSessionRep) {
         try {
             let key_field = Object.keys(key)[0]
