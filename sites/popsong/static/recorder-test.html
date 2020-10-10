@@ -177,15 +177,17 @@
     <div class="drag-bar-control"
           onmousedown="wv_capture_cursor(event)"
           onmouseup="wv_release_captured_cursor(event,false)"
-          onmouseout="wv_release_captured_cursor(event,true)"
+          onmouseout="wv_track_cursor_out(event,true)"
           onmousemove="wv_track_cursor(event)"
+          onmouseenter="wv_check_cursor_entry(event)"
         >
           <div class="wave_edit_controls_container"
             onmousedown="wv_capture_cursor(event,1)"
             onmouseup="wv_release_captured_cursor(event,false,1)"
-            onmouseout="wv_release_captured_cursor(event,true,1)"
+            onmouseout="wv_track_cursor_out(event,true,1)"
             onmousemove="wv_track_cursor(event,1)"
-          >
+            onmouseenter="wv_check_cursor_entry(event,t)"
+            >
             <button onclick="wv_zoom_in(event)">&downarrow;</button>
             <button onclick="wv_zoom_out(event)">&uparrow;</button>
             <button onclick="wv_scroll_left(event)">&leftarrow;</button>
@@ -1804,10 +1806,38 @@ function draw_wave(data,ctx,W,h) {
     ctx.globalCompositeOperation = saved_comp
   }
 
+  function isElementVisible(el,topOffset,leftOffset) {
+    let rect     = el.getBoundingClientRect(),
+        vWidth   = window.innerWidth || document.documentElement.clientWidth,
+        vHeight  = window.innerHeight || document.documentElement.clientHeight,
+        efp      = function (x, y) { return document.elementFromPoint(x, y) };     
+
+    // Return false if it's not in the viewport
+    if (rect.right < 0 || rect.bottom < 0 
+            || rect.left > vWidth || rect.top > vHeight)
+        return false;
+
+    // Return true if any of its four corners are visible
+    let rect_top = rect.top + (topOffset ? topOffset : 0)
+    let rect_left = rect.left + (leftOffset ? topOffset : 0)
+    return (
+          el.contains(efp(rect_left,  rect_top))
+      ||  el.contains(efp(rect.right, rect_top))
+      ||  el.contains(efp(rect.right, rect.bottom))
+      ||  el.contains(efp(rect_left,  rect.bottom))
+    );
+}
 
   async function open_wave_editor(wave_name) {
     let el = g_wave_open_editors[wave_name]
-    if ( el !== undefined ) return
+    if ( el !== undefined ) {
+      let container = g_wave_open_editors[wave_name].display
+      if ( !isElementVisible(container,20,20) ) {
+        container.style.top = "20px"
+        container.style.left = "20px"
+      }
+      return
+    }
     let div = document.getElementById('wave-graph-tmplt')
     let clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
     clone.id = wave_name;
@@ -2081,7 +2111,7 @@ function draw_wave(data,ctx,W,h) {
   //
   function wv_capture_cursor(ev,el_depth)  {
     ev = ev || window.event;
-    ev.preventDefault();
+    //ev.preventDefault();
 
     let controlBar = ev.target
     if ( controlBar ) {
@@ -2119,6 +2149,44 @@ function draw_wave(data,ctx,W,h) {
           if ( dist < WV_CONST_MOUSE_DRAG_DIST_TOLERANCE ) return
         }
         container._app_dragging = false
+      }
+    }
+  }
+  //
+  function wv_check_cursor_entry(ev,el_depth) {
+    ev = ev || window.event;
+    ev.preventDefault();
+    let controlBar = ev.target
+    if ( controlBar ) {
+      let container = controlBar.parentNode
+      if ( el_depth ) container = container.parentNode
+      if ( container ) {
+        if ( ev.buttons === 0 ) {
+          container._app_dragging = false
+        }
+      }
+    }
+  }
+  //
+  function wv_track_cursor_out(ev,el_depth) {
+    ev = ev || window.event;
+    ev.preventDefault();
+    //
+    let controlBar = ev.target
+    if ( controlBar ) {
+      let container = controlBar.parentNode
+      if ( el_depth ) container = container.parentNode
+      if ( container && container._app_dragging ) {
+        // calculate the new cursor position:
+        let prev_x = container._app_mouse_x - ev.clientX;
+        let prev_y = container._app_mouse_y - ev.clientY;
+        container._app_mouse_x = ev.clientX;
+        container._app_mouse_y = ev.clientY;
+        // set the element's new position:
+        let new_y = (container.offsetTop - prev_y)
+        let new_x = (container.offsetLeft - prev_x)
+        if ( new_y > 8 ) container.style.top = new_y + "px";
+        if ( new_x > 8 ) container.style.left = new_x + "px";
       }
     }
   }
