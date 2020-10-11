@@ -277,10 +277,11 @@
   //
   let recorder = false
   let audio = false
-  let app_recoder = false
+  let g_app_recoder = false
   let g_current_session_name = 'none'
   let g_session_name_list = []
   let g_preferred_download_format = 'audio/mpeg'
+  let g_wave_current_container = null
 
   //
   let g_wave_open_editors = {}
@@ -408,6 +409,7 @@
       let mediaRecorder = new MediaRecorder(stream);
       this.mediaRecorder = mediaRecorder
       this.audio_instance = null
+      this.section_id = 0
       //
       mediaRecorder.addEventListener('dataavailable', event => {
         this.data_handler(event)
@@ -444,7 +446,13 @@
       let audioUrl = URL.createObjectURL(audioBlob);
       this.audioBlob = audioBlob
       this.audio_instance = new Audio(audioUrl);
-      wv_secure('end-recording',audioBlob)
+      this.section_id = wv_secure('end-recording',audioBlob)
+    }
+
+    add_current_data() {
+      if ( this.audioBlob ) {
+        add_audio_data(this.audioBlob,this.section_id)
+      }
     }
 
     delete_last_recorderd_audio() {
@@ -850,7 +858,6 @@
       }
     });
 
-
         // close when clicking on backdrop
     tsend_btn_fld.addEventListener('click', (event) => {
       if ( sess_name_fld && temail_fld ) {
@@ -869,7 +876,6 @@
         tmodal.close('cancelled');
     });
 
-   
   }
 
   //>--
@@ -1165,7 +1171,7 @@
     apply_find_audio_session(g_current_session_name, audioStore, update_list_elem_callback, not_found_callback)
   }
 
-  function add_audio_data(audioBlob) {
+  function add_audio_data(audioBlob,section_id) {
 
     //
     if ( g_audio_db === null ) {
@@ -1183,8 +1189,9 @@
         if ( cursor ) {
           let sessionObj = cursor.value
           let blob_url = URL.createObjectURL(audioBlob);
-          let map_id = uuidv4()
-          sessionObj.data[map_id] = audioBlob
+          // map_id = section_id
+          sessionObj.data[section_id] = audioBlob
+          // 
           let geo_update = JSON.stringify(g_wv_current_locaion)
           if ( sessionObj.locations.indexOf(geo_update) < 0 ) {
             sessionObj.locations.push(geo_update)
@@ -1192,7 +1199,7 @@
           //
           const request = cursor.update(sessionObj);
           request.onsuccess = async () => {
-            add_audio_element(blob_url,map_id,audioBlob)  // visual rep
+            add_audio_element(blob_url,map_id,audioBlob,section_id)  // visual rep
             await wv_secure_total_session(g_current_session_name)
           };
           //
@@ -1489,7 +1496,7 @@
   // RECORDER
   async function wv_init_recorder() {
     const stream = await navigator.mediaDevices.getUserMedia({ 'audio': true });
-    app_recoder = new AppAudioRecorder(stream)
+    g_app_recoder = new AppAudioRecorder(stream)
   }
 
   //
@@ -1520,7 +1527,7 @@
       g_playButton.setAttribute('disabled', true);
       g_saveButton.setAttribute('disabled', true);
       g_deleteButton.setAttribute('disabled', true);
-      app_recoder.start();
+      g_app_recoder.start();
     });
 
     // STOP RECORD
@@ -1531,13 +1538,13 @@
       g_playButton.removeAttribute('disabled');
       g_saveButton.removeAttribute('disabled');
       g_deleteButton.removeAttribute('disabled');
-      app_recoder.stop();
+      g_app_recoder.stop();
     });
 
     // PLAY
     g_playButton.addEventListener('click', () => {
       stop_geo_update()
-      app_recoder.play();
+      g_app_recoder.play();
     });
 
     // DELETE
@@ -1545,14 +1552,12 @@
       g_saveButton.setAttribute('disabled', true);
       g_playButton.setAttribute('disabled', true);
       g_deleteButton.setAttribute('disabled', true);
-      app_recoder.delete_last_recorderd_audio()
+      g_app_recoder.delete_last_recorderd_audio()
     })
 
     // SAVE
     g_saveButton.addEventListener('click', () => {
-      if ( app_recoder.audioBlob ) {
-        add_audio_data(app_recoder.audioBlob)
-      }
+      g_app_recoder.add_current_data()
     });
 
   }
@@ -1576,7 +1581,7 @@
   }
 
 
-  function add_audio_element(audio_el_url,index,audioBlob) {
+  function add_audio_element(audio_el_url,index,audioBlob,section_id) {
     if ( index === undefined ) index = uuidv4()
     let audioElement = document.createElement('audio');
     audioElement.src = audio_el_url;
@@ -1822,7 +1827,7 @@ function draw_wave(data,ctx,W,h) {
       ||  el.contains(efp(rect.right, rect.bottom))
       ||  el.contains(efp(rect_left,  rect.bottom))
     );
-}
+  }
 
   async function open_wave_editor(wave_name) {
     let el = g_wave_open_editors[wave_name]
@@ -1842,7 +1847,9 @@ function draw_wave(data,ctx,W,h) {
     clone.style.display = 'visible'
     clone._app_dragging = false
     if ( div._app_zIndex === undefined ) div._app_zIndex = 500
+    else  div._app_zIndex++
     clone.style.zIndex = div._app_zIndex
+    clone._app_zIndex = div._app_zIndex
     console.log(clone.style.zIndex)
     //
     let canvas = clone.getElementsByTagName('canvas')[0];
@@ -1932,7 +1939,6 @@ function draw_wave(data,ctx,W,h) {
 
     //g_wave_open_editors[wave_name] = { 'display' : clone, 'graph' : ctx }
   //
-  var g_wave_current_container = null
   //
   function remove_wave_editor(wave_name) {
     let editor_data = g_wave_open_editors[wave_name]
@@ -2104,6 +2110,22 @@ function draw_wave(data,ctx,W,h) {
   }
   // // //
 
+  function switch_z(container) {
+    if ( g_wave_current_container !== null ) {
+      if ( container.className == 'wave-graph-container' ) {
+        if ( container !== g_wave_current_container ) {
+          let z = container._app_zIndex
+          if ( z !== undefined ) {
+            container._app_zIndex = g_wave_current_container._app_zIndex
+            container.style.zIndex = g_wave_current_container._app_zIndex
+            g_wave_current_container.style.zIndex = z
+            g_wave_current_container._app_zIndex = z
+          }
+        }
+      }
+    }
+  }
+
   //
   function wv_capture_cursor(ev,el_depth)  {
     ev = ev || window.event;
@@ -2114,17 +2136,20 @@ function draw_wave(data,ctx,W,h) {
       let container = controlBar.parentNode
       if ( el_depth ) container = container.parentNode
       if ( container ) {
+        switch_z(container)
         let x = ev.clientX;
         let y = ev.clientY; 
         container._app_mouse_x = x
         container._app_mouse_y = y
         container._app_dragging = true
-        g_wave_current_container = container
-        document.addEventListener('mouseup',(ev) => {
-          if ( g_wave_current_container != null ) {
-            g_wave_current_container._app_dragging = false
-          }
-        })
+        if ( container.className == 'wave-graph-container' ) {
+          g_wave_current_container = container
+          document.addEventListener('mouseup',(ev) => {
+            if ( g_wave_current_container != null ) {
+              g_wave_current_container._app_dragging = false
+            }
+          })
+        }
       }
     }
   }
@@ -2279,14 +2304,16 @@ function draw_wave(data,ctx,W,h) {
   }
 
   function wv_secure(op,audioBlob,id_param) {  // edit-update, end-recording
+    let section_id = (id_param ? id_param : uuidv4())
     // relay to worker
     let message = {
       'type' : 'benchmark',
       'blob' : audioBlob,
       'op' : op,
-      'blob_id' : (id_param ? id_param : ('ER-' + uuidv4()))
+      'blob_id' : section_id
     }
     g_ownership_worker.postMessage(message)
+    return section_id
   }
 
   async function wv_secure_total_session(sess_name) {
