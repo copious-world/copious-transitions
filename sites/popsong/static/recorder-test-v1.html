@@ -163,6 +163,11 @@
         <button onclick="wv_edit_checked()" >edit checked</button>
         <button onclick="wv_delete_checked()" >delete checked</button>
       </div>
+      <div>
+        <span style="font-weight: bolder;color:chocolate">THIS IS A TEST</span>
+        <button onclick="test_blob_send()">send blob</button>
+        <button onclick="test_session_send()">send session</button>
+      </div>  
     </div>
     <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 2px;;margin-top: 2px;">&nbsp;</div>
     <div id="saved-audio-messages">
@@ -1191,9 +1196,8 @@
           }
           //
           const request = cursor.update(sessionObj);
-          request.onsuccess = async () => {
+          request.onsuccess = () => {
             add_audio_element(blob_url,map_id,audioBlob)  // visual rep
-            await wv_secure_total_session(g_current_session_name)
           };
           //
         }
@@ -2759,8 +2763,8 @@ function draw_wave(data,ctx,W,h) {
 
 
 
-/*
-var BASE64_MARKER = ';base64,';
+
+  var BASE64_MARKER = ';base64,';
 
 function convertDataURIToBinary(dataURI) {
   var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
@@ -2774,5 +2778,29 @@ function convertDataURIToBinary(dataURI) {
   }
   return array;
 }
-*/
+  // TESTS TESTS --  TESTS TESTS --  TESTS TESTS -- 
+  function test_blob_send() {
+    let data="data:audio/ogg;base64,T2dnUwACAAAAAAAAAADSeWyXAU9nZ1MAAAAAAAAAAAAA0nl";
+    let binary= convertDataURIToBinary(data);
+    let chunk = new Blob([binary], {type : 'audio/ogg'});
+    wv_prep_secure_relay(chunk)
+  }
+  
+  function test_session_send() {
+    let data="data:audio/ogg;base64,T2dnUwACAAAAAAAAAADSeWyXAU9nZ1MAAAAAAAAAAAAA0nl";
+    let binary= convertDataURIToBinary(data);
+    let chunk = new Blob([binary], {type : 'audio/ogg'});
+    //
+    let chunk_array = []
+    chunk_array.push(chunk)
+    chunk_array.push(chunk)
+    chunk_array.push(chunk)
+    //
+    let audioBlob = new Blob(chunk_array);
+    //add_audio_data(audioBlob)
+    //
+    wv_secure('end-recording',audioBlob)
+  }
+
+
 </script>
