@@ -297,12 +297,8 @@
     }
     //--<
     
-    async function sign_hex_of(blob) {
-        let blobArray = await blob.arrayBuffer();
-        let a_view = new Uint8Array(blobArray)
-        let mapable = [...a_view];
-        const hashHex = mapable.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
-        let output = await sign_hash(hashHex,g_user_info.priv)
+    async function sign_hex_of(b64blob) {  // blob is base64 encoded
+        let output = await sign_hash(b64blob,g_user_info.priv)
         return output
     }
 
