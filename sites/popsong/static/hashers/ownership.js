@@ -10,6 +10,7 @@
     const AUDIO_SESSION_STORE = 'audio_sessions'
     const AUDIO_USERID_STORE = 'audio_users'
     const AUDIO_SESSION_COMPLETE = 'audio_complete'
+    const DB_VERSION = 4.0
   
     var g_user_info = {}
     var g_current_aes_key = null
@@ -55,7 +56,7 @@
 
     async function wv_init_database(db_name) {
         // request an open of DB
-        let request = self.indexedDB.open(db_name, 2.2);
+        let request = self.indexedDB.open(db_name, DB_VERSION);
         //
         request.onerror = (event) => {
             console.log("This web app will not store recorded audio without the use of computer storage.")
@@ -298,13 +299,14 @@
     
     async function sign_hex_of(blob) {
         let blobArray = await blob.arrayBuffer();
-        let mapable = [...blobArray];
+        let a_view = new Uint8Array(blobArray)
+        let mapable = [...a_view];
         const hashHex = mapable.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
         let output = await sign_hash(hashHex,g_user_info.priv)
         return output
     }
 
-    function store_hashes_and_nonces(map_id,output,hash_prefix,hashHex,set_nonces) {
+    function store_hashes_and_nonces(map_id,output,hash_prefix,hashHex,set_nonces,set_hashes) {
         let p = new Promise((resolve,reject) => {
             let sess_name = g_current_session_name
             let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
@@ -317,6 +319,7 @@
                     if ( cursor ) {
                         let sessionObj = cursor.value
                         let nonces = set_nonces ? g_current_nonces : sessionObj.hashes[map_id].nonces
+                        let hashed_chunks = set_hashes ? g_current_chunks : sessionObj.hashes[map_id].hashed_chunks
                         let last_loc_bytes = geo_loc_str_to_byte_array(sessionObj.sess_geo_location)
                         let stored_token = output 
                         if ( last_loc_bytes ) {
@@ -329,7 +332,8 @@
                             'hash_combo' : stored_token,      // signed and sent to server
                             'combined' : hash_prefix,
                             'blob_hash' : hashHex,
-                            'nonces' : nonces
+                            'nonces' : nonces,
+                            'hashed_chunks' : hashed_chunks
                         }
                         cursor.update(sessionObj);
                         resolve(stored_token)
@@ -347,7 +351,7 @@
         return p
     }
 
-    async function combined_hash_signed(hexs_chunk_array,blob_id,new_blob,prev_blob_hash) {
+    async function combined_hash_signed_and_store(hexs_chunk_array,blob_id,new_blob,prev_blob_hash) {
         if ( prev_blob_hash ) {     // store the history of changes if the parameter is provided
             hexs_chunk_array.push(prev_blob_hash)
         }
@@ -364,7 +368,8 @@
         let hash_prefix = xor_all_to_hext_str(hexs_chunk_array)
         let output = hash_prefix + '|{+}|' + hashHex  // the hex of the xor of chunk hashses... with the hex of the Sha2 hash of blob
         output = await sign_hash(output,g_user_info.priv)
-        let located_mac = await store_hashes_and_nonces(blob_id,output,hash_prefix,hashHex,(prev_blob_hash ? false : true))
+        let is_new_storage = (prev_blob_hash ? false : true)
+        let located_mac = await store_hashes_and_nonces(blob_id,output,hash_prefix,hashHex,is_new_storage,is_new_storage)
         //
         return(located_mac)
     }
@@ -558,7 +563,7 @@
                 g_current_chunks.push(chunk_hash)
                 let nonce_hx_str = hex_fromTypedArray(g_nonce_buffer)  // a string
                 g_current_nonces.push(nonce_hx_str)
-                // STORE HASH REMOTELY
+                // STORE HASH REMOTELY           // STORE HASH REMOTELY
                 let remote_cache_op = {
                     'transition' : 'chunk',
                     'message' : {
@@ -577,8 +582,9 @@
                 let op = message.op
                 //edit-update, end-recording
                 switch ( op ) {
-                    case 'end-recording' : {        // recording stop button
-                        let c_hash = await combined_hash_signed(g_current_chunks,message.blob_id,message.blob,null)
+                    case 'end-recording' : {        // recording stop button to db
+                        let c_hash = await combined_hash_signed_and_store(g_current_chunks,message.blob_id,message.blob,null)
+                         // STORE HASH REMOTELY  // STORE HASH REMOTELY
                         let remote_cache_op = {
                             'transition' : 'chunk-final',
                             'message' : {
@@ -597,7 +603,7 @@
                     }
                     case 'edit-update' : {          // cut, undo, etc.
                         let hashes = await retrieve_hash_from_db(message.blob_id,g_current_session_name)
-                        let c_hash = await combined_hash_signed(hashes.combined,message.blob_id,message.blob,hashes.blob_hash)
+                        let c_hash = await combined_hash_signed_and_store(hashes.hashed_chunks,message.blob_id,message.blob,hashes.blob_hash)
                         let remote_cache_op = {
                             'transition' : 'chunk-change',
                             'message' : {
@@ -679,18 +685,22 @@
                     };
                     //
                     socket.onmessage = (event) => {
-                        let msg = JSON.parse(event.data)
-                        if ( msg.data.type === 'ws_id' ) {
-                            let local_ws_id = msg.ws_id
-                            if ( msg.data.status === "connected" ) {
-                                set_current_app_ws_id(local_ws_id)
-                            }
-                        } else {
-                            if ( g_expected_response ) {
-                                g_expected_response.resolve(msg)
-                            } else {
-                                interaction_info(msg)
-                            }    
+                        if ( event.data !== undefined ) {
+                            try {
+                                let msg = JSON.parse(event.data)
+                                if ( msg.data.type === 'ws_id' ) {
+                                    let local_ws_id = msg.ws_id
+                                    if ( msg.data.status === "connected" ) {
+                                        set_current_app_ws_id(local_ws_id)
+                                    }
+                                } else {
+                                    if ( g_expected_response ) {
+                                        g_expected_response.resolve(msg)
+                                    } else {
+                                        interaction_info(msg)
+                                    }    
+                                }
+                            } catch (e) {}
                         }
                     };
                     

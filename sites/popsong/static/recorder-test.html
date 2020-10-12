@@ -2,6 +2,14 @@
 <html>
 <head>
 <style>
+
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor:default;
+}
+
   audio {
     display: block;
     margin: 5px;
@@ -181,7 +189,7 @@
             onmouseup="wv_release_captured_cursor(event,false,1)"
             onmouseout="wv_track_cursor_out(event,true,1)"
             onmousemove="wv_track_cursor(event,1)"
-            onmouseenter="wv_check_cursor_entry(event,t)"
+            onmouseenter="wv_check_cursor_entry(event,1)"
             >
             <button onclick="wv_zoom_in(event)">&downarrow;</button>
             <button onclick="wv_zoom_out(event)">&uparrow;</button>
@@ -261,6 +269,8 @@
   const ZERO_AXIS_OFFSET = 10
   const THIRTY_SECONDS = 30000
   const GEO_UPDATE_INTERVAL = THIRTY_SECONDS
+  const DB_VERSION = 4.0
+
   //
   // get a key for wrapping the local private key for storage between sessions.
   const FETCH_SERVER_WRAPPER_KEY = '/song-search/guarded/dynamic/identified_key_wrapper_pub_key'
@@ -321,6 +331,23 @@
   function beep() {
     g_beeper_snd.play();
   }
+
+  var BASE64_MARKER = ';base64,';
+  //
+  function convertDataURIToBinary(dataURI) {
+    var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+    var base64 = dataURI.substring(base64Index);
+    var raw = window.atob(base64);
+    var rawLength = raw.length;
+    var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+    for(i = 0; i < rawLength; i++) {
+      array[i] = raw.charCodeAt(i);
+    }
+    return array;
+  }
+
+  //beep()
 
   const g_audioContext = new AudioContext();
 
@@ -440,15 +467,24 @@
       this.mediaRecorder.stop();
     }
 
-    //
+    // audio_results
+    // Called when recording stops.. This makes the first recod of a collection of audio chunks
+    // A section ID is produced. The section ID will be used later when the user decideds to save 
+    // the section... However, the section hash will be sent on to the server. (note: section v.s. session)
     audio_results() {
       let audioBlob = new Blob(this.audioChunks);
       let audioUrl = URL.createObjectURL(audioBlob);
       this.audioBlob = audioBlob
       this.audio_instance = new Audio(audioUrl);
-      this.section_id = wv_secure('end-recording',audioBlob)
+      let section_id = 'ER' + uuidv4() // use ER to signify End(Edit) Recording and be different than other randoms
+      this.section_id = section_id
+      wv_secure('end-recording',audioBlob,section_id)
     }
 
+    // add_current_data
+    // Called when the user decides to save the audio as part of the named session
+    // At this point, there is a section_id. It is used to make sure the indexedDB storage 
+    // maps to the blob
     add_current_data() {
       if ( this.audioBlob ) {
         add_audio_data(this.audioBlob,this.section_id)
@@ -478,7 +514,7 @@
   async function wv_init_database(db_name) {
     // request an open of DB
     let p = new Promise((resolve,reject) => {
-      let request = window.indexedDB.open(db_name, 2.2);
+      let request = window.indexedDB.open(db_name, DB_VERSION);
       //
       request.onerror = (event) => {
         alert("This web app will not store recorded audio without the use of computer storage.")
@@ -512,7 +548,7 @@
         //
         //
         try {
-          let completeStore = db.createObjectStore(AUDIO_SESSION_COMPLETE, { autoIncrement : false });
+          let completeStore = db.createObjectStore(AUDIO_SESSION_COMPLETE, { autoIncrement : false, keyPath: 'name' });
           completeStore.createIndex("name", "name", { unique: true });
         } catch (e) {
         }
@@ -677,22 +713,54 @@
   }
 
 
+
+  // https://stackoverflow.com/questions/33702838/how-to-append-bytes-multi-bytes-and-buffer-to-arraybuffer-in-javascript
+  function concatTypedArrays(a, b) { // a, b TypedArray of same type
+    var c = new (a.constructor)(a.length + b.length);
+    c.set(a, 0);
+    c.set(b, a.length);
+    return c;
+  }
+
+  function wv_concat_sections(raw_sections) {
+    let n = raw_sections.length
+    let result_buffer = raw_sections.shift()
+    while ( raw_sections.length ) {
+      let next_buffer = raw_sections.shift()
+      result_buffer = concatTypedArrays(result_buffer, next_buffer)
+    }
+    return result_buffer
+  }
+
   async function make_complete_session_record(sess_name_cmplt,sessionObj,contentType) {
     // make a file storage format
     let raw_sections = []
     for ( let wave_name in sessionObj.data ) {
-      let raw_wave = await get_wave_data(wave_name,channels,blob_fetcher)
+      let raw_wave = await get_wave_data(wave_name)
       raw_sections.push(raw_wave)
     }
-
-    let byteArrays = raw_sections.map(section => {
-      let byteArray = new Uint8Array(section[0]);
-      return byteArray
-    })
-
-    let sess_blob = new Blob(byteArrays, {type: contentType});
-    await remove_complete_if_exists(sess_name_cmplt)
-    await store_audio_key(sess_name_cmplt,sess_blob)
+    //
+    let total_sections = wv_concat_sections(raw_sections)
+    let audioBlob = make_audio_blob([total_sections,total_sections])
+    //
+    /*
+    // TEST AUDIO
+    let f_url = URL.createObjectURL(audioBlob);
+    let test = new Audio(f_url)
+    test.play()
+    // 
+    //
+    try {
+      //await remove_complete_if_exists(sess_name_cmplt)
+    } catch (e) {
+      console.log(e)
+    }
+    */
+    try {
+      await store_audio_key(sess_name_cmplt,audioBlob)
+    } catch (e) {
+      console.log(e)
+    }
     //
   }
 
@@ -938,16 +1006,41 @@
   }
 
 
+  function blobToBase64(blob) {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        resolve(reader.result);
+      };
+    });
+  }
+
   //
   async function store_audio_key(app_audio_key,audioBlob) {
+
+    let storable = await blobToBase64(audioBlob)
+
     let p = new Promise((resolve,reject) => {
+      //
       let transaction = g_audio_db.transaction(AUDIO_SESSION_COMPLETE, "readwrite");
-      let userStore = transaction.objectStore(AUDIO_SESSION_COMPLETE)
+      transaction.oncomplete = (ev) => {
+        console.log("store_audio_key: transaction done")
+      }
+      transaction.onerror = (ev) => {
+        console.log(ev)
+      }
+      let audioStore = transaction.objectStore(AUDIO_SESSION_COMPLETE)
+
+      //let blobArray = await audioBlob.arrayBuffer();
+      //let a_view = new Uint8Array(blobArray)
+      //let mapable = [...a_view];
+
       let storeObj = {
         'name' : app_audio_key,
-        'blob' : audioBlob
+        'blob' : storable
       }
-      let result = userStore.put(storeObj)
+      let result = audioStore.put(storeObj)
       result.onsuccess = (event) => {
         resolve(event.target.result)
       }
@@ -961,21 +1054,23 @@
   // //
   async function get_audio_key(app_audio_key) {
     let p = new Promise((resolve,reject) => {
-      let transaction = g_audio_db.transaction(AUDIO_SESSION_COMPLETE, "read");
+      let transaction = g_audio_db.transaction(AUDIO_SESSION_COMPLETE, "readwrite");
       let userStore = transaction.objectStore(AUDIO_SESSION_COMPLETE);
       
-      let nameIndex = store.index('name');
-      nameIndex.get(sess_name).onsuccess = (evt) => {
-        let cursor = evt.target.result;
-        let keyRangeValue = IDBKeyRange.only(value.name);
-        nameIndex.openCursor(keyRangeValue).onsuccess = (event) => {
-          let cursor = evt.target.result;
-          if ( cursor ) {
-            resolve(cursor.value)
-          } else {
-            resolve(false)
+      let nameIndex = userStore.index('name');
+      nameIndex.get(app_audio_key).onsuccess = (evt) => {
+        let value = evt.target.result;
+        if ( value ) {
+          let keyRangeValue = IDBKeyRange.only(value.name);
+          nameIndex.openCursor(keyRangeValue).onsuccess = (event) => {
+            let cursor = event.target.result;
+            if ( cursor ) {
+              resolve(cursor.value)
+            } else {
+              resolve(false)
+            }
           }
-        }
+        } else resolve(false)
       }
     })
     //
@@ -986,22 +1081,40 @@
   async function remove_complete_if_exists(app_audio_key) {
     let p = new Promise((resolve,reject) => {
       let transaction = g_audio_db.transaction(AUDIO_SESSION_COMPLETE, "readwrite");
+      let p_t = new Promise((resolve,reject) => {
+        transaction.oncomplete = (ev) => {
+          resolve(true)
+          console.log("remove_complete_if_exists: transaction done")
+        }
+        transaction.onerror = (ev) => {
+          console.log(ev)
+          reject(false)
+        }}
+      )
+
       let userStore = transaction.objectStore(AUDIO_SESSION_COMPLETE);
-      
-      let nameIndex = store.index('name');
-      nameIndex.get(sess_name).onsuccess = (evt) => {
-        let cursor = evt.target.result;
-        let keyRangeValue = IDBKeyRange.only(value.name);
-        nameIndex.openCursor(keyRangeValue).onsuccess = (event) => {
-          let cursor = evt.target.result;
-          if ( cursor ) {
-            cursor.delete();
-            request.onsuccess = () => {
-              resolve(true)
-            };
-          } else {
-            resolve(false)
+      //
+      let nameIndex = userStore.index('name');
+      nameIndex.get(app_audio_key).onsuccess = async (evt) => {
+        let value = evt.target.result;
+        if ( value ) {
+          let keyRangeValue = IDBKeyRange.only(value.name);
+          nameIndex.openCursor(keyRangeValue).onsuccess = async (event) => {
+            let cursor = event.target.result;
+            if ( cursor ) {
+              let request = cursor.delete();
+              request.onsuccess = async () => {
+                await p_t
+                resolve(true)
+              };
+            } else {
+              await p_t
+              resolve(false)
+            }
           }
+        } else {
+          await p_t
+          resolve(false)
         }
       }
     })
@@ -1131,7 +1244,7 @@
   }
 
 
-  function update_audio_data(map_id,data_list) {
+  function update_audio_data(section_id,data_list) {
     //
     if ( g_audio_db === null ) {
       console.log("db not initialized :: update_audio_data")
@@ -1149,14 +1262,15 @@
         var cursor = event.target.result;
         if ( cursor ) {
           let sessionObj = cursor.value
-          if ( sessionObj.data[map_id] != null ) {
+          if ( sessionObj.data[section_id] != null ) {
             let blob_url = URL.createObjectURL(audioBlob);
-            sessionObj.data[map_id] = audioBlob
-            wv_secure('edit-update',audioBlob,map_id)
+            sessionObj.data[section_id] = audioBlob
+            wv_secure('edit-update',audioBlob,section_id)
             //
             const request = cursor.update(sessionObj);
-            request.onsuccess = () => {
-              update_audio_element(blob_url,map_id,audioBlob)  // visual rep
+            request.onsuccess = async () => {
+              update_audio_element(blob_url,section_id,audioBlob)  // visual rep
+              await wv_secure_total_session(g_current_session_name)
             };
           }
           //
@@ -1170,6 +1284,25 @@
 
     apply_find_audio_session(g_current_session_name, audioStore, update_list_elem_callback, not_found_callback)
   }
+
+
+  function add_new_audio_session_to_db(audioStore,applicatin_op) {
+    let sessionObj = {
+        'name' : g_current_session_name,
+        'sess_date_time' : '' + Date.now(),
+        'sess_geo_location' : JSON.stringify(g_wv_current_locaion),
+        'data' : { },
+        'hashes' : { },
+        'locations' : [JSON.stringify(g_wv_current_locaion)]
+      }
+      //
+      if ( applicatin_op  && (typeof applicatin_op === 'function') ) {
+        applicatin_op(sessionObj)
+      }
+      let request = audioStore.add(sessionObj);
+      return request
+  }
+
 
   function add_audio_data(audioBlob,section_id) {
 
@@ -1199,7 +1332,7 @@
           //
           const request = cursor.update(sessionObj);
           request.onsuccess = async () => {
-            add_audio_element(blob_url,map_id,audioBlob,section_id)  // visual rep
+            add_audio_element(blob_url,section_id,audioBlob,section_id)  // visual rep
             await wv_secure_total_session(g_current_session_name)
           };
           //
@@ -1218,13 +1351,17 @@
         'locations' : [JSON.stringify(g_wv_current_locaion)]
       }
       //
-      let map_id = uuidv4()
-      sessionObj.data[map_id] = audioBlob   // JSON.stringify(audioBlob)
+      let applicatin_op = (sessionObj) => {
+        sessionObj.data[section_id] = audioBlob   // JSON.stringify(audioBlob)
+      } 
       //
-      let request = audioStore.add(sessionObj);
-      request.onsuccess = function(event) {
-        add_audio_element(blob_url,map_id,audioBlob)  // visual rep
-      };
+      let request = add_new_audio_session_to_db(audioStore,applicatin_op)
+      if ( request ) {
+        request.onsuccess = function(event) {
+          add_audio_element(blob_url,section_id,audioBlob)  // visual rep
+        };
+      }
+      //
     }
 
     apply_find_audio_session(g_current_session_name, audioStore, update_list_callback, add_new_callback)
@@ -1306,9 +1443,10 @@
           delete sessionObj.data[audio_key]
           //
           const request = cursor.update(sessionObj);
-          request.onsuccess = () => {
+          request.onsuccess = async () => {
             //  item has been removed
             console.log(`deleted ${audio_key}`)
+            await wv_secure_total_session(g_current_session_name)
           };
           //
         }
@@ -1376,7 +1514,16 @@
       sess_name_el.innerHTML = name
       g_recordButton.removeAttribute('disabled');
       //
+      let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
+      let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
+      add_new_audio_session_to_db(audioStore)
+      //
       clear_play_list()
+      let sess_op_el = document.getElementById('delete-session')
+      if ( sess_op_el ) {
+        sess_op_el.style.visibility = "visible"
+      }
+
       update_session_name_selections(g_current_session_name,g_session_name_list)
     }
   }
@@ -1476,9 +1623,10 @@
           var cursor = event.target.result;
           if ( cursor ) {
             var request = cursor.delete();
-            request.onsuccess = function() {
+            request.onsuccess = () => {
               g_current_session_name = 'none'
               load_name_list()
+              choose_edit_user_session(g_current_session_name)
             };
           }
         }
@@ -1558,6 +1706,10 @@
     // SAVE
     g_saveButton.addEventListener('click', () => {
       g_app_recoder.add_current_data()
+      let sess_op_el = document.getElementById('send-session')
+      if ( sess_op_el ) {
+        sess_op_el.style.visibility = "visible"
+      }
     });
 
   }
@@ -2007,7 +2159,7 @@ function draw_wave(data,ctx,W,h) {
     }
   }
 
-//update_audio_data(map_id,audioBlob)
+  //  wv_cut_data
   function wv_cut_data(data,selection_rect,samples_per_pixel) {
     let start = (selection_rect.startX)*samples_per_pixel
     let end = (selection_rect.w)*samples_per_pixel + start
@@ -2304,16 +2456,14 @@ function draw_wave(data,ctx,W,h) {
   }
 
   function wv_secure(op,audioBlob,id_param) {  // edit-update, end-recording
-    let section_id = (id_param ? id_param : uuidv4())
     // relay to worker
     let message = {
       'type' : 'benchmark',
       'blob' : audioBlob,
       'op' : op,
-      'blob_id' : section_id
+      'blob_id' : id_param
     }
     g_ownership_worker.postMessage(message)
-    return section_id
   }
 
   async function wv_secure_total_session(sess_name) {
@@ -2375,15 +2525,29 @@ function draw_wave(data,ctx,W,h) {
     let sess_name_cmplt = sess_name + '-complete'
     let data = await get_audio_key(sess_name_cmplt)
     if ( data ) {
-      let file_data = data.blob
+      //
+      let sess_blob = data.blob
+      let barray = convertDataURIToBinary(sess_blob)
+      //
+      let snd = new Audio(sess_blob)
+      snd.play()
+
+      // //
+      let contentType = g_preferred_download_format
+      let file_data = new Blob([barray], {type: contentType});
+      //
+      //
       let f_url = URL.createObjectURL(file_data);
+
       if ( downloader_url !== null ) {
         URL.revokeObjectURL(downloader_url)
       }
       downloader_url = f_url
       downloadlink.href = f_url
-      link.download = sess_name + '.' + data.ext;
-      link.click();
+      let ext = data.ext ? data.ext : "mp3"
+      downloadlink.download = sess_name + '.' + ext;
+      downloadlink.click();
+      //
       return true
     }
     return false
@@ -2395,12 +2559,12 @@ function draw_wave(data,ctx,W,h) {
     let downloadlink = document.getElementById('wave-download-link')
     if ( downloader && downloadlink ) {
       downloadlink.innerHTML = `Download ${g_current_session_name}`
-      if ( downloader.open ) downloader.open()
+      if ( downloader.showModal ) downloader.showModal()
       else {
         downloader.style.visibility = 'visible'
         downloader.style.display = 'block'
       }
-      let result = download_audio_session_record(g_current_session_name,downloadlink)
+      let result = await download_audio_session_record(g_current_session_name,downloadlink)
       if ( result ) {
         // maybe send a copy to the server ???
       }
@@ -2784,22 +2948,6 @@ function draw_wave(data,ctx,W,h) {
     application_initialization()
   }
 
-
-
 /*
-var BASE64_MARKER = ';base64,';
-
-function convertDataURIToBinary(dataURI) {
-  var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
-  var base64 = dataURI.substring(base64Index);
-  var raw = window.atob(base64);
-  var rawLength = raw.length;
-  var array = new Uint8Array(new ArrayBuffer(rawLength));
-
-  for(i = 0; i < rawLength; i++) {
-    array[i] = raw.charCodeAt(i);
-  }
-  return array;
-}
 */
 </script>
