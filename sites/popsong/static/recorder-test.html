@@ -1989,6 +1989,7 @@ function draw_wave(data,ctx,W,h) {
         container.style.top = "20px"
         container.style.left = "20px"
       }
+      switch_z(container)
       return
     }
     let div = document.getElementById('wave-graph-tmplt')
@@ -2089,13 +2090,14 @@ function draw_wave(data,ctx,W,h) {
     canvas.addEventListener('mousemove', wv_edit_mouseMove, false);
   }
 
-    //g_wave_open_editors[wave_name] = { 'display' : clone, 'graph' : ctx }
+  //  g_wave_open_editors[wave_name] = { 'display' : clone, 'graph' : ctx }
   //
   //
   function remove_wave_editor(wave_name) {
     let editor_data = g_wave_open_editors[wave_name]
     if ( editor_data ) {
       let container = editor_data.display
+      find_new_z(wave_name,container,g_wave_open_editors)
       if ( container ) container.remove()
       delete  g_wave_open_editors[wave_name]
     }
@@ -2262,18 +2264,44 @@ function draw_wave(data,ctx,W,h) {
   }
   // // //
 
-  function switch_z(container) {
-    if ( g_wave_current_container !== null ) {
+  function switch_z(container,prev_c) {
+    let source_c = ( prev_c === undefined ) ? g_wave_current_container : prev_c
+    //
+    if ( source_c !== null ) {
       if ( container.className == 'wave-graph-container' ) {
-        if ( container !== g_wave_current_container ) {
+        if ( container !== source_c ) {
           let z = container._app_zIndex
           if ( z !== undefined ) {
-            container._app_zIndex = g_wave_current_container._app_zIndex
-            container.style.zIndex = g_wave_current_container._app_zIndex
-            g_wave_current_container.style.zIndex = z
-            g_wave_current_container._app_zIndex = z
+            container._app_zIndex = source_c._app_zIndex
+            container.style.zIndex = source_c._app_zIndex
+            source_c.style.zIndex = z
+            source_c._app_zIndex = z
           }
         }
+      }
+    }
+  }
+
+  function find_new_z(wave_name,container,open_containers) {
+    let c_names = Object.keys(open_containers)
+    if ( c_names.length > 1 ) {
+      let n = c_names.length
+      let max_z = -1
+      let switcher = null
+      for ( let i = 0; i < n; i++ ) {
+        let name = c_names[i]
+        if ( name !== wave_name ) {
+          let oc = open_containers[name].display
+          let z = oc._app_zIndex
+          if ( z > max_z ) {
+            max_z = z
+            switcher = oc
+          }
+        }
+      }
+      if ( switcher ) {
+        switch_z(switcher,container)
+        g_wave_current_container = switcher
       }
     }
   }

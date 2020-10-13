@@ -184,7 +184,7 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
             let key_value = post_body.email
             let key_field = 'email'
             let dbkey = `${key_field}-${key_value}`
-            let transfer_id = await this.db.store_file_class('wave_hex_signed',dbkey,audioSessionRep)
+            let transfer_id = await this.db.store_file_class('wave_hex_signed',dbkey,post_body)
             return transfer_id
         } catch (e) {
         }
