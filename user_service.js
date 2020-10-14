@@ -569,6 +569,13 @@ g_app_wss.on("connection", (ws,req) => {
                         ws.send(JSON.stringify(finalization_state));
                     }
                 }
+            } else {
+                let ping_id = body.ping_id
+                if ( ping_id ) {
+                    if ( g_transition_engine ) {
+                        g_transition_engine.ponged(ws)
+                    }
+                }
             }
         });
 
@@ -577,40 +584,8 @@ g_app_wss.on("connection", (ws,req) => {
         });
     }
 });
-    
-/*
-    wss.on('connection', function connection(ws, req) {
-        const ip = req.socket.remoteAddress;
-      });
-    
-    
-    function noop() {}
-    
-    function heartbeat() {
-      this.isAlive = true;
-    }
-    
-    const wss = new WebSocket.Server({ port: 8080 });
-    
-    wss.on('connection', function connection(ws) {
-      ws.isAlive = true;
-      ws.on('pong', heartbeat);
-    });
-    
-    const interval = setInterval(function ping() {
-      wss.clients.forEach(function each(ws) {
-        if (ws.isAlive === false) return ws.terminate();
-    
-        ws.isAlive = false;
-        ws.ping(noop);
-      });
-    }, 30000);
-    
-    wss.on('close', function close() {
-      clearInterval(interval);
-    });
-*/
-    
+
+
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 }       // WEB APP SCOCKETS OPTION (END)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------

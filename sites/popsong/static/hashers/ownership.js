@@ -10,7 +10,7 @@
     const AUDIO_SESSION_STORE = 'audio_sessions'
     const AUDIO_USERID_STORE = 'audio_users'
     const AUDIO_SESSION_COMPLETE = 'audio_complete'
-    const DB_VERSION = 4.0
+    const DB_VERSION = 5.0
   
     var g_user_info = {}
     var g_current_aes_key = null
@@ -106,6 +106,12 @@
     function hex_fromTypedArray(byteArray){
         let arrayOfBytes = Array.from(byteArray)
         return(hex_fromArrayOfBytes(arrayOfBytes))
+    }
+    //--<
+
+    //>--
+    function hex_fromByteArray(byteArray){
+        return hex_fromTypedArray(ArrayOfBytes_toByteArray(byteArray))
     }
     //--<
 
@@ -503,7 +509,8 @@
 
     async function remote_data_relay(sess_data) {
         let blob = sess_data.blob
-        sess_data.blob = sign_hex_of(blob)
+        let signature = await sign_hex_of(blob)
+        sess_data.blob = hex_fromByteArray(signature)
         let json =  await postData(STORE_ASSET_POST_URL,sess_data,'omit',true)
         return json
     }
@@ -584,7 +591,7 @@
                         let remote_cache_op = {
                             'transition' : 'chunk-final',
                             'message' : {
-                                'chunk-final' : c_hash,
+                                'chunk_final' : c_hash,
                                 'email' : g_user_info.email,
                                 'session' : g_current_session_name,
                                 'client_time' : Date.now(),
@@ -603,7 +610,7 @@
                         let remote_cache_op = {
                             'transition' : 'chunk-change',
                             'message' : {
-                                'chunk-change' : c_hash,
+                                'chunk_change' : c_hash,
                                 'email' : g_user_info.email,
                                 'session' : g_current_session_name,
                                 'client_time' : Date.now(),
@@ -660,8 +667,9 @@
 
 
     // ---- ---- ---- ---- ---- ---- ---- ---- ----
-    // ---- ---- ---- ---- ---- ---- ---- ---- ----
+    // ---- ---- ---- ---- ---- ---- ---- ---- ---- 
 
+    var g_com_url = ""
     async function web_socket_initializer(user_info) {
         try {
             let chunk_com_req = {
@@ -672,22 +680,32 @@
             let json =  await postData(CHUNK_POST_COM_WSSURL_REQ,chunk_com_req,'omit',true)
             if ( json ) {
                 let com_url = json.url
+                g_com_url = com_url
                 let p = new Promise((resolve,reject) => {
-                    let socket = new WebSocket(`wss://${self.location.host}/${com_url}`);   // wss ... forcing this onto a secure channel
+                    let socket = new WebSocket(`wss://${self.location.host}/${g_com_url}`);   // wss ... forcing this onto a secure channel
                     let opened = false
                     socket.onopen = (event) => {
                         opened = true
                         resolve(socket)
                     };
                     //
+                    //
                     socket.onmessage = (event) => {
                         if ( event.data !== undefined ) {
                             try {
                                 let msg = JSON.parse(event.data)
-                                if ( msg.data.type === 'ws_id' ) {
+                                if ( msg.data && (msg.data.type === 'ws_id') ) {
                                     let local_ws_id = msg.ws_id
                                     if ( msg.data.status === "connected" ) {
                                         set_current_app_ws_id(local_ws_id)
+                                    }
+                                } else if ( msg.data && (msg.data.type === 'ping') ) {
+                                    if ( g_app_web_socket ) {
+                                        let ponger = {
+                                            "ping_id" : msg.data.ping_id,
+                                            "time" : Date.now()
+                                        }
+                                        g_app_web_socket.send(JSON.stringify(ponger))
                                     }
                                 } else {
                                     if ( g_expected_response ) {
@@ -716,6 +734,7 @@
                             }
                         }
                       }
+                      clearTimeout(socket._pingTimeout);
                     };
                     
                     socket.onerror = (error)  => {
@@ -726,7 +745,8 @@
                             if ( g_expected_response ) { g_expected_response.reject(error) }
                             interaction_state('error-ws',error)
                         }
-                    };    
+                    };
+                                  
                 })
                 return p
             }

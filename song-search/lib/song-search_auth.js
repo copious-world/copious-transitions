@@ -127,16 +127,13 @@ class SearcherSessionManager extends SessionManager {
     }
 
     process_transition(transition,post_body,req) {
-
+        let transObj = super.process_transition(transition,post_body,req)
         if ( G_wave_store_trns.tagged(transition) ) {
-            let transObj = super.process_transition(transition,post_body,req)
             transObj.secondary_action = false
         } else if ( G_wave_mover_trns.tagged(transition) ) {  
             // sent entire audio session
-            let transObj = super.process_transition(transition,post_body,req)
             transObj.secondary_action = false
         } else if ( G_wss_chunk.tagged(transition) || G_wss_chunk_final.tagged(transition) ||  G_wss_chunk_change.tagged(transition) ) {
-            let transObj = super.process_transition(transition,post_body,req)
             transObj.secondary_action = false
         } else {        // chunk transitions coming through wss are not checking for seconday actions... a design decision
             return super.process_transition(transition,post_body,req)
@@ -158,8 +155,8 @@ class SearcherSessionManager extends SessionManager {
         if ( G_wave_store_trns.tagged(transition) ) {
             this.trans_engine.store_audio_session_component_hashes(post_body)
         } else if ( G_wave_mover_trns.tagged(transition) ) {   // sent entire audio session
-            await this.trans_engine.store_audio_session_component(post_body)
-        } else {
+            await this.trans_engine.store_audio_session_component_for_move(post_body)
+        } else { // from wss connection
             if ( G_wss_chunk.tagged(transition) ) {
                 this.trans_engine.store_recording_chunk(post_body)
             } else if ( G_wss_chunk_final.tagged(transition) ) {

@@ -58,29 +58,30 @@ class SongSearchDBClass extends DBClass {
         super(SongSearchSessionStore,memcdClient)
 
         // CACHING AND LOCAL STORAGE
-        this.cached_sessions = {}   // one per user across that user's devices
+        this.cached_session_containers = {}       // one per user across that user's devices
         this.sessions_components = {}   // a list of recorder elements
         this.root_path = process.mainModule.path
     }
 
-    get_from_cache(session_id) {
-        let sessObj = this.cached_sessions[session_id]
+    get_from_container_cache(session_id) {
+        let sessObj = this.cached_session_containers[session_id]
         if ( sessObj ) {
             return sessObj
         }        
         return(FORCE_FAIL_FETCH)
     }
 
-    async cache_if_found(session_id,and_with,transformer) {
-        let sessObj = this.cached_sessions[session_id]  // is it in cache?
+    // cache_container_if_found
+    async cache_container_if_found(session_id,and_with,transformer) {
+        let sessObj = this.cached_session_containers[session_id]  // is it in cache?
         if ( sessObj ) {
             return sessObj
         } else {
             let datum = await super.get_key_value(session_id)   // get it out of key value store... (may need file storage)
             if ( datum ) {
                 if ( transformer === undefined ) transformer = async (dat) => dat
-                this.cached_sessions[session_id] = await transformer(datum)    // if found
-                return this.cached_sessions[session_id]
+                this.cached_session_containers[session_id] = await transformer(datum)    // if found
+                return this.cached_session_containers[session_id]
             } else if ( and_with ) {    // expand the key and try again..
                 for ( let key in and_with ) {
                     let search_value = and_with[key]
@@ -89,9 +90,9 @@ class SongSearchDBClass extends DBClass {
                     if ( datm_container ) {
                         let container = JSON.parse(datm_container)
                         if ( container[session_id] ) {
-                            this.cached_sessions[session_id] = container[session_id]
+                            this.cached_session_containers[session_id] = container[session_id]
                             // return from loop
-                            return this.cached_sessions[session_id]
+                            return this.cached_session_containers[session_id]
                         }
                     }
                 }
@@ -107,14 +108,16 @@ class SongSearchDBClass extends DBClass {
     // the session_id maps to a collection of recording sessions, each with its name
     // If the session object is not in caches, this routine create an object and places it in caches
     async component_cache_if_found(CachableOperationsClass,session_id,sess_name,transformer) {
-        let key = `${session_id}-${sess_name}`
+        let key = `${session_id}-${sess_name}`  // session_id -- a user's collection of sessions, sess_name -- a particular session
         let sessionComponent = this.sessions_components[key] // look for the object in caches
         if ( sessionComponent ) {
             return(sessionComponent)
         } else {    // if not in cache
-            let sessContainer = await this.cache_if_found(session_id,false,transformer)  // load the larger object containing parts of the sessions
+            // Deal first with getting the container of the session
+            // retrieve from DB if not yet loaded
+            let sessContainer = await this.cache_container_if_found(session_id,false,transformer)  // load the larger object containing parts of the sessions
             if ( sessContainer ) {
-                if ( sessContainer.assets === undefined ) {
+                if ( sessContainer.assets === undefined ) {  // first time here
                     sessContainer.assets = {}
                 }
                 let activeSession = sessContainer.assets[sess_name] // this is the smaller part, with the active session
@@ -129,16 +132,20 @@ class SongSearchDBClass extends DBClass {
                 sessionComponent = new CachableOperationsClass(activeSession) // 
                 this.sessions_components[key] = sessionComponent    // put it into cache
                 return sessionComponent
-            } else return false // no container of active sessions (past and present)
+            } else return false // no container of active sessions (past and present) // depends on there being a user
         }
     }
 
-    async store_component_section(session_id,sess_name,sessCompFields,update)  {
+    async store_component_section(CachableOperationsClass,session_id,sess_name,source_ComponentFields,update)  {
         let key = `${session_id}-${sess_name}`
-        let sessContainer = this.get_from_cache(session_id)  // changed in caches
+        let sessContainer = this.get_from_container_cache(session_id)  // changed in caches
         let sessionComponent = this.sessions_components[key]
+        if ( (sessContainer === undefined) || (sessionComponent == undefined) ) {
+            // say someone sends and edit after some time: hence, no object is cached due to recording
+            sessionComponent = await this.component_cache_if_found(CachableOperationsClass,session_id,sess_name,this.file_transformer_parse)
+        }
         if ( sessionComponent ) {
-            sessionComponent.add_fields(sessCompFields)
+            sessionComponent.add_fields(source_ComponentFields)
         }
         if ( sessContainer && (sessContainer !== FORCE_FAIL_FETCH) ) {
             let filename = await super.get_key_value(session_id)

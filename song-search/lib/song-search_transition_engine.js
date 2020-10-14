@@ -40,11 +40,17 @@ class SessionObjectOps {
     }
 
     add_fields(sessCompFields) {
+        let chunk_info = sessCompFields
         this.datum.blob_list[sessCompFields.blob_id] = false // makes a place holder
         if ( !this.datum.email ) this.datum.email = chunk_info.email
         if ( !this.datum.session ) this.datum.session = chunk_info.session
         if ( !this.datum.op_time ) this.datum.op_time = chunk_info.client_time
-        this.datum.chunk_final = sessCompFields.chunk_final
+        if ( sessCompFields.chunk_final ) {
+            this.datum.chunk_final = sessCompFields.chunk_final
+        }
+        if ( sessCompFields.chunk_change ) {
+            this.datum.chunk_change = sessCompFields.chunk_change
+        }
     }
 
     update_component(update_info) {
@@ -130,6 +136,9 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
     }
 
 
+    // store_recording_chunk
+    // this is supposed to be the in-recording data transfer in case chunks appear in sequence while in the process of recording
+    // One is sent at the end of recording in any case
     async store_recording_chunk(post_body) {
         try {
             let sessions_id = post_body.server_id
@@ -145,11 +154,15 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
         }
     }
 
+    // store_audio_session_component_section
+    // This messages comes in at the end of recording
+    // Or, it comes in at the when an edit is done to the sound
+    // The hash received is a combination of the hashes made from chunks and previous edits.
     async store_audio_session_component_section(post_body,do_update) {
         try {
             let sessions_id = post_body.server_id
             let sess_name = post_body.session
-            let sessionObject = await this.db.store_component_section(sessions_id,sess_name,post_body) 
+            let sessionObject = await this.db.store_component_section(SessionObjectOps,sessions_id,sess_name,post_body) 
             if ( sessionObject ) {
                 if ( do_update ) {
                     sessionObject.update_component(post_body)
@@ -161,7 +174,9 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
         }
     }
 
-    async store_audio_session_component(post_body) {  // store for transfer... the audio session 
+
+    // this is for preparing to move sessions from one user device to another...
+    async store_audio_session_component_for_move(post_body) {  // store for transfer... the audio session 
         try {
             let key = {'email' : post_body.email }
             let audioSessionRep = {
@@ -179,6 +194,9 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
     }
 
      // // 
+     // This is the storage of a signature of stiched recording sections.
+     // These may be be downloaded at the client device to an mp3 or other.
+     // There should be a storage of the base64 encoding, since that is what is signed.
      async store_audio_session_component_hashes(post_body) {
         try {
             let key_value = post_body.email

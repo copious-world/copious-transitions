@@ -269,7 +269,7 @@ button:disabled {
   const ZERO_AXIS_OFFSET = 10
   const THIRTY_SECONDS = 30000
   const GEO_UPDATE_INTERVAL = THIRTY_SECONDS
-  const DB_VERSION = 4.0
+  const DB_VERSION = 5.0
 
   //
   // get a key for wrapping the local private key for storage between sessions.
@@ -2020,13 +2020,15 @@ function draw_wave(data,ctx,W,h) {
       audio_el.ontimeupdate = (event) => {
         let aud_el = event.target
         if ( aud_el ) {
-          let play_time = aud_el.currentTime
-          let duration = aud_el.duration
-          let percent = play_time/duration
           let play_info = g_wave_open_editors[wave_name]
-          let ctx = play_info.graph
-          let prev_offset = play_info.where_ticker
-          update_play_marker(ctx,play_info,percent)
+          if ( play_info ) {
+            let play_time = aud_el.currentTime
+            let duration = aud_el.duration
+            let percent = play_time/duration
+            let ctx = play_info.graph
+            let prev_offset = play_info.where_ticker
+            update_play_marker(ctx,play_info,percent)
+          }
         }
       }
     }
