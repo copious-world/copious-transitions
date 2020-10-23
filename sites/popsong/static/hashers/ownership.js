@@ -16,6 +16,7 @@
     var g_current_aes_key = null
     var g_current_chunks = []       // chunk hashes
     var g_current_nonces = []
+    var g_current_chunk_times = []
     let g_nonce_buffer = new Uint8Array((256/8))        // 256 bits or 32 bytes 
     var g_current_session_name = "none"
     var g_current_session_machine_name = ""
@@ -157,6 +158,19 @@
     //--<
 
     //>--
+    function xor_byte_arrays(ba1,ba2) {
+        let n = Math.min(ba1.length,ba2.length)
+        let N = Math.max(ba1.length,ba2.length)
+        // -- make the new array out of the longer array
+        let xored = ba1.length > ba2.length ? new Uint8Array(ba1) : new Uint8Array(ba2)
+        for ( let i = 0; i < n; i++ ) { // xor in the shorter array
+            xored[i] = ba1[2] ^ ba1[i]
+        }
+        return xored
+    }
+    //--<
+
+    //>--
     function hex_xor_of_strings(str1,str2) {
         let bytes1 = hex_toArrayOfBytes(str1)
         let bytes2 = hex_toArrayOfBytes(str2)
@@ -169,7 +183,7 @@
     //>--
     // xor_all
     //  -- 
-    function xor_all_to_hext_str(hexs_chunks) {  // chunks are text hashes
+    function xor_all_to_hex_str(hexs_chunks) {  // chunks are text hashes
         let start_chunk = hexs_chunks[0]
         let encoded = hex_toArrayOfBytes(start_chunk)
         let n = hexs_chunks.length
@@ -255,14 +269,14 @@
 
     //>--
     // digestByteArray
+    //  Xor a nonce onto the data bytes take from the Blob.
+    //  Then use SHA-256 to hash the result. 
+    //  Return the SHA hash as a hex string.
     //  -- 
     async function digestByteArray(byteArray,secret) {
         if ( secret ) {  // the secret has to match the Uint8Array type
             byteArray = new Uint8Array(byteArray)  // copy the array
-            let n = byteArray.length
-            for ( let i = 0; i < n; i++ ) {
-                byteArray[i] = byteArray[i] ^ secret[i]
-            }
+            byteArray = xor_byte_arrays(byteArray,secret)
         }
         const hashBuffer = await g_crypto.digest('SHA-256', byteArray);          // hash the message
         const hashAsBytes = new Uint8Array(hashBuffer)
@@ -276,9 +290,11 @@
 
     //>--
     // hash_of_chunk
+    //
+    //  Get the array of bytes from a blob (audio blob, e.g.)
     //  -- 
     async function hash_of_chunk(a_chunk,secret) {
-        let chunkArray = await a_chunk.arrayBuffer();   // a_chunk is a blobc
+        let chunkArray = await a_chunk.arrayBuffer();   // a_chunk is a blob
         let hexHash = await digestByteArray(chunkArray,secret)
         return(hexHash)
     }
@@ -308,7 +324,7 @@
         return output
     }
 
-    function store_hashes_and_nonces(map_id,output,hash_prefix,hashHex,set_nonces,set_hashes) {
+    function store_hashes_and_nonces(map_id,hashObj) {
         let p = new Promise((resolve,reject) => {
             let sess_name = g_current_session_name
             let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
@@ -320,25 +336,9 @@
                     var cursor = event.target.result;
                     if ( cursor ) {
                         let sessionObj = cursor.value
-                        let nonces = set_nonces ? g_current_nonces : sessionObj.hashes[map_id].nonces
-                        let hashed_chunks = set_hashes ? g_current_chunks : sessionObj.hashes[map_id].hashed_chunks
-                        let last_loc_bytes = geo_loc_str_to_byte_array(sessionObj.sess_geo_location)
-                        let stored_token = output 
-                        if ( last_loc_bytes ) {
-                            let a_view = new Uint8Array(output)
-                            let o_array = [...a_view]
-                            let xored = xor_arrays(last_loc_bytes,o_array)
-                            stored_token = hex_fromArrayOfBytes(xored)
-                        }
-                        sessionObj.hashes[map_id] = {
-                            'hash_combo' : stored_token,      // signed and sent to server
-                            'combined' : hash_prefix,
-                            'blob_hash' : hashHex,
-                            'nonces' : nonces,
-                            'hashed_chunks' : hashed_chunks
-                        }
+                        sessionObj.hashes[map_id] = hashObj
                         cursor.update(sessionObj);
-                        resolve(stored_token)
+                        resolve(true)
                     }
                 }
             }
@@ -353,27 +353,73 @@
         return p
     }
 
-    async function combined_hash_signed_and_store(hexs_chunk_array,blob_id,new_blob,prev_blob_hash) {
-        if ( prev_blob_hash ) {     // store the history of changes if the parameter is provided
-            hexs_chunk_array.push(prev_blob_hash)
+
+    // combined_hash_signed_and_store
+    // parameters:
+    //  hexs_chunk_array - either the new hashes from audio chunks or stored ones from previous recording and return to edit
+    //  blob_id - the id for local storage and/or identifying this as part of the larger sessions container
+    //  new_blob - this is the combined blob data of all gathered chunks for a sessions of a named session
+    //  prev_blob_hash (optional) - provided during the editing of a section... this will be incorporated
+    //
+    async function combined_hash_signed_and_store(hashObj,blob_id,new_blob,prev_blob_hash) {
+        let is_new_storage = prev_blob_hash ? false : true // store the history of changes if the parameter is provided
+        // hexs_chunk_array passed
+        let nonces = is_new_storage ? g_current_nonces : hashObj.nonces
+        let times = is_new_storage ? g_current_chunk_times : hashObj.times
+        let hexs_chunk_array = is_new_storage ? g_current_chunks :  hashObj.hashed_chunks
+        //
+        if ( is_new_storage ) {     // demarcate data representation from editing history representation
+            nonces.push("0")
+            hexs_chunk_array.push("0")
+            times.push("0")
+        } else {
+            hexs_chunk_array.push(prev_blob_hash)   // previous result of this function
         }
+        
         // hash
-        let blobArray = await new_blob.arrayBuffer();
-        const hashBuffer = await g_crypto.digest('SHA-256', blobArray);
+        let blobArray = await new_blob.arrayBuffer();          // -- recorded data
+        const hashBuffer = await g_crypto.digest('SHA-256', blobArray);     // SHA 256
         //  convert to hex string
         const hashArray = Array.from(new Uint8Array(hashBuffer));                     // convert buffer to byte array
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+        const hashHex_suffix = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
         // add to the hash list
-        hexs_chunk_array.push(hashHex)
+        hexs_chunk_array.push(hashHex_suffix)
+        //
+        let hx_time = Date.now().toString(16)
+        times.push(hx_time)             // ensuing times correspond to first store and edits.
+        let last_loc_bytes = geo_loc_str_to_byte_array(hashObj.sess_geo_location)
+        let stored_token = hashHex_suffix 
+        if ( last_loc_bytes ) {
+            let a_view = new Uint8Array(hashHex_suffix)
+            let o_array = [...a_view]
+            let xored = xor_arrays(last_loc_bytes,o_array)
+            hashHex_suffix = hex_fromArrayOfBytes(xored)
+            hashHex_suffix = hex_xor_of_strings(hashHex_suffix,hx_time)
+        }
+        //
         //
         // get an xor of all the hashes in the chunk array
-        let hash_prefix = xor_all_to_hext_str(hexs_chunk_array)
-        let output = hash_prefix + '|{+}|' + hashHex  // the hex of the xor of chunk hashses... with the hex of the Sha2 hash of blob
-        output = await sign_hash(output,g_user_info.priv)
-        let is_new_storage = (prev_blob_hash ? false : true)
-        let located_mac = await store_hashes_and_nonces(blob_id,output,hash_prefix,hashHex,is_new_storage,is_new_storage)
+        let hash_prefix = xor_all_to_hex_str(hexs_chunk_array)
         //
-        return(located_mac)
+        let output = hash_prefix + '|{+}|' + hashHex_suffix  // the hex of the xor of chunk hashses... with the hex of the Sha2 hash of blob
+        //        
+        output = await sign_hash(output,g_user_info.priv)
+        let hashObjUpdate = {
+            'hash_combo' : stored_token,      // signed and sent to server
+            'combined' : hash_prefix,
+            'blob_hash' : hashHex,
+            'nonces' : nonces,
+            'hashed_chunks' : hashed_chunks,
+            'times' : times
+        }
+        //
+        for ( let hky in hashObjUpdate ) {
+            hashObj[hky] = hashObjUpdate[hky]
+        }
+        //
+        await store_hashes_and_nonces(blob_id,hashObj)
+        //
+        return(output)
     }
 
 
@@ -559,13 +605,18 @@
                 g_current_session_name = message.sess_name
                 // The chunk in raw form is in the client for sound playback.
                 let new_chunk = message.chunk
-                
+                let chunk_time = Date.now()
+                let hx_chunk_time = chunk_time.toString(16);
                 crypto.getRandomValues(g_nonce_buffer);
-                let chunk_hash = await hash_of_chunk(new_chunk,g_nonce_buffer)  // chunk has is a string in the hex alphabet
-                // STORE HASH LOCALLY
+                let time_array = hex_toByteArray(hx_chunk_time)
+                let secret = xor_byte_arrays(g_nonce_buffer,time_array)
+                // -- hash_of_chunk -- SHA-256 of xor with secret  = (time ^ data) ^ random = (time ^ random) ^ data
+                let chunk_hash = await hash_of_chunk(new_chunk,secret)  // chunk has is a string in the hex alphabet
+                // STORE HASH LOCALLY -- not yet in DB -- the chunk is in the DB
                 g_current_chunks.push(chunk_hash)
                 let nonce_hx_str = hex_fromTypedArray(g_nonce_buffer)  // a string
                 g_current_nonces.push(nonce_hx_str)
+                g_current_chunk_times.push(hx_chunk_time)
                 // STORE HASH REMOTELY           // STORE HASH REMOTELY
                 let remote_cache_op = {
                     'transition' : 'chunk',
@@ -573,7 +624,7 @@
                         'chunk' : chunk_hash,
                         'email' : g_user_info.email,
                         'session' : g_current_session_name,
-                        'client_time' : Date.now(),
+                        'client_time' : chunk_time,
                         'server_id' : g_user_info.server_id
                     }       // there is no blob id yet...
                 }
@@ -586,7 +637,11 @@
                 //edit-update, end-recording
                 switch ( op ) {
                     case 'end-recording' : {        // recording stop button to db
-                        let c_hash = await combined_hash_signed_and_store(g_current_chunks,message.blob_id,message.blob,null)
+                        // message.blob_id -- a uuid, made for the blob
+                        // next get the session data for this blob from the DB
+                        let hashes = await retrieve_hash_from_db(message.blob_id,g_current_session_name)
+                        // message.blob -- the audio blob, made from the chunks gathered - real time.
+                        let c_hash = await combined_hash_signed_and_store(hashes,message.blob_id,message.blob,null)
                          // STORE HASH REMOTELY  // STORE HASH REMOTELY
                         let remote_cache_op = {
                             'transition' : 'chunk-final',
@@ -595,18 +650,25 @@
                                 'email' : g_user_info.email,
                                 'session' : g_current_session_name,
                                 'client_time' : Date.now(),
-                                'server_id' : g_user_info.server_id,
-                                'blob_id' : message.blob_id
+                                'server_id' : g_user_info.server_id,    // identifies the user recording session
+                                'blob_id' : message.blob_id             // UUID from web page
                             }
                         }
                         post_chunk(remote_cache_op)
+                        // discard data mapping to chunks gathhered while recording
                         g_current_chunks = []
                         g_current_nonces = []
+                        g_current_chunk_times = []
                         break;
                     }
                     case 'edit-update' : {          // cut, undo, etc.
+                        // message.blob_id -- a uuid, made for the blob - stays the same after edits, etc.
+                        // next get the session data for this blob from the DB
                         let hashes = await retrieve_hash_from_db(message.blob_id,g_current_session_name)
-                        let c_hash = await combined_hash_signed_and_store(hashes.hashed_chunks,message.blob_id,message.blob,hashes.blob_hash)
+                        // message.blob -- the audio blob, made from the chunks gathered - real time - and then edited
+                        // make a new hash for the edit
+                        let edit_ops = JSON.stringify(hashes.operations)
+                        let c_hash = await combined_hash_signed_and_store(hashes,message.blob_id,message.blob,hashes.blob_hash)
                         let remote_cache_op = {
                             'transition' : 'chunk-change',
                             'message' : {
@@ -615,7 +677,8 @@
                                 'session' : g_current_session_name,
                                 'client_time' : Date.now(),
                                 'server_id' : g_user_info.server_id,
-                                'blob_id' : message.blob_id
+                                'blob_id' : message.blob_id,
+                                'ops' : edit_ops
                             }
                         }
                         post_chunk(remote_cache_op)

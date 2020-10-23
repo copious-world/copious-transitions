@@ -478,6 +478,7 @@ button:disabled {
       this.audio_instance = new Audio(audioUrl);
       let section_id = 'ER' + uuidv4() // use ER to signify End(Edit) Recording and be different than other randoms
       this.section_id = section_id
+      wv_backup_audio_chunks_for_verification(section_id,this.audioChunks)
       wv_secure('end-recording',audioBlob,section_id)
     }
 
@@ -505,6 +506,7 @@ button:disabled {
     relayAudioData(chunk) {
       wv_prep_secure_relay(chunk)
     }
+
 
   }
 
@@ -575,6 +577,8 @@ button:disabled {
     };
     //
   }
+
+
 
     ////////////////
 
@@ -1244,7 +1248,7 @@ button:disabled {
   }
 
 
-  function update_audio_data(section_id,data_list) {
+  function update_audio_data(section_id,data_list,op_parameters) {
     //
     if ( g_audio_db === null ) {
       console.log("db not initialized :: update_audio_data")
@@ -1265,6 +1269,12 @@ button:disabled {
           if ( sessionObj.data[section_id] != null ) {
             let blob_url = URL.createObjectURL(audioBlob);
             sessionObj.data[section_id] = audioBlob
+            if ( op_parameters ) {
+              let operation = {'op' : 'cut', "startX" :  op_parameters.startX, "w" : op_parameters.w, "samples" : op_parameters.samplePP }
+              sessionObj.hashes[section_id].op_history.push(operation)
+            } else {
+              sessionObj.hashes[section_id].op_history.push({'op' : 'back'})
+            }
             wv_secure('edit-update',audioBlob,section_id)
             //
             const request = cursor.update(sessionObj);
@@ -1286,22 +1296,64 @@ button:disabled {
   }
 
 
-  function add_new_audio_session_to_db(audioStore,applicatin_op) {
+  function add_new_audio_session_to_db(audioStore,application_op) {
+    let sess_loc_str = JSON.stringify(g_wv_current_locaion)
+    //
     let sessionObj = {
         'name' : g_current_session_name,
         'sess_date_time' : '' + Date.now(),
-        'sess_geo_location' : JSON.stringify(g_wv_current_locaion),
+        'sess_geo_location' : sess_loc_str,
         'data' : { },
+        'original_chunks' : { },      // base64 encoded
         'hashes' : { },
-        'locations' : [JSON.stringify(g_wv_current_locaion)]
+        'locations' : [sess_loc_str]
       }
       //
       if ( applicatin_op  && (typeof applicatin_op === 'function') ) {
-        applicatin_op(sessionObj)
+        application_op(sessionObj)
       }
       let request = audioStore.add(sessionObj);
       return request
   }
+
+
+  // assuming there is an array that has been collected
+  // each element will correspond to a resulting hash
+  // The hashes are sent to the server and can be reconstructed later
+  // but only if the chunk array is still available in its original form
+  function wv_backup_audio_chunks_for_verification(section_id,audioChunksArray) {
+    if ( g_audio_db === null ) {
+      console.log("db not initialized :: wv_backup_audio_chunks_for_verification")
+      return;
+    }
+    //
+    let converted_chunks = audioChunksArray.map( async (chunk) => {
+      let storable = await blobToBase64(chunk)
+      return(storable)
+    })
+    //
+    let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
+    let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
+
+    //
+    let add_elem_original_chumks_callback = (value,dbIndex) => {
+      let keyRangeValue = IDBKeyRange.only(value.name);
+      dbIndex.openCursor(keyRangeValue).onsuccess = (event) => {
+        var cursor = event.target.result;
+        if ( cursor ) {
+          let sessionObj = cursor.value
+          sessionObj.original_chunks[section_id] = converted_chunks
+        }
+      }
+    }
+      //
+      let not_found_callback = () => {
+        console.log("wv_backup_audio_chunks_for_verification: no audio for current session")
+      }
+      //
+      apply_find_audio_session(g_current_session_name, audioStore, add_elem_original_chumks_callback, not_found_callback)
+   }
+
 
 
   function add_audio_data(audioBlob,section_id) {
@@ -1324,11 +1376,12 @@ button:disabled {
           let blob_url = URL.createObjectURL(audioBlob);
           // map_id = section_id
           sessionObj.data[section_id] = audioBlob
+          if ( sessionObj.hashes[section_id].op_history === undefined ) {
+            sessionObj.hashes[section_id].op_history = []
+          }
           // 
           let geo_update = JSON.stringify(g_wv_current_locaion)
-          if ( sessionObj.locations.indexOf(geo_update) < 0 ) {
-            sessionObj.locations.push(geo_update)
-          }
+          sessionObj.locations.push(geo_update)
           //
           const request = cursor.update(sessionObj);
           request.onsuccess = async () => {
@@ -1342,20 +1395,13 @@ button:disabled {
 
     let add_new_callback = () => {
       let blob_url = URL.createObjectURL(audioBlob);
-      let sessionObj = {
-        'name' : g_current_session_name,
-        'sess_date_time' : '' + Date.now(),
-        'sess_geo_location' : JSON.stringify(g_wv_current_locaion),
-        'data' : { },
-        'hashes' : { },
-        'locations' : [JSON.stringify(g_wv_current_locaion)]
-      }
       //
-      let applicatin_op = (sessionObj) => {
+      let application_op = (sessionObj) => {
         sessionObj.data[section_id] = audioBlob   // JSON.stringify(audioBlob)
+        sessionObj.hashes[section_id].op_history = []
       } 
       //
-      let request = add_new_audio_session_to_db(audioStore,applicatin_op)
+      let request = add_new_audio_session_to_db(audioStore,application_op)
       if ( request ) {
         request.onsuccess = function(event) {
           add_audio_element(blob_url,section_id,audioBlob)  // visual rep
@@ -2184,7 +2230,7 @@ function draw_wave(data,ctx,W,h) {
       //
       let canvas = player_info.canvas
       if ( canvas && (player_info.save_selection.startX !== undefined) ) {
-        if ( player_info.save_selection.w <= 0 ) {
+        if ( player_info.save_selection.w <= 0 ) {   // turn the selection around only when it is backwards
           if ( player_info.save_selection.w === 0 ) return
           else {
             let w = player_info.save_selection.w
@@ -2217,7 +2263,8 @@ function draw_wave(data,ctx,W,h) {
         draw_wave(display_data,ctx,W,h,rec_seconds)
         //
         data_list = [display_data,c2_data]
-        update_audio_data(wave_name,data_list)
+        player_info.save_selection.samplePP = samples_per_pixel
+        update_audio_data(wave_name,data_list,player_info.save_selection)
       }
     }
   }
@@ -2258,7 +2305,7 @@ function draw_wave(data,ctx,W,h) {
             //
             let data2 = undo_op.data2
             let data_list = [data,data2]
-            update_audio_data(wave_name,data_list)
+            update_audio_data(wave_name,data_list,false)
           }
         }
       }
@@ -2583,6 +2630,40 @@ function draw_wave(data,ctx,W,h) {
     return false
   }
 
+  
+  // download verification data
+  // 
+  var verifier_downloader_url = null
+  async function download_verification_session_record(sess_name,downloadlink) {
+    if ( !(downloadlink) ) return false
+    let sess_name_cmplt = sess_name + '-complete'
+    let data = await get_audio_key(sess_name_cmplt)
+    if ( data ) {
+      let all_verify_data = {
+        "base_audio" : data,
+        "session_info" : {}
+      }
+      let sessObj = await get_audio_data(sess_name)
+      if ( sessObj ) {
+        all_verify_data.session_info = sessObj
+        //
+        let f_url = URL.createObjectURL(all_verify_data);
+
+        if ( verifier_downloader_url !== null ) {
+          URL.revokeObjectURL(verifier_downloader_url)
+        }
+        verifier_downloader_url = f_url
+        downloadlink.href = f_url
+        let ext = data.ext ? data.ext : "json"
+        downloadlink.download = sess_name + '.' + ext;
+        downloadlink.click();
+      }
+    }
+  }
+
+
+
+
   // // 
   async function download_prompt() {
     let downloader = g_audio_download_modal
@@ -2605,6 +2686,32 @@ function draw_wave(data,ctx,W,h) {
       }
     }
   }
+
+
+  // // 
+  async function download_verification_prompt() {
+    let downloader = g_verify_download_modal
+    let downloadlink = document.getElementById('verification-download-link')
+    if ( downloader && downloadlink ) {
+      downloadlink.innerHTML = `Download ${g_current_session_name}`
+      if ( downloader.showModal ) downloader.showModal()
+      else {
+        downloader.style.visibility = 'visible'
+        downloader.style.display = 'block'
+      }
+      let result = await download_verification_session_record(g_current_session_name,downloadlink)
+      if ( result ) {
+        // maybe send a copy to the server ???
+      }
+      if ( downloader.close ) downloader.close()
+      else {
+        downloader.style.visibility = 'hidden'
+        downloader.style.display = 'none'
+      }
+    }
+  }
+
+
 
 
   function worker_status_view(status) {
