@@ -242,6 +242,18 @@ button:disabled {
     </footer>
   </dialog>
   <!-- end of dialog-->
+  <dialog id='verification-download-box'>
+    <h3 class="modal-header">Click on the link below to begin downloading verification data</h3>
+    <div class="modal-body">
+      <blockquote class="wv-bq-dialog">
+        <a id='verification-download-link' href = "" >no file</a>
+      </blockquote>
+    </div>
+    <footer class="modal-footer">
+      <button id="verification-download-cancel" type="button">Cancel</button>
+    </footer>
+  </dialog>
+  <!-- end of dialog-->
   <dialog id='session-transfer-box'>
     <h3 class="modal-header">Name a session to retrieve that you previously posted from another device</h3>
     <div class="modal-body">
@@ -312,6 +324,7 @@ button:disabled {
   const savedAudioMessagesContainer = document.querySelector('#saved-audio-messages');
   const g_user_modal = document.getElementById('user-dialog');
   const g_audio_download_modal = document.getElementById('wave-download-box')
+  const g_verify_download_modal = document.getElementById('verification-download-box')
   const g_session_transfer_modal = document.getElementById('session-transfer-box')
   var g_geo_update = null
 
@@ -889,10 +902,9 @@ button:disabled {
     });
 
 
-    // ADIO MODAL
+    // AUDIO MODAL
     const dmodal = g_audio_download_modal
     const cancel_dmodal = document.getElementById('wave-download-cancel');
-
 
     dmodal.addEventListener('cancel', () => {
       //modal.close('cancelled');
@@ -907,10 +919,32 @@ button:disabled {
 
     // 
     cancel_dmodal.addEventListener('click', () => {
-      modal.close('cancelled');
+      dmodal.close('cancelled');
     });
 
 
+    // AUDIO MODAL
+    const v_dmodal = g_verify_download_modal
+    const v_cancel_dmodal = document.getElementById('verification-download-cancel');
+
+    v_dmodal.addEventListener('cancel', () => {
+      //modal.close('cancelled');
+    });
+
+    // close when clicking on backdrop
+    v_dmodal.addEventListener('click', (event) => {
+      if (event.target === v_dmodal) {
+        v_dmodal.close('cancelled');
+      }
+    });
+
+    // 
+    cancel_dmodal.addEventListener('click', () => {
+      v_dmodal.close('cancelled');
+    });
+
+
+    //
 
     // TRANSFER MODAL
     const tmodal = g_session_transfer_modal
@@ -1336,7 +1370,7 @@ button:disabled {
     let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
 
     //
-    let add_elem_original_chumks_callback = (value,dbIndex) => {
+    let add_elem_original_chunks_callback = (value,dbIndex) => {
       let keyRangeValue = IDBKeyRange.only(value.name);
       dbIndex.openCursor(keyRangeValue).onsuccess = (event) => {
         var cursor = event.target.result;
@@ -1351,7 +1385,7 @@ button:disabled {
         console.log("wv_backup_audio_chunks_for_verification: no audio for current session")
       }
       //
-      apply_find_audio_session(g_current_session_name, audioStore, add_elem_original_chumks_callback, not_found_callback)
+      apply_find_audio_session(g_current_session_name, audioStore, add_elem_original_chunks_callback, not_found_callback)
    }
 
 
@@ -2606,8 +2640,8 @@ function draw_wave(data,ctx,W,h) {
       let sess_blob = data.blob
       let barray = convertDataURIToBinary(sess_blob)
       //
-      let snd = new Audio(sess_blob)
-      snd.play()
+      //let snd = new Audio(sess_blob)
+      //snd.play()
 
       // //
       let contentType = g_preferred_download_format
@@ -2630,7 +2664,7 @@ function draw_wave(data,ctx,W,h) {
     return false
   }
 
-  
+
   // download verification data
   // 
   var verifier_downloader_url = null
