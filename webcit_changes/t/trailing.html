@@ -127,4 +127,21 @@ function site_wide_logout(req_logout = true) {
 setup_sitewide()
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- 
 
+// handling some bug until a better framework is in place
+let bs = document.querySelectorAll('.stickynote_outer')
+if ( bs && bs.length ) {
+	bs.forEach(d => { 
+		let x = d.style.left;
+		let y = d.style.top;
+		d.style.position = "absolute";
+		d.style.left = x;
+		d.style.top = y;
+	})
+}
+
+function ctdlRandomString() {
+	let temporary = '' + Date.now()
+	return temporary
+}
+
 </script>
