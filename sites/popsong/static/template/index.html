@@ -1562,6 +1562,9 @@ html {
 		}
 	}
 	function pin_ItsAlive(pinned) {
+		if ( pinned && (typeof pinned.openAction === 'function')) {
+			pinned.openAction()
+		}
 		g_apparition = null;
 	}
 	// ---- ---- ---- ---- ---- ----
