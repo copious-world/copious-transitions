@@ -24,4 +24,4 @@ release/www.popsongnow.com/index.html
 webcrypto*
 user_keys*
 *.DS*
-
+sites/popsong/static/dialog-polyfill-master/*

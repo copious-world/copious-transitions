@@ -10,13 +10,15 @@ class MediaUpStatic extends GeneralStatic {
         this.preloaded = {
             "demo_uploader" : { "fname" : '/uploader.html', "ftype" : "html" },
             "pub_submit" : { "fname" : '/submitter.html', "ftype" : "html" },
-            "recorder" : { "fname" : '/recorder.html', "ftype" : "html" }
+            "recorder" : { "fname" : '/recorder.html', "ftype" : "html" },
+            "dialogs" : { "fname" : '/dialog_packaged.html', "ftype" : "html" }
         }
         //
         this.demo_asset_media_object = null
         this.publication_asset_media_object = null
         this.recorder_object = null
         this.ownership_worker = null
+        this.dialogs_packaged = null
     }
 
     preload_all(conf) {
@@ -55,7 +57,15 @@ class MediaUpStatic extends GeneralStatic {
             "string" : JSON.stringify(json)
         }
         //
-        
+        // D) POLYFILL FOR DIALOGS (HTML in transition)
+        data = this.preloaded.dialogs.data
+        json = this.prepare_asset(data)
+        //
+        this.dialogs_packaged = {
+            "mime_type" : "application/json",
+            "string" : JSON.stringify(json)
+        }
+        //
     }
 
     fetch(asset) {
@@ -76,6 +86,12 @@ class MediaUpStatic extends GeneralStatic {
                 return("empty")
             } else {
                 return(this.recorder_object)
+            }
+        } else if ( asset = "dialogs" ) {
+            if ( !(this.dialogs_packaged) ) {
+                return("empty")
+            } else {
+                return(this.dialogs_packaged)
             }
         } else {
             return(super.fetch())

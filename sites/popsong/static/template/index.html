@@ -688,6 +688,11 @@ html {
 			cursor: pointer;
 		}
 
+		#for_testing_dialogs {
+			display: none;
+			visibility: hidden;
+		}
+
 	</style>
 </head>
 <script>
@@ -903,7 +908,9 @@ html {
 {{{yourProileLinks.content}}}
 {{{yourDashboardLinks.content}}}
 
-
+<dialog id="for_testing_dialogs">
+	<span>This is a dialog test</span>
+</dialog>
 
 </body>
 </html>
@@ -2011,4 +2018,6 @@ html {
 	//
 	resize()
 	setupLogoutRestoration()
+
+
 </script>
