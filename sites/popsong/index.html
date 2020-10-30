@@ -21,9 +21,6 @@
 /**
  * Extra rules that Pure adds on top of Normalize.css
 
-html {
-
-}
 */
 
 /**
@@ -55,7 +52,7 @@ html {
 		.items .item {
 			flex: 1 0 300px;
 			box-sizing: border-box;
-			background: -webkit-linear-gradient(to right, rgba(242, 242, 210, 0.3), white));
+			background: -webkit-linear-gradient(to right, rgba(242, 242, 210, 0.3), white );
 			background: linear-gradient(to right, rgba(242, 242, 210, 0.3), white );
 			color: #171e42;
 			padding: 10px;
@@ -686,6 +683,11 @@ html {
 
 		a {
 			cursor: pointer;
+		}
+
+		#for_testing_dialogs {
+			display: none;
+			visibility: hidden;
 		}
 
 	</style>
@@ -1358,6 +1360,22 @@ async function do_fetch_recorder() {
         }
     }
 }
+
+async function ensure_dialog_elements() {
+    let test_dialog = document.getElementById("for_testing_dialogs")  // thought to be in the template... if not this does nothing
+    if ( test_dialog ) {
+        if ( typeof favDialog.showModal !== "function" ) {
+            let element_supportJson =  await fetchEndPoint('uploaders/static/dialogs')
+            if ( element_supportJson ) {
+                let css_support = decodeURIComponent(formJson.html)
+                document.appendChild(css_support)
+                addscript(decodeURIComponent(element_supportJson.script),document)
+            }
+        }
+    }
+}
+
+ensure_dialog_elements()
 </script>
 		</div>
 	</div>
@@ -2832,7 +2850,9 @@ async function fetchUploader(theDiv) {
 
 
 
-
+<dialog id="for_testing_dialogs">
+	<span>This is a dialog test</span>
+</dialog>
 
 </body>
 </html>
@@ -3951,4 +3971,6 @@ async function fetchUploader(theDiv) {
 	//
 	resize()
 	setupLogoutRestoration()
+
+
 </script>
