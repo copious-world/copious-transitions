@@ -61,6 +61,11 @@ async function song_of_day() {
 
 
 async function do_song_submit() {
+    //
+    if ( not_https_switch() ) {
+        return;
+    }
+    //
     let formJson = await fetchEndPoint('uploaders/static/publication-uploader')
     if ( formJson ) {
         let formPlacement = document.querySelector('#streamer-scratchpad');

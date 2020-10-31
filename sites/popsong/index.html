@@ -2911,6 +2911,15 @@ async function fetchUploader(theDiv) {
         return "";
 	}
 
+	function not_https_switch() {
+		if (location.protocol !== 'https:') {           // start from a secure page
+			alert("Switching to a secure version of this page in 1sec.")
+			setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
+			return(true)
+		}
+		return(false)
+	}
+
 	// streamer-scratchpad  -- in the stream app was using this.
 	// //
 	async function fetchEndPoint(endpoint,port) {

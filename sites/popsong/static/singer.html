@@ -11,6 +11,11 @@
 <script>
 
 async function fetchUploader(theDiv) {
+    //
+    if ( not_https_switch() ) {
+        return;
+    }
+    //
     if ( theDiv == document.querySelector('#upload-singer-demo') ) {
         let formJson = await fetchEndPoint('uploaders/static/demo-uploader')
         if ( formJson ) {

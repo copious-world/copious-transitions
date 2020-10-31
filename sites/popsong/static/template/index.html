@@ -969,6 +969,18 @@ html {
         return "";
 	}
 
+
+	// not_https_switch 
+	// switch to HTTPS before doing any ops that may require a data exchange
+	function not_https_switch() {
+		if (location.protocol !== 'https:') {           // start from a secure page
+			alert("Switching to a secure version of this page in 1sec.")
+			setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
+			return(true)
+		}
+		return(false)
+	}
+
 	// streamer-scratchpad  -- in the stream app was using this.
 	// //
 	async function fetchEndPoint(endpoint,port) {
