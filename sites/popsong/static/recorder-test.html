@@ -1,155 +1,155 @@
 <!doctype html>
 <html>
 <head>
-  <style>
+<style>
 
-    button {
+  button {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor:default;
+  }
+  
+    audio {
+      display: block;
+      margin: 5px;
+    }
+    .like-button {
+      font-weight: 600;
+      font-size:68%;
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: rgb(250, 244, 218);
+      margin-right: 4px;
+      margin-left: 2px;
+    }
+    .wv_button {
+      width: 50%;
+    }
+    .wv_button_wordy {
+      width: 70%;
+      font-size: 80%;
+    }
+    #saved-audio-messages {
+      max-height: 256px;
+      overflow-y: scroll;
+    }
+    .component-container {
+      border: rgb(126, 79, 9) solid 2px;
+      padding: 4px;
+    }
+    .audio-checks {
+      float: left
+    }
+    .audio-playback {
+      display: inline;
+    }
+    .playback-div {
+      width:100%;
+      text-align:left;
+      vertical-align:bottom;
+      border-bottom: midnightblue solid 1px;
+      padding: 2px;
+    }
+    .pop-name-list {
+      visibility: hidden;
+      display: none;
+    }
+    .pop-name-list-popped {
+      visibility: visible;
+      display: block;
+    }
+  
+    .wave-graph-container {
+      left: 10px;
+      top: 10px;
+      width: 80%;
+      height: 40%;
+      position:absolute;
+      display: none;
+      visibility: none;
+      z-index:500;
+      border: 2px orangered solid;
+      background-color: ivory;
+    }
+  
+    .wave-graph-container button {
+      font-size: 0.8em;
+      cursor: pointer;
+      font-weight: 600;
+      background-color: rgb(250, 244, 218);
+      border-radius: 6px;
+      border: 1px double #cccccc;
+      width:auto;
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+  
+    .drag-bar-control {
+      margin:0px;
+      width: 100%;
+      height: 20px;
+      background-color: slateblue;
+      color:goldenrod;
+      cursor:move;
+      text-align: right;
+    }
+    .wave-graph-canvas {
+      width: 100%;
+      height: 100%;
+    }
+    .wv-editor-close {
+      font-size: 120%;
+      height:10px;
+      width:10px;
+      text-align: center;
+      vertical-align: middle;
       cursor: pointer;
     }
-    button:disabled {
-      cursor:default;
+    .wave_edit_controls_container {
+      display:inline-block;
+      width: calc(100% - 20px);
+      text-align: center;
+      height: 100%;
     }
-    
-      audio {
-        display: block;
-        margin: 5px;
-      }
-      .like-button {
-        font-weight: 600;
-        font-size:68%;
-        font-family: Arial, Helvetica, sans-serif;
-        background-color: rgb(250, 244, 218);
-        margin-right: 4px;
-        margin-left: 2px;
-      }
-      .wv_button {
-        width: 50%;
-      }
-      .wv_button_wordy {
-        width: 70%;
-        font-size: 80%;
-      }
-      #saved-audio-messages {
-        max-height: 256px;
-        overflow-y: scroll;
-      }
-      .component-container {
-        border: rgb(126, 79, 9) solid 2px;
-        padding: 4px;
-      }
-      .audio-checks {
-        float: left
-      }
-      .audio-playback {
-        display: inline;
-      }
-      .playback-div {
-        width:100%;
-        text-align:left;
-        vertical-align:bottom;
-        border-bottom: midnightblue solid 1px;
-        padding: 2px;
-      }
-      .pop-name-list {
-        visibility: hidden;
-        display: none;
-      }
-      .pop-name-list-popped {
-        visibility: visible;
-        display: block;
-      }
-    
-      .wave-graph-container {
-        left: 10px;
-        top: 10px;
-        width: 80%;
-        height: 40%;
-        position:absolute;
-        display: none;
-        visibility: none;
-        z-index:500;
-        border: 2px orangered solid;
-        background-color: ivory;
-      }
-    
-      .wave-graph-container button {
-        font-size: 0.8em;
-        cursor: pointer;
-        font-weight: 600;
-        background-color: rgb(250, 244, 218);
-        border-radius: 6px;
-        border: 1px double #cccccc;
-        width:auto;
-        padding-left: 4px;
-        padding-right: 4px;
-      }
-    
-      .drag-bar-control {
-        margin:0px;
-        width: 100%;
-        height: 20px;
-        background-color: slateblue;
-        color:goldenrod;
-        cursor:move;
-        text-align: right;
-      }
-      .wave-graph-canvas {
-        width: 100%;
-        height: 100%;
-      }
-      .wv-editor-close {
-        font-size: 120%;
-        height:10px;
-        width:10px;
-        text-align: center;
-        vertical-align: middle;
-        cursor: pointer;
-      }
-      .wave_edit_controls_container {
-        display:inline-block;
-        width: calc(100% - 20px);
-        text-align: center;
-        height: 100%;
-      }
-    
-      dialog {
-        padding: 0;
-        border: 0;
-        border-radius: 0.4rem;
-        padding: 6px;
-        box-shadow: 0 0 1em black;
-        background-color: rgb(221, 214, 221);
-      }
-    
-      dialog::backdrop {
-        background: rgba(200, 200, 160, 0.25);
-      }
-    
-      .wv-bq-dialog {
-        max-width: 600px;
-        border:rgb(250, 244, 218) solid 1px;
-        background-color: rgba(255, 245, 238, 0.603);
-        color:rgb(24, 57, 83);
-        font-weight:400;
-      }
+  
+    dialog {
+      padding: 0;
+      border: 0;
+      border-radius: 0.4rem;
+      padding: 6px;
+      box-shadow: 0 0 1em black;
+      background-color: rgb(221, 214, 221);
+    }
+  
+    dialog::backdrop {
+      background: rgba(200, 200, 160, 0.25);
+    }
+  
+    .wv-bq-dialog {
+      max-width: 600px;
+      border:rgb(250, 244, 218) solid 1px;
+      background-color: rgba(255, 245, 238, 0.603);
+      color:rgb(24, 57, 83);
+      font-weight:400;
+    }
 
-      .check_audio_element {
-        height: 50%;
-      }
-    
-    #audioBoxGhost {
-      position : absolute;
-      display : none;
-      visibility: hidden;
-      height : 0px;
-      width : 0px;
-      cursor : move;
-      border : 2px dotted greenyellow;
-      background-color: rgba(236, 236, 201, 0.445);
+    .check_audio_element {
+      min-height: 50px;
     }
   
-  </style>
-  
+  #audioBoxGhost {
+    position : absolute;
+    display : none;
+    visibility: hidden;
+    height : 0px;
+    width : 0px;
+    cursor : move;
+    border : 2px dotted greenyellow;
+    background-color: rgba(236, 236, 201, 0.445);
+  }
+
+</style>
+
 </head>
 <body>
   <div class="component-container">
@@ -302,7 +302,7 @@
   <div id="audioBoxGhost" >
       &nbsp;
   </div>
-  
+
 </body>
 </html>
 
@@ -1936,6 +1936,14 @@
       }
       return false
     }
+
+    function lst_remove(list,index) {
+      list.splice(index,1)
+    }
+
+    function lst_insert_before(list,el,index) {
+      list.splice(index,0,el)
+    }
   
   
     function wv_reposition(srcEl,dstEl) {
@@ -1947,40 +1955,42 @@
         let tst_el = g_audio_play_list_order[i]
         if ( tst_el == srcEl ) from = i
         if ( tst_el == dstEl ) to = i
-        if ( from != 0 && to != 0 ) break
+        if ( (from != -1) && (to != -1) ) break
         i++
       }
-      if ( ( from != -1 )&& ( to != -1 ) ) {
-        let tmp_el = g_audio_play_list_order[from]
-        g_audio_play_list_order[from] = g_audio_play_list_order[to]
-        g_audio_play_list_order[to] = tmp_el
-        //
+      if ( ( from != -1 )&& ( to != -1 ) && ( from !== to ) ) {
+        // not a swap...
         // swap the two elements according to their position in the childNodes of the parent
         let p_node = srcEl.parentNode
         if ( p_node ) {
-          let follow_node = dstEl.nextSibling
-          if ( follow_node === srcEl ) {
-            p_node.appendChild(dstEl)
-          } else if ( srcEl.nextSibling === dstEl ) {
-            p_node.appendChild(srcEl)
-          } else {
-            let old_src = p_node.replace(dstEl,srcEl)
-            if ( follow_node ) {
-              p_node.insertBefore(old_src,follow_node)
+          if ( from > to ) {
+            lst_remove(g_audio_play_list_order,from)
+            lst_insert_before(g_audio_play_list_order,srcEl,to)
+            //
+            p_node.insertBefore(srcEl,dstEl)
+          } else if ( from < to ) {
+            lst_remove(g_audio_play_list_order,from)
+            lst_insert_before(g_audio_play_list_order,srcEl,to)
+            //    
+            let dst_follow_node = dstEl.nextSibling
+            if ( dst_follow_node ) {
+              p_node.insertBefore(srcEl,dst_follow_node)
             } else {
-              p_node.appendChild(old_src)
-            }
+              p_node.appendChild(srcEl)
+            } 
           }
         }
         //
-        let map_ids = g_audio_play_list_order.map(divEl => {
-          let id = divEl.id
-          id = id.replace('audio-div-','')
-          return(id)
-        })
+        if ( from !== to ) {
+          let map_ids = g_audio_play_list_order.map(divEl => {
+            let id = divEl.id
+            id = id.replace('audio-div-','')
+            return(id)
+          })
+          //
+          wv_reset_audio_sections_order(map_ids)
+        }
         //
-        wv_reset_audio_sections_order(map_ids)
-  
       }
   
     }

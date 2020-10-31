@@ -130,6 +130,10 @@
       color:rgb(24, 57, 83);
       font-weight:400;
     }
+
+    .check_audio_element {
+      min-height: 50px;
+    }
   
   #audioBoxGhost {
     position : absolute;
@@ -137,11 +141,13 @@
     visibility: hidden;
     height : 0px;
     width : 0px;
+    cursor : move;
     border : 2px dotted greenyellow;
     background-color: rgba(236, 236, 201, 0.445);
   }
 
 </style>
+
 
 <div class="component-container">
   <span style="font-weight: bolder;">Manage Recording Sessions</span>
@@ -293,6 +299,7 @@
 <div id="audioBoxGhost" >
     &nbsp;
 </div>
+
 
 <script>
 const AUDIO_SESSION_STORE = 'audio_sessions'
@@ -774,7 +781,23 @@ function wv_concat_sections(raw_sections) {
 async function make_complete_session_record(sess_name_cmplt,sessionObj,contentType) {
   // make a file storage format
   let raw_sections = []
-  for ( let wave_name in sessionObj.data ) {
+  let mapkys = null
+  if ( sessionObj.edit_order ) {
+    mapkys = sessionObj.edit_order
+    mapkys = mapkys.map(bid => {
+      if ( bid.indexOf('audio-div-') === 0 ) {
+        return bid.replace('audio-div-','')
+      } else {
+        return bid
+      }
+    })
+  } else {
+    mapkys = Object.keys(sessionObj.data)
+  }
+  //
+  let n = mapkys.length
+  for ( let i = 0; i < n; i++ ) {
+    let wave_name = mapkys[i]
     let raw_wave = await get_wave_data(wave_name)
     raw_sections.push(raw_wave)
   }
@@ -1482,7 +1505,7 @@ function add_audio_data(audioBlob,section_id) {
     let request = add_new_audio_session_to_db(audioStore,application_op)
     if ( request ) {
       request.onsuccess = function(event) {
-          sessionObj.edit_order.push(section_id)
+        sessionObj.edit_order.push(section_id)
         add_audio_element(blob_url,section_id,audioBlob)  // visual rep
       };
     }
@@ -1766,8 +1789,8 @@ function delete_session() {
 }
 
 
-  function wv_reset_audio_sections_order(map_ids) {
-    if ( g_current_session_name !== 'none ') {
+function wv_reset_audio_sections_order(map_ids) {
+  if ( g_current_session_name !== 'none ') {
       let sess_name = g_current_session_name
       if ( g_audio_db === null ) {
         console.log("db not initialized :: delete_session")
@@ -1778,13 +1801,17 @@ function delete_session() {
       let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
 
       let reset_audio_ordering_callback = (value,dbIndex) => {
-        let sessionObj = value
         let keyRangeValue = IDBKeyRange.only(value.name);
         dbIndex.openCursor(keyRangeValue).onsuccess = (event) => {
           var cursor = event.target.result;
           if ( cursor ) {
             let sessionObj = cursor.value
             sessionObj.edit_order = map_ids
+            const request = cursor.update(sessionObj);
+            request.onsuccess = async () => {
+              await wv_secure_total_session(g_current_session_name)
+            };
+          }
         }
       }
 
@@ -1793,8 +1820,8 @@ function delete_session() {
       }
 
       apply_find_audio_session(sess_name, audioStore, reset_audio_ordering_callback, not_found_callback)    
-    }
   }
+}
 
   
 // RECORDER
@@ -1871,17 +1898,18 @@ function wv_initialize_global_buttons() {
 }
 
 
-  function wv_rect_vertical_intersect_size(r1,r1) {
+  function wv_rect_vertical_intersect_size(r1,r2) {
     //
     let y1_top = r1.top
-    let y1_bot = y1_top + r1.height
+    let y1_bot = r1.bottom
     //
     let y2_top = r2.top
-    let y2_bot = y1_top + r2.height
+    let y2_bot = r2.bottom
+    if ( (y2_bot <= y1_top) || (y1_bot <= y2_top) ) return 0
     //
-    if ( y1_top > y2_top ) {
+    if ( y1_top < y2_top ) {
       return(y1_bot - y2_top)  // increasing downward
-    } ekse {
+    } else {
       return(y2_bot - y1_top)  // increasing downward
     }
   }
@@ -1904,71 +1932,90 @@ function wv_initialize_global_buttons() {
     return false
   }
 
+  function lst_remove(list,index) {
+    list.splice(index,1)
+  }
+
+  function lst_insert_before(list,el,index) {
+    list.splice(index,0,el)
+  }
+
 
   function wv_reposition(srcEl,dstEl) {
     let i = 0;
     let n = g_audio_play_list_order.length
-    let from = 0
-    let to = 0
+    let from = -1
+    let to = -1
     while ( i < n ) {
       let tst_el = g_audio_play_list_order[i]
       if ( tst_el == srcEl ) from = i
       if ( tst_el == dstEl ) to = i
-      if ( from != 0 && to != 0 ) break
+      if ( (from != -1) && (to != -1) ) break
+      i++
     }
-    if ( (from != 0 )&& (to != 0) ) {
-      let tmp_el = g_audio_play_list_order[from]
-      g_audio_play_list_order[from] = g_audio_play_list_order[to]
-      g_audio_play_list_order[to] = tmp
-      //
+    if ( ( from != -1 )&& ( to != -1 ) && ( from !== to ) ) {
+      // not a swap...
       // swap the two elements according to their position in the childNodes of the parent
       let p_node = srcEl.parentNode
       if ( p_node ) {
-        let follow_node = dstEl.nextSibling
-        if ( follow_node === srcEl ) {
-          p_node.appendChild(dstEl)
-        } else if ( srcEl.nextSibling === dstEl ) {
-          p_node.appendChild(srcEl)
-        } else {
-          let old_src = p_node.replace(dstEl,srcEl)
-          if ( follow_node ) {
-            p_node.insertBefore(old_src,follow_node)
+        if ( from > to ) {
+          lst_remove(g_audio_play_list_order,from)
+          lst_insert_before(g_audio_play_list_order,srcEl,to)
+          //
+          p_node.insertBefore(srcEl,dstEl)
+        } else if ( from < to ) {
+          lst_remove(g_audio_play_list_order,from)
+          lst_insert_before(g_audio_play_list_order,srcEl,to)
+          //    
+          let dst_follow_node = dstEl.nextSibling
+          if ( dst_follow_node ) {
+            p_node.insertBefore(srcEl,dst_follow_node)
           } else {
-            p_node.appendChild(old_src)
-          }
+            p_node.appendChild(srcEl)
+          } 
         }
       }
       //
-      let map_ids = g_audio_play_list_order.map(divEl => {
-        let id = divEl.id
-        id = id.replace('audio-cbox-','')
-        return(id)
-      })
+      if ( from !== to ) {
+        let map_ids = g_audio_play_list_order.map(divEl => {
+          let id = divEl.id
+          id = id.replace('audio-div-','')
+          return(id)
+        })
+        //
+        wv_reset_audio_sections_order(map_ids)
+      }
       //
-      wv_reset_audio_sections_order(map_ids)
-
     }
 
   }
 
 
-  function wv_move_html_element(elem) {
+
+  function wv_move_html_element(elem,track_source) {
     //
     if ( elem._tracker ) {
       elem.removeEventListener('mousemove',elem._tracker)
     }
     elem._tracker = (ev) => {
-      let mover = ev.target;
+      let mover = elem;
       let y = ev.clientY;
-      let prev_y = mover._app_mouse_y - ev.clientY;
+      let delta_y = mover._app_mouse_y - ev.clientY;
       mover._app_mouse_y = ev.clientY;
       // set the element's new position:
-      let new_y = (mover.offsetTop - prev_y)
+      let new_y = (mover.offsetTop - delta_y)
+      // lower bound
       if ( new_y > 8 ) mover.style.top = new_y + "px";
     }
-
-    elem.addEventListener('mousemove',elem._tracker)
+    window.addEventListener('mousemove',elem._tracker)
+    track_source.addEventListener('mousemove',elem._tracker)
+    //
     elem._releaser = (ev) => {
+      track_source.removeEventListener('mousemove',elem._tracker)
+      window.removeEventListener('mousemove',elem._tracker)
+      window.removeEventListener('mouseup',elem._releaser)
+      elem._releaser = null
+      elem._tracker = null
       //
       let divEl = elem._source
       divEl._ghost = false
@@ -1976,19 +2023,19 @@ function wv_initialize_global_buttons() {
       divEl._moving_audio_box = 0
       divEl._dragging = false
       //
+      let y = ev.clientY;
+      let rect = elem.getBoundingClientRect();
       elem.style.visibility = 'hidden'
       elem.style.display = 'none'
       //
-      let x = ev.clientX;
-      let y = ev.clientY;
-      let rect = elem.getBoundingClientRect();
       let overEl = getIntersectedElement(rect)
-      if ( overEl && (overEl !== diveEl) ) {
-        let ydiff = mover._app_mouse_y - y;
+      if ( overEl && (overEl !== track_source) ) {
+        let ydiff = elem._app_mouse_y - y;
         wv_reposition(divEl,overEl)
       }
+      //
     }
-
+    window.addEventListener('mouseup',elem._releaser)
   }
 
   
@@ -1996,47 +2043,42 @@ function wv_initialize_global_buttons() {
     //
     g_audio_play_list_order.push(divEl)
     //
-    divEl._moving_audio_box = 0
-    divEl._dragging = false
+    divEl._wait_to_drag = null
+    //
     divEl.addEventListener('mousedown',(ev) => {
-      divEl._moving_audio_box = 1
-      divEl._dragging = false
+      if ( divEl !== ev.target ) return;
+      divEl._wait_to_drag = setTimeout(() => {
+        clearTimeout(divEl._wait_to_drag)
+        divEl._wait_to_drag = null
+        //
+        let outliner = document.getElementById('audioBoxGhost')
+        outliner.style.position = "absolute"
+        outliner.style.zIndex = 1000
+        let d_rect = divEl.getBoundingClientRect()
+        outliner.style.top = d_rect.top + "px"
+        outliner.style.left = d_rect.left + "px"
+        outliner.style.width = d_rect.width + "px"
+        outliner.style.height = d_rect.height + "px"
+        outliner._source = divEl
+        divEl._ghost = outliner
+        outliner.style.display = 'block'
+        outliner.style.visibility = "inherit"
+        let y = ev.clientY;
+        outliner._app_mouse_y = y
+        //---
+        wv_move_html_element(outliner,divEl)
+        //--
+      },350)
     })
-    divEl.addEventListener('mouseover',(ev) => {
-      if ( ev.buttons > 0 ) {
-        if ( moving_audio_box ) {
-          divEl._moving_audio_box++
-        }
-        if ( divEl._moving_audio_box > 10 ) {
-          divEl._dragging = true
-          let outliner = document.getElementById('audioBoxGhost')
-          outliner.style.position = "absolute"
-          outliner.style.zIndex = 1000
-          outliner.style.top = divEl.clientY + "px"
-          outliner.style.left = divEl.clientX + "px"
-          outliner.style.width = divEl.clientWidth + "px"
-          outliner.style.height = divEl.clientHeight + "px"
-          outliner._source = divEl
-          divEl._ghost = outliner
-          outliner.style.display = 'block'
-          outliner.style.visibility = "inherit"
-          outliner._app_mouse_x = x
-          outliner._app_mouse_y = y
-          //---
-          wv_move_html_element(outliner)
-        }
+    //
+    let quic_hit = (ev) => {
+      if ( divEl._wait_to_drag !== null ) {
+        clearTimeout(divEl._wait_to_drag)
+        divEl._wait_to_drag = null
       }
-    })
-    divEl.addEventListener('mouseup',(ev) => {
-      divEl._moving_audio_box = 0
-      divEl._dragging = false
-      if ( divEl._ghost !== undefined ) {
-        wv_hide_html_element(divEl._ghost)
-        let outliner = divEl._ghost
-        divEl._ghost = false
-        outliner._source = false
-      }
-    })
+      window.removeEventListener('mouseup',quic_hit)
+    }
+    divEl.addEventListener('mouseup',quic_hit)
   }
 
 
@@ -2074,11 +2116,11 @@ function add_audio_element(audio_el_url,index,audioBlob,section_id) {
   divEl.id = `audio-div-${index}`
   divEl._ref_audio_data = audioBlob
   divEl.className = "playback-div"
-    add_audio_playback_box_responsiveness(divEl)
+  add_audio_playback_box_responsiveness(divEl)
   let checkEl = document.createElement('input')
   checkEl.type = "checkbox";
   checkEl.name = `audioSections`;
-  checkEl.className = "checkEl"
+  checkEl.className = "check_audio_element"
   checkEl.value = "";
   checkEl.id = `audio-cbox-${index}`;
   divEl.appendChild(checkEl)
@@ -2107,15 +2149,22 @@ function populate_play_list(sess_name) {
   //
   let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readonly");
   let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
-
+  //
   let update_list_callback = (value) => {
     let sessionObj = value
     let blob_map = sessionObj.data
       let ordering = sessionObj.edit_order
+      ordering = ordering.map(bid => {
+        if ( bid.indexOf('audio-div-') === 0 ) {
+          return bid.replace('audio-div-','')
+        } else {
+          return bid
+        }
+      })
       ordering.forEach(blob_id => {
-      let audioBlob = blob_map[blob_id]
-      let blob_url = URL.createObjectURL(audioBlob)
-      add_audio_element(blob_url,blob_id,audioBlob)
+        let audioBlob = blob_map[blob_id]
+        let blob_url = URL.createObjectURL(audioBlob)
+        add_audio_element(blob_url,blob_id,audioBlob)
       })
   }
 
@@ -3371,7 +3420,7 @@ if ( g_window_can_process ) {
   application_initialization()
 }
 
-if ( g_current_pin !== undefined ) {
+if ( typeof g_current_pin !== "undefined" ) {
   g_current_pin.openAction = () => {
     let f = async () => { await initialize_db_and_crypto() }
     f()
