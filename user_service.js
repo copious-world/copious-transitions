@@ -421,29 +421,35 @@ g_auth_wss.on("connection", (ws,req) => {
         ws.on("message",  async (data, flags) => {
             
             let body = JSON.parse(data.toString());
-
-            let token = body.token
-            if ( token ) {
-                if ( body.action === 'setup' ) {
-                    let ws_data = g_going_sitewide_ws_session[token]
-                    if ( ws_data === undefined ) {
-                        g_going_sitewide_ws_session[token] = [ ws ]
-                    } else {
-                        let ws_list = g_going_sitewide_ws_session[token]
-                        if ( ws_list.indexOf(ws) < 0 ) {
-                            ws_list.push(ws)
-                        }
-                    }    
-                } else if ( body.action === "logout" ) {
-                    let ws_list = g_going_sitewide_ws_session[token]
-                    let command = {
-                        'action' : 'logout',
-                        'token' : token
-                    }
-                    ws_list.forEach(ws => {
-                        send_to_ws(ws,command)
-                    })
+            let ping_id = body.ping_id
+            if ( ping_id ) {
+                if ( g_transition_engine ) {
+                    g_transition_engine.ponged(ws)
                 }
+            } else {
+                let token = body.token
+                if ( token ) {
+                    if ( body.action === 'setup' ) {
+                        let ws_data = g_going_sitewide_ws_session[token]
+                        if ( ws_data === undefined ) {
+                            g_going_sitewide_ws_session[token] = [ ws ]
+                        } else {
+                            let ws_list = g_going_sitewide_ws_session[token]
+                            if ( ws_list.indexOf(ws) < 0 ) {
+                                ws_list.push(ws)
+                            }
+                        }    
+                    } else if ( body.action === "logout" ) {
+                        let ws_list = g_going_sitewide_ws_session[token]
+                        let command = {
+                            'action' : 'logout',
+                            'token' : token
+                        }
+                        ws_list.forEach(ws => {
+                            send_to_ws(ws,command)
+                        })
+                    }
+                }    
             }
         });
 
@@ -504,11 +510,21 @@ if ( conf_obj.ws_client_port && !(g_debug) ) {   // SUPPORT SERVICE WEB SCOCKETS
             g_sitewide_socket.onmessage = async (event) => {	// handle the finalization through the websocket
                                     try {
                                         let handler = JSON.parse(event.data)
-                                        if ( handler.token === token ) {
-                                            if ( handler.action === "logout" ) {
-                                                await g_session_manager.process_user('logout',handler,null,null)
-                                            } else {
-                                                eval(handler.action)
+                                        if ( handler.data && (handler.data.type === 'ping') ) {
+                                            if ( g_sitewide_socket ) {
+                                                let ponger = {
+                                                    "ping_id" : msg.data.ping_id,
+                                                    "time" : Date.now()
+                                                }
+                                                g_sitewide_socket.send(JSON.stringify(ponger))
+                                            }
+                                        } else {
+                                            if ( handler.token === token ) {
+                                                if ( handler.action === "logout" ) {
+                                                    await g_session_manager.process_user('logout',handler,null,null)
+                                                } else {
+                                                    eval(handler.action)
+                                                }
                                             }
                                         }
                                     } catch (e) {

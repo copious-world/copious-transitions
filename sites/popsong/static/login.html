@@ -332,11 +332,21 @@
             g_sitewide_socket.onmessage = (event) => {	// handle the finalization through the websocket
                                     try {
                                         let handler = JSON.parse(event.data)
-                                        if ( handler.token === token ) {
-                                            if ( handler.action === "logout" ) {
-                                                logout(false)
-                                            } else {
-                                                eval(handler.action)
+                                        if ( handler.data && (handler.data.type === 'ping') ) {
+                                            if ( g_sitewide_socket ) {
+                                                let ponger = {
+                                                    "ping_id" : msg.data.ping_id,
+                                                    "time" : Date.now()
+                                                }
+                                                g_sitewide_socket.send(JSON.stringify(ponger))
+                                            }
+                                        } else {
+                                            if ( handler.token === token ) {
+                                                if ( handler.action === "logout" ) {
+                                                    logout(false)
+                                                } else {
+                                                    eval(handler.action)
+                                                }
                                             }
                                         }
                                     } catch (e) {
@@ -438,9 +448,20 @@
                             (rsp) => { 
                                         return (event) => {     // handle the finalization through the websocket
                                                 try {
-                                                    let login_instructions = JSON.parse(event.data)
-                                                    if ( login_instructions.OK ) {      // happens after the windowized redirects.
-                                                        finalize_foreign_login(rsp,login_instructions)
+                                                    let handler = JSON.parse(event.data)
+                                                    if ( handler.data && (handler.data.type === 'ping') ) {
+                                                        if ( g_sitewide_socket ) {
+                                                            let ponger = {
+                                                                "ping_id" : msg.data.ping_id,
+                                                                "time" : Date.now()
+                                                            }
+                                                            g_sitewide_socket.send(JSON.stringify(ponger))
+                                                        }
+                                                    } else {
+                                                        let login_instructions = handler
+                                                        if ( login_instructions.OK ) {      // happens after the windowized redirects.
+                                                            finalize_foreign_login(rsp,login_instructions)
+                                                        }
                                                     }
                                                 } catch (e) {
                                                 }

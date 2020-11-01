@@ -91,11 +91,21 @@ function setup_sitewide() {
 		g_sitewide_socket.onmessage = (event) => {	// handle the finalization through the websocket
 								try {
 									let handler = JSON.parse(event.data)
-									if ( handler.token === token_from_cookie() ) {
-										if ( handler.action === "logout" ) {
-											site_wide_logout(false)
-										} else {
-											eval(handler.action)
+									if ( handler.data && (handler.data.type === 'ping') ) {
+										if ( g_sitewide_socket ) {
+											let ponger = {
+												"ping_id" : msg.data.ping_id,
+												"time" : Date.now()
+											}
+											g_sitewide_socket.send(JSON.stringify(ponger))
+										}
+									} else {
+										if ( handler.token === token_from_cookie() ) {
+											if ( handler.action === "logout" ) {
+												site_wide_logout(false)
+											} else {
+												eval(handler.action)
+											}
 										}
 									}
 								} catch (e) {
