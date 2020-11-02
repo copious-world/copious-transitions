@@ -1,5 +1,6 @@
 const { GeneralTransitionEngine } = require.main.require('./lib/general_transition_engine')
 const hexUtils = require.main.require('./lib/hex_utils')
+const fs = require('fs')
 
 //const EventEmitter = require('events')
 //const cached = require('cached')
@@ -71,6 +72,41 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
     constructor() {
         super()
     }
+
+    initialize(conf,db) {
+        super.initialize(conf,db)
+        let backup_dir = this.root_path + '/user_keys/'
+        fs.readdir(backup_dir, (err, files) => { 
+            if ( err ) {
+              console.log(err); 
+              process.exit(0)
+            } else { 
+                //
+              files.forEach(file => {
+                if ( file[0] != '.' ) {
+                    let abspath = backup_dir + file
+                    try {
+                        let data = fs.readFileSync(abspath).toString()
+                        let userObject = JSON.parse(data)
+                        if ( (userObject.email !== undefined) && (userObject.wrapped_aes_key !== undefined) ) {
+                            let policy_key = 'transfer-email-' + userObject.email
+                            this.db.set_key_value(policy_key,file)
+                        } else if ( (userObject.email !== undefined) && (userObject.sess_id !== undefined) ) {
+                            if ( userObject.sess_id === `transfer-email-${userObject.email}` ) {
+                                let policy_key = 'wave_hex_signed-email-' + userObject.email + '-name-' + userObject.name
+                                this.db.set_key_value(policy_key,file)
+                            }
+                        }
+                        userObject = null  // just make the point that these are not cached here
+                    } catch (e) {
+                        console.log(e);
+                    }
+                }
+              })
+            } 
+        })
+    }
+
 
     get_import_key_function() {
         return (jwk_key,uses) => {
@@ -201,7 +237,9 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
         try {
             let key_value = post_body.email
             let key_field = 'email'
-            let dbkey = `${key_field}-${key_value}`
+            let name_value = post_body.name
+            let specializer = 'name'
+            let dbkey = `${key_field}-${key_value}-${specializer}-${name_value}`
             let transfer_id = await this.db.store_file_class('wave_hex_signed',dbkey,post_body)
             return transfer_id
         } catch (e) {

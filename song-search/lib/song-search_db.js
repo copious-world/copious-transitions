@@ -64,35 +64,6 @@ class SongSearchDBClass extends DBClass {
     }
 
 
-    initialize(conf) {
-        super(conf)
-        let backup_dir = this.root_path + '/user_keys/'
-        fs.readdir(backup_dir, (err, files) => { 
-            if ( err ) {
-              console.log(err); 
-              process.exit(0)
-            } else { 
-              console.log("\nCurrent directory filenames:"); 
-              files.forEach(file => {
-                if ( file[0] != '.' ) {
-                    let abspath = backup_dir + file
-                    try {
-                        let data = fs.readFileSync(abspath).toString()
-                        let userObject = JSON.parse(data)
-                        if ( userObject.email ) {
-                            let policy_key = 'transfer-email-' + userObject.email
-                            super.set_key_value(policy_key,file)
-                        }
-                        userObject = null  // just make the point that these are not cached here
-                    } catch (e) {
-                        console.log(e);
-                    }
-                }
-              })
-            } 
-        })
-    }
-
 
     get_from_container_cache(session_id) {
         let sessObj = this.cached_session_containers[session_id]
@@ -229,14 +200,9 @@ class SongSearchDBClass extends DBClass {
         try {
             let filename = await super.get_key_value(policy_key)
             if ( filename ) {
-                if ( filename.indexOf('/user_keys/') < 0 ) {  // DELETE
-                    let prefix = this.root_path 
-                    let fixer = filename.substr(prefix.length)
-                    fixer = this.root_path + '/user_keys/' + fixer
-                    super.set_key_value(policy_key,fixer)
-                    filename = fixer // moved by hand
-                }
-                let p = this.file_transformer(filename)
+                let prefix = this.root_path + '/user_keys/'
+                let abspath = prefix + filename
+                let p = this.file_transformer(abspath)
                 return p
             } else if ( filename === null ) {
                 return(null)
@@ -249,11 +215,12 @@ class SongSearchDBClass extends DBClass {
 
     async store_file_class(storage_class,key,audioSessionRep) {
         let policy_key = `${storage_class}-${key}`
-        let filename = await super.get_key_value(policy_key)
-        if ( filename === null || filename === undefined || (filename.indexOf('/user_keys/') <= 0) ) {
-            filename = this.root_path + '/user_keys/' + ('' + uuid())
+        let uuid_file_name = await super.get_key_value(policy_key)
+        if ( uuid_file_name === null || uuid_file_name === undefined ) {
+            uuid_file_name = ('' + uuid())
         }
-        super.set_key_value(policy_key,filename)
+        super.set_key_value(policy_key,uuid_file_name)
+        let filename = this.root_path + '/user_keys/' + uuid_file_name
         return this.store_to_file_promise(audioSessionRep,filename,policy_key)
     }
 
