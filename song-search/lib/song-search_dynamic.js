@@ -258,6 +258,8 @@ class SongSearchDynamic extends GeneralDynamic {
           } else {
             if ( session_data === null ) {
               rslt = { "no_key" : true, "reason" : "database empty"}
+            } else {
+              rslt = { "no_key" : true, "reason" : "aes missing"}
             }
           }
           //
