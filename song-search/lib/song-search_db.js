@@ -63,6 +63,37 @@ class SongSearchDBClass extends DBClass {
         this.root_path = process.mainModule.path
     }
 
+
+    initialize(conf) {
+        super(conf)
+        let backup_dir = this.root_path + '/user_keys/'
+        fs.readdir(backup_dir, (err, files) => { 
+            if ( err ) {
+              console.log(err); 
+              process.exit(0)
+            } else { 
+              console.log("\nCurrent directory filenames:"); 
+              files.forEach(file => {
+                if ( file[0] != '.' ) {
+                    let abspath = backup_dir + file
+                    try {
+                        let data = fs.readFileSync(abspath).toString()
+                        let userObject = JSON.parse(data)
+                        if ( userObject.email ) {
+                            let policy_key = 'transfer-email-' + userObject.email
+                            super.set_key_value(policy_key,file)
+                        }
+                        userObject = null  // just make the point that these are not cached here
+                    } catch (e) {
+                        console.log(e);
+                    }
+                }
+              })
+            } 
+        })
+    }
+
+
     get_from_container_cache(session_id) {
         let sessObj = this.cached_session_containers[session_id]
         if ( sessObj ) {
