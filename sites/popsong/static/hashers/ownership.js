@@ -547,13 +547,12 @@
         g_wss_active_session_id = ws_id
     }
 
-
     function post_chunk(chunk_data) {
         let chunk_message = JSON.stringify(chunk_data)
         g_app_web_socket.send(chunk_message)
     }
 
-    async function remote_data_relay(sess_data) {
+    async function remote_signed_data_relay(sess_data) {
         let blob = sess_data.blob
         let signature = await sign_hex_of(blob)
         sess_data.blob = hex_fromByteArray(signature)
@@ -696,7 +695,8 @@
                     let sess_data = await fetch_compressed_session_from_db(sess_name)
                     sess_data.email = g_user_info.email
                     sess_data.sess_id = g_user_info.server_id
-                    await remote_data_relay(sess_data)    
+                    delete sess_data.pub_verification_key  // keep the verification key here if the signer key is lost, then put trust apart from signature
+                    await remote_signed_data_relay(sess_data)    
                 } catch (e) {
                     // ----
                 }
