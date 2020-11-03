@@ -354,6 +354,7 @@
   let g_wave_open_editors = {}
   let g_wv_current_locaion = { 'latitude' : NaN,'longitude' : NaN}
   let g_save_up_audio_elements = {}
+  let g_pub_verification_key = ""
   
   //
   let g_nonce_buffer = new Uint8Array((128/8))    // 16 bytes or 128 bit IV for AES
@@ -1111,6 +1112,7 @@
     let exported = await g_crypto.exportKey("raw",pub_key);
     let exportedKeyBuffer = new Uint8Array(exported);
     let pub_key_str = hex_fromTypedArray(exportedKeyBuffer);
+    g_pub_verification_key = pub_key_str
   
     let key_info = {
       "pk_str" : pub_key_str,
@@ -1155,7 +1157,8 @@
   
       let storeObj = {
         'name' : app_audio_key,
-        'blob' : storable
+        'blob' : storable,
+        'pub_verification_key' : g_pub_verification_key
       }
       let result = audioStore.put(storeObj)
       result.onsuccess = (event) => {
@@ -3378,6 +3381,7 @@
     if ( priv_key ) {
       set_current_session_signing_key(priv_key)
       set_current_session_email(user_info.email)
+      g_pub_verification_key = user_info.pub_key
     }
     return priv_key !== false
   }
