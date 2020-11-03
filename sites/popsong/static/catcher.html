@@ -31,20 +31,4 @@ async function do_fetch_recorder() {
         }
     }
 }
-
-async function ensure_dialog_elements() {
-    let test_dialog = document.getElementById("for_testing_dialogs")  // thought to be in the template... if not this does nothing
-    if ( test_dialog ) {
-        if ( typeof favDialog.showModal !== "function" ) {
-            let element_supportJson =  await fetchEndPoint('uploaders/static/dialogs')
-            if ( element_supportJson ) {
-                let css_support = decodeURIComponent(formJson.html)
-                document.appendChild(css_support)
-                addscript(decodeURIComponent(element_supportJson.script),document)
-            }
-        }
-    }
-}
-
-ensure_dialog_elements()
 </script>

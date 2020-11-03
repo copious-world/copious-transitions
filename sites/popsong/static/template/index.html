@@ -954,6 +954,43 @@ html {
 		whereScipt.appendChild(scriptEl);
 	}
 
+	function addstyle(script) {
+		var styleEl = document.createElement('style');
+		styleEl.type = 'text/css';
+		styleEl.text = script;
+		let whereScript = document.getElementsByTagName('head')
+		if ( whereScript && whereScript.length ) {
+			whereScript[0].appendChild(styleEl);
+		}
+	}
+
+	async function ensure_dialog_elements() {
+		let test_dialog = document.getElementById("for_testing_dialogs")  // thought to be in the template... if not this does nothing
+		if ( test_dialog ) {
+			if ( typeof test_dialog.showModal !== "function" ) {
+				let element_supportJson =  await wv_fetchEndPoint('uploaders/static/dialogs')
+				if ( element_supportJson ) {
+					let css_support = decodeURIComponent(element_supportJson.html)
+					addstyle(css_support)
+					let html_els = document.getElementsByTagName('html')
+					let html = null
+					if ( html_els && html_els.length ) {
+					html = html_els[0]
+					addscript(decodeURIComponent(element_supportJson.script),html)
+					// register the dialogs
+					let dialogs = document.getElementsByTagName('dialog')
+					let n = dialogs.length
+					for ( let i = 0; i < n; i++ ) {
+						let dial = dialogs[i]
+						dialogPolyfill.registerDialog(dial);
+					}
+					}
+				}
+			}
+		}
+	}
+
+
     function getCookie(cname) {  // modified from w3school
         var name = cname + "=";
         var ca = document.cookie.split(';');

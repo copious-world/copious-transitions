@@ -389,6 +389,11 @@ function convertDataURIToBinary(dataURI) {
   return array;
 }
 
+//
+if ( typeof ensure_dialog_elements === "function" ) {
+  ensure_dialog_elements()
+}
+
 //beep()
 
 const g_audioContext = new AudioContext();
@@ -3417,7 +3422,11 @@ async function application_initialization() {
 // ---- ---- ---- ---- ---- ----
 // ---- ---- ---- ---- ---- ----
 if ( g_window_can_process ) {
-  application_initialization()
+  async function first_inializer() {
+    await ensure_dialog_elements()
+    application_initialization()
+  }
+  first_inializer()
 }
 
 if ( typeof g_current_pin !== "undefined" ) {

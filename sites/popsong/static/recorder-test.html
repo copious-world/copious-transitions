@@ -303,6 +303,17 @@
       &nbsp;
   </div>
 
+
+
+
+
+
+
+<dialog id="for_testing_dialogs">
+	<span>This is a dialog test</span>
+</dialog>
+
+
 </body>
 </html>
 
@@ -866,6 +877,9 @@
   if ( typeof(fetchEndPoint) === "undefined" ) {
     async function fetchEndPoint(endpoint,port) {
       port = !(port) ? '' : ( port.length ? `:${port}`   : '')
+      if ( typeof g_siteURL === "undefined" ) {
+        window.g_siteURL = location.host;
+      }
       let myRequest = new Request(`${location.protocol}//${g_siteURL}${port}/${endpoint}`);
       try {
         const body = await fetch(myRequest, {
@@ -3422,7 +3436,11 @@
   // ---- ---- ---- ---- ---- ----
   // ---- ---- ---- ---- ---- ----
   if ( g_window_can_process ) {
-    application_initialization()
+    async function first_inializer() {
+      await ensure_dialog_elements()
+      application_initialization()
+    }
+    first_inializer()
   }
   
   if ( typeof g_current_pin !== "undefined" ) {
@@ -3433,6 +3451,54 @@
   }
   
   /*
+  not in recorder ... look in the index.html template
   */
+
+
+	function addscript(script,whereScipt) {
+		var scriptEl = document.createElement('script');
+		scriptEl.type = 'text/javascript';
+		scriptEl.text = script;
+		whereScipt.appendChild(scriptEl);
+	}
+
+
+	function addstyle(script) {
+		var styleEl = document.createElement('style');
+		styleEl.type = 'text/css';
+		styleEl.text = script;
+		let whereScript = document.getElementsByTagName('head')
+		if ( whereScript && whereScript.length ) {
+			whereScript[0].appendChild(styleEl);
+		}
+	}
+
+async function ensure_dialog_elements() {
+    let test_dialog = document.getElementById("for_testing_dialogs")  // thought to be in the template... if not this does nothing
+    if ( test_dialog ) {
+        if ( typeof test_dialog.showModal !== "function" ) {
+            let element_supportJson =  await wv_fetchEndPoint('uploaders/static/dialogs')
+            if ( element_supportJson ) {
+                let css_support = decodeURIComponent(element_supportJson.html)
+                addstyle(css_support)
+                let html_els = document.getElementsByTagName('html')
+                let html = null
+                if ( html_els && html_els.length ) {
+                  html = html_els[0]
+                  addscript(decodeURIComponent(element_supportJson.script),html)
+                  // register the dialogs
+                  let dialogs = document.getElementsByTagName('dialog')
+                  let n = dialogs.length
+                  for ( let i = 0; i < n; i++ ) {
+                    let dial = dialogs[i]
+                    dialogPolyfill.registerDialog(dial);
+                  }
+                }
+            }
+        }
+    }
+}
+
+
 </script>
   
