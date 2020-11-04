@@ -1385,6 +1385,11 @@
           if ( sessionObj.data[section_id] != null ) {
             let blob_url = URL.createObjectURL(audioBlob);
             sessionObj.data[section_id] = audioBlob
+            // handle a case which should not happen
+            if ( sessionObj.hashes[section_id] === undefined ) {
+              sessionObj.hashes[section_id] = { 'op_history' : [] }
+            }
+            // update hash ops
             if ( op_parameters ) {
               let operation = {'op' : 'cut', "startX" :  op_parameters.startX, "w" : op_parameters.w, "samples" : op_parameters.samplePP }
               sessionObj.hashes[section_id].op_history.push(operation)
@@ -1498,10 +1503,13 @@
           let blob_url = URL.createObjectURL(audioBlob);
           // map_id = section_id
           sessionObj.data[section_id] = audioBlob
+          if ( sessionObj.hashes[section_id] === undefined ) {
+            sessionObj.hashes[section_id] = {}
+          }
           if ( sessionObj.hashes[section_id].op_history === undefined ) {
             sessionObj.hashes[section_id].op_history = []
           }
-            sessionObj.edit_order.push(section_id)
+          sessionObj.edit_order.push(section_id)
           // 
           let geo_update = JSON.stringify(g_wv_current_locaion)
           sessionObj.locations.push(geo_update)
@@ -1521,6 +1529,9 @@
       //
       let application_op = (sessionObj) => {
         sessionObj.data[section_id] = audioBlob   // JSON.stringify(audioBlob)
+        if ( sessionObj.hashes[section_id] === undefined ) {
+            sessionObj.hashes[section_id] = {}
+        }
         sessionObj.hashes[section_id].op_history = []
       } 
       //

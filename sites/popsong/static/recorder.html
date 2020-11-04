@@ -1375,7 +1375,7 @@ function update_audio_data(section_id,data_list,op_parameters) {
           if ( sessionObj.hashes[section_id] === undefined ) {
             sessionObj.hashes[section_id] = { 'op_history' : [] }
           }
-          // update hash
+          // update hash ops
           if ( op_parameters ) {
             let operation = {'op' : 'cut', "startX" :  op_parameters.startX, "w" : op_parameters.w, "samples" : op_parameters.samplePP }
             sessionObj.hashes[section_id].op_history.push(operation)
