@@ -1435,10 +1435,12 @@ function wv_backup_audio_chunks_for_verification(section_id,audioChunksArray) {
     return;
   }
   //
-  let converted_chunks = audioChunksArray.map( async (chunk) => {
+  let converted_chunks = []
+  let n = audioChunksArray.length
+  for ( let i = 0; i < n; i++ ) {
     let storable = await blobToBase64(chunk)
-    return(storable)
-  })
+    converted_chunks.push(storable)
+  }
   //
   let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
   let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
