@@ -1452,6 +1452,7 @@
     let converted_chunks = []
     let n = audioChunksArray.length
     for ( let i = 0; i < n; i++ ) {
+      let chunk = audioChunksArray[i]
       let storable = await blobToBase64(chunk)
       converted_chunks.push(storable)
     }
