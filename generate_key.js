@@ -1,7 +1,8 @@
-let webcrypto = require('webcrypto')
+const { Crypto } = require('node-webcrypto-ossl')
 let fs = require('fs')
 
-var g_crypto = webcrypto.crypto.subtle
+const crypto = new Crypto()
+var g_crypto = crypto.subtle; //webcrypto.crypto.subtle
 
 async function do_key_gen() {
     let key = await g_crypto.generateKey(

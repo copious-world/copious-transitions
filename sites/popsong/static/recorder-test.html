@@ -3215,33 +3215,33 @@
   //
   
   //>--
-  async function wv_wrap_private_key(key,nonce_buffer,email) {
-      //
-      let wrapper_key_pair = await wv_wrapper_keypair_promise()   // create key each time
-      let PUB_wrapper_key = wrapper_key_pair.publicKey
-      let PRIV_wrapper_key = wrapper_key_pair.privateKey
-      //
-      let PUB_wrapper_key_transport = await export_wrapper_key(PUB_wrapper_key)
-      //
-      let user_identification = {
-          "user_key" : email,               // A unique name for this user
-          "pub_wrapper_key" : PUB_wrapper_key_transport,        // send public wrapping key
-          "device_id" : get_client_device_name()      // identify the devices as well as possible without plugins or compicated user interaction
-      }
-      // Ask for the server's public key
-      let server_wrapped_key = await wv_postData(FETCH_SERVER_WRAPPER_KEY,user_identification)
-      let wrapped_aes = server_wrapped_key.wrapped
-      wrapped_aes = bufferToArrayBufferCycle(wrapped_aes.data)
-      let sess_id = server_wrapped_key.id
-      let [hx_encrypted_key,hx_iv_str] = await wv_ecrypted_local_priv_key(key,wrapped_aes,PRIV_wrapper_key,nonce_buffer)
-      //
-      let serverReply = {     // for local use
-          'encrypted_key' : hx_encrypted_key,
-          'who' : sess_id,
-          'iv' : hx_iv_str
-      }
-      //
-      return(serverReply)
+async function wv_wrap_private_key(key,nonce_buffer,email) {
+    //
+    let wrapper_key_pair = await wv_wrapper_keypair_promise()   // create key each time
+    let PUB_wrapper_key = wrapper_key_pair.publicKey
+    let PRIV_wrapper_key = wrapper_key_pair.privateKey
+    //
+    let PUB_wrapper_key_transport = await export_wrapper_key(PUB_wrapper_key)
+    //
+    let user_identification = {
+        "user_key" : email,               // A unique name for this user
+        "pub_wrapper_key" : PUB_wrapper_key_transport,        // send public wrapping key
+        "device_id" : get_client_device_name()      // identify the devices as well as possible without plugins or compicated user interaction
+    }
+    // Ask for the server's public key
+    let server_wrapped_key = await wv_postData(FETCH_SERVER_WRAPPER_KEY,user_identification)
+    let wrapped_aes = server_wrapped_key.wrapped
+    wrapped_aes = hex_toByteArray(wrapped_aes)
+    let sess_id = server_wrapped_key.id
+    let [hx_encrypted_key,hx_iv_str] = await wv_ecrypted_local_priv_key(key,wrapped_aes,PRIV_wrapper_key,nonce_buffer)
+    //
+    let serverReply = {     // for local use
+        'encrypted_key' : hx_encrypted_key,
+        'who' : sess_id,
+        'iv' : hx_iv_str
+    }
+    //
+    return(serverReply)
   }
   //--<
   
@@ -3301,42 +3301,42 @@
   //>--
   // fetch_restoration_key
   // --
-  async function fetch_restoration_key(user_info) {
-      // The server keeps a cipher key to be delivered over TLS... It is for this user. This device keeps an initialization vector
-      // that the server does not have... (at this time, just relying on TLS to send the key unencrypted otherwise.)
-      let wrapper_key_pair = await wv_wrapper_keypair_promise()   // create key each time
-      let PUB_wrapper_key = wrapper_key_pair.publicKey
-      let PRIV_wrapper_key = wrapper_key_pair.privateKey
-      //
-      let PUB_wrapper_key_transport = await export_wrapper_key(PUB_wrapper_key)
-  
-      let user_identification = {
-          "user_key" : user_info.email,               // A unique name for this user
-          "pub_wrapper_key" : PUB_wrapper_key_transport,        // send public wrapping key
-          "sess_id" : user_info.server_id,
-          "device_id" : get_client_device_name()      // identify the devices as well as possible without plugins or compicated user interaction
-      }
-      // Ask for the server's public key
-      let server_wrapped_key = false
-      try {
-          server_wrapped_key = await wv_postData(FETCH_SERVER_WRAPPER_KEY_RESTORE,user_identification)
-      } catch (e) {
-          console.log(e)
-      }
-      if ( server_wrapped_key ) {
-          let wrapped_aes = server_wrapped_key.wrapped
-          if ( wrapped_aes !== undefined ) {
-            wrapped_aes = bufferToArrayBufferCycle(wrapped_aes.data)
-            let iv_buffer = hex_toByteArray(user_info.iv)
-            let enckey = hex_toByteArray(user_info.encrypted_key)
-            let priv_key = await wv_decrypted_local_priv_key(enckey,wrapped_aes,PRIV_wrapper_key,iv_buffer)
-            return(priv_key)
-          } else if ( server_wrapped_key.no_key ) {
-            alert('Please reenter user data: ' + server_wrapped_key.reason)
-            throw new Error(server_wrapped_key)
-          }
-      }
-      return false
+async function fetch_restoration_key(user_info) {
+    // The server keeps a cipher key to be delivered over TLS... It is for this user. This device keeps an initialization vector
+    // that the server does not have... (at this time, just relying on TLS to send the key unencrypted otherwise.)
+    let wrapper_key_pair = await wv_wrapper_keypair_promise()   // create key each time
+    let PUB_wrapper_key = wrapper_key_pair.publicKey
+    let PRIV_wrapper_key = wrapper_key_pair.privateKey
+    //
+    let PUB_wrapper_key_transport = await export_wrapper_key(PUB_wrapper_key)
+
+    let user_identification = {
+        "user_key" : user_info.email,               // A unique name for this user
+        "pub_wrapper_key" : PUB_wrapper_key_transport,        // send public wrapping key
+        "sess_id" : user_info.server_id,
+        "device_id" : get_client_device_name()      // identify the devices as well as possible without plugins or compicated user interaction
+    }
+    // Ask for the server's public key
+    let server_wrapped_key = false
+    try {
+        server_wrapped_key = await wv_postData(FETCH_SERVER_WRAPPER_KEY_RESTORE,user_identification)
+    } catch (e) {
+        console.log(e)
+    }
+    if ( server_wrapped_key ) {
+        let wrapped_aes = server_wrapped_key.wrapped
+        if ( wrapped_aes !== undefined ) {
+          wrapped_aes = hex_toByteArray(wrapped_aes)
+          let iv_buffer = hex_toByteArray(user_info.iv)
+          let enckey = hex_toByteArray(user_info.encrypted_key)
+          let priv_key = await wv_decrypted_local_priv_key(enckey,wrapped_aes,PRIV_wrapper_key,iv_buffer)
+          return(priv_key)
+        } else if ( server_wrapped_key.no_key ) {
+          alert('Please reenter user data: ' + server_wrapped_key.reason)
+          throw new Error(server_wrapped_key)
+        }
+    }
+    return false
   }
   //--<
   

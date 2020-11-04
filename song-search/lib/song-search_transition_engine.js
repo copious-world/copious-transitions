@@ -5,8 +5,13 @@ const fs = require('fs')
 //const EventEmitter = require('events')
 //const cached = require('cached')
 //
-const web_crypto = require('webcrypto')
-var g_crypto = web_crypto.crypto.subtle
+//const web_crypto = require('webcrypto')
+//var g_crypto = web_crypto.crypto.subtle
+
+const { Crypto } = require('node-webcrypto-ossl')
+const crypto = new Crypto()
+var g_crypto = crypto.subtle; //webcrypto.crypto.subtle
+
 
 const FORCE_FAIL_FETCH = "NotAnObject"
 const APP_STORAGE_CLASS = "WAVE-REC"

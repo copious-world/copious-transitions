@@ -217,8 +217,9 @@ class SongSearchDynamic extends GeneralDynamic {
               let sess_id = await this.trans_engine.store_audio_session(key,audioSessionRep)
               //
               let wrapped_key = await this.trans_engine.wrap_aes_key(client_wrapper_key,clear_aes_key)
+              let wrapped_key_hx = hexUtils.hex_fromByteArray(wrapped_key)
               rslt = {
-                'wrapped' : wrapped_key,   // has been loaded as jwk
+                'wrapped' : wrapped_key_hx,   // has been loaded as jwk
                 'id' : sess_id
               }
             } else {
@@ -245,8 +246,9 @@ class SongSearchDynamic extends GeneralDynamic {
               let client_wrapper_key = transtionObj._pub_wrapper_key
               if ( client_wrapper_key ) {
                 let wrapped_key = await this.trans_engine.wrap_aes_key(client_wrapper_key,clear_aes_key)
+                let wrapped_key_hx = hexUtils.hex_fromByteArray(wrapped_key)
                 rslt = {
-                  'wrapped' : wrapped_key,   // has been loaded as jwk
+                  'wrapped' : wrapped_key_hx,   // has been loaded as jwk
                   'id' : transtionObj._server_id
                 }
               } else {
