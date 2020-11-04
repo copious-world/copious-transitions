@@ -530,14 +530,14 @@
     // Called when recording stops.. This makes the first recod of a collection of audio chunks
     // A section ID is produced. The section ID will be used later when the user decideds to save 
     // the section... However, the section hash will be sent on to the server. (note: section v.s. session)
-    audio_results() {
+    async audio_results() {
       let audioBlob = new Blob(this.audioChunks);
       let audioUrl = URL.createObjectURL(audioBlob);
       this.audioBlob = audioBlob
       this.audio_instance = new Audio(audioUrl);
       let section_id = 'ER' + uuidv4() // use ER to signify End(Edit) Recording and be different than other randoms
       this.section_id = section_id
-      wv_backup_audio_chunks_for_verification(section_id,this.audioChunks)
+      await (section_id,this.audioChunks)
       wv_secure('end-recording',audioBlob,section_id)
     }
   
@@ -1443,7 +1443,7 @@
   // each element will correspond to a resulting hash
   // The hashes are sent to the server and can be reconstructed later
   // but only if the chunk array is still available in its original form
-  function wv_backup_audio_chunks_for_verification(section_id,audioChunksArray) {
+  async function wv_backup_audio_chunks_for_verification(section_id,audioChunksArray) {
     if ( g_audio_db === null ) {
       console.log("db not initialized :: wv_backup_audio_chunks_for_verification")
       return;
