@@ -5,6 +5,7 @@ const {exec} = require('child_process')
 const path_util = require('path')
 const util = require('util');
 const asyc_exec = util.promisify(exec);
+const Terser = require('terser')
 
 const scp = require('node-scp')
 
@@ -391,8 +392,27 @@ function compress_html_file(compressable) {
     return result
 }
 
+async function compress_javascript_file(html_scripts) {
+    let parts = html_scripts.split('<script>')  // very special case
+    let c_parts = [ parts.shift() ]
+    let n = parts.length
+    for ( let i = 0; i < n; i++ ) {
+        let script_n_rest = parts[i]
+        let end_script = script_n_rest.indexOf('</script>')
+        let script = script_n_rest.substr(0,end_script)
+        let follow = script_n_rest.substr(end_script)
+        let c_script_rslt = await Terser.minify(script, { mangle: false, ecma: 8 })
+        let c_script = c_script_rslt.code
+        let result = c_script + follow
+        c_parts.push(result)
+
+    }
+    let reconstructed = c_parts.join('<script>\n')
+    return(reconstructed)
+}
+
 // var g_siteURL = "localhost";
-function prepareHtmlFile(filePath,dmn) {
+async function prepareHtmlFile(filePath,dmn) {
     //
     let url = dmn
     /// 
@@ -423,6 +443,8 @@ function prepareHtmlFile(filePath,dmn) {
     //
     fileString = compress_html_file(compressable)
     fileString = fileString.replace(replVar,salvaged)
+    //
+    fileString = await compress_javascript_file(fileString)
     //
     fs.writeFileSync(filePath,fileString)
 }
@@ -745,17 +767,17 @@ function run_releaser() {
 }
 
 // 
-locate_html_directory(g_releaseObject.nginx)
-nginx_releaser(g_releaseObject.nginx)
-prepare_entry_points(g_releaseObject.micros,g_releaseObject.nginx)
+//locate_html_directory(g_releaseObject.nginx)
+//nginx_releaser(g_releaseObject.nginx)
+//prepare_entry_points(g_releaseObject.micros,g_releaseObject.nginx)
 stage_html()
-stage_private_files(g_releaseObject.staging)
+//stage_private_files(g_releaseObject.staging)
 /*stage_micros()*/
-output_ecosystem(g_releaseObject.micros,g_releaseObject.nginx)
-gen_bash_script()
-zip_release()
-upload_release()
-run_releaser()
+//output_ecosystem(g_releaseObject.micros,g_releaseObject.nginx)
+//gen_bash_script()
+//zip_release()
+//upload_release()
+//run_releaser()
 ///
 /*
 

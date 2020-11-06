@@ -1,7 +1,7 @@
 <div id="catcher-app" class="applink" >
     <p style="text-align:center;color:firebrick;font-size:120%;">Record New Songs</p>
     <blockquote id = "wv-recorder-header" style="text-align:center;padding-bottom:4px;">
-        <button id="load-song-catcher" style="width:50%" onclick="do_fetch_recorder()" >Load Song Catcher</button>
+        <button id="load-song-catcher" class="button-hit-once" style="width:50%" onclick="do_fetch_recorder()" >Load Song Catcher</button>
         <!-- <br>
         <button id="install-song-catcher" style="width:50%" >Install Song Catcher</button> -->
     </blockquote>
@@ -11,24 +11,41 @@
     </blockquote>
 </div>
 <script>
+var g_song_catcher_no_receipt_timeout = null;
+let g_song_catcher_loaderBtn = document.getElementById('load-song-catcher')
+//g_song_catcher_loaderBtn._app_is_loaded = false
 async function do_fetch_recorder() {
     if ( not_https_switch() ) {
         return;
     }
-    let formJson = await fetchEndPoint('uploaders/static/recorder')
-    if ( formJson ) {
-        let formPlacement = document.querySelector('#recorder-scratchpad');
-        if ( formPlacement ) {
-            formPlacement.innerHTML = decodeURIComponent(formJson.html)
-            addscript(decodeURIComponent(formJson.script),formPlacement)
-            let loaderBtn = document.getElementById('load-song-catcher')
-            loaderBtn.disabled = true
-            loaderBtn.style.display = "none"
-            let header = document.getElementById("wv-recorder-header")
-            if ( header ) {
-                header.innerHTML = "Record Songs"
+    g_song_catcher_loaderBtn.setAttribute('disabled', true);
+    g_song_catcher_no_receipt_timeout = setTimeout(() => {
+        g_song_catcher_loaderBtn.removeAttribute('disabled');
+        g_song_catcher_no_receipt_timeout = null
+    },5000)
+    try {
+        let formJson = await fetchEndPoint('uploaders/static/recorder')
+        if ( formJson ) {
+            let formPlacement = document.querySelector('#recorder-scratchpad');
+            if ( formPlacement ) {
+                //
+                formPlacement.innerHTML = decodeURIComponent(formJson.html)
+                addscript(decodeURIComponent(formJson.script),formPlacement)
+                //
+                if ( g_song_catcher_no_receipt_timeout !== null ) {
+                    clearTimeout(g_song_catcher_no_receipt_timeout)
+                    g_song_catcher_no_receipt_timeout = null
+                }
+                g_song_catcher_loaderBtn.style.display = "none"
+                let header = document.getElementById("wv-recorder-header")
+                if ( header ) {
+                    header.innerHTML = "Record Songs"
+                }
+                //g_song_catcher_loaderBtn._app_is_loaded = true
             }
         }
+    } catch (e) {
+        g_song_catcher_loaderBtn.removeAttribute('disabled');
     }
 }
 </script>
