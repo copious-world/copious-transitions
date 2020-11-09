@@ -2243,6 +2243,13 @@ function draw_line_chart(ctx,x0,y0,data,offset,n,thick, color) {
   ctx.stroke();
 }
 
+function draw_seconds(ctx,x,y,color,txt) {
+  ctx.lineWidth = 2; // how thick the line is
+  ctx.strokeStyle = color; // what color our line is
+  ctx.font = '22px serif';
+  let secs_txt = txt + " secs"
+  ctx.fillText(secs_txt, x, y);
+}
 
 function wv_clear_selection(player_info) {
   if ( player_info.save_selection.startX !== undefined ) {
@@ -2323,7 +2330,7 @@ function reduceAudioPeak(data, spp, scroll, width) {
 
 
 
-function draw_wave(data,ctx,W,h) {
+function draw_wave(data,ctx,W,h,dataSecs) {
   // Set up the canvas
   ctx.clearRect(0,-h,W,(2*h))
   draw_h_line(ctx, 0, 0, W, 2, '#009')
@@ -2342,6 +2349,8 @@ function draw_wave(data,ctx,W,h) {
   let draw_data = reduceAudioPeak(data, samples_per_pixel, 0, n_pixels)
   //
   draw_line_chart(ctx, 10, 0, draw_data, section_start, n_pixels, 1, '#000')
+  //
+  if ( dataSecs ) draw_seconds(ctx,5,(h-40),'#000',`${dataSecs}`)
 }
 
 function update_play_marker(ctx,play_info,percent) {
