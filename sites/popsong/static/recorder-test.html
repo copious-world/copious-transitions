@@ -2241,6 +2241,22 @@
     ctx.lineTo(x1, y1);
     ctx.stroke();
   }
+
+
+  // == ---- == ---- == ---- == ---- == ---- == ---- == ---- == ---- == ---- == ---- 
+  // 
+  function draw_seconds(ctx,x,y,color,txt) {
+    ctx.lineWidth = 2; // how thick the line is
+    ctx.strokeStyle = color; // what color our line is
+    ctx.font = "italic bold 11pt Courier"
+    let secs_txt = txt + " secs"
+    y = -y/4 + 20 // header height
+    let saveFill = ctx.fillStyle
+    ctx.fillStyle = 'navy';
+    ctx.fillText(secs_txt, x, y);
+    ctx.fillStyle = saveFill;
+  }
+
   
   function draw_line_chart(ctx,x0,y0,data,offset,n,thick, color) {
     ctx.lineWidth = thick; // how thick the line is
@@ -2334,9 +2350,8 @@
   }
   
   
-  
-  
-  function draw_wave(data,ctx,W,h) {
+    
+  function draw_wave(data,ctx,W,h,dataSecs) {
     // Set up the canvas
     ctx.clearRect(0,-h,W,(2*h))
     draw_h_line(ctx, 0, 0, W, 2, '#009')
@@ -2355,7 +2370,14 @@
     let draw_data = reduceAudioPeak(data, samples_per_pixel, 0, n_pixels)
     //
     draw_line_chart(ctx, 10, 0, draw_data, section_start, n_pixels, 1, '#000')
+    //
+    let fsecs = parseFloat(dataSecs)
+    fsecs = fsecs.toFixed(3)
+    //
+    if ( dataSecs ) draw_seconds(ctx,15,h,'#000',`${fsecs}`)
   }
+
+  // == ---- == ---- == ---- == ---- == ---- == ---- == ---- == ---- == ---- == ---- 
   
   function update_play_marker(ctx,play_info,percent) {
     let last_tick = play_info.where_ticker

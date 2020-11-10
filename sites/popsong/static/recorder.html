@@ -2327,31 +2327,33 @@ function reduceAudioPeak(data, spp, scroll, width) {
   return drawData;
 }
 
-
-
-
+  
 function draw_wave(data,ctx,W,h,dataSecs) {
-  // Set up the canvas
-  ctx.clearRect(0,-h,W,(2*h))
-  draw_h_line(ctx, 0, 0, W, 2, '#009')
-  let offset = ZERO_AXIS_OFFSET
-  draw_v_line(ctx, offset, -h, (2*h), 2, '#9999A9')
-  //
-  // size data to visible
-  let n_pixels = (W - offset)
-  let samples_per_pixel = Math.ceil(data.length/n_pixels)
-  let dmax = Math.max(...data)
-  let section_start = 0 //data.indexOf(dmax) - 200
-  let dmin = Math.abs(Math.min(...data))
-  dmax = Math.max(dmin,dmax)
-  let factor = WAVE_DISPLAY_MAX/dmin
-  data = data.map(datum => datum*factor)
-  let draw_data = reduceAudioPeak(data, samples_per_pixel, 0, n_pixels)
-  //
-  draw_line_chart(ctx, 10, 0, draw_data, section_start, n_pixels, 1, '#000')
-  //
-  if ( dataSecs ) draw_seconds(ctx,5,(h-40),'#000',`${dataSecs}`)
-}
+    // Set up the canvas
+    ctx.clearRect(0,-h,W,(2*h))
+    draw_h_line(ctx, 0, 0, W, 2, '#009')
+    let offset = ZERO_AXIS_OFFSET
+    draw_v_line(ctx, offset, -h, (2*h), 2, '#9999A9')
+    //
+    // size data to visible
+    let n_pixels = (W - offset)
+    let samples_per_pixel = Math.ceil(data.length/n_pixels)
+    let dmax = Math.max(...data)
+    let section_start = 0 //data.indexOf(dmax) - 200
+    let dmin = Math.abs(Math.min(...data))
+    dmax = Math.max(dmin,dmax)
+    let factor = WAVE_DISPLAY_MAX/dmin
+    data = data.map(datum => datum*factor)
+    let draw_data = reduceAudioPeak(data, samples_per_pixel, 0, n_pixels)
+    //
+    draw_line_chart(ctx, 10, 0, draw_data, section_start, n_pixels, 1, '#000')
+    //
+    let fsecs = parseFloat(dataSecs)
+    fsecs = fsecs.toFixed(3)
+    //
+    if ( dataSecs ) draw_seconds(ctx,15,h,'#000',`${fsecs}`)
+  }
+
 
 function update_play_marker(ctx,play_info,percent) {
   let last_tick = play_info.where_ticker
