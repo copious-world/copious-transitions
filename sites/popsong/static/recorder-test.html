@@ -171,9 +171,17 @@
     </select>
     </div>
     <!--   -->
-    <div>
-    <button class="wv_button" id="send-session" onclick="download_prompt()" >Download&nbsp;Session</button>
-    <button class="wv_button_wordy" id="delete-session" onclick="delete_session()" >Delete&nbsp;Session&nbsp;from&nbsp;Device</button>
+    <div id="send-session" >
+      <button  class="panel-ctrl wv_button" id="send-session-panel-ctrl-open" onclick="open_button_panel('send-session-panel-ctrl-','toggle-session-buttons')">download/transfer/verify&nbsp;&downarrow;</button>
+      <button  class="panel-ctrl" id="send-session-panel-ctrl-close" style="visibility: hidden;display: none;" onclick="close_button_panel('send-session-panel-ctrl-','toggle-session-buttons')">&rightarrow;</button>
+      <div id="toggle-session-buttons" class="hidden-buttons" style="visibility: hidden;display: none;">
+        <button class="wv_button" id="download-audio" onclick="download_prompt()" >Download&nbsp;Session&nbsp;Audio</button>
+        <button class="wv_button" id="download-session" onclick ="purposeful_download_action_prompt('move')" >Request&nbsp;Device&nbsp;Transfer</button>
+        <button class="wv_button" id="upload-session" onclick ="install_transfer_prompt()" >Install&nbsp;Session&nbsp;Transfer</button>
+        <button class="wv_button" id="verify-session" onclick ="purposeful_download_action_prompt('verify')" >Verify&nbsp;Session</button>    
+      </div>
+      <!--   -->
+      <button class="wv_button" id="delete-session" onclick="delete_session()" >Delete&nbsp;Session&nbsp;from&nbsp;Device</button>
     </div>
     <div style="max-height: 1px; background-color: maroon;width: 100%;margin-bottom: 12px;">&nbsp;</div>
     <!--   -->
@@ -275,7 +283,7 @@
     <h3 class="modal-header">Click on the link below to begin downloading verification data</h3>
     <div class="modal-body">
       <blockquote class="wv-bq-dialog">
-        <a id='verification-download-link' href = "" >no file</a>
+        <a id='file-download-link' href = "" >no file</a>
       </blockquote>
     </div>
     <footer class="modal-footer">
@@ -284,21 +292,19 @@
   </dialog>
   <!-- end of dialog-->
   <dialog id='session-transfer-box'>
-    <h3 class="modal-header">Name a session to retrieve that you previously posted from another device</h3>
+    <h3 class="modal-header">Upload your session file</h3>
     <div class="modal-body">
-      <form method="dialog">
-        <label for="wv-id-email-transfer">Your identifying email:</label>
-        <input type="text" id="wv-id-email-transfer" name="wv-id-email-transfer" />
-        <br>
-        <label for="wv-sess-name-transfer">Sesson Name:</label>
-        <input type="text" id="wv-sess-name-transfer" name="wv-sess-name-transfer" />
-      </form>
+      <div class="drop-target" ondrop="handle_session_upload(ev)">
+        Drop your file here. It will checked against the server before it is added to your session list on thist device.
+      </div>
     </div>
     <footer class="modal-footer">
       <button id="wave-tranfer-cancel" type="button">Cancel</button>
       <button id="wave-tranfer-send" type="button">Request</button>
     </footer>
   </dialog>
+  <!-- end of dialog-->
+
   <div id="audioBoxGhost" >
       &nbsp;
   </div>
@@ -406,6 +412,41 @@
     return array;
   }
   
+  function open_button_panel(bgrp,traget_name) {
+    let panel = document.getElementById(traget_name)
+    if ( panel ) {
+      panel.style.visibility = "visible"
+      panel.style.display = "block"
+      let opener = document.getElementById(bgrp + 'open')
+      if ( opener ) {
+        opener.style.visibility = "hidden"
+        opener.style.display = "none"
+      }
+      let closer = document.getElementById(bgrp + 'close')
+      if ( closer ) {
+        closer.style.visibility = "visible"
+        closer.style.display = "block"
+      }
+    }
+  }
+  function close_button_panel(bgrp,traget_name) {
+    let panel = document.getElementById(traget_name)
+    if ( panel ) {
+      panel.style.visibility = "hidden"
+      panel.style.display = "none"
+      let opener = document.getElementById(bgrp + 'open')
+      if ( opener ) {
+        opener.style.visibility = "visible"
+        opener.style.display = "block"
+      }
+      let closer = document.getElementById(bgrp + 'close')
+      if ( closer ) {
+        closer.style.visibility = "hidden"
+        closer.style.display = "none"
+      }
+    }
+  }
+
   //beep()
   
   const g_audioContext = new AudioContext();
@@ -1022,48 +1063,31 @@
     cancel_dmodal.addEventListener('click', () => {
       v_dmodal.close('cancelled');
     });
-  
-  
     //
-  
+
+
+
     // TRANSFER MODAL
     const tmodal = g_session_transfer_modal
-    let temail_fld = document.getElementById('wv-id-email-transfer')
-    let sess_name_fld = document.getElementById('wv-sess-name-transfer')
-    let tsend_btn_fld = document.getElementById('wave-tranfer-send')
     let tcancel_btn_fld = document.getElementById('wave-tranfer-cancel')
-  
+
     tmodal.addEventListener('cancel', () => {
       //modal.close('cancelled');
     });
-  
+
     // close when clicking on backdrop
     tmodal.addEventListener('click', (event) => {
       if (event.target === tmodal) {
         tmodal.close('cancelled');
       }
     });
-  
-        // close when clicking on backdrop
-    tsend_btn_fld.addEventListener('click', (event) => {
-      if ( sess_name_fld && temail_fld ) {
-        let email = temail_fld.value
-        let sess_name = sess_name_fld.value
-        if ( email.length && sess_name.length ) {
-          request_transferred_session(email,sess_name)
-          tmodal.close('sent');
-          return;
-        }
-      }
-      beep();
-      return;
-    });
-    tsend_btn_fld.addEventListener('click', (event) => {
+    //
+    tcancel_btn_fld.addEventListener('click', (event) => {
         tmodal.close('cancelled');
     });
-  
+
   }
-  
+    
   //>--
   // wv_keypair_promise
   //  -- 
@@ -1553,27 +1577,6 @@
   }
   
   
-  async function wv_install_transferred_session(session_object) {
-    //
-    if ( g_audio_db === null ) {
-      console.log("db not initialized :: wv_install_transferred_session")
-      return;
-    }
-    //
-    let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
-    let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
-    //
-    let request = audioStore.put(session_object)
-    request.onsuccess = (ev) => {
-      let rsult = event.target.result
-      //
-      let sess_name = session_object.name
-      add_in_new_session(sess_name)
-    }
-    //
-  }
-  
-  
   async function get_audio_data(sess_name) {
     //
     if ( g_audio_db === null ) {
@@ -1749,6 +1752,7 @@
         sess_op_el = document.getElementById('send-session')
         if ( sess_op_el ) {
           sess_op_el.style.visibility = "hidden"
+          sess_op_el.style.display = "none"
         }
         sess_op_el = document.getElementById('delete-session')
         if ( sess_op_el ) {
@@ -1771,6 +1775,7 @@
         sess_op_el = document.getElementById('send-session')
         if ( sess_op_el ) {
           sess_op_el.style.visibility = "inherit"
+          sess_op_el.style.display = "block"
         }
         sess_op_el = document.getElementById('delete-session')
         if ( sess_op_el ) {
@@ -1791,6 +1796,13 @@
   function delete_session() {
     if ( g_current_session_name !== 'none ') {
       let sess_name = g_current_session_name
+
+      let ans = confirm("Do you want to proceed? Proceeding will cause this session to be deleted from your device.")
+      
+      if ( ans === false ) {
+        return
+      }
+
       if ( g_audio_db === null ) {
         console.log("db not initialized :: delete_session")
         return;
@@ -1879,6 +1891,7 @@
     sess_op_el = document.getElementById('send-session')
     if ( sess_op_el ) {
       sess_op_el.style.visibility = "hidden"
+      sess_op_el.style.display = "none"
     }
     sess_op_el = document.getElementById('delete-session')
     if ( sess_op_el ) {
@@ -1927,6 +1940,7 @@
       let sess_op_el = document.getElementById('send-session')
       if ( sess_op_el ) {
         sess_op_el.style.visibility = "visible"
+        sess_op_el.style.display = "block"
       }
     });
   
@@ -2949,18 +2963,18 @@
     }
   }
   
-  async function wv_move_session(sess_name) {
-    try {
-      let sessionObj = await get_audio_data(sess_name)
-      let message = {
-        'type' : 'device-move',
-        'sess_id' : sess_name
-      }
-      // get the session data and store it
-      g_ownership_worker.postMessage(message)  // just send the key for DB retrieval
-      //
-    } catch (e) {
+  function wv_secure_session_action(sess_name,purpose) {
+    let vid = uuidv4()
+    let mtype = (purpose === 'move') ? 'device-move' : 'verify'
+    let message = {
+      'type' : mtype,
+      'sess_id' : sess_name,
+      'verification_id' : vid
     }
+    // get the session data and store it
+    g_ownership_worker.postMessage(message)  // just send the key for DB retrieval
+    //
+    return vid
   }
   
   //
@@ -2983,77 +2997,10 @@
   
   
   
-  //  download_audio_session_record
-  //  -- present a dialog to a user for downloading the current session in some audio format that deterines ext
-  var downloader_url = null
-  async function download_audio_session_record(sess_name,downloadlink) {
-    if ( !(downloadlink) ) return false
-    let sess_name_cmplt = sess_name + '-complete'
-    let data = await get_audio_key(sess_name_cmplt)
-    if ( data ) {
-      //
-      let sess_blob = data.blob
-      let barray = convertDataURIToBinary(sess_blob)
-      //
-      //let snd = new Audio(sess_blob)
-      //snd.play()
-  
-      // //
-      let contentType = g_preferred_download_format
-      let file_data = new Blob([barray], {type: contentType});
-      //
-      //
-      let f_url = URL.createObjectURL(file_data);
-  
-      if ( downloader_url !== null ) {
-        URL.revokeObjectURL(downloader_url)
-      }
-      downloader_url = f_url
-      downloadlink.href = f_url
-      let ext = data.ext ? data.ext : "mp3"
-      downloadlink.download = sess_name + '.' + ext;
-      downloadlink.click();
-      //
-      return true
-    }
-    return false
-  }
-  
-  
-  // download verification data
-  // 
-  var verifier_downloader_url = null
-  async function download_verification_session_record(sess_name,downloadlink) {
-    if ( !(downloadlink) ) return false
-    let sess_name_cmplt = sess_name + '-complete'
-    let data = await get_audio_key(sess_name_cmplt)
-    if ( data ) {
-      let all_verify_data = {
-        "base_audio" : data,
-        "session_info" : {}
-      }
-      let sessObj = await get_audio_data(sess_name)
-      if ( sessObj ) {
-        all_verify_data.session_info = sessObj
-        //
-        let f_url = URL.createObjectURL(all_verify_data);
-  
-        if ( verifier_downloader_url !== null ) {
-          URL.revokeObjectURL(verifier_downloader_url)
-        }
-        verifier_downloader_url = f_url
-        downloadlink.href = f_url
-        let ext = data.ext ? data.ext : "json"
-        downloadlink.download = sess_name + '.' + ext;
-        downloadlink.click();
-      }
-    }
-  }
-  
-  
-  
-  
-  // // 
+  // :: audio download
+  //
+  // // download_prompt = Download audio data that can be heard or can be edited...
+  // //
   async function download_prompt() {
     let downloader = g_audio_download_modal
     let downloadlink = document.getElementById('wave-download-link')
@@ -3075,12 +3022,54 @@
       }
     }
   }
+
+  //  download_audio_session_record
+  //  -- present a dialog to a user for downloading the current session in some audio format that deterines ext
+
+  var downloader_url = null
+  async function download_audio_session_record(sess_name,downloadlink) {
+    if ( !(downloadlink) ) return false
+    let sess_name_cmplt = sess_name + '-complete'
+    let data = await get_audio_key(sess_name_cmplt)  // get the data with the blob in it
+    if ( data ) {
+      //
+      let sess_blob = data.blob       // here is the blob
+      let barray = convertDataURIToBinary(sess_blob)
+      //
+      //let snd = new Audio(sess_blob)
+      //snd.play()
   
+      // //
+      let contentType = g_preferred_download_format
+      let file_data = new Blob([barray], {type: contentType});  // a playable file
+      //
+      //
+      let f_url = URL.createObjectURL(file_data);
   
+      if ( downloader_url !== null ) {
+        URL.revokeObjectURL(downloader_url)
+      }
+      downloader_url = f_url
+      downloadlink.href = f_url
+      let ext = data.ext ? data.ext : "mp3"
+      downloadlink.download = sess_name + '.' + ext;
+      downloadlink.click();
+      //
+      return true
+    }
+    return false
+  }
+  
+
+  // :: end audio download
+
+
+  
+  // :: verification (transfer) download
   // // 
-  async function download_verification_prompt() {
-    let downloader = g_verify_download_modal
-    let downloadlink = document.getElementById('verification-download-link')
+  async function purposeful_download_action_prompt(purpose) {
+    let downloader = g_verify_download_modal            // -- one downloader modal suffices for both transfer and verification \ 
+    let downloadlink = document.getElementById('file-download-link')
     if ( downloader && downloadlink ) {
       downloadlink.innerHTML = `Download ${g_current_session_name}`
       if ( downloader.showModal ) downloader.showModal()
@@ -3088,20 +3077,213 @@
         downloader.style.visibility = 'visible'
         downloader.style.display = 'block'
       }
-      let result = await download_verification_session_record(g_current_session_name,downloadlink)
-      if ( result ) {
-        // maybe send a copy to the server ???
-      }
+      // very modest differences between a transfer and verification data structure... both are almost all the data plus some modifiers
+      await download_secure_session_record(g_current_session_name,purpose,downloadlink)
       if ( downloader.close ) downloader.close()
       else {
         downloader.style.visibility = 'hidden'
         downloader.style.display = 'none'
       }
+      //
+    }
+  }
+  
+
+  // download_secure_session_record
+  // download verification or transfer data
+  // When this is done, there is a file containing data which might be transfered
+  // or which might be used to run a verification process...
+  // 
+  var verifier_downloader_url = null
+  async function download_secure_session_record(sess_name,purpose,downloadlink) {
+    if ( !(downloadlink) ) return false
+    let sess_name_cmplt = sess_name + '-complete'     // get the base64 encoded blob
+    let data = await get_audio_key(sess_name_cmplt)   // get the data with the blob in it
+    if ( data ) {
+      // all_data_in_process
+      let all_data_in_process = {
+        "base_audio" : data,      // keep in base64 format
+        "session_info" : {}
+      }
+      //
+      try {
+        let sessObj = await get_audio_data(g_current_session_name)            // the session record with all edit history, etc
+        if ( sessObj ) {
+          // get an id for the server to recognize this data being processed and tell the server
+          let vid = wv_secure_session_action(g_current_session_name,purpose)
+          sessObj.verification_id = vid
+          all_data_in_process.session_info = sessObj
+          //
+          let f_url = URL.createObjectURL(all_data_in_process);
+
+          if ( verifier_downloader_url !== null ) {
+            URL.revokeObjectURL(verifier_downloader_url)
+          }
+          verifier_downloader_url = f_url
+          downloadlink.href = f_url
+          let ext = data.ext ? data.ext : "json"
+          downloadlink.download = sess_name + '.' + ext;
+          downloadlink.click();
+        }
+      } catch (e) {
+
+      }
     }
   }
   
   
-  
+// :: end verification (transfer) download
+
+
+// :: tranfer upload
+
+// create a promises to capture dropped data or handle fail
+var g_session_upload_promise = null
+var g_sess_up_resolver = (v) => {}
+var g_sess_up_rejector = (v) => {}
+function upload_session_promise() {
+  g_session_upload_promise = new Promise((resolve,reject) => {
+    g_sess_up_resolver = (v) => { resolve(v) }
+    g_sess_up_rejector = (v) => { reject(v) }
+  })
+  return g_session_upload_promise
+}
+
+
+
+//
+// install_transfer_prompt
+// Present a dialog that allows for a file to be dropped so that the page may initialize the 
+// installation of the data into the local DB.
+//
+async function install_transfer_prompt() {
+  //
+  let uploader = g_session_transfer_modal
+  if ( uploader ) {
+    if ( uploader.showModal ) uploader.showModal()
+    else {
+      uploader.style.visibility = 'visible'
+      uploader.style.display = 'block'
+    }
+    //
+    try {
+      // promise fulfilled in handle_session_uupload_session_promisepload (see below)
+      let session_data = await ()  // promise 
+      if ( session_data ) {
+        let vid = session_data.verification_id        //  verify transfer... verify verification... etc.
+        let user_info = await wv_find_user(APP_USER_SINGLETON)
+        let qobj = {
+          "verification_id" : vid,
+          "purpose" : session_data.purpose,
+          "email" : user_info.email
+        }
+        let verify_OK = await transfer_verified(qobj) // as the server (or peers) for permissions to accept
+        if ( verify_OK ) {
+          await wv_install_transferred_session(session_data)
+        } else {
+          alert("The provided file does not include recognizable audio session data to be processed by this application.")
+        }
+      }
+    } catch(err) {
+    }
+    g_session_upload_promise = null
+    //
+    if ( uploader.close ) uploader.close()
+    else {
+      uploader.style.visibility = 'hidden'
+      uploader.style.display = 'none'
+    }
+  }
+  //
+}
+
+
+// transfer_verified
+// assuming that the transfer request has been uploaded, this will obtain permission to accept the drop
+// Failure does not prohibit manipulation of the db by other programs.
+// Failure prevents further management on the server side.
+async function transfer_verified(qobj)  {
+  try {
+    let resolution = await wv_postData(REQ_SESSION_VERIFICATION_SERVER,qobj)
+    if ( resolution ) {
+      return(true)
+    } else return(false)
+  } catch(e) {
+  }
+}
+
+
+// handle_session_upload
+// accesses the data through a drop action..
+// resolve complete session for manipulation by install_transfer_prompt
+/// 
+function handle_session_upload(ev) {
+  if ( g_session_upload_promise !== null ) {
+    let file = null
+    if ( ev.dataTransfer.items ) { // Use DataTransferItemList interface to access the file(s)
+      if (ev.dataTransfer.items[0].kind === 'file') {
+        file = ev.dataTransfer.items[0].getAsFile();
+      }
+    } else {
+      file = ev.dataTransfer.files[i].getAsFile();
+    }
+    //
+    if ( file === null )  g_sess_up_rejector(false);
+    //
+    var reader = new FileReader();
+    reader.onload = (e) => {
+        let raw_data = (e.target.result)
+        try {
+          raw_data = raw_data.toString()
+          let data = JSON.parse(raw_data)
+          g_sess_up_resolver(data)
+        } catch (err) {
+          g_sess_up_rejector(false)
+        }
+    };
+    reader.readAsText(file);
+  }
+}
+
+
+
+async function wv_install_transferred_session(transfer_session_object) {
+  //
+  if ( g_audio_db === null ) {
+    console.log("db not initialized :: wv_install_transferred_session")
+    return;
+  }
+  // access the complete and the historical editting...
+  let session_object = transfer_session_object.session_info
+  let complete_data = transfer_session_object.base_audio
+  //
+  let transaction = g_audio_db.transaction(AUDIO_SESSION_STORE, "readwrite");
+  let audioStore = transaction.objectStore(AUDIO_SESSION_STORE);
+  //
+  let request = audioStore.put(session_object)
+  request.onsuccess = (ev) => {
+    let rsult = event.target.result``
+    //
+    let sess_name = session_object.name
+    add_in_new_session(sess_name)
+  }
+  //
+  // Previously the user downloaded the complete data in its stored form.
+  // This puts it back in its stored form...
+  //
+  let c_transaction = g_audio_db.transaction(AUDIO_SESSION_COMPLETE, "readwrite");
+  let c_audioStore = c_transaction.objectStore(AUDIO_SESSION_COMPLETE);
+  let c_request = audioStore.put(complete_data)
+  c_request.onsuccess = (ev) => {
+    let rsult = event.target.result  // 
+    //
+  }
+
+}
+
+// :: end tranfer upload
+
+
   
   function worker_status_view(status) {
     //
@@ -3109,26 +3291,6 @@
   
   function worker_op_response(data) {
     //
-  }
-  
-  // ---- ---- ---- ---- ---- ----
-  // ---- ---- ---- ---- ---- ----
-  
-  async function request_transferred_session(email,sess_name) {
-    let session_identification = {
-          'email' : user_email,
-          'sess_name' : sess_name
-        }
-    try {
-      let session_data = await wv_postData(REQ_AUDIO_SESSION_TRANSFER,session_identification)
-      if ( session_data && session_data.packed ) {
-        let user_info = await wv_find_user(APP_USER_SINGLETON)
-        let session_object = await wv_unpack_session_data(session_data.packed,user_info)
-        await wv_install_transferred_session(session_object)
-        alert(`The session ${sess_name} is now available for editing`)
-      }
-    } catch(e) {
-    }
   }
   
   

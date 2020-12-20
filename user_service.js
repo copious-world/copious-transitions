@@ -709,10 +709,18 @@ function load_parameters() {
         confJSON.mod_path = {}
         g_expected_modules.forEach(mname => {
             let modName = confJSON.modules[mname]
-            if ( modName ) {
-                confJSON.mod_path[mname] = __dirname + `/${module_path}/${modName}`
+            if ( typeof modName === 'string' ) {
+                if ( modName ) {
+                    confJSON.mod_path[mname] = __dirname + `/${module_path}/${modName}`
+                } else {
+                    confJSON.mod_path[mname] = __dirname + `/defaults/lib/default_${mname}`
+                }
+            } else if ( typeof modName === 'object' ) {  // allow for modules from other locations
+                modName = modName.module
+                let alternate_mod_path = modName.mod_path   // perhaps filter this in the future to attain some standard in locations..
+                confJSON.mod_path[mname] = __dirname + `/${alternate_mod_path}/${modName}`
             } else {
-                confJSON.mod_path[mname] = __dirname + `/defaults/lib/default_${mname}`
+                throw new Error("ill formed module name in config file")
             }
         })
         return(confJSON)

@@ -52,10 +52,20 @@ class WaveStorePaths extends TaggedTransition {
     }
 }
 
-// Contact Paths
+// Wave Mover Paths -- for a transfer
 class WaveMoverPaths extends TaggedTransition {
     constructor() {
         super("move_waves")
+    }
+    //
+    file_entry_id(file_key) {
+        return("")
+    }
+}
+
+class VerifierPaths extends TaggedTransition {
+    constructor() {
+        super("verify")
     }
     //
     file_entry_id(file_key) {
@@ -102,6 +112,7 @@ class SongSearchTransitions {
         this.recording_key_keyed = new RecoringKeyPaths()
         this.wave_store_keyed = new WaveStorePaths()
         this.wave_mover_keyed = new WaveMoverPaths()
+        this.verifier_keyed = new VerifierPaths()
         //
         this.chunk_keyed = new WSS_ChunkPaths()
         this.chunk_change_keyed = new WSS_ChunkFinalPaths()
@@ -114,6 +125,7 @@ class SongSearchTransitions {
         global.G_recording_key_injest_trns = this.recording_key_keyed
         global.G_wave_store_trns = this.wave_store_keyed
         global.G_wave_mover_trns = this.wave_mover_keyed
+        global.G_verifier_trns = this.verifier_keyed
         //
         global.G_wss_chunk = this.chunk_keyed
         global.G_wss_chunk_final = this.chunk_change_keyed

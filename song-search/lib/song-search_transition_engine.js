@@ -229,7 +229,24 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
               delete post_body.when
               delete post_body.device_id
               delete post_body.timestamp
-              await this.store_audio_session(key,audioSessionRep)
+              await this.store_audio_session(key,audioSessionRep,'transfer')
+        } catch (e) {
+        }
+    }
+
+    async store_audio_session_component_for_transfer(pose_body) {
+        try {
+            let key = {'email' : post_body.email }
+            let audioSessionRep = {
+                'user' : key,
+                'device' : post_body.device_id,
+                'timestamp' : post_body.when,
+                'component_data' : post_body
+              }
+              delete post_body.when
+              delete post_body.device_id
+              delete post_body.timestamp
+              await this.store_audio_session(key,audioSessionRep,'verify')
         } catch (e) {
         }
     }
@@ -279,13 +296,13 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
     }
 
     // //
-    async store_audio_session(key,audioSessionRep) {
+    async store_audio_session(key,audioSessionRep,type) {
         try {
             let key_field = Object.keys(key)[0]
             let key_value = key[key_field]
             let dbkey = `${key_field}-${key_value}`
             audioSessionRep.wrapped_aes_key = hexUtils.hex_fromByteArray(audioSessionRep.wrapped_aes_key)
-            let transfer_id = await this.db.store_file_class('transfer',dbkey,audioSessionRep)
+            let transfer_id = await this.db.store_file_class(type,dbkey,audioSessionRep)
             return transfer_id
         } catch (e) {
         }

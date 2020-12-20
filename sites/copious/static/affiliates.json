@@ -1,0 +1,49 @@
+{
+    "all_files" : [
+        {
+            "source_dir" : "template",
+            "file_path" : "t_about.svg",
+            "symbol" : "$affiliate_here",
+            "template_file" : true,
+            "about" : [ "deboxing" ]
+        },
+        {
+            "source_dir" : "template",
+            "file_path" : "t_dashboard.html",
+            "output_spec" : "template/dashboard.html",
+            "symbol" : "$affiliate_here",
+            "template_file" : true,
+            "about" : [ "deboxing" ]
+        },
+        {
+            "source_dir" : "template",
+            "file_path" : "t_deboxing.svg",
+            "symbol" : "$affiliate_here",
+            "template_file" : true,
+            "about" : [ "deboxing" ]
+        },
+        {
+            "source_dir" : "template",
+            "file_path" : "t_locating.svg",
+            "symbol" : "$affiliate_here",
+            "template_file" : true,
+            "about" : [ "deboxing" ]
+        },
+        {
+            "source_dir" : "template",
+            "file_path" : "t_technology.svg",
+            "symbol" : "$affiliate_here",
+            "template_file" : true,
+            "about" : [ "technology" ]
+        }
+    ],
+    "affiliates" : [
+        {
+            "description" : {
+                "keys" : [ "deboxing" ],
+                "text" : "alpha"
+            },
+            "link" : "alpha"
+        }
+    ]
+}

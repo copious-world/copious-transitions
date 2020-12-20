@@ -156,6 +156,8 @@ class SearcherSessionManager extends SessionManager {
             this.trans_engine.store_audio_session_component_hashes(post_body)
         } else if ( G_wave_mover_trns.tagged(transition) ) {   // sent entire audio session
             await this.trans_engine.store_audio_session_component_for_move(post_body)
+        } else if ( G_verifier_trns.tagged(transition) ) {   // sent entire audio session
+            await this.trans_engine.store_audio_session_component_for_transfer(post_body)
         } else { // from wss connection
             if ( G_wss_chunk.tagged(transition) ) {
                 this.trans_engine.store_recording_chunk(post_body)

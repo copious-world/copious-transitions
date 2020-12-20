@@ -12,23 +12,20 @@
     "auth_websocket" : "auth_ws",
     "svgLogo" : {
         "link" : "/",
-        "file" : "./copiousLogo.svg",
+        "file" : "./logo-drop.html",
         "svg" : ""
     },
     "relatedAsset" : {
         "name" : "GitGHub",
-        "link" : "https://github.com/copious-world",
-        "file" : "./GitHub.svg",
-        "svg" : ""
+        "file" : "./related-link-drop.html"
     },
     "svgBannerFrame" :  {
-        "file" : "./splash-drop.html",
-        "svg" : ""
+        "file" : "./splash-drop.html"
     },
     "aboutBox" : {
         "name" : "about",
         "content" : {
-            "svg" : "",
+            "html" : "",
             "file" : "./about-drop.html",
         },
         "output_height" : "inherit",
@@ -42,7 +39,7 @@
     "topicBox_1" : {
         "name" : "technology",
         "content" : {
-            "file" : "./topic-drop.html"
+            "file" : "./topic-drop_1.html"
         },
         "output_height" : "inherit",
         "output_width" : "inherit"
@@ -50,7 +47,7 @@
     "topicBox_2" : {
         "name" : "deboxing",
         "content" : {
-            "file" : "./topic-drop.html"
+            "file" : "./topic-drop_2.html"
         },
         "output_height" : "inherit",
         "output_width" : "inherit"
@@ -58,7 +55,7 @@
     "topicBox_3" : {
         "name" : "locating",
         "content" : {
-            "file" : "./topic-drop.html"
+            "file" : "./topic-drop_3.html"
         },
         "output_height" : "inherit",
         "output_width" : "inherit"

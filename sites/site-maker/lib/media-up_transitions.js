@@ -6,7 +6,7 @@ const uuid = require('uuid/v4')
 class UploaderPaths extends TaggedTransition {
     constructor() {
         super("upload")
-        this.static_entries = [ "demo-uploader", "publication-uploader" ] // for this app used by  passing(asset)
+        this.static_entries = [ "sound-uploader", "publication-uploader" ] // for this app used by  passing(asset)
     }
     //
     transform_file_name(file_name) {
@@ -52,7 +52,7 @@ class DemoSubmissionPaths extends MediaSubmitTransition {
         super("do_demo_upload")
     }
     file_entry_id(file_key) {
-        return('_singer')
+        return('_jingle')
     }
     file_type() {
         return('mp3')
@@ -64,10 +64,10 @@ class PubSubmissionPaths extends MediaSubmitTransition {
         super("do_publication_upload")
     }
     file_entry_id(file_key) {
-        return('_' + file_key + '_soday')
+        return('_' + file_key + '_new_site')
     }
     file_type() {
-        return('mp3')
+        return('html')
     }
 }
 

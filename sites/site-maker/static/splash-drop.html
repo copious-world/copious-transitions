@@ -1,0 +1,221 @@
+<style>
+    .droppable {
+        width: 100%;
+        height: 100%;
+        border: 1px solid purple;
+        background-color: whitesmoke;
+        position : relative;
+    }
+    .droppable:hover {
+        border: 2px dotted magenta;
+        background-color: paleturquoise;
+    }
+    .dropper_button {
+        width: 30%;
+    }
+    .dropper_controls {
+        border: solid 1px rgb(208, 218, 231);
+        padding: 3px;
+    }
+    .droppable image {
+        position:absolute; 
+        top:0px; 
+        left:0px; 
+        z-index:100; 
+        width:100%; 
+        height:100%; 
+        border:none;
+    }
+    .droppable > .drop-text {
+        position:absolute; 
+        top:0px; 
+        left:0px; 
+        z-index:50; 
+        width:100%; 
+        height:100%; 
+        border:none;
+    }
+    .site-maker-message-box {
+        border: 1px solid darkgreen;
+        padding: 2px;
+        background-color: whitesmoke;
+        color:teal;
+        font-weight: bolder;
+    }
+
+    .site-maker-message-box span {
+        color: darkolivegreen;
+    }
+
+    #site-builder-user-info {
+        border : 1px solid darkgray;
+    }
+
+</style>
+<div style="height:inherit;width: inherit;">
+<div class="dropper_controls" >
+    <button class="dropper_button" id="send-session" onclick="upload_prompt()" >upload&nbsp;and&nbsp;create&nbsp;website</button>
+</div>
+<div  class='site-maker-message-box'>
+    status <span id="site-maker-messages">--</span>
+</div>
+<div class="droppable" ondrop="dropHandler(event,'svgBannerFrame');" ondragover="dragOverHandler(event,'svgBannerFrame');" >
+    <div class="drop-text" id="drop-target-svgBannerFrame">
+    </div>
+    <image src="images/drop-target.png" onclick="capture_clicks(ev)">
+</div>
+</div>
+<div id="site-builder-user-info" >
+    <input type='text' id="site-builder-email" >
+    <div></div>
+    <input type='text' id="site-builder-url" >
+    <div></div>
+    <select id="stie-builder-hosting-service" >
+        <option >vultr</option>
+        <option>heroku</option>
+        <option>other</option>
+    </select>
+    <div></div>
+    <input  id="stie-builder-info-good" type="checkbox" value=""> My information is correct
+    <div></div>
+    <button id="verify-user-info" onclick="add_in_user_info()">Go ahead and create my site</button>
+</div>
+    
+
+    
+
+<script>
+    //
+    const SITE_MAKER_UPLOAD_URL = "/transition/publication-uploader"
+    //
+    let g_drop_envelope_uploader = {
+        "user_info" : {}
+    }
+    //
+    function  prepare_file_text(text,subst_key,file_name) {
+        let encoded = encodeURIComponent(text)
+        g_drop_envelope_uploader[subst_key] = { "text" : encoded, "file-name" : file_name }
+        let drop_display_id = `drop-target-${subst_key}`
+        let drop_display = document.getElementById(drop_display_id)
+        if ( drop_display ) {
+            drop_display.innerHTML = text
+        }
+    }
+    //
+    //
+    function dropHandler(ev,subst_key) {
+        let dopzone = ev.target
+        if ( ev.dataTransfer.items ) {
+            // Use DataTransferItemList interface to access the file(s)
+            for (let i = 0; i < ev.dataTransfer.items.length; i++) {
+                if (ev.dataTransfer.items[i].kind === 'file') {
+                    let file = ev.dataTransfer.items[i].getAsFile();
+                    let fname = file.name
+                    var reader = new FileReader();
+                    reader.onload = (e) => {
+                        prepare_file_text(e.target.result,subst_key,fname)
+                    };
+                    reader.readAsText(file);
+                    break
+                }
+            }
+        } else {
+            // Use DataTransfer interface to access the file(s)
+            for (let i = 0; i < ev.dataTransfer.files.length; i++) {
+                let file = ev.dataTransfer.files[i].getAsFile();
+                let fname = file.name
+                var reader = new FileReader();
+                reader.onload = (e) => {
+                    prepare_file_text(e.target.result,subst_key,fname)
+                };
+                reader.readAsText(file);
+                break
+            }
+        }
+    }
+
+    function dragOverHandler(ev,subst_key) {
+        ev.preventDefault();
+    }
+
+    function capture_clicks(ev) {
+        ev.preventDefault();
+    }
+
+    function SiteMakerMessage(msg) {
+        let msg_box = document.getElementById('site-maker-messages')
+        msg_box.innerHTML = msg
+    }
+
+
+    //
+    function sb_get_val(b) {
+        let el = document.getElementById(b)
+        if ( el ) {
+            return el.value
+        } else return(false)
+    }
+
+    //
+    var _site_builder_reject = () => {}
+    var _site_builder_resolve = () => {}
+
+    function add_in_user_info() {
+        ky = 'info-good'
+        let el = document.getElementById(`site-builder-${ky}`)
+        if ( el.checked ) {
+            let ky = 'email'
+            let val = sb_get_val(`site-builder-${ky}`)
+            if ( val === false ) { _site_builder_reject() }
+            g_drop_envelope_uploader.user_info[ky] = val
+
+            ky = 'url'
+            val = sb_get_val(`site-builder-${ky}`)
+            if ( val === false ) { _site_builder_reject() }
+            g_drop_envelope_uploader.user_info[ky] = val
+
+            ky = 'hosting-service'
+            val = sb_get_val(`site-builder-${ky}`)
+            if ( val === false ) { _site_builder_reject() }
+            g_drop_envelope_uploader.user_info[ky] = val
+            //
+            _site_builder_resolve()
+            return
+        }
+        _site_builder_reject()
+    }
+
+    function ask_user_info() {
+        return new Promise((resolve,reject) => {
+            //
+            let user_capture = document.getElementById('site-builder-user-info')
+            //
+            if ( user_capture ) {
+                _site_builder_reject = () => { reject(false) }
+                _site_builder_resolve = () => { resolve(true) }
+            } else {
+                reject(false)
+            }
+            //
+        })
+    }
+
+    // upload the JSON structure created by dragging and dropping...
+    async function upload_prompt() {
+        let positive = await ask_user_info()
+        if ( positive ) {
+            try {
+                let data = g_drop_envelope_uploader
+                let resp = await postData(SITE_MAKER_UPLOAD_URL, data)
+                if ( resp.OK === "true" ) {
+                } else {
+                    SiteMakerMessage(`Site maker upload: ${resp.reason}`)
+                }
+            } catch (e) {
+                SiteMakerMessage(`Site maker upload: ${e.message}`)
+            }
+
+        }
+    }
+    
+</script>

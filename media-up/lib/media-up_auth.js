@@ -37,11 +37,11 @@ class UploaderSessionManager extends SessionManager {
         }
         if ( G_demo_submit_trns.tagged(transition) ) {
             trans_object.secondary_action = false
-            post_body.file_type = "mp3"
+            post_body.file_type = G_demo_submit_trns.file_type()
         }
         if ( G_publication_submit_trns.tagged(transition) ) {
             trans_object.secondary_action = false
-            post_body.file_type = "mp3"
+            post_body.file_type = G_publication_submit_trns.file_type()
         }
         //
         return(trans_object)

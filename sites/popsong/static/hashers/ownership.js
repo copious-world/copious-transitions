@@ -6,6 +6,7 @@
     const CHUNK_POST_COM_WSSURL_REQ = `https://${self.location.host}/song-search/guarded/dynamic/hash_progress_com_wss_url`
     const STORE_ASSET_POST_URL = `https://${self.location.host}/song-search/transition/store_waves`  // SESSION STORAGE FOR THIS DEVICE
     const SESSION_DEVICE_MOVE = `https://${self.location.host}/song-search/transition/move_waves`    // FROM THIS DEVICE TO STORAGE
+    const SESSION_DEVICE_VERIFY = `https://${self.location.host}/song-search/transition/verify`    // FROM THIS DEVICE TO STORAGE
     //
     const AUDIO_SESSION_STORE = 'audio_sessions'
     const AUDIO_USERID_STORE = 'audio_users'
@@ -505,6 +506,13 @@
         return p
     }
 
+    async function get_session_movement_data(sess_name) {
+
+    }
+    async function get_session_verification_data(sess_name) {
+
+    }
+
     
     // ---- ---- ---- ---- ---- ---- ---- ---- ----
     // ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -552,7 +560,7 @@
         g_app_web_socket.send(chunk_message)
     }
 
-    async function remote_signed_data_relay(sess_data) {
+    async function remote_signed_data_relay(sess_data) {        // allows for the recreation of the cloud...
         let blob = sess_data.blob
         let signature = await sign_hex_of(blob)
         sess_data.blob = hex_fromByteArray(signature)
@@ -564,6 +572,13 @@
         delete sess_data.blob
         // sending the data array container wav and ogg sections
         let json =  await postData(SESSION_DEVICE_MOVE,sess_data,'omit',true)
+        return json
+    }
+
+    async function remote_data_verification(sess_data) {
+        delete sess_data.blob
+        // sending the data array container wav and ogg sections
+        let json =  await postData(SESSION_DEVICE_VERIFY,sess_data,'omit',true)
         return json
     }
 
@@ -692,25 +707,42 @@
             case 'storage' : {          // send a complete session
                 let sess_name = message.sess_id
                 try {
-                    let sess_data = await fetch_compressed_session_from_db(sess_name)
+                    let sess_data = await fetch_compressed_session_from_db(sess_name) // complete sessions (complete session db)
                     sess_data.email = g_user_info.email
                     sess_data.sess_id = g_user_info.server_id
                     delete sess_data.pub_verification_key  // keep the verification key here if the signer key is lost, then put trust apart from signature
+                    // sends the blob part of the data
                     await remote_signed_data_relay(sess_data)    
                 } catch (e) {
                     // ----
                 }
                 break;
             }
-            case 'device-move' : {          // send a complete session
+            case 'device-move' : {          // send a session key and secret
                 let sess_name = message.sess_id
                 try {
-                    let sess_data = await fetch_session_from_db(sess_name)
+                    let sess_data = await get_session_movement_data(sess_name)//fetch_session_from_db(sess_name)
                     sess_data.email = g_user_info.email
                     sess_data.sess_id = g_user_info.server_id
                     sess_data.device_id = get_client_device_name()
-                    
+                    sess_data.transfer_id = message.verification_id
+                    //
                     await remote_data_transfer(sess_data)    
+                } catch (e) {
+                    // ----
+                }
+                break;
+            }
+            case 'verify' : {          // request for verification record release
+                let sess_name = message.sess_id
+                try {
+                    let sess_data = await await get_session_verification_data(sess_name) // fetch_session_from_db(sess_name)
+                    sess_data.email = g_user_info.email
+                    sess_data.sess_id = g_user_info.server_id
+                    sess_data.device_id = get_client_device_name()
+                    sess_data.verification_id = message.verification_id
+                    //
+                    await remote_data_verification(sess_data)    
                 } catch (e) {
                     // ----
                 }
