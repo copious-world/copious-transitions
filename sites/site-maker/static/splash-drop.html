@@ -1,4 +1,4 @@
-<style>
+<style>  
     .droppable {
         width: 100%;
         height: 100%;
@@ -17,14 +17,15 @@
         border: solid 1px rgb(208, 218, 231);
         padding: 3px;
     }
-    .droppable image {
+    .droppable > .capture_image {
         position:absolute; 
         top:0px; 
         left:0px; 
         z-index:100; 
-        width:100%; 
-        height:100%; 
+        width: inherit; 
+        height: inherit; 
         border:none;
+        cursor:pointer;
     }
     .droppable > .drop-text {
         position:absolute; 
@@ -51,6 +52,19 @@
         border : 1px solid darkgray;
     }
 
+    #hidden-file-div {
+        visibility: hidden;
+        position:absolute;
+        top:0px; 
+        left:0px; 
+        z-index:50; 
+        width:40%; 
+        height:20%; 
+        border: 2px solid darkorchid;
+        background-color: palegoldenrod;
+    }
+
+
 </style>
 <div style="height:inherit;width: inherit;">
 <div class="dropper_controls" >
@@ -62,7 +76,10 @@
 <div class="droppable" ondrop="dropHandler(event,'svgBannerFrame');" ondragover="dragOverHandler(event,'svgBannerFrame');" >
     <div class="drop-text" id="drop-target-svgBannerFrame">
     </div>
-    <image src="images/drop-target.png" onclick="capture_clicks(ev)">
+    <image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'svgBannerFrame')" />
+</div>
+<div id="hidden-file-div">
+    <input type="file" name="drop-click-file_loader"  id="drop-click-file_loader" />
 </div>
 </div>
 <div id="site-builder-user-info" >
@@ -103,7 +120,45 @@
     }
     //
     //
+    function request_file_browser() {
+        return new Promise((resolve,reject) => {
+            let file_div = document.getElementById('hidden-file-div')
+            if ( file_div ) {
+                file_div.style.visibility = "visible"
+                file_div.style.display = "block"
+                //
+
+                let done_with_file = () => {
+                    file_div.style.visibility = "hidden"
+                    file_div.style.display = "none"
+                }
+
+                let file_el = document.getElementById('drop-click-file_loader')
+                file_el.addEventListener('change',(ev) => {
+                    let file = file_el.files[0]
+                    let fr = new FileReader()
+                    fr.onload = (ev) => {
+                        let res = {
+                            "result" : fr.result,
+                            "name"   : fr.name
+                        }
+                        done_with_file()
+                        resolve(res)
+                    }
+                    fr.onerror = (ev) => {
+                        done_with_file()
+                        reject("no file")
+                    }
+                    fr.readAsText(file)
+                })
+
+            }
+        })
+    }
+    //
+    //
     function dropHandler(ev,subst_key) {
+        ev.preventDefault();
         let dopzone = ev.target
         if ( ev.dataTransfer.items ) {
             // Use DataTransferItemList interface to access the file(s)
@@ -138,8 +193,15 @@
         ev.preventDefault();
     }
 
-    function capture_clicks(ev) {
+    async function capture_clicks(ev,subst_key) {
         ev.preventDefault();
+        // ask for a file
+        try {
+            let file = await request_file_browser()
+            prepare_file_text(file.result,subst_key,file.fname)
+        } catch (e) {
+            alert("file could not be loaded")
+        }
     }
 
     function SiteMakerMessage(msg) {
