@@ -234,7 +234,7 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
         }
     }
 
-    async store_audio_session_component_for_transfer(pose_body) {
+    async store_audio_session_component_for_verify(pose_body) {
         try {
             let key = {'email' : post_body.email }
             let audioSessionRep = {
@@ -298,7 +298,7 @@ class SongTransitionEngineClass extends GeneralTransitionEngine {
     // //
     async store_audio_session(key,audioSessionRep,type) {
         try {
-            let key_field = Object.keys(key)[0]
+            let key_field = Object.keys(key)[0]    // this has to change ... not reliable
             let key_value = key[key_field]
             let dbkey = `${key_field}-${key_value}`
             audioSessionRep.wrapped_aes_key = hexUtils.hex_fromByteArray(audioSessionRep.wrapped_aes_key)

@@ -115,8 +115,8 @@ class SongSearchTransitions {
         this.verifier_keyed = new VerifierPaths()
         //
         this.chunk_keyed = new WSS_ChunkPaths()
-        this.chunk_change_keyed = new WSS_ChunkFinalPaths()
-        this.chunk_final_keyed = new WSS_ChunkChangePaths()
+        this.chunk_change_keyed = new WSS_ChunkChangePaths()
+        this.chunk_final_keyed = new WSS_ChunkFinalPaths()
     }
 
     initialize() {
@@ -128,8 +128,8 @@ class SongSearchTransitions {
         global.G_verifier_trns = this.verifier_keyed
         //
         global.G_wss_chunk = this.chunk_keyed
-        global.G_wss_chunk_final = this.chunk_change_keyed
-        global.G_wss_chunk_change = this.chunk_final_keyed
+        global.G_wss_chunk_final = this.chunk_final_keyed
+        global.G_wss_chunk_change = this.chunk_change_keyed
         //
     }
     
