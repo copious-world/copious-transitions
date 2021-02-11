@@ -1,130 +1,57 @@
 const { DBClass, SessionStore } = require.main.require('./lib/general_db')
-const processExists = require('process-exists');
-const EventEmitter = require('events')
-const CitadelClient = require('node_citadel')
-//const cached = require('cached')
+var MemCacheStoreFactory = require('memorystore')
 //
+const PersistenceManager = require.main.require('./lib/global_persistence')
 //
-//const Memcached = require("memcached")
-const MemCacheStoreFactory = require('connect-memcached');
-var MemcachePlus = require('memcache-plus');
-
-
-
 const apiKeys = require.main.require('./local/api_keys')
+const g_persistence = new PersistenceManager(apiKeys)
+
+const SLOW_MESSAGE_QUERY_INTERVAL = 5000
+const FAST_MESSAGE_QUERY_INTERVAL = 1000
 
 
-g_citadel_pass = apiKeys.citadel_password.trim();  // decrypt ??
-
-// pre initialization
-
-(async () => {
-  const exists = await processExists('memcached');
-  if ( !exists ) {
-    console.log("Memchached deamon has not been intialized")
-    process.exit(1)
-  }
-})();
-
-const memcdClient = new MemcachePlus(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
-
-/*
-const userCache = cached('users', { backend: {
-  type: 'memcached',
-  client: memcdClient
-}});
-*/
+const memcdClient = g_persistence.get_LRUManager(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
 
 
-var g_citadel = null
-var g_citadel_pass = ""
-var g_restarting = false
-
-
-//
-//
-class CitadelRestarter extends EventEmitter {
-    constructor() {
-      super()
-      this.on('restart',() => {
-        console.log("restarting connection")
-        g_restarting = true
-        run_citadel()
-      })
-    }
-}
-
-
-//
-//
-async function run_citadel() {
-    let citadel = new CitadelClient()
-  
-    await citadel.connect()
-    console.log("citadel connected")
-    let time_data = await citadel.server_time()
-    console.log(time_data.split('\n')[0])
+async function run_persistence() {   // describe the entry point to super storage
+  if ( g_persistence ) {
+    let user_slow = SLOW_MESSAGE_QUERY_INTERVAL
+    let user_fast = FAST_MESSAGE_QUERY_INTERVAL
+    let user_q_holder = G_users_trns
     //
-    citadel.set_restart_agent(new CitadelRestarter())
-    // 
-    g_citadel = citadel
-    g_restarting = false
-}
-
-//
-//
-async function post_new_user() {
-  if ( g_restarting ) {
-    setTimeout(() => { post_new_user() }, 200 )
-  } else if ( G_users_trns.empty_queue() ) {
-    setTimeout(() => { post_new_user() }, 1000 )
-  } else {
-    //
-    while ( g_citadel && !(G_users_trns.empty_queue()) ) {
-      let udata = G_users_trns.get_work()
-      await g_citadel.create_user(udata.name,udata.pass)
-      await g_citadel.logout()
-    }
-    setTimeout(() => { post_new_user() }, 1000 )
-    //
-  }
-}
-
-
-async function post_contact_message() {
-  if ( g_restarting ) {
-    setTimeout(() => { post_contact_message() }, 200 )
-  } else if ( G_contact_trns.empty_queue() ) {
-    setTimeout(() => { post_contact_message() }, 1000 )
-  } else {
-    //
-    await g_citadel.user('admin')
-    await g_citadel.password(g_citadel_pass)    
-    while ( g_citadel && !(G_contact_trns.empty_queue()) ) {
-      let msg_body = G_contact_trns.get_work()
-      //
-      let msgObject = {
-        'recipient' : "admin",
-        'anonymous' : false, 
-        'type' : false,
-        'subject' : decodeURIComponent(msg_body.name),
-        'author' : decodeURIComponent(msg_body.email),
-        'references' : decodeURIComponent(msg_body.website),
-        'text' : decodeURIComponent(msg_body.comment)
+    let user_m_handler = (i_obj) => {
+        let o_obj = i_obj
+        return(o_obj)
       }
-      //
-      await g_citadel.post_message(msgObject)
+      //  ADD PARAMETERS TO THE NEW SENDER
+    g_persistence.add_message_handler(user_m_handler,user_q_holder,user_slow,user_fast)
+
+    let contact_slow = SLOW_MESSAGE_QUERY_INTERVAL
+    let contact_fast = FAST_MESSAGE_QUERY_INTERVAL
+    let contact_q_holder = G_contact_trns
+    //
+    let contact_m_handler = (i_obj) => {
+        let o_obj = {
+          'recipient' : "admin",
+          'anonymous' : false, 
+          'type' : false,
+          'subject' : decodeURIComponent(i_obj.name),
+          'author' : decodeURIComponent(i_obj.email),
+          'references' : decodeURIComponent(i_obj.website),
+          'text' : decodeURIComponent(i_obj.comment)
+        }
+        return(o_obj)
     }
-    await g_citadel.logout()
-    setTimeout(() => { post_contact_message() }, 1000 )
+    //  ADD PARAMETERS TO THE NEW SENDER
+    g_persistence.add_message_handler(contact_m_handler,contact_q_holder,contact_slow,contact_fast)
+
   }
 }
 
 
 async function dropConnections() {
-  if ( g_citadel ) {
-    await g_citadel.logout()
-    g_citadel.quit()
+  if ( g_persistence ) {
+    await g_persistence.client_going_down("captcha")
   }
 }
 
@@ -140,9 +67,10 @@ class CaptchaSessionStore extends SessionStore {
     //
     generateStore(expressSession) {
         if ( super.can_generate_store(expressSession,true) ) {
-            // custom code goes here
-            let MemcachedStore = new MemCacheStoreFactory(expressSession)
-            return (new MemcachedStore({ client: memcdClient }))
+            let memory_Store = new MemCacheStoreFactory(expressSession)
+            return (new memory_Store({
+              checkPeriod: 86400000 // prune expired entries every 24h
+            }))
         } else {
             process.exit(1)
         }
@@ -161,8 +89,6 @@ class CaptchaDBClass extends DBClass {
 
     // // // 
     initialize(conf) {
-        setTimeout(post_new_user,5000)
-        setTimeout(post_contact_message,5000)
         super.initialize(conf)
     }
 
@@ -191,7 +117,7 @@ class CaptchaDBClass extends DBClass {
           let key_key = G_users_trns.kv_store_key()
           let key = udata[key_key]
           this.store_cache(key,udata,G_users_trns.back_ref());  // this app will use cache to echo persitent storage
-          super.store_user(udata,key_key)                               // use persitent storage
+          super.store_user(udata,key_key)                       // use persitent storage
         }
     }
 
@@ -239,7 +165,7 @@ class CaptchaDBClass extends DBClass {
 
     // // // 
     last_step_initalization() {
-        run_citadel()
+      run_persistence()
     }
 
 }

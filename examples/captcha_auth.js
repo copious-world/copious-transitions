@@ -1,8 +1,8 @@
 const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth')
 //
-//const expressSession = require('express-session');
+const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
-//const uuid = require('uuid/v4');
+const uuid = require('uuid/v4');
 
 var cnt = 0
 
@@ -12,7 +12,35 @@ class CaptchaSessionManager extends SessionManager {
         //
         super(exp_app,db_obj,bussiness)         //
         //  ----  ----  ----  ----  ----  ----  ----  ----  ----
+        //
+        let db_store = db_obj.session_store.generateStore(expressSession)  // custom application session store for express 
+        //
+        this.session = expressSession({         // express session middleware
+            secret: this.conf.sessions.secret,
+            resave: true,
+            saveUninitialized: true,
+            proxy : true,
+            maxAge: 24 * 60 * 60 * 1000,
+            sameSite: false,
+            genid: (req) => {
+                return uuid() // use UUIDs for session IDs
+            },
+            store: db_store,
+            cookie: {
+                secure: false,
+                httpOnly: true,
+                domain: this.conf.domain
+            }
+        })
+        //
         this.middle_ware.push(cookieParser())           // use a cookie parser
+        
+        this.middle_ware.push(this.session)             // this is where the session object is introduced as middleware
+        let access_session_from_res = (req, res, next) => {
+            res.locals.session = req.session;   // for apps using sessions...
+            next();
+          }
+        this.middle_ware.push(access_session_from_res)
     }
 
     app_set_user_cookie(res,session_token) {   // express token here
@@ -51,6 +79,7 @@ class CaptchaSessionManager extends SessionManager {
         }
         return(false)
     }
+
 
     // //
     async process_user(user_op,body,req,res) {

@@ -1,46 +1,23 @@
 //
 const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth_session_lite')
-const expressSession = require('express-session');
+//const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
-const uuid = require('uuid/v4');
+//const uuid = require('uuid/v4');
 
 
 class DashboardSessionManager extends SessionManager {
 
     constructor(exp_app,db_obj,business) {
-        //
         super(exp_app,db_obj,business)         //
         //  ----  ----  ----  ----  ----  ----  ----  ----  ----
-        //
-        let db_store = db_obj.session_store.generateStore(expressSession)  // custom application session store for express 
-        //
-        this.session = expressSession({         // express session middleware
-            secret: this.conf.sessions.secret,
-            resave: true,
-            saveUninitialized: true,
-            proxy : true,
-            maxAge: 24 * 60 * 60 * 1000,
-            sameSite: false,
-            genid: (req) => {
-                return uuid() // use UUIDs for session IDs
-            },
-            store: db_store,
-            cookie: {
-                secure: false,
-                httpOnly: true,
-                domain: this.conf.domain
-            }
-        })
-        //
         this.middle_ware.push(cookieParser())           // use a cookie parser
-        this.middle_ware.push(this.session)             // this is where the session object is introduced as middleware
-        let access_session_from_res = (req, res, next) => {
-            res.locals.session = req.session;   // for apps using sessions...
-            next();
-          }
-        this.middle_ware.push(access_session_from_res)
     }
 
+    token_match(session_from_cookie,session_token) {
+        // or decrypt the token from the cookie
+        if ( session_from_cookie === session_token ) return(true)
+        return(false)
+    }
 
     //process_asset(asset_id,post_body) {}
     feasible(transition,post_body,req) {                // is the transition something that can be done?
@@ -100,6 +77,18 @@ class DashboardSessionManager extends SessionManager {
         }
     }
 
+    app_user_check_cookie(req,session_token) {
+        if ( this.user_cookie !== undefined ) {
+            if ( req && (req.cookies !== undefined) ) {
+                let session_from_cookie = req.cookies[this.user_cookie]
+                if ( !(this.token_match(session_from_cookie,session_token)) ) {
+                    return(false)
+                }
+            }
+        }
+        return(true)
+    }
+
     which_uploaded_files(req,post_body) {
         if ( req ) {
             let files = req.files
@@ -124,6 +113,9 @@ class DashboardSessionManager extends SessionManager {
             let email = asset.substr('dashboard'.length + 1)
             if ( email.length ) {
                 let token = body.token
+                if ( !(this.app_user_check_cookie(req,token)) ) {
+                    return false
+                }
                 let active = await this.tokenCurrent(token)
                 return active
             }

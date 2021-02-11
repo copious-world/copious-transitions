@@ -194,6 +194,12 @@ let g_finalize_transitions = {}
 g_app.post('/transition/:transition', async (req, res) => {           // the transition is a name or key
     let body = req.body
     let transition = req.params.transition
+    //
+    let proceed = await g_session_manager.guard(transition,body,req)
+    if ( !proceed ) {             // asset exits, permission granted, etc.  (check fail)
+        return res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'false', 'reason' : 'unavailable' }));
+    }
+    //
     if ( g_validator.valid(body,g_validator.field_set[transition]) ) {         // A field set may be in the configuration for named transitions - true by default
         let is_feasible = await g_session_manager.feasible(transition,body,req)
         if ( is_feasible  ) {                        // can this session actually make the transition?
@@ -216,7 +222,7 @@ g_app.post('/transition/:transition', async (req, res) => {           // the tra
             }
         }
     }
-    res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'false', 'reason' : 'unavailable' }));
+    res.status(200).send(JSON.stringify({ 'type' : 'transition', 'OK' : 'false', 'reason' : 'unavailable' }));
 });
 
 // TRANSITIONS  - TRANSITION ACCEPTED  -- the body should send back the token it got with the asset.
@@ -709,7 +715,7 @@ function load_parameters() {
         confJSON.mod_path = {}
         g_expected_modules.forEach(mname => {
             let modName = confJSON.modules[mname]
-            if ( typeof modName === 'string' ) {
+            if ( (typeof modName === 'string') || ( modName === undefined )  ) {
                 if ( modName ) {
                     confJSON.mod_path[mname] = __dirname + `/${module_path}/${modName}`
                 } else {
@@ -720,6 +726,7 @@ function load_parameters() {
                 let alternate_mod_path = modName.mod_path   // perhaps filter this in the future to attain some standard in locations..
                 confJSON.mod_path[mname] = __dirname + `/${alternate_mod_path}/${modName}`
             } else {
+                console.log(mname,modName)
                 throw new Error("ill formed module name in config file")
             }
         })

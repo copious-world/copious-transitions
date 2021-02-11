@@ -1,30 +1,19 @@
 const { DBClass, SessionStore } = require.main.require('./lib/general_db')
-const processExists = require('process-exists');
 const fs = require('fs')
 const uuid = require('uuid/v4')
 
-//const EventEmitter = require('events')
-//const cached = require('cached')
+const PersistenceManager = require.main.require('./lib/global_persistence')
 //
-//
-const MemCacheStoreFactory = require('connect-memcached');
-var MemcachePlus = require('memcache-plus');
+const apiKeys = require.main.require('./local/api_keys')
+const g_persistence = new PersistenceManager(apiKeys)
+
+
+const memcdClient = g_persistence.get_LRUManager(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
+
+
+
 
 const FORCE_FAIL_FETCH = "NotAnObject";
-
-//const apiKeys = require.main.require('./local/api_keys')
-
-// pre initialization
-
-(async () => {
-  const exists = await processExists('memcached');
-  if ( !exists ) {
-    console.log("Memchached deamon has not been intialized")
-    process.exit(1)
-  }
-})();
-
-const memcdClient = new MemcachePlus(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
