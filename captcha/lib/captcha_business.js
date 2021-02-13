@@ -1,20 +1,9 @@
 const GeneralBusiness = require.main.require('./lib/general_business')
 const ReMailer = require.main.require("./lib/remailer");
 const apiKeys = require.main.require('./local/api_keys')
-const nodemailer = require("nodemailer");
-//const myStorageClass = null
+//
+const {MessageRelayer} = require("message-relay-services")
 
-
-
-var g_mail_transport = nodemailer.createTransport({
-    host: "smtp.sendgrid.net",
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: 'apikey', // generated ethereal user
-      pass: apiKeys.sendGrid // generated ethereal password
-    }
-});
 
 
 const new_user_props = {
@@ -45,13 +34,6 @@ const forgetful_user_props = {
 }
 
 
-var g_MailToNewUser = new ReMailer(g_mail_transport,new_user_props);
-var g_MailToForgetfulUser = new ReMailer(g_mail_transport,forgetful_user_props);
-/*
-                    g_MailToForgetfulUser.html = emailer.html
-                    g_MailToForgetfulUser.text = emailer.text
-*/
-
 
 
 class CaptchaBusines extends GeneralBusiness {
@@ -60,12 +42,22 @@ class CaptchaBusines extends GeneralBusiness {
         super()
         this.db = null
         this.rules = null
+        this.mail_transport = null
+        this.mail_to_new_user = null
+        this.mail_to_forgetful_user = null
     }
 
 
     initialize(conf_obj,db) {
         super.initialize(conf_obj,db)
         this.conf = conf_obj
+        this.initialize_mailing()
+    }
+
+    initialize_mailing() {
+        this.mail_transport = new MessageRelayer(apiKeys.message_relays);
+        this.mail_to_new_user =  new ReMailer(this.mail_transport,new_user_props);
+        this.mail_to_forgetful_user = new ReMailer(this.mail_transport,forgetful_user_props);
     }
 
     //
@@ -73,7 +65,7 @@ class CaptchaBusines extends GeneralBusiness {
         switch ( use_case ) {
             case "forgot" : {
                 try {
-                    if ( g_MailToForgetfulUser ) {
+                    if (  this.mail_to_forgetful_user ) {
                         let email = post_body.email
                         let emailer = this.get_recently_forgetful(email)        // for repetitions on this pathway
                         let trackable = ""
@@ -83,12 +75,12 @@ class CaptchaBusines extends GeneralBusiness {
                             whokey = do_hash(email + 'FORGETFUL' + this.forgetfulness_tag)
                             emailer.whokey = whokey
                             //  HTML
-                            let html = g_MailToForgetfulUser.html
+                            let html =  this.mail_to_forgetful_user.html
                             html =  html.replace("$$whokey",whokey)
                             html = html.replace("$$who",email)
                             emailer.html = html     // emailer
                             // TEXT
-                            let text = g_MailToForgetfulUser.text
+                            let text =  this.mail_to_forgetful_user.text
                             text =  text.replace("$$whokey",whokey)
                             text = text.replace("$$who",email)
                             emailer.text = text     // emailer
@@ -106,7 +98,7 @@ class CaptchaBusines extends GeneralBusiness {
                         let tracking_num = do_hash(whokey + 'A' + emailer.count + 'B' + ((11*emailer.count - 3)%13)) // just some weird thing
                         let viewable = trackable.replace("$$tracking_num",tracking_num).replace("$$tracking_num",tracking_num)
                         // send the email with the link to the form that is being updated here
-                        g_MailToForgetfulUser.emit('email_this',emailer.email,emailer)
+                         this.mail_to_forgetful_user.emit('email_this',emailer.email,emailer)
                         //
                         // update this form and store it.  // this will be sent... when the user clicks the link in his email
                         this.db.put_static_store(whokey,viewable,'text/html')   // the whokey points to the web page that will be displayed (key,asset)
@@ -123,8 +115,8 @@ class CaptchaBusines extends GeneralBusiness {
                 return false
             }
             case "new-user" : {
-                if ( g_MailToNewUser ) {
-                    g_MailToNewUser.emit('email_this',post_body.email)
+                if (  this.mail_to_new_user ) {
+                     this.mail_to_new_user.emit('email_this',post_body.email)
                 }            
                 break
             }

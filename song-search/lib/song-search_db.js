@@ -5,7 +5,8 @@ const uuid = require('uuid/v4')
 const PersistenceManager = require.main.require('./lib/global_persistence')
 //
 const apiKeys = require.main.require('./local/api_keys')
-const g_persistence = new PersistenceManager(apiKeys)
+const g_persistence = new PersistenceManager(apiKeys.persistence)
+
 
 
 const memcdClient = g_persistence.get_LRUManager(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect

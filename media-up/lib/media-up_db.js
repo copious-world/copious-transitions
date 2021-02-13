@@ -2,7 +2,8 @@ const { DBClass, SessionStore }  = require.main.require('./lib/general_db')
 const PersistenceManager = require.main.require('./lib/global_persistence')
 //
 const apiKeys = require.main.require('./local/api_keys')
-const g_persistence = new PersistenceManager(apiKeys)
+const g_persistence = new PersistenceManager(apiKeys.persistence)
+
 
 const SLOW_MESSAGE_QUERY_INTERVAL = 5000
 const FAST_MESSAGE_QUERY_INTERVAL = 1000

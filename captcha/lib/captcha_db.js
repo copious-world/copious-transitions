@@ -4,7 +4,7 @@ var MemCacheStoreFactory = require('memorystore')
 const PersistenceManager = require.main.require('./lib/global_persistence')
 //
 const apiKeys = require.main.require('./local/api_keys')
-const g_persistence = new PersistenceManager(apiKeys)
+const g_persistence = new PersistenceManager(apiKeys.persistence)
 
 const SLOW_MESSAGE_QUERY_INTERVAL = 5000
 const FAST_MESSAGE_QUERY_INTERVAL = 1000
@@ -21,6 +21,7 @@ async function run_persistence() {   // describe the entry point to super storag
     //
     let user_m_handler = (i_obj) => {
         let o_obj = i_obj
+        i_obj.m_path = "user"
         return(o_obj)
       }
       //  ADD PARAMETERS TO THE NEW SENDER
@@ -32,6 +33,7 @@ async function run_persistence() {   // describe the entry point to super storag
     //
     let contact_m_handler = (i_obj) => {
         let o_obj = {
+          'm_path' : "contact",
           'recipient' : "admin",
           'anonymous' : false, 
           'type' : false,
@@ -166,6 +168,19 @@ class CaptchaDBClass extends DBClass {
     // // // 
     last_step_initalization() {
       run_persistence()
+    }
+
+
+     //
+    disconnect() {
+       return new Promise((resolve,reject) => {
+          g_persistence.client_going_down()
+          if ( memcdClient.disconnect(true) ) {
+            resolve(true)
+          } else {
+            reject(false)
+          }
+       })
     }
 
 }

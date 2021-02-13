@@ -391,7 +391,7 @@ g_db.last_step_initalization()
 var g_exp_server = g_app.listen(conf_obj.port,() => {
     console.log(`listening on ${conf_obj.port}`)
 });
-//var shutdown_server_helper = shutdown_server_helper_factory(g_exp_server)
+var g_shutdown_server_helper = shutdown_server_helper_factory(g_exp_server)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
@@ -712,6 +712,7 @@ function load_parameters() {
         //
         let confJSON = JSON.parse(data)
         let module_path = confJSON.module_path
+        global.global_module_path = module_path
         confJSON.mod_path = {}
         g_expected_modules.forEach(mname => {
             let modName = confJSON.modules[mname]
@@ -737,11 +738,16 @@ function load_parameters() {
     }
 }
 
-/*
+
 process.on('SIGINT', async () => {
-    global_shutdown_manager.shutdown_all()
-    g_exp_server.shutdown((err) => {
+    try {
+        await g_db.disconnect()
+        global_shutdown_manager.shutdown_all()
+        g_shutdown_server_helper.shutdown(async (err) => {
+            process.exit(0)
+        })    
+    } catch (e) {
+        console.log(e)
         process.exit(0)
-    })
+    }
 });
-*/

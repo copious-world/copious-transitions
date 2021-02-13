@@ -1,23 +1,9 @@
-//const GeneralStatic = require('lib/general_static')
-
-const nodemailer = require("nodemailer");
-const ReMailer = require.main.require('./lib/remailer');
+const {MessageRelayer} = require("message-relay-services")
+const GeneralBusiness = require.main.require('./lib/general_business')
+const ReMailer = require.main.require("./lib/remailer");
 
 const myStorageClass = null
-
-
 const apiKeys = require.main.require('./local/api_keys')
-
-
-var g_mail_transport = nodemailer.createTransport({
-    host: "smtp.sendgrid.net",
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: 'apikey', // generated ethereal user
-      pass: apiKeys.sendGrid // generated ethereal password
-    }
-});
 
 
 const uploader_props = {
@@ -45,12 +31,12 @@ const uploader_props = {
     This email has been sent to you just to let you know that your user account is ready for you to log in.
     <br>
     <b>You can log into your account at:</b>
-    <a href="http://www.copious.world:2000">copious.world login</a>
+    <a href="http://www.copious.world">copious.world login</a>
   `,
     "from": '"noreply" <noreply@noreply.com>', // sender address
     "to": "", // list of receivers
     "subject": "Your copious.world BB account is now active", // Subject line
-    "text": "You can log into your account at: http://www.copious.world:2000", // plain text body
+    "text": "You can log into your account at: http://www.copious.world", // plain text body
 }
 
 
@@ -67,33 +53,38 @@ const songofday_submitter_props = {
     This email has been sent to you just to let you know that your user account is ready for you to log in.
     <br>
     <b>You can log into your account at:</b>
-    <a href="http://www.copious.world:2000">copious.world login</a>
+    <a href="http://www.copious.world">copious.world login</a>
   `,
     "from": '"noreply" <noreply@noreply.com>', // sender address
     "to": "", // list of receivers
     "subject": "Your copious.world BB account is now active", // Subject line
-    "text": "You can log into your account at: http://www.copious.world:2000", // plain text body
+    "text": "You can log into your account at: http://www.copious.world", // plain text body
 }
 
 
 
-var g_MailToUploader = new ReMailer(g_mail_transport,uploader_props);
-var g_MailToSODSubmittter = new ReMailer(g_mail_transport,songofday_submitter_props);
-
-
-
-class UploaderBusiness {
+class UploaderBusiness extends GeneralBusiness {
     //
     constructor() {
-        //super(myStorageClass)
+        super()
         this.db = null
         this.rules = null
+        this.mail_transport = null
+        this.mail_to_upload_user = null
+        this.mail_to_song_of_day_user = null
     }
 
     //
     initialize(conf_obj,db) {
         this.db = db
         this.rules = conf_obj.business ? ( conf_obj.business.rules ? conf_obj.business.rules : null ) : null
+        this.initialize_mailing()
+    }
+
+    initialize_mailing() {
+        this.mail_transport = new MessageRelayer(apiKeys.message_relays);
+        this.mail_to_upload_user = new ReMailer(this.mail_transport,uploader_props);
+        this.mail_to_song_of_day_user = new ReMailer(this.mail_transport,songofday_submitter_props);
     }
 
     //
@@ -111,23 +102,23 @@ class UploaderBusiness {
     process(use_case,post_body) {
         switch ( use_case ) {
             case "demo" : {
-                if ( g_MailToUploader ) {
+                if ( this.mail_to_upload_user ) {
                     if ( body.category === "singer-demo" ) {
-                        let [html,text] = this.helper_populate_message(post_body,g_MailToUploader.html, g_MailToUploader.text)
-                        g_MailToUploader.html = html
-                        g_MailToUploader.text = text
-                        g_MailToUploader.emit('email_this',post_body.email)
+                        let [html,text] = this.helper_populate_message(post_body,this.mail_to_upload_user.html, this.mail_to_upload_user.text)
+                        this.mail_to_upload_user.html = html
+                        this.mail_to_upload_user.text = text
+                        this.mail_to_upload_user.emit('email_this',post_body.email)
                     }
                 }            
                 break
             }
             case "submitter" : {
-                if ( g_MailToSODSubmittter ) {
+                if ( this.mail_to_song_of_day_user ) {
                     if ( body.category ===  "song-of-the-day" ) {
-                        let [html,text] = this.helper_populate_message(post_body,g_MailToSODSubmittter.html, g_MailToSODSubmittter.text)
-                        g_MailToSODSubmittter.html = html
-                        g_MailToSODSubmittter.text = text
-                        g_MailToSODSubmittter.emit('email_this',post_body.email)
+                        let [html,text] = this.helper_populate_message(post_body,this.mail_to_song_of_day_user.html, this.mail_to_song_of_day_user.text)
+                        this.mail_to_song_of_day_user.html = html
+                        this.mail_to_song_of_day_user.text = text
+                        this.mail_to_song_of_day_user.emit('email_this',post_body.email)
                     }
                 }
                 break
