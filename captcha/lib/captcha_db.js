@@ -1,18 +1,16 @@
 const { DBClass, SessionStore } = require.main.require('./lib/general_db')
-var MemCacheStoreFactory = require('memorystore')
 //
 const PersistenceManager = require.main.require('./lib/global_persistence')
 //
 const apiKeys = require.main.require('./local/api_keys')
-const g_persistence = new PersistenceManager(apiKeys.persistence)
+const g_persistence = new PersistenceManager(apiKeys.persistence,apiKeys.message_relays)
 
 const SLOW_MESSAGE_QUERY_INTERVAL = 5000
 const FAST_MESSAGE_QUERY_INTERVAL = 1000
-
-
-const memcdClient = g_persistence.get_LRUManager(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
-
-
+//
+const g_keyValueDB = g_persistence.get_LRUManager(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
+//
+//
 async function run_persistence() {   // describe the entry point to super storage
   if ( g_persistence ) {
     let user_slow = SLOW_MESSAGE_QUERY_INTERVAL
@@ -69,10 +67,7 @@ class CaptchaSessionStore extends SessionStore {
     //
     generateStore(expressSession) {
         if ( super.can_generate_store(expressSession,true) ) {
-            let memory_Store = new MemCacheStoreFactory(expressSession)
-            return (new memory_Store({
-              checkPeriod: 86400000 // prune expired entries every 24h
-            }))
+            return (g_keyValueDB)
         } else {
             process.exit(1)
         }
@@ -86,7 +81,7 @@ class CaptchaDBClass extends DBClass {
 
     //
     constructor() {
-        super(CaptchaSessionStore,memcdClient)
+        super(CaptchaSessionStore,g_keyValueDB)
     }
 
     // // // 
@@ -109,12 +104,11 @@ class CaptchaDBClass extends DBClass {
         }
     }
 
-
     // // // 
     store_user(fdata) {
         if ( G_users_trns.tagged('user') ) {
           let [udata,tandems] = G_users_trns.update(fdata)          // custom user storage (seconday service)
-          G_users_trns.enqueue(tandems)
+          //G_users_trns.enqueue(tandems)
           //
           let key_key = G_users_trns.kv_store_key()
           let key = udata[key_key]
@@ -129,7 +123,7 @@ class CaptchaDBClass extends DBClass {
         if ( udata ) {
           return(udata)
         } else {
-          let key_key = G_users_trns.kv_store_key()
+          let key_key = G_users_trns.kv_store_key()  // more persistent than the cache
           let key = fdata[key_key]
           udata = super.fetch_user(key)  // no callback, just get value
           if ( udata ) {
@@ -175,7 +169,7 @@ class CaptchaDBClass extends DBClass {
     disconnect() {
        return new Promise((resolve,reject) => {
           g_persistence.client_going_down()
-          if ( memcdClient.disconnect(true) ) {
+          if ( g_keyValueDB.disconnect(true) ) {
             resolve(true)
           } else {
             reject(false)

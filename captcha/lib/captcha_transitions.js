@@ -57,10 +57,8 @@ class CaptchaUsers extends TaggedTransition {
     }
 
     update(data) {
-        data.tandems = {}
-        data.tandems.name = data.email.replace('@','')      // a pecularity of this application
-        data.tandems.pass = generate_password()
-        return([data,data.tandems])
+        delete data.uuid
+        return([data,""])
     }
 
 }

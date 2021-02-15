@@ -1478,6 +1478,7 @@ html {
 	function hide_thankyou_box(theBox) {
 		theBox.style.visibility = "hidden"
 		theBox.style.display = "none";
+		theBox.style.zIndex = 0
 	}
 
 	function show_thankyou_box(msg) {
@@ -1488,8 +1489,9 @@ html {
 				if ( mbox ) mbox.innerHTML = msg
 
 			}
-			theBox.style.visibility = "visible"
 			theBox.style.display = "block";
+			theBox.style.visibility = "visible"
+			theBox.style.zIndex = 2000
 		}
 	}
 
@@ -1842,7 +1844,7 @@ html {
 	var g_contact_Handling = null
 	function initContact() {
 		g_contact_Handling = new ValidationContainer({
-			"auth_port" : g_contact_port,
+			"auth_port" : "",
             "service_url" : `${location.protocol}//${g_siteURL}/{{auth_path}}/transition/contact`,
             "errors_here" : document.getElementById('contact-errors_here'),
             "failure_msg_prefix" : "Cannot Process Captcha",
