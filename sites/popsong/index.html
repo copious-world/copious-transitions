@@ -1187,7 +1187,7 @@ viewBox="0 0 360 38">
 	width="360"
 	height="40"
 	viewBox="0 0 360 40">
-		<a id="a4187" xlink:href="/webcit/dotgoto?room=Copious.World"   style="cursor:pointer" target="CITBLOG">
+		<a id="a4187" xlink:href="/blog/"   style="cursor:pointer" target="CITBLOG">
 		<rect
 			y="0"
 			x="10"
@@ -1208,7 +1208,7 @@ viewBox="0 0 360 38">
 				x="60"
 				id="tspan4339">Blog</tspan></text>
 		</a>
-		<a id="a4193" xlink:href="/webcit/dotgoto?room=Demo-notes"  style="cursor:pointer" target="CITBLOG">
+		<a id="a4193" xlink:href="/demos/"  style="cursor:pointer" target="CITBLOG">
 		<rect
 			y="0"
 			x="144"
@@ -2806,16 +2806,17 @@ async function fetchUploader(theDiv) {
    <div style="padding:6px;border:darkgreen solid 1px">
    I am <span >$$WHOAMI</span>
    <br>
-   <a id='who-my-profile'  class="nav-link" href="/webcit/do_template?template=user_show?who=$$WHOAMI" target="WEBCIT" >
+   <a id='who-my-profile'  class="nav-link" href="/profile/guarded/static/profile+$$WHOAMI" target="COPIOUS-PROFILE" >
       View my Profile
    </a>
    </div>
 </div>
 
 <script>
-   g_loginValueViews[``] = (acctData,html) => {
+   g_loginValueViews[`profile`] = (acctData,html) => {
       try {
          let uid = acctData.data.email
+         //
          html = html.replace('$$WHOAMI',uid)
          html = html.replace('$$WHOAMI',uid)
       } catch (e) {
@@ -2888,7 +2889,7 @@ async function fetchUploader(theDiv) {
       }
    }
 
-   g_loginValueViews[``] = (acctData,html) => {
+   g_loginValueViews[`dashboard`] = (acctData,html) => {
       try {
          let uid = acctData.data.email
          g_dashboard_owner = uid
@@ -3508,13 +3509,13 @@ async function fetchUploader(theDiv) {
 			'element' : greetAndMeetContainer1,
 			'unauthed' : g_originalGreetAndMeet1,
 			'authed' : profileHTML,
-			'action' : ``
+			'action' : `profile`
 		}
 		g_loginStateViewHolders["gAndM2"] = {
 			'element' : greetAndMeetContainer2,
 			'unauthed' : g_originalGreetAndMeet2,
 			'authed' : dashboardHTML,
-			'action' : ``
+			'action' : `dashboard`
 		}
 		profileHTML.textContent = '';
 		dashboardHTML.textContent = '';
@@ -3820,6 +3821,7 @@ async function fetchUploader(theDiv) {
 				if ( captchaPlacement ) {
 					captchaPlacement.innerHTML = svgText
 					g_currenCaptchaTOKEN = captchaObject.transition.token
+					g_CurContainer.captch_input.value = ''
 				}
 				//
 				return await captchaPromises();  // wait for user interaction to finish else 

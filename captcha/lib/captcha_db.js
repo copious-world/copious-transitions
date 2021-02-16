@@ -4,11 +4,13 @@ const PersistenceManager = require.main.require('./lib/global_persistence')
 //
 const apiKeys = require.main.require('./local/api_keys')
 const g_persistence = new PersistenceManager(apiKeys.persistence,apiKeys.message_relays)
+const g_ephemeral = new PersistenceManager(apiKeys.session)
 
 const SLOW_MESSAGE_QUERY_INTERVAL = 5000
 const FAST_MESSAGE_QUERY_INTERVAL = 1000
 //
-const g_keyValueDB = g_persistence.get_LRUManager(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
+const g_keyValueDB = g_persistence.get_LRUManager(); // leave it to the module to figure out how to connect
+const g_keyValueSessions =  g_ephemeral.get_LRUManager();
 //
 //
 async function run_persistence() {   // describe the entry point to super storage
@@ -67,7 +69,7 @@ class CaptchaSessionStore extends SessionStore {
     //
     generateStore(expressSession) {
         if ( super.can_generate_store(expressSession,true) ) {
-            return (g_keyValueDB)
+            return (g_keyValueSessions)
         } else {
             process.exit(1)
         }
@@ -81,7 +83,8 @@ class CaptchaDBClass extends DBClass {
 
     //
     constructor() {
-        super(CaptchaSessionStore,g_keyValueDB)
+      let persistenceDB = undefined
+      super(CaptchaSessionStore,g_keyValueDB,g_keyValueSessions,persistenceDB)
     }
 
     // // // 

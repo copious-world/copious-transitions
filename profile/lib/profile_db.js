@@ -9,12 +9,12 @@ const g_ephemeral = new PersistenceManager(apiKeys.session)
 
 const g_keyValueDB = g_persistence.get_LRUManager();      // leave it to the module to figure out how to connect
 const g_keyValueSessions =  g_ephemeral.get_LRUManager();
-//
+
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
 
-class DashboardSessionStore extends SessionStore {
+class ProfileSessionStore extends SessionStore {
   //
   constructor() {
       super()
@@ -23,13 +23,15 @@ class DashboardSessionStore extends SessionStore {
 }
 
 
-class DashboardDBClass extends DBClass {
+
+
+class ProfileDBClass extends DBClass {
 
     //
     constructor() {
         // sessStorage,keyValueDB,persistentDB
         let persistentDB = undefined
-        super(DashboardSessionStore,g_keyValueDB,g_keyValueSessions,persistentDB)
+        super(ProfileSessionStore,g_keyValueDB,g_keyValueSessions,persistentDB)
     }
 
     // // // 
@@ -52,4 +54,4 @@ class DashboardDBClass extends DBClass {
 
 //
 //
-module.exports = new DashboardDBClass()
+module.exports = new ProfileDBClass()

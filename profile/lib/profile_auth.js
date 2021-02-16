@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 //const uuid = require('uuid/v4');
 
 
-class DashboardSessionManager extends SessionManager {
+class ProfileSessionManager extends SessionManager {
 
     constructor(exp_app,db_obj,business) {
         super(exp_app,db_obj,business)         //
@@ -21,7 +21,7 @@ class DashboardSessionManager extends SessionManager {
 
     //process_asset(asset_id,post_body) {}
     feasible(transition,post_body,req) {                // is the transition something that can be done?
-        if (  G_dashboard_trns.tagged(transition) ) {
+        if (  G_profile_trns.tagged(transition) ) {
             return(true)
         }
         return(super.feasible(transition,post_body,req))
@@ -30,15 +30,15 @@ class DashboardSessionManager extends SessionManager {
     //
     async process_transition(transition,post_body,req) {
         let trans_object = super.process_transition(transition,post_body,req)
-        if ( G_dashboard_trns.tagged(transition) ) {
-            post_body._uuid_prefix =  G_dashboard_trns.uuid_prefix()
+        if ( G_profile_trns.tagged(transition) ) {
+            post_body._uuid_prefix =  G_profile_trns.uuid_prefix()
         }
         return(trans_object)
     }
 
     //
     match(post_body,transtion_object)  {
-        if ( G_dashboard_trns.tagged(transtion_object.tobj.asset_key) ) {
+        if ( G_profile_trns.tagged(transtion_object.tobj.asset_key) ) {
             post_body._t_match_field = post_body[G_captcha_trns.match_key()]
         }
         return super.match(post_body,transtion_object)
@@ -46,7 +46,7 @@ class DashboardSessionManager extends SessionManager {
 
     //
     async finalize_transition(transition,post_body,elements,req) {
-        if ( G_dashboard_trns.tagged(transition) ) {
+        if ( G_profile_trns.tagged(transition) ) {
             if ( post_body._t_match_field ) {
                 super.update_session_state(transition,post_body,req)
                 let finalization_state = {      // this has to get fancy
@@ -104,19 +104,19 @@ class DashboardSessionManager extends SessionManager {
 
     //
     key_for_user() {    // communicate to the general case which key to use
-        let key_key = G_dashboard_trns.kv_store_key()
+        let key_key = G_profile_trns.kv_store_key()
         return(key_key)
     }
 
     async guard(asset,body,req) {
-        if ( asset.substr(0,'dashboard'.length) === 'dashboard' ) {
-            let email = asset.substr('dashboard'.length + 1)
+        if ( asset.substr(0,'profile'.length) === 'profile' ) {
+            let email = asset.substr('profile'.length + 1)
             if ( email.length ) {
                 let token = body.token
                 if ( !(this.app_user_check_cookie(req,token)) ) {
                     return false
                 }
-                let active = await this.tokenCurrent(token,email)
+                let active = await this.tokenCurrent(token)
                 return active
             }
         } else {
@@ -129,13 +129,13 @@ class DashboardSessionManager extends SessionManager {
 
 }
 
-class DashboardAuth  extends GeneralAuth {
+class ProfileAuth  extends GeneralAuth {
     constructor() {
-        super(DashboardSessionManager)   // intializes general authorization with the customized session manager class.
+        super(ProfileSessionManager)   // intializes general authorization with the customized session manager class.
     }
 }
 
-var session_checker = new DashboardAuth()
+var session_checker = new ProfileAuth()
 module.exports = session_checker;
 
 

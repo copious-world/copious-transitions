@@ -3,7 +3,7 @@ const { DBClass, SessionStore } = require.main.require('./lib/general_db')
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
 
-class DashboardSessionStore extends SessionStore {
+class DefaultSessionStore extends SessionStore {
     //
     constructor(db_wrapper) {
         super(db_wrapper)
@@ -13,11 +13,11 @@ class DashboardSessionStore extends SessionStore {
 
 
 
-class DashboardDBClass extends DBClass {
+class DefaultDBClass extends DBClass {
 
     //
     constructor() {
-        super(DashboardSessionStore)
+        super(DefaultSessionStore)
     }
 
 }
@@ -25,4 +25,4 @@ class DashboardDBClass extends DBClass {
 
 //
 //
-module.exports = new DashboardDBClass()
+module.exports = new DefaultDBClass()

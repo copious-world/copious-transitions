@@ -89,11 +89,13 @@
     },
     "yourProileLinks" : {
          "name" : "profile-links",
-         "file" : "./profile_access.html"
+         "file" : "./profile_access.html",
+         "instantiate" : "profile"
     },
     "yourDashboardLinks" : {
          "name" : "dashboard-links",
-         "file" : "./dashboard_access.html"
+         "file" : "./dashboard_access.html",
+         "instantiate" : "dashboard"
     },
     "foreign_login" : [
         {

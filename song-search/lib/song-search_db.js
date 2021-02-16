@@ -5,12 +5,12 @@ const uuid = require('uuid/v4')
 const PersistenceManager = require.main.require('./lib/global_persistence')
 //
 const apiKeys = require.main.require('./local/api_keys')
-const g_persistence = new PersistenceManager(apiKeys.persistence)
+const g_persistence = new PersistenceManager(apiKeys.persistence,apiKeys.message_relays)
+const g_ephemeral = new PersistenceManager(apiKeys.session)
 
 
-
-const memcdClient = g_persistence.get_LRUManager(); //new Memcached('localhost:11211');  // leave it to the module to figure out how to connect
-
+const g_keyValueDB = g_persistence.get_LRUManager();      // leave it to the module to figure out how to connect
+const g_keyValueSessions =  g_ephemeral.get_LRUManager();
 
 
 
@@ -25,18 +25,6 @@ class SongSearchSessionStore extends SessionStore {
         super()
     }
     //
-
-    //
-    generateStore(expressSession) {
-        if ( super.can_generate_store(expressSession,true) ) {
-            // custom code goes here
-            let MemcachedStore = new MemCacheStoreFactory(expressSession)
-            return (new MemcachedStore({ client: memcdClient }))
-        } else {
-            process.exit(1)
-        }
-    }
-    //
 }
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -45,7 +33,8 @@ class SongSearchDBClass extends DBClass {
 
     //
     constructor() {
-        super(SongSearchSessionStore,memcdClient)
+        let persistenceDB = undefined 
+        super(SongSearchSessionStore,g_keyValueDB,g_keyValueSessions,persistenceDB)
 
         // CACHING AND LOCAL STORAGE
         this.cached_session_containers = {}       // one per user across that user's devices

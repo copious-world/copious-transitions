@@ -1,8 +1,5 @@
 //
 const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth_session_lite')
-const expressSession = require('express-session');
-const cookieParser = require('cookie-parser');
-const uuid = require('uuid/v4');
 
 
 class DefaultSessionManager extends SessionManager {
@@ -16,7 +13,7 @@ class DefaultSessionManager extends SessionManager {
 
 class DefaultAuth  extends GeneralAuth {
     constructor() {
-        super(DefaultAuth)   // intializes general authorization with the customized session manager class.
+        super(DefaultSessionManager)   // intializes general authorization with the customized session manager class.
     }
 }
 

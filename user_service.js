@@ -45,6 +45,7 @@ const g_business = require(conf_obj.mod_path.business)       // backend tasks th
 const g_transition_engine = require(conf_obj.mod_path.transition_engine)
 //
 var g_app = require(conf_obj.mod_path.expression)(conf_obj,g_db); // exports a function
+var g_session_manager = null
 
 //
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
@@ -303,7 +304,7 @@ g_app.post('/secondary/users/:action', async (req, res) => {
             // this is the asset needed by the client to turn on personlization and key access (aside from sessions and cookies)
             if ( g_session_manager.match(body,cached_transition)  ) {   // check the tokens and any other application specific information required
                 let transitionObj = cached_transition.tobj
-                let session_token = g_session_manager.unstash_session_token(cached_transition.elements)
+                let session_token = g_session_manager.unstash_session_token(cached_transition)
                 if ( session_token ) {
                     let elements = await g_session_manager.initialize_session_state('user',session_token,transitionObj,res)
                     res.status(200).send(JSON.stringify({ 'type' : transitionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token, 'elements' : elements  }));
@@ -327,7 +328,7 @@ g_app.post('/foreign_login/:token', async (req, foreign_res) => {  // or use the
             if ( g_session_manager.match(body,cached_transition)  ) {        // check the tokens and any other application specific information required
                 cached_transition.action += '-secondary'
                 let transitionObj = cached_transition.tobj
-                let session_token = g_session_manager.unstash_session_token(cached_transition.elements)
+                let session_token = g_session_manager.unstash_session_token(cached_transition)
                 if ( session_token ) {
                     let elements = await g_session_manager.initialize_session_state('user',session_token,transitionObj,null)
                     send_ws_outofband(token,{ 'type' : transitionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token, 'elements' : elements })
