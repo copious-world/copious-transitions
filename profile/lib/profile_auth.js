@@ -77,6 +77,7 @@ class ProfileSessionManager extends SessionManager {
         }
     }
 
+    //
     app_user_check_cookie(req,session_token) {
         if ( this.user_cookie !== undefined ) {
             if ( req && (req.cookies !== undefined) ) {
@@ -89,6 +90,7 @@ class ProfileSessionManager extends SessionManager {
         return(true)
     }
 
+    //
     which_uploaded_files(req,post_body) {
         if ( req ) {
             let files = req.files
@@ -108,6 +110,7 @@ class ProfileSessionManager extends SessionManager {
         return(key_key)
     }
 
+    //
     async guard(asset,body,req) {
         if ( asset.substr(0,'profile'.length) === 'profile' ) {
             let email = asset.substr('profile'.length + 1)
@@ -116,7 +119,7 @@ class ProfileSessionManager extends SessionManager {
                 if ( !(this.app_user_check_cookie(req,token)) ) {
                     return false
                 }
-                let active = await this.tokenCurrent(token)
+                let active = await this.sessionCurrent(token,email)
                 return active
             }
         } else {

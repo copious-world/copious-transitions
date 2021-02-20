@@ -12,22 +12,27 @@ class ProfileStatic extends GeneralStatic {
         super.initialize(db_obj,conf)
         this.profile_application_initialize()
     }
-
     // 
     profile_application_initialize() {
       let users = this.db.all_keys('user')
       users.forEach(user => {
-        let static_dash = 'profile+' + user
-        let profile_characteristics = {
-          'owner' : user,
-          'date'  : ('' + Date.now()),
-          'panel_key' : generate_password(),
-          'which_profile' : 'test profile'
-        }
-        this.db.put_static_store(static_dash,JSON.stringify(profile_characteristics),"application/json")
+        let [static_dash,dash_info] = this. _user_static_descriptors(user)
+        this.db.put_static_store(static_dash,dash_info,"application/json")
       })
+      this.db.static_synchronizer((user) => {  this. _user_static_descriptors(user) })
     }
       
+    _user_static_descriptors(user) {
+      let static_dash = 'profile+' + user
+      let profile_characteristics = {
+        'owner' : user,
+        'date'  : ('' + Date.now()),
+        'panel_key' : generate_password(),
+        'which_profile' : 'test profile'
+      }
+      return [static_dash,JSON.stringify(profile_characteristics),]
+    }
+
     
 }
 

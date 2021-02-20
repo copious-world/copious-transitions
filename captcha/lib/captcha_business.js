@@ -5,7 +5,6 @@ const apiKeys = require.main.require('./local/api_keys')
 const {MessageRelayer} = require("message-relay-services")
 
 
-
 const new_user_props = {
     "html" : `Thank you for joining our community.
     <br>

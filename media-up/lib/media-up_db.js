@@ -1,5 +1,8 @@
-const { DBClass, SessionStore }  = require.main.require('./lib/general_db')
+const { DBClass }  = require.main.require('./lib/general_db')
 const PersistenceManager = require.main.require('./lib/global_persistence')
+const CustomPersistenceDB = require.main.require('./custom_storage/persistent_db')
+const CustomStaticDB = require.main.require('./custom_storage/static_db')
+
 //
 const apiKeys = require.main.require('./local/api_keys')
 const g_ephemeral = new PersistenceManager(apiKeys.session)
@@ -10,7 +13,8 @@ const g_keyValueSessions =  g_ephemeral.get_LRUManager();
 
 const SLOW_MESSAGE_QUERY_INTERVAL = 5000
 const FAST_MESSAGE_QUERY_INTERVAL = 1000
-
+//
+const NOTIFICATION_PATH = 'notify'
 //
 //
 
@@ -30,6 +34,7 @@ async function run_persistence() {   // describe the entry point to super storag
     let m_handler = (i_obj) => {
         let udata = i_obj
         let o_obj =  msgObject = {
+          "m_type" : NOTIFICATION_PATH,
           'recipient' : "admin",
           'anonymous' : false, 
           'type' : "upload",
@@ -49,23 +54,15 @@ async function run_persistence() {   // describe the entry point to super storag
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
 
-class UploaderSessionStore extends SessionStore {
-    //
-    constructor() {
-        super()
-    }
-    //
-}
-
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
 class UploaderDBClass extends DBClass {
 
     constructor() {
-      // sessStorage,keyValueDB,persistentDB
-      let persistentDB = undefined
-      super(UploaderSessionStore,g_keyValueDB,g_keyValueSessions,persistentDB)
+      let persistenceDB = new CustomPersistenceDB(g_persistence.message_fowarding)  // pass app messages to the backend
+      let staticDB = new CustomStaticDB(g_persistence.message_fowarding)
+      super(g_keyValueDB,g_keyValueSessions,persistenceDB,staticDB)
     }
 
     // // // 
@@ -88,12 +85,16 @@ class UploaderDBClass extends DBClass {
         }
     }
 
-    // // // 
+    // // store_user
+    // When a user uploads media, the user information will be stored for ownership and possible future membership...
+    //
     store_user(udata) {
       super.store_user(udata)                               // use persitent storage
     }
 
-    // // // 
+    // // last_step_initalization
+    // The initializer starts the timers that check to see if something is in the queue for sending to backend processes.
+    //
     last_step_initalization() {
       run_persistence()
     }

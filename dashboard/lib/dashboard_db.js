@@ -1,6 +1,8 @@
-const { DBClass, SessionStore } = require.main.require('./lib/general_db')
-var MemCacheStoreFactory = require('memorystore')
+const { DBClass } = require.main.require('./lib/general_db')
 const PersistenceManager = require.main.require('./lib/global_persistence')
+const CustomPersistenceDB = require.main.require('./custom_storage/persistent_db')
+const CustomStaticDB = require.main.require('./custom_storage/static_db')
+
 //
 const apiKeys = require.main.require('./local/api_keys')
 const g_persistence = new PersistenceManager(apiKeys.persistence,apiKeys.message_relays)
@@ -14,22 +16,17 @@ const g_keyValueSessions =  g_ephemeral.get_LRUManager();
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
 
-class DashboardSessionStore extends SessionStore {
-  //
-  constructor() {
-      super()
-  }
-  //
-}
-
-
 class DashboardDBClass extends DBClass {
 
     //
     constructor() {
-        // sessStorage,keyValueDB,persistentDB
-        let persistentDB = undefined
-        super(DashboardSessionStore,g_keyValueDB,g_keyValueSessions,persistentDB)
+      //
+      let persistenceDB = new CustomPersistenceDB(g_persistence.message_fowarding)  // pass app messages to the backend
+      let staticDB = new CustomStaticDB(g_persistence.message_fowarding)
+      //
+      g_persistence.message_fowarding.subscribe('user-dashboard',this.asset_intake)
+      //
+      super(g_keyValueDB,g_keyValueSessions,persistenceDB,staticDB)
     }
 
     // // // 
@@ -45,6 +42,12 @@ class DashboardDBClass extends DBClass {
 
     all_keys(category) {
       return(this.pdb.all_keys(category))
+    }
+
+
+    asset_intake(obj) {
+      let static_dash = 'dashboard+' + obj.email
+      this.put_static_store(static_dash,obj,"application/json")
     }
 
 }

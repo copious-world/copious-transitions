@@ -1,5 +1,4 @@
-const { DBClass, SessionStore } = require.main.require('./lib/general_db')
-var MemCacheStoreFactory = require('memorystore')
+const { DBClass } = require.main.require('./lib/general_db')
 const PersistenceManager = require.main.require('./lib/global_persistence')
 //
 const apiKeys = require.main.require('./local/api_keys')
@@ -12,31 +11,22 @@ const g_keyValueSessions =  g_ephemeral.get_LRUManager();
 
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-//
-
-class ProfileSessionStore extends SessionStore {
-  //
-  constructor() {
-      super()
-  }
-  //
-}
-
-
 
 
 class ProfileDBClass extends DBClass {
 
     //
     constructor() {
-        // sessStorage,keyValueDB,persistentDB
-        let persistentDB = undefined
-        super(ProfileSessionStore,g_keyValueDB,g_keyValueSessions,persistentDB)
+      let persistenceDB = new CustomPersistenceDB(g_persistence.message_fowarding)  // pass app messages to the backend
+      let staticDB = new CustomStaticDB(g_persistence.message_fowarding)
+      //
+      g_persistence.message_fowarding.subscribe('user-profile',this.asset_intake)
+      //
+      super(g_keyValueDB,g_keyValueSessions,persistenceDB,staticDB)
     }
 
     // // // 
     // // // 
-    
     async fetch_user(fdata) {  //  G_users_trns.from_cache()
       let udata = await this.fetch_user_from_key_value_store(fdata[G_users_trns.kv_store_key()])
       if ( udata ) {
@@ -45,12 +35,18 @@ class ProfileDBClass extends DBClass {
       return(false)
     }
 
+    //
     all_keys(category) {
       return(this.pdb.all_keys(category))
     }
 
-}
+    //
+    asset_intake(obj) {
+      let static_dash = 'profile+' + obj.email
+      this.put_static_store(static_dash,obj,"application/json")
+    }
 
+}
 
 //
 //

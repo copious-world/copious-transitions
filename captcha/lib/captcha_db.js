@@ -1,8 +1,11 @@
-const { DBClass, SessionStore } = require.main.require('./lib/general_db')
-//
+const { DBClass } = require.main.require('./lib/general_db')
 const PersistenceManager = require.main.require('./lib/global_persistence')
+const CustomPersistenceDB = require.main.require('./custom_storage/persistent_db')
+const CustomStaticDB = require.main.require('./custom_storage/static_db')
 //
 const apiKeys = require.main.require('./local/api_keys')
+//
+//
 const g_persistence = new PersistenceManager(apiKeys.persistence,apiKeys.message_relays)
 const g_ephemeral = new PersistenceManager(apiKeys.session)
 
@@ -61,30 +64,13 @@ async function dropConnections() {
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
 
-class CaptchaSessionStore extends SessionStore {
-    //
-    constructor(db_wrapper) {
-        super(db_wrapper)
-    }
-    //
-    generateStore(expressSession) {
-        if ( super.can_generate_store(expressSession,true) ) {
-            return (g_keyValueSessions)
-        } else {
-            process.exit(1)
-        }
-    }
-    //
-}
-
-
-
 class CaptchaDBClass extends DBClass {
 
     //
     constructor() {
-      let persistenceDB = undefined
-      super(CaptchaSessionStore,g_keyValueDB,g_keyValueSessions,persistenceDB)
+      let persistenceDB = new CustomPersistenceDB(g_persistence.message_fowarding)  // pass app messages to the backend
+      let staticDB = new CustomStaticDB(g_persistence.message_fowarding)
+      super(g_keyValueDB,g_keyValueSessions,persistenceDB,staticDB)
     }
 
     // // // 
@@ -130,7 +116,7 @@ class CaptchaDBClass extends DBClass {
           let key = fdata[key_key]
           udata = super.fetch_user(key)  // no callback, just get value
           if ( udata ) {
-            this.store_cache(key,udata,G_users_trns.back_ref());
+            this.store_cache(key,udata,G_users_trns.back_ref());    // from persitence to local cache
             return(udata)
           }
         }
@@ -144,7 +130,7 @@ class CaptchaDBClass extends DBClass {
       let key = udata[key_key]
       //
       this.store_cache(key,udata,G_users_trns.back_ref());  // this app will use cache to echo persitent storage
-      super.update_user(udata,key_key)                               // use persitent storage
+      super.update_user(udata,key_key)                      // use persitent storage
     }
 
 

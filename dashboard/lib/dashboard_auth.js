@@ -1,8 +1,6 @@
 //
 const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth_session_lite')
-//const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
-//const uuid = require('uuid/v4');
 
 
 class DashboardSessionManager extends SessionManager {
@@ -77,6 +75,7 @@ class DashboardSessionManager extends SessionManager {
         }
     }
 
+    //
     app_user_check_cookie(req,session_token) {
         if ( this.user_cookie !== undefined ) {
             if ( req && (req.cookies !== undefined) ) {
@@ -89,6 +88,7 @@ class DashboardSessionManager extends SessionManager {
         return(true)
     }
 
+    //
     which_uploaded_files(req,post_body) {
         if ( req ) {
             let files = req.files
@@ -108,6 +108,7 @@ class DashboardSessionManager extends SessionManager {
         return(key_key)
     }
 
+    //
     async guard(asset,body,req) {
         if ( asset.substr(0,'dashboard'.length) === 'dashboard' ) {
             let email = asset.substr('dashboard'.length + 1)
@@ -116,7 +117,7 @@ class DashboardSessionManager extends SessionManager {
                 if ( !(this.app_user_check_cookie(req,token)) ) {
                     return false
                 }
-                let active = await this.tokenCurrent(token,email)
+                let active = await this.sessionCurrent(token,email)
                 return active
             }
         } else {
@@ -126,7 +127,7 @@ class DashboardSessionManager extends SessionManager {
         }
         return(true)    // true by default
     }
-
+    //
 }
 
 class DashboardAuth  extends GeneralAuth {

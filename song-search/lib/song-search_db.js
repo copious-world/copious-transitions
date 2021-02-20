@@ -1,4 +1,4 @@
-const { DBClass, SessionStore } = require.main.require('./lib/general_db')
+const { DBClass } = require.main.require('./lib/general_db')
 const fs = require('fs')
 const uuid = require('uuid/v4')
 
@@ -19,14 +19,6 @@ const FORCE_FAIL_FETCH = "NotAnObject";
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
 
-class SongSearchSessionStore extends SessionStore {
-    //
-    constructor() {
-        super()
-    }
-    //
-}
-
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
 class SongSearchDBClass extends DBClass {
@@ -34,7 +26,7 @@ class SongSearchDBClass extends DBClass {
     //
     constructor() {
         let persistenceDB = undefined 
-        super(SongSearchSessionStore,g_keyValueDB,g_keyValueSessions,persistenceDB)
+        super(g_keyValueDB,g_keyValueSessions,persistenceDB)
 
         // CACHING AND LOCAL STORAGE
         this.cached_session_containers = {}       // one per user across that user's devices
