@@ -25,14 +25,17 @@ class PageableMemStoreElement {
 }
 
 
+function mime_to_file_type(mime_type) {
+    return("json") // etc
+}
 
 //
 // and also a pub/sub client
 //
 class StaticContracts extends FilesAndRelays {
 
-    constructor(messenger) {
-        super(messenger)
+    constructor(messenger,stash_interval,default_m_type) {
+        super(messenger,stash_interval,default_m_type)
 
         this._whokey_to_ids = {}
         this._ids_to_data_rep = {}
@@ -49,6 +52,7 @@ class StaticContracts extends FilesAndRelays {
             let freeloading_timeout = conf.static_db.freeloading_timeout
             this.max_freeloading_time =  freeloading_timeout ? freeloading_timeout : MAX_LAX_CACHE_TIME
             this.memory_allocation_preference = conf.static_db.max_data_RAM
+            this.load_dir(this.blob_dir)
         }
     }
     //
@@ -217,7 +221,8 @@ class StaticContracts extends FilesAndRelays {
     async remove_file(file) {
         if ( file !== undefined ) {
             try {
-                await fsPromises.rm(file)
+                let fpath = this.blob_dir + '/' + file
+                await fsPromises.rm(fpath)
             } catch (e) {}
         }
     }
@@ -225,11 +230,25 @@ class StaticContracts extends FilesAndRelays {
     async load_file(file) {
         if ( file !== undefined ) {
             try {
-                let data = await fsPromises.readFile(file)
+                let fpath = this.blob_dir + '/' + file
+                let data = await fsPromises.readFile(fpath)
                 let str = data.toString()
                 return str
             } catch (e) {}
         }
+    }
+
+    async load_dir(blob_dir) {
+        let files = fsPromises.readdir(blob_dir)
+        file.forEach(fille => {
+            try {
+                let datstr = this.load_file(blob_dir + '/' + file)
+                let datum = JSON.parse(datstr)
+                let whokey = datum._whokey
+                this.set_key_value(whokey,datum)
+            } catch (e) {
+            }
+        });
     }
 
     schedule(sync_function,static_sync_interval) {  // sync_function this may go away, but it is here for now...
@@ -242,12 +261,14 @@ class StaticContracts extends FilesAndRelays {
 
     async static_backup() {
         //this.unhooked = false
-        for ( let ky in this._ids_to_data_rep ) {
-            let pmse = this._ids_to_data_rep[ky]
+        for ( let ky in this._whokey_to_ids ) {
+            let id = this._whokey_to_ids[ky]
+            let pmse = this._ids_to_data_rep[id]
             if ( !(pmse.saved) ) {
                 let datum = { ...(pmse.data) }
                 dataum.string = encodeURIComponent(dataum.string)
                 let file = this.blob_dir + '/' + pmse.file
+                data._whokey = ky
                 await fsPromises.writeFile(file,JSON.stringify(datum))
                 this.saved = true
                 // remove old data from memory if space is being used up.

@@ -18,7 +18,11 @@ class JsonMessage {
     //
     constructor(initObj) {
         this.sock = initObj.sock
-        this.last_message = initObj.last_message
+        this.message_queue = []
+        this.server = initObj.server
+        this.client_name = initObj.client_name
+
+        this.last_message = ''
         this.current_message = {}
         this.handlers_by_path = {}
     }
@@ -29,83 +33,99 @@ class JsonMessage {
     }
     // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
     //
+
     message_complete() {
-        try {
-            let msg = JSON.parse(this.last_message)
-            for ( let ky in msg ) {
-                this.current_message[ky] = msg[ky]
+        let msg = this.last_message
+        msg = msg.trim()
+        if ( !(msg.length) ) return ""
+        //
+        msg = msg.replace(/\}\s+\{/g,'}{')
+        let raw_m_list = msg.split('}{')
+        let rest = ""
+        let n = raw_m_list.length
+        for ( let i = 0; i < n; i++ ) {
+            rest = raw_m_list[i]
+            let str = rest
+            if ( i < (n-1) ) str += '}'
+            if ( i > 0 ) str = '{' + str
+            try {
+                let m_obj = JSON.parse(str)
+                this.message_queue.push(m_obj)
+            } catch (e) {
+                console.log(e)
+                this.last_message = rest
             }
-        } catch (e) {
-            console.error(e)
-            return(false)
         }
-        this.last_message = ""
-        return(true)
+        return(this.message_queue.length > 0)
     }
+
     // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
     //
     async forward_op() {
-        let path = this.current_message.m_path
-        if ( path ) {
-            let path_handler = g_message_paths[path]
-            if ( path_handler === undefined ) {
-                this.sock.write("ERROR: paths improperly loaded in service")
-            }
-            if ( path_handler && (typeof path_handler.send === 'function') ) {
-                // defer to the path handler how to take care of operations...
-                let op = this.current_message.op
-                switch ( op ) {
-                    case "G" : {
-                        let result = await path_handler.get(this.current_message)
-                        result = result !== false ? result : "ERROR"
-                        let response = {
-                            "_response_id" : this.current_message._response_id,
-                            "msg" : result
-                        }
-                        this.sock.write(JSON.stringify(response))
-                        break;
-                    }
-                    case "D" : {
-                        let result = await path_handler.del(this.current_message)
-                        result = result !== false ? result : "ERROR"
-                        let response = {
-                            "_response_id" : this.current_message._response_id,
-                            "msg" : result
-                        }
-                        this.sock.write(JSON.stringify(response))
-                        break;
-                    }
-                    case "S" :
-                    default : {  // sending forward op message or any other message. May be a subscription..
-                        let result = false
-                        let resp_id = this.current_message._response_id
-                        if (  this.current_message.ps_op === 'sub'  ) {
-                            // path
-                            let listener = ((sock,tt) => {
-                                                return (msg) => {
-                                                        msg.topic = tt
-                                                        sock.write(JSON.stringify(msg))
-                                                    }
-                                                }
-                                            )(this.sock,topic)
-                            this.handlers_by_path[path] = listener
-                            let topic = this.current_message
-                            result = path_handler.subscribe(topic,this.current_message,listener)
-                        } else {
-                            result = await path_handler.send(this.current_message)
-                        }
-                        result = result !== false ? result : "ERROR"
-                        let response = {
-                            "_response_id" : resp_id,
-                            "msg" : result
-                        }
-                        this.sock.write(JSON.stringify(response))
-                        break;
-                    }
-
+        while ( this.message_queue.length !== 0 )  {
+            this.current_message = this.message_queue.shift()
+            let path = (this.current_message ? this.current_message.m_path : undefined)
+            if ( path ) {
+                let path_handler = g_message_paths[path]
+                if ( path_handler === undefined ) {
+                    this.sock.write("ERROR: paths improperly loaded in service")
                 }
-            } else {
-                this.sock.write("ERROR")
+                if ( path_handler && (typeof path_handler.send === 'function') ) {
+                    // defer to the path handler how to take care of operations...
+                    let op = this.current_message.op
+                    switch ( op ) {
+                        case "G" : {
+                            let result = await path_handler.get(this.current_message)
+                            result = result !== false ? result : "ERROR"
+                            let response = {
+                                "_response_id" : this.current_message._response_id,
+                                "msg" : result
+                            }
+                            this.sock.write(JSON.stringify(response))
+                            break;
+                        }
+                        case "D" : {
+                            let result = await path_handler.del(this.current_message)
+                            result = result !== false ? result : "ERROR"
+                            let response = {
+                                "_response_id" : this.current_message._response_id,
+                                "msg" : result
+                            }
+                            this.sock.write(JSON.stringify(response))
+                            break;
+                        }
+                        case "S" :
+                        default : {  // sending forward op message or any other message. May be a subscription..
+                            let result = false
+                            let resp_id = this.current_message._response_id
+                            if (  this.current_message.ps_op === 'sub'  ) {
+                                // path
+                                let listener = ((sock,tt) => {
+                                                    return (msg) => {
+                                                            msg.topic = tt
+                                                            sock.write(JSON.stringify(msg))
+                                                        }
+                                                    }
+                                                )(this.sock,topic)
+                                this.handlers_by_path[path] = listener
+                                let topic = this.current_message
+                                result = path_handler.subscribe(topic,this.current_message,listener)
+                            } else {
+                                result = await path_handler.send(this.current_message)
+                            }
+                            result = result !== false ? result : "ERROR"
+                            let response = {
+                                "_response_id" : resp_id,
+                                "msg" : result
+                            }
+                            this.sock.write(JSON.stringify(response))
+                            break;
+                        }
+    
+                    }
+                } else {
+                    this.sock.write("ERROR")
+                }
             }
         }
     }
@@ -150,7 +170,8 @@ class Server {
             // CREATE A MESSAGE HANDLER OBJECT
             g_messenger_connections[clientName] = new JsonMessage({
                 'sock' : sock,
-                'last_message' : ''
+                'server' : server,
+                'client_name' : client_name
             })
             //
             //

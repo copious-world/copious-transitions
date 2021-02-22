@@ -228,7 +228,6 @@ class Client extends EventEmitter {
                     message._response_id = id
                     //
                     let flat_message = JSON.stringify(message)
-
                     this.waiting_for_response[message._response_id] = (msg) => {
                         this.waiting_for_response[message._response_id] = false
                         resolve(msg)

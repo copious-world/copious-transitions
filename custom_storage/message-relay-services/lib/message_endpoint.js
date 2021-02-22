@@ -10,6 +10,46 @@ const NOISY = true
 
 let g_messenger_connections = {}
 
+
+class Replier {
+    constructor(pars) {
+        this.sock = pars.sock
+        this.last_message = ''
+        this.message_queue = []
+        this.server = pars.server
+        this.client_name = pars.client_name
+    }
+    //
+
+    dequeue_messages() {
+        if ( this.message_queue.length ) {
+            let msg_obj = this.message_queue.shift()
+            if (  msg_obj ) {
+                if ( msg_obj.ps_op === 'sub' ) {            // ps_op a pub/sub operation
+                    let topic = msg_obj.topic
+                    this.server.add_to_topic(topic,this.client_name,this)
+                    let response_id = msg_obj._response_id
+                    let response = { "_response_id" : response_id, "state" : "OK" }
+                    this.sock.write(JSON.stringify(response))
+                } else if ( msg_obj.ps_op === 'pub' ) {     // ps_op a pub/sub operation
+                    let topic = msg_obj.topic
+                    let ignore = this.sock
+                    this.server.send_to_all(topic,msg_obj,ignore)
+                    let response_id = msg_obj._response_id
+                    let response = { "_response_id" : response_id, "state" : "OK" }
+                    this.sock.write(JSON.stringify(response))
+                } else {
+                    let response_id = msg_obj._response_id
+                    let response = this.server.app_message_handler(msg_obj)
+                    response._response_id = response_id
+                    this.sock.write(JSON.stringify(response))
+                }
+            }
+        }
+    }
+
+}
+
 //
 class Server {
     //
@@ -22,24 +62,39 @@ class Server {
         this.init();
     }
 
-    message_complete(msg) {
-        try {
-            let m_obj = JSON.parse(msg)
-            return(m_obj)
-        } catch (e) {
-            console.log(e)
+    message_complete(mescon) {
+        let msg = mescon.last_message
+        msg = msg.trim()
+        if ( !(msg.length) ) return ""
+        //
+        msg = msg.replace(/\}\s+\{/g,'}{')
+        let raw_m_list = msg.split('}{')
+        let rest = ""
+        let n = raw_m_list.length
+        for ( let i = 0; i < n; i++ ) {
+            rest = raw_m_list[i]
+            let str = rest
+            if ( i < (n-1) ) str += '}'
+            if ( i > 0 ) str = '{' + str
+            try {
+                let m_obj = JSON.parse(str)
+                mescon.message_queue.push(m_obj)
+            } catch (e) {
+                console.log(e)
+                return(rest)
+            }
         }
-        return(false)
+        return("")
     }
 
     //
-    add_to_topic(topic,clientName,relayer) {
+    add_to_topic(topic,client_name,relayer) {
         let tset = this.all_topics[topic]
         if ( tset == undefined ) {
             tset = {}
             this.all_topics[topic] = tset
         }
-        tset[clientName] = relayer
+        tset[client_name] = relayer
     }
 
     //
@@ -56,14 +111,15 @@ class Server {
         }
     }
 
-    remove_from_all_topics(clientName) {
+    remove_from_all_topics(client_name) {
         for ( let topic in this.all_topics ) {
             let tset = this.all_topics[topic]
             if ( tset ) {
-                delete tset[clientName]
+                delete tset[client_name]
             }
         }
     }
+
 
     init() {
         //
@@ -71,52 +127,34 @@ class Server {
 
         let onClientConnected_func = (sock) => {
             // // // 
-            let clientName = `${sock.remoteAddress}:${sock.remotePort}`;
-            if ( NOISY ) console.log(`new client connected: ${clientName}`);
+            let client_name = `${sock.remoteAddress}:${sock.remotePort}`;
+            if ( NOISY ) console.log(`new client connected: ${client_name}`);
             //
-            g_messenger_connections[clientName] = {
+            g_messenger_connections[client_name] = new Replier({
                 'sock' : sock,
-                'last_message' : ''
-            }
+                'server' : server,
+                'client_name' : client_name
+            })
             //
             sock.on('data', (data) => {
-                let mescon = g_messenger_connections[clientName]
+                let mescon = g_messenger_connections[client_name]
                 mescon.last_message += data.toString()
                 //
-                let msg_obj = server.message_complete(mescon.last_message)
-                if (  msg_obj !== false ) {
-                    mescon.last_message = ""
-                    if ( msg_obj.ps_op === 'sub' ) {            // ps_op a pub/sub operation
-                        let topic = msg_obj.topic
-                        server.add_to_topic(topic,clientName,mescon)
-                        let response_id = msg_obj._response_id
-                        let response = { "_response_id" : response_id, "state" : "OK" }
-                        mescon.sock.write(JSON.stringify(response))
-                    } else if ( msg_obj.ps_op === 'pub' ) {     // ps_op a pub/sub operation
-                        let topic = msg_obj.topic
-                        let ignore = mescon.sock
-                        server.send_to_all(topic,msg_obj,ignore)
-                        let response_id = msg_obj._response_id
-                        let response = { "_response_id" : response_id, "state" : "OK" }
-                        mescon.sock.write(JSON.stringify(response))
-                    } else {
-                        let response_id = msg_obj._response_id
-                        let response = this.app_message_handler(msg_obj)
-                        response._response_id = response_id
-                        mescon.sock.write(JSON.stringify(response))
-                    }
+                mescon.last_message = server.message_complete(mescon)
+                if ( mescon.message_queue.length ) {
+                    mescon.dequeue_messages()
                 }
             });
             //
             sock.on('close', () => {
-                let mescon = g_messenger_connections[clientName]
+                let mescon = g_messenger_connections[client_name]
                 mescon.sock.end()
-                delete g_messenger_connections[clientName]
-                this.remove_from_all_topics(clientName)
+                delete g_messenger_connections[client_name]
+                server.remove_from_all_topics(client_name)
             });
             //
             sock.on('error', (err) => {
-                console.error(`Connection ${clientName} error: ${err.message}`);
+                console.error(`Connection ${client_name} error: ${err.message}`);
             });
             //
         }

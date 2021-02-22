@@ -21,8 +21,6 @@ class FilesAndRelays extends AppLifeCycle {
         this.count = 0
     }
 
-
-
     initialize(conf) {
         //
         // Subscribe to new information coming in on this local channel (default.. users)
@@ -49,7 +47,7 @@ class FilesAndRelays extends AppLifeCycle {
                 this.prune_storage_map()
                 fs.writeFile(this.db_file,JSON.stringify(this._storage_map),() => { this.dirty = false })
             }
-        },DB_STASH_INTERVAL)
+        },this.stash_interval)
         //
         this.add_interval(extant_interval)
     }
@@ -114,7 +112,7 @@ class FilesAndRelays extends AppLifeCycle {
 
 
 
-    async remote_fetch_message(id,m_type) {
+    async remote_fetch_message(id) {
         let m_type = obj.m_type ? obj.m_type : this.default_m_type
         let msg = {
             "m_type" : m_type,
@@ -125,17 +123,15 @@ class FilesAndRelays extends AppLifeCycle {
         return obj
     }
 
-    remote_store_message(obj,m_type) {
+    remote_store_message(obj) {
         let m_type = obj.m_type ? obj.m_type : this.default_m_type
-        let msg = {
-            "m_type" : m_type,
-            "data"  : obj,
-            "op"     : "S"
-        }
+        let msg = Object.assign({},obj)
+        msg.m_type = m_type
+        msg.op = "S"
         this.messenger.send(msg)
     }
 
-    remote_store_dereference(id,m_type) {
+    remote_store_dereference(id) {
         let m_type = obj.m_type ? obj.m_type : this.default_m_type
         let msg = {
             "m_type" : m_type,
