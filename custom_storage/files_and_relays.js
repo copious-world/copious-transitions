@@ -16,7 +16,7 @@ class FilesAndRelays extends AppLifeCycle {
         this._storage_map = {}
         this._time_to_id = {}
         this.dirty = false
-        this.root_path = process.main.path
+        this.root_path = require.main.path
         this.stash_interval = stash_interval ? stash_interval : DB_STASH_INTERVAL
         this.count = 0
     }

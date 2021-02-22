@@ -1,5 +1,7 @@
 let FilesAndRelays = require('./files_and_relays')
 let fsPromises = require('fs/promises')
+const uuid = require('uuid/v4')
+//
 
 const MAX_LAX_CACHE_TIME = 1000*3600*4
 const MAX_BYTES_ALLOWED = (1<<24)
@@ -71,6 +73,7 @@ class StaticContracts extends FilesAndRelays {
         return(hh)
     }
 
+    field_transforms(ky) { return ky }  // for renaming fields if it is necessary (see descendants)
         
     // override pruning behavior
     prune_storage_map() {
@@ -139,18 +142,29 @@ class StaticContracts extends FilesAndRelays {
             })()
         } else {
             let local_store = true
-            let hh = this.hash(data.string)
-            let stored = data.string
-            let len = data.string.length
+
+            let obj = {
+                "mime_type" : data.mime_type,
+                "key_field" : "file",
+                "file"  : uuid()
+            }
+
+            for ( let ky in data ) {
+                let tky = this.field_transforms(ky)
+                obj[tky] = data[ky]
+            }
+
+            let hh = this.hash(obj.string)
+            let stored = obj.string
+            //
+            let len = obj.string.length
             if ( len < MAX_GROUP_STORAGE_SIZE ) {
                 stored = hh
                 local_store = false
             }
-            let obj = {
-                "_key" : (local_store ? hh : undefined),
-                "data" : stored,
-                "mime_type" : data.mime_type
-            }
+            obj.data = stored
+            obj._key = (local_store ? hh : undefined)
+            
             // CREATE
             this.create(obj)
             this._whokey_to_ids[whokey] = obj._id  // by not setting the id, the parent class is allowed to set it
@@ -239,8 +253,8 @@ class StaticContracts extends FilesAndRelays {
     }
 
     async load_dir(blob_dir) {
-        let files = fsPromises.readdir(blob_dir)
-        file.forEach(fille => {
+        let files = await fsPromises.readdir(blob_dir)
+        files.forEach(file => {
             try {
                 let datstr = this.load_file(blob_dir + '/' + file)
                 let datum = JSON.parse(datstr)
@@ -266,7 +280,7 @@ class StaticContracts extends FilesAndRelays {
             let pmse = this._ids_to_data_rep[id]
             if ( !(pmse.saved) ) {
                 let datum = { ...(pmse.data) }
-                dataum.string = encodeURIComponent(dataum.string)
+                datum.string = encodeURIComponent(datum.string)
                 let file = this.blob_dir + '/' + pmse.file
                 data._whokey = ky
                 await fsPromises.writeFile(file,JSON.stringify(datum))
