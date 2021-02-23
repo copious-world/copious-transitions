@@ -9,20 +9,43 @@ const MAX_GROUP_STORAGE_SIZE = 256  // ??  The max length of data passed to the 
 //
 
 class PageableMemStoreElement {
-    constructor(key,file,type,data) {
+    constructor(key,file,obj,flat_obj,buod) {
         this.key = key
         this.file = file
-        this.type = type
-        this.data = data
+        this.type = '.json'
+        this._obj = Object.assign({},obj) 
         this.saved = false
         this.unhooked = false
         this.t_stamp = Date.now()
+        this.back_up_on_delete = buod
+        this.flat_object = flat_obj
+        this.clip_big_fields(obj)
     }
 
-    update(data) {
-        this.data = data
+    update(obj,flat_obj) {
+        this._obj = Object.assign({},obj) 
+        this.clip_big_fields(obj)
         this.t_stamp = Date.now()
+        this.unhooked = false
         this.saved = false
+        this.flat_object = flat_obj
+        this.clip_big_fields(obj)
+    }
+
+    back_up(deleting) {
+        if ( deleting ) {
+            if ( !(this.back_up_on_delete) ) return;
+        }
+        // write to a file.....
+    }
+
+    clip_big_fields(obj) {
+        for ( let ky in obj ) {
+            let val = obj[ky]
+            if ( val.length > (MAX_GROUP_STORAGE_SIZE/4) ) {
+                obj[ky] = `@${ky}`
+            }
+        }
     }
 }
 
@@ -35,8 +58,8 @@ function mime_to_file_type(mime_type) {
 // and also a pub/sub client
 //
 class StaticContracts extends FilesAndRelays {
-
-    constructor(messenger,stash_interval,default_m_type) {
+    //
+    constructor(messenger,stash_interval,default_m_type,whokey_field) {
         super(messenger,stash_interval,default_m_type)
 
         this._whokey_to_ids = {}
@@ -45,6 +68,10 @@ class StaticContracts extends FilesAndRelays {
         this.max_freeloading_time = MAX_LAX_CACHE_TIME
         this.memory_allocation_preference = MAX_BYTES_ALLOWED
         this.allocated = 0
+        this._whokey_field = whokey_field ? whokey_field : "email"
+        this.back_up_on_delete = false
+        this._adjusted_field_prefix = `_$_`
+        this._max_group_storage = MAX_GROUP_STORAGE_SIZE
     }
     //
     initialize(conf) {
@@ -54,6 +81,8 @@ class StaticContracts extends FilesAndRelays {
             let freeloading_timeout = conf.static_db.freeloading_timeout
             this.max_freeloading_time =  freeloading_timeout ? freeloading_timeout : MAX_LAX_CACHE_TIME
             this.memory_allocation_preference = conf.static_db.max_data_RAM
+            this._adjusted_field_prefix = conf.static_db.adjusted_field_prefix ? conf.static_db.adjusted_field_prefix : this._adjusted_field_prefix
+            this._max_group_storage = conf.static_db.max_forwarded_storage ? conf.static_db.max_forwarded_storage : MAX_GROUP_STORAGE_SIZE
             this.load_dir(this.blob_dir)
         }
     }
@@ -69,9 +98,25 @@ class StaticContracts extends FilesAndRelays {
     }
 
     hash(data) {
-        let hh = ""
+        let hh = Math.floor(Math.random()*data.length)   // not official left to the app
         return(hh)
     }
+
+    flat_object_size(obj) {
+        let sz = 0
+        for ( let ky in obj ) {
+            let dat = obj[ky]
+            if ( dat.length ) {
+                sz += dat.length
+            }
+        }
+        return sz
+    }
+
+    flat_object(obj) {
+        return (JSON.stringify(obj))
+    }
+
 
     field_transforms(ky) { return ky }  // for renaming fields if it is necessary (see descendants)
         
@@ -94,125 +139,92 @@ class StaticContracts extends FilesAndRelays {
     }
 
 
-    remote_store_message(obj,m_type) {
-        if ( obj._key !== undefined ) {
-            let hh = obj._key 
+    application_stash_large_data(obj) {
+        let flat_object = this.flat_object(obj)
+        if ( obj && (flat_object.length < this._max_group_storage) ) return(obj)  // no concern of this method
+        //
+        if ( obj._key !== undefined ) {  // in data reps table, _ids_to_data_rep
+            let hh = obj._key
             let pmse = this._ids_to_data_rep[hh]
-            let sender = {}
-            if ( pmse !== undefined ) {  // possibly needs to fetch from a local file....
-                for ( let ky in obj ) { sender[ky] = obj[ky] }
-                sender.data = pmse.data
-            } else sender = obj
-            super.remote_store_message(sender,m_type)
+            pmse.update(obj,flat_object)
+            return(pmse._obj)
         } else {
-            super.remote_store_message(obj,m_type)
+            let hh = this.hash(flat_object)
+            if ( obj._id == undefined ) obj._id = this.id_maker()
+            obj._key = hh
+            let whokey = obj._whokey ? obj._whokey : ""
+            let pmse = new PageableMemStoreElement(whokey,obj._id,obj,flat_object,this.back_up_on_delete)  // keep the big data here
+            this._ids_to_data_rep[hh] = pmse
+            return(pmse._obj)
         }
     }
 
-
-    /*
-        data == {
-            'string' : text,
-            'mime_type' : mime_type
+    application_unstash_large_data(obj) {
+        let hh = obj._key
+        if ( hh !== undefined ) {  // in data reps table, _ids_to_data_rep
+            let pmse = this._ids_to_data_rep[hh]
+            //obj.data = 
+            return(pmse._obj)
         }
-    */
+        return(obj)
+    }
 
-    set_key_value(whokey,data) {
+    application_clear_large_data(obj) {
+        let hh = obj._key
+        if ( hh !== undefined ) {
+            let pmse = this._ids_to_data_rep[hh]
+            if ( pmse ) {
+                pmse.back_up(true)
+                delete this._ids_to_data_rep[hh]
+            }
+        } 
+        return(obj)
+    }
+
+    async set_key_value(whokey,data) {
         let id = this.has(whokey)
         if ( id !== false ) {
-            (async () => {
-                let obj = await this.findOne(id)
-                if ( obj ) {
-                    let local_store = true
-                    let hh = this.hash(data.string)
-                    let stored = data.string
-                    let len = data.string.length
-                    if ( len < MAX_GROUP_STORAGE_SIZE ) {
-                        stored = hh
-                        local_store = false
-                    }
-                    obj.data = stored      // for recovery
-                    // UPDATE
-                    this.update(obj)
-                    if ( local_store ) {
-                        this.allocated += data.string.length
-                        this._ids_to_data_rep[obj._key].update(data)
-                    }
+            let obj = await this.findOne(id)
+            if ( obj ) {
+                // set .. in this case is update
+                if ( data._id ) delete data._id
+                let up_obj = Object.assign(obj,data)
+                obj._whokey = whokey
+                this.update(up_obj)   // having found it still have to send new data back....
+            }
+        } else {  // never saw this
+            let obj = await this.search_one(whokey,this._whokey_field)
+            if ( obj ) {
+                obj._whokey = whokey
+                if ( data._id ) delete data._id
+                let up_obj = Object.assign(obj,data)
+                this.update(up_obj)   // having found it still have to send new data back....
+            } else {
+                obj = {
+                    "key_field" : "file",
+                    "file"  : uuid()
                 }
-            })()
-        } else {
-            let local_store = true
-
-            let obj = {
-                "mime_type" : data.mime_type,
-                "key_field" : "file",
-                "file"  : uuid()
+                obj._whokey = whokey
+                obj = Object.assign(obj,data)                
+                // CREATE
+                this.create(obj)    // store a persistence representation, but send any amount of data to the backend    
             }
-
-            for ( let ky in data ) {
-                let tky = this.field_transforms(ky)
-                obj[tky] = data[ky]
-            }
-
-            let hh = this.hash(obj.string)
-            let stored = obj.string
-            //
-            let len = obj.string.length
-            if ( len < MAX_GROUP_STORAGE_SIZE ) {
-                stored = hh
-                local_store = false
-            }
-            obj.data = stored
-            obj._key = (local_store ? hh : undefined)
-            
-            // CREATE
-            this.create(obj)
             this._whokey_to_ids[whokey] = obj._id  // by not setting the id, the parent class is allowed to set it
-            let ftype = mime_to_file_type(data.mime_type)
-            if ( local_store ) {
-                this.allocated += data.string.length
-                this._ids_to_data_rep[hh] = new PageableMemStoreElement(whokey,obj._id,ftype,data)
-            }
         }
+        return(true)
     }
 
     //
     async get_key_value(whokey) {
         let id = this._whokey_to_ids[whokey]
-        if ( id === undefined ) return(false)
-        let obj = await this.findOne(id)
-        if ( obj !== false ) {
-            if ( obj._key !== undefined ) {
-                let hh = obj._key
-                let pmse = this._ids_to_data_rep[hh]
-                if ( pmse !== undefined ) {  // possibly needs to fetch from a local file....
-                    if ( pmse.unhooked ) {
-                        pmse.data.string = await this.load_file()
-                        this.allocated += data.string.length
-                        pmse.unhooked = false
-                    }
-                    return pmse.data
-                }
-            } else {
-                // check on the data size....
-                if ( obj.string && obj.string.length < MAX_GROUP_STORAGE_SIZE ) {
-                    return(obj)
-                } else {
-                    let ftype = mime_to_file_type(obj.mime_type)
-                    let local_data = {
-                        "data" : obj.string,
-                        "mime_type" : data.mime_type
-                    }
-                    this.allocated += local_data.string.length
-                    let hh = this.hash(obj.string)
-                    this._ids_to_data_rep[hh] = new PageableMemStoreElement(whokey,obj._id,ftype,local_data)
-                    obj._key = hh
-                    obj.data = hh
-                    this.update(obj,true)  // true turns off remote storage, where this just came from
-                    return local_data
-                }
-            }
+        let obj = null
+        if ( id === undefined ) {
+            obj = await this.search_one(whokey,this._whokey_field)
+        } else {
+            obj = await this.findOne(id)
         }
+        this._whokey_to_ids[whokey] = obj._id  // by not setting the id, the parent class is allowed to set it
+        return obj
     }
 
     //
