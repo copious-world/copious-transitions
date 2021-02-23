@@ -9,6 +9,7 @@ const MAX_GROUP_STORAGE_SIZE = 256  // ??  The max length of data passed to the 
 //
 
 class PageableMemStoreElement {
+    //
     constructor(key,file,obj,flat_obj,buod) {
         this.key = key
         this.file = file
@@ -91,7 +92,6 @@ class StaticContracts extends FilesAndRelays {
         this.pdb = presistence_db
     }
 
-
     has(whokey) {
         let id = this._whokey_to_ids[whokey]
         return ( (id !== undefined) ? id : false )
@@ -163,7 +163,17 @@ class StaticContracts extends FilesAndRelays {
         let hh = obj._key
         if ( hh !== undefined ) {  // in data reps table, _ids_to_data_rep
             let pmse = this._ids_to_data_rep[hh]
-            //obj.data = 
+            if ( pmse.unhooked ) {
+                (async (ff) => {
+                    let str = await this.load_file(ff)
+                    try {
+                        let loaded_obj = JSON.parse(str)
+                        pmse.update(loaded_obj)
+                    } catch (e) {
+                        console.log("PMSE - parse error...")
+                    }
+                })(pmse.file)
+            }
             return(pmse._obj)
         }
         return(obj)
