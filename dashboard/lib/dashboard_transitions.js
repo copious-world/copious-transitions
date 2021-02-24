@@ -8,6 +8,33 @@ class Dashboards extends TaggedTransition {
         } else {
             super("dashboard")
         }
+        //
+        this.ok_topics = [
+            "blog-markdown",
+            "demo-json",  // encryption check as well...
+            "streams-link",
+            "link_package-json"
+        ]
+        //
+        this.ok_command = [
+            "command-publish",
+            "command-recind",
+            "command-delete",
+            "command-send"
+        ]
+        //
+    }
+
+    can_publish(topic) {
+        // check to see if the topic belongs to a profile operation...
+        if ( (topic in this.ok_topics) || (topic in this.ok_command)) {
+            return true
+        }
+        return false
+    }
+
+    encryption_check(topic) {
+        if ( topic === "change-password" ) return(true)
     }
 
     existence_query(udata) {

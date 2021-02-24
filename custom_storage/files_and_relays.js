@@ -66,11 +66,24 @@ class FilesAndRelays extends AppLifeCycle {
         this.add_interval(extant_interval)
     }
 
+    missing(obj) {
+        let id = obj._id
+        if ( this._storage_map[id] === undefined ) return true
+        return false
+    }
 
     id_maker() {
         return uuid()
     }
 
+    hash_from_key(id) {
+        let obj = this._storage_map[id]
+        if ( obj ) {
+            let hh = this.application_hash_key(obj)
+            if ( hh ) return(hh)
+        }
+        return false
+    }
 
     chrono_update_all() {   // usually called just in intialization ... starts the clock on each piece of data...
         this._time_to_id = {}
@@ -219,9 +232,8 @@ class FilesAndRelays extends AppLifeCycle {
         return false
     }
 
-
     // findOne -- returns false if the object is nowhere...
-    async findOne(id) {
+    async findOne(id,dont_create) {
         this._search_attempted = true
         let obj = this._storage_map[id]
         if ( !( obj ) ) {
@@ -229,10 +241,12 @@ class FilesAndRelays extends AppLifeCycle {
             if ( !( obj ) ) {
                 return false
             }
-            this.create(obj)   // remote data will be stashed before unstashing...
+            if ( !(dont_create) ) {
+                this.create(obj)   // remote data will be stashed before unstashing...
+            } else return obj
         }
         obj._tstamp = this.update_stamp(obj._tstamp,obj._id)
-        let app_version = this.application_unstash_large_data(obj)
+        let app_version = await this.application_unstash_large_data(obj)
         this._search_attempted = false  // handled for this object
         return(app_version)
     }
@@ -243,22 +257,23 @@ class FilesAndRelays extends AppLifeCycle {
         if ( !( obj ) ) {
             return false
         }
+        this.application_fix_keys_obj(obj,key,field)
         this.create(obj)   // remote data will be stashed before unstashing...
         obj._tstamp = this.update_stamp(obj._tstamp,obj._id)
-        let app_version = this.application_unstash_large_data(obj)
+        let app_version = await this.application_unstash_large_data(obj)
         this._search_attempted = false  // handled for this object
         return(app_version)
     }
 
 
-    update(obj,dont_remote) {
+    async update(obj,dont_remote) {
         if ( !(obj._id) || !(this._storage_map[obj._id]) ) {
             return new Error("does not exists")
         }
         this._storage_map[obj._id] = obj
         obj._tstamp = this.update_stamp(obj._tstamp,obj._id)
         if ( !(dont_remote) ) {
-            let sender = this.application_unstash_large_data(obj)
+            let sender = await this.application_unstash_large_data(obj)
             this.remote_store_message(sender)
         }
         this.application_stash_large_data(obj)
@@ -282,7 +297,6 @@ class FilesAndRelays extends AppLifeCycle {
         return(Object.keys(this._storage_map))
     }
 
-
     /// --- Application SUSBSCRIPTION METHODS....
     app_subscription_handler(topic,msg) {
         console.warn("Files and Relays -- has no subscription handler for any topic")
@@ -291,7 +305,13 @@ class FilesAndRelays extends AppLifeCycle {
     application_stash_large_data(obj) { return obj }
     application_unstash_large_data(obj) { return obj }
     application_clear_large_data(obj) {}
+    application_fix_keys_obj(obj,key,field) {}
+    application_hash_key(obj) { return 0 }
 
+    async publish(topic,obj) {
+        let response = await this.messenger.publish(topic,obj)
+        return response
+    }
 }
 
 

@@ -130,6 +130,24 @@ class ProfileSessionManager extends SessionManager {
         return(true)    // true by default
     }
 
+    //
+    async update_session_state(transition,post_body,req) {    // req for session cookies if any
+        if ( G_profile_trns.tagged(transition) ) {
+            if ( this.trans_engine && post_body.topic ) {
+                let topic = post_body.topic
+                if ( G_profile_trns.can_publish(topic) !== false ) {
+                    // the transition engine will make use of the pub/sub system... 
+                    // expect commands to go this way.. requesting changes in the backend such as a file moving directories, etc.
+                    let response = await this.trans_engine.publish(topic,post_body)
+                    if ( reponse === "OK" || (response.status === "OK" ) ) {
+                        return true
+                    }
+                }
+                return (false)
+            }
+        }
+    }
+
 }
 
 class ProfileAuth  extends GeneralAuth {

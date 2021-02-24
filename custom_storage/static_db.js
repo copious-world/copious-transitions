@@ -1,5 +1,6 @@
 let FilesAndRelays = require('./files_and_relays')
 let fsPromises = require('fs/promises')
+let fs = require('fs')
 const uuid = require('uuid/v4')
 //
 
@@ -64,6 +65,7 @@ class StaticContracts extends FilesAndRelays {
         super(messenger,stash_interval,default_m_type)
 
         this._whokey_to_ids = {}
+        this._whokey_to_hash = {}
         this._ids_to_data_rep = {}
 
         this.max_freeloading_time = MAX_LAX_CACHE_TIME
@@ -78,12 +80,14 @@ class StaticContracts extends FilesAndRelays {
     initialize(conf) {
         super.initialize(conf)
         if ( conf.static_db ) {
+            //
             this.blob_dir = conf.static_db.blob_dir
             let freeloading_timeout = conf.static_db.freeloading_timeout
             this.max_freeloading_time =  freeloading_timeout ? freeloading_timeout : MAX_LAX_CACHE_TIME
             this.memory_allocation_preference = conf.static_db.max_data_RAM
             this._adjusted_field_prefix = conf.static_db.adjusted_field_prefix ? conf.static_db.adjusted_field_prefix : this._adjusted_field_prefix
             this._max_group_storage = conf.static_db.max_forwarded_storage ? conf.static_db.max_forwarded_storage : MAX_GROUP_STORAGE_SIZE
+            //
             this.load_dir(this.blob_dir)
         }
     }
@@ -100,6 +104,10 @@ class StaticContracts extends FilesAndRelays {
     hash(data) {
         let hh = Math.floor(Math.random()*data.length)   // not official left to the app
         return(hh)
+    }
+
+    newer(remote_obj,up_obj) {
+        return false        // applicatio policy
     }
 
     flat_object_size(obj) {
@@ -125,7 +133,7 @@ class StaticContracts extends FilesAndRelays {
         let ctime = Date.now()
         let stamps = Object.keys(this._time_to_id)
         stamps.sort()
-        ctime -= AGED_OUT_DELTA
+        ctime -= this.max_freeloading_time
         while ( stamps.length > 0  ) {
             let ts = stamps.shift()
             if ( ctime > ts ) {
@@ -139,46 +147,91 @@ class StaticContracts extends FilesAndRelays {
     }
 
 
-    application_stash_large_data(obj) {
+    // // 
+    application_fix_keys_obj(obj,key,field) {
+        if ( obj._whokey === undefined  ) {
+            obj._whokey = key
+            let id_chunk = obj[field]
+            if ( id_chunk && id_chunk.length && (typeof id_chunk === 'string') ) {
+                if ( key.indexOf(id_chunk) < 0 ) {
+                    obj._whokey += `_${id_chunk}`
+                }
+            } 
+        }
+    }
+
+    application_hash_key(obj) {
+        return obj._key
+    }
+
+    hash_from_persitence(obj) {
+        let id = obj._id
+        let hh = super.hash_from_key(id)
+        return hh
+    }
+
+    // // 
+    application_stash_large_data(obj,check_presistence) {
         let flat_object = this.flat_object(obj)
         if ( obj && (flat_object.length < this._max_group_storage) ) return(obj)  // no concern of this method
         //
-        if ( obj._key !== undefined ) {  // in data reps table, _ids_to_data_rep
+        if ( obj._key !== undefined && !(check_presistence) ) {  // in data reps table, _ids_to_data_rep
             let hh = obj._key
             let pmse = this._ids_to_data_rep[hh]
-            pmse.update(obj,flat_object)
-            return(pmse._obj)
+            if ( pmse ) {
+                pmse.update(obj,flat_object)
+                return(pmse._obj)    
+            } else return(obj)
         } else {
-            let hh = this.hash(flat_object)
+            let hh = false
+            if ( check_presistence ) {
+                hh = obj._key
+            }
+            if ( !(hh) ) {
+                hh = ( obj._id !== undefined ) ? this.hash_from_persitence(obj) : this.hash(flat_object)
+            }
+            if ( !(hh) ) {
+                hh = this.hash(flat_object)
+            }
             if ( obj._id == undefined ) obj._id = this.id_maker()
             obj._key = hh
-            let whokey = obj._whokey ? obj._whokey : ""
+            let whokey = obj._whokey ? obj._whokey : "lost"
+            obj._whokey = whokey
+            this._whokey_to_ids[whokey] = obj._id
+            this._whokey_to_hash[whokey] = obj._key
             let pmse = new PageableMemStoreElement(whokey,obj._id,obj,flat_object,this.back_up_on_delete)  // keep the big data here
             this._ids_to_data_rep[hh] = pmse
             return(pmse._obj)
         }
     }
 
-    application_unstash_large_data(obj) {
+    async load_object_pmse(pmse) {
+        if ( pmse.unhooked ) {
+            let str = await this.load_file(pmse.file)
+            try {
+                let loaded_obj = JSON.parse(str)
+                pmse.update(loaded_obj)
+            } catch (e) {
+                console.log("PMSE - parse error...")
+            }
+        }
+        return(pmse._obj)
+    }
+
+    // // 
+    async application_unstash_large_data(obj) {
         let hh = obj._key
         if ( hh !== undefined ) {  // in data reps table, _ids_to_data_rep
             let pmse = this._ids_to_data_rep[hh]
-            if ( pmse.unhooked ) {
-                (async (ff) => {
-                    let str = await this.load_file(ff)
-                    try {
-                        let loaded_obj = JSON.parse(str)
-                        pmse.update(loaded_obj)
-                    } catch (e) {
-                        console.log("PMSE - parse error...")
-                    }
-                })(pmse.file)
-            }
-            return(pmse._obj)
+            if ( pmse === undefined ) return(obj)  // this is a problemc
+            let loaded_obj = await this.load_object_pmse(pmse)
+            loaded_obj._key = hh
+            return loaded_obj
         }
         return(obj)
     }
 
+    // // 
     application_clear_large_data(obj) {
         let hh = obj._key
         if ( hh !== undefined ) {
@@ -191,16 +244,26 @@ class StaticContracts extends FilesAndRelays {
         return(obj)
     }
 
+    // // 
     async set_key_value(whokey,data) {
         let id = this.has(whokey)
         if ( id !== false ) {
-            let obj = await this.findOne(id)
+            let obj = await this.get_key_value(whokey)
+            if ( !(obj) ) { obj = await this.findOne(id) }
             if ( obj ) {
                 // set .. in this case is update
+                obj._whokey = whokey
                 if ( data._id ) delete data._id
                 let up_obj = Object.assign(obj,data)
-                obj._whokey = whokey
-                this.update(up_obj)   // having found it still have to send new data back....
+                if ( super.missing(obj) ) {
+                    let remote_obj = await this.findOne(id,true)
+                    if ( this.newer(remote_obj,up_obj) ) {
+                        up_obj = Object.assign(up_obj,remote_obj)
+                    }
+                    this.create(up_obj)  // use the current object
+                } else {
+                    this.update(up_obj)   // having found it still have to send new data back....
+                }
             }
         } else {  // never saw this
             let obj = await this.search_one(whokey,this._whokey_field)
@@ -208,7 +271,15 @@ class StaticContracts extends FilesAndRelays {
                 obj._whokey = whokey
                 if ( data._id ) delete data._id
                 let up_obj = Object.assign(obj,data)
-                this.update(up_obj)   // having found it still have to send new data back....
+                if ( super.missing(obj) ) {
+                    await this.findOne(id,true)     // let remote_obj = if this returns a remote object, it could be checked
+                    if ( this.newer(remote_obj,up_obj) ) {
+                        up_obj = Object.assign(up_obj,remote_obj)
+                    }
+                    this.create(up_obj)  // use the current object
+                } else {
+                    this.update(up_obj)   // having found it still have to send new data back....
+                }
             } else {
                 obj = {
                     "key_field" : "file",
@@ -220,6 +291,7 @@ class StaticContracts extends FilesAndRelays {
                 this.create(obj)    // store a persistence representation, but send any amount of data to the backend    
             }
             this._whokey_to_ids[whokey] = obj._id  // by not setting the id, the parent class is allowed to set it
+            this._whokey_to_hash[whokey] = obj._key
         }
         return(true)
     }
@@ -231,9 +303,22 @@ class StaticContracts extends FilesAndRelays {
         if ( id === undefined ) {
             obj = await this.search_one(whokey,this._whokey_field)
         } else {
+            let hh = this._whokey_to_hash[whokey]
+            let pmse = this._ids_to_data_rep[hh]
+            if ( pmse ) {
+                let obj = pmse._obj
+                if ( !obj ) {
+                    let loaded_obj = await this.load_object_pmse(pmse)
+                    if ( loaded_obj) {
+                        return loaded_obj
+                    }
+                }
+                return obj
+            }
             obj = await this.findOne(id)
         }
         this._whokey_to_ids[whokey] = obj._id  // by not setting the id, the parent class is allowed to set it
+        this._whokey_to_hash[whokey] = obj._key
         return obj
     }
 
@@ -251,6 +336,7 @@ class StaticContracts extends FilesAndRelays {
             this.remove_file(file)
         }
         delete this._whokey_to_ids[whokey]
+        delete this._whokey_to_hash[whokey]
     }
 
     // 
@@ -263,28 +349,42 @@ class StaticContracts extends FilesAndRelays {
         }
     }
 
-    async load_file(file) {
+    load_file(file) {
         if ( file !== undefined ) {
             try {
                 let fpath = this.blob_dir + '/' + file
-                let data = await fsPromises.readFile(fpath)
+                let data = fs.readFileSync(fpath)
                 let str = data.toString()
                 return str
             } catch (e) {}
         }
+        return false
     }
 
-    async load_dir(blob_dir) {
-        let files = await fsPromises.readdir(blob_dir)
-        files.forEach(file => {
-            try {
-                let datstr = this.load_file(blob_dir + '/' + file)
-                let datum = JSON.parse(datstr)
-                let whokey = datum._whokey
-                this.set_key_value(whokey,datum)
-            } catch (e) {
-            }
-        });
+    // //
+    load_dir(blob_dir) {
+        try {
+            fs.mkdirSync(blob_dir)
+        } catch (e) {
+        }
+        try {
+            let files = fs.readdirSync(blob_dir)
+            files.forEach(async file => {
+                if ( file === '.DS_Store' ) return
+                try {
+                    let datstr = this.load_file(file)
+                    if ( datstr ) {
+                        let obj = JSON.parse(datstr)
+                        this.application_stash_large_data(obj,true)
+                        // can't do this:: this.set_key_value(whokey,datum)    
+                    }
+                } catch (e) {
+                }
+            });            
+        } catch (e) {
+        }
+
+
     }
 
     schedule(sync_function,static_sync_interval) {  // sync_function this may go away, but it is here for now...
@@ -294,24 +394,23 @@ class StaticContracts extends FilesAndRelays {
     }
     //
 
-
-    async static_backup() {
+    // static_backup
+    //  write the larger data objects to a file.. one per object if it has not been saved
+    //  
+    async static_backup() {  
         //this.unhooked = false
-        for ( let ky in this._whokey_to_ids ) {
-            let id = this._whokey_to_ids[ky]
-            let pmse = this._ids_to_data_rep[id]
+        for ( let hh in this._ids_to_data_rep ) {
+            let pmse = this._ids_to_data_rep[hh]
             if ( !(pmse.saved) ) {
-                let datum = { ...(pmse.data) }
-                datum.string = encodeURIComponent(datum.string)
+                let string = pmse.flat_object
                 let file = this.blob_dir + '/' + pmse.file
-                data._whokey = ky
-                await fsPromises.writeFile(file,JSON.stringify(datum))
+                await fsPromises.writeFile(file,string)
                 this.saved = true
                 // remove old data from memory if space is being used up.
-                if ( (this.max_freeloading_time < (Date.now() - pmse.t_stamp))
-                                    && (this.allocated > this.memory_allocation_preference) ) {
-                    this.allocated -= pmse.data.string.length
-                    pmse.data = null
+                if ( this.ultra_test || ((this.max_freeloading_time < (Date.now() - pmse.t_stamp))
+                                                        && (this.allocated > this.memory_allocation_preference)) ) {
+                    this.allocated -= string.length
+                    pmse._obj = null
                     pmse.unhooked = true
                 }
             }

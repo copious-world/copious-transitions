@@ -2,12 +2,37 @@ const TaggedTransition = require.main.require("./lib/tagged_transitions")
 
 // Profile Users
 class Profiles extends TaggedTransition {
+    //
     constructor(descendant) {
+        //
         if ( descendant ) {
             super(descendant)
         } else {
             super("profile")
         }
+        //
+        this.ok_topics = [
+            "avatar-visible",
+            "change-password",  // encryption check as well...
+            "account-settings",
+            "hash-storage"
+        ]
+        //
+    }
+
+    can_publish(topic) {
+        // check to see if the topic belongs to a profile operation...
+        if ( topic in this.ok_topics ) {
+            if ( this.encryption_check(topic) ) {
+                return("aes")       // return a type indicator
+            }
+            return true
+        }
+        return false
+    }
+
+    encryption_check(topic) {
+        if ( topic === "change-password" ) return(true)
     }
 
     existence_query(udata) {

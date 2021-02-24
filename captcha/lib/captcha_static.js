@@ -28,7 +28,7 @@ class CaptchaStatic extends GeneralStatic {
     }
 
     fetch(asset) {
-            return(super.fetch(asset))
+        return(super.fetch(asset))
     }
     
 }

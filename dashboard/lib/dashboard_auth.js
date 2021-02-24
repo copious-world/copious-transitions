@@ -5,8 +5,8 @@ const cookieParser = require('cookie-parser');
 
 class DashboardSessionManager extends SessionManager {
 
-    constructor(exp_app,db_obj,business) {
-        super(exp_app,db_obj,business)         //
+    constructor(exp_app,db_obj,business,trans_engine) {
+        super(exp_app,db_obj,business,trans_engine)       //
         //  ----  ----  ----  ----  ----  ----  ----  ----  ----
         this.middle_ware.push(cookieParser())           // use a cookie parser
     }
@@ -46,10 +46,10 @@ class DashboardSessionManager extends SessionManager {
     async finalize_transition(transition,post_body,elements,req) {
         if ( G_dashboard_trns.tagged(transition) ) {
             if ( post_body._t_match_field ) {
-                super.update_session_state(transition,post_body,req)
+                let status = await this.update_session_state(transition,post_body,req)
                 let finalization_state = {      // this has to get fancy
                     "state" : "computed",
-                    "OK" : "true"
+                    "OK" : (status ? "true" : "false")
                 }
                 // set a cookie for use by other micro services
                 return(finalization_state)
@@ -98,11 +98,6 @@ class DashboardSessionManager extends SessionManager {
     }
 
     //
-    update_session_state(transition,session_token,req) {    // req for session cookies if any
-        return super.update_session_state(transition,session_token,req)
-    }
-
-    //
     key_for_user() {    // communicate to the general case which key to use
         let key_key = G_dashboard_trns.kv_store_key()
         return(key_key)
@@ -128,6 +123,26 @@ class DashboardSessionManager extends SessionManager {
         return(true)    // true by default
     }
     //
+
+
+    //
+    async update_session_state(transition,post_body,req) {    // req for session cookies if any
+        if ( G_dashboard_trns.tagged(transition) ) {
+            if ( this.trans_engine && post_body.topic ) {
+                let topic = post_body.topic
+                if ( G_dashboard_trns.can_publish(topic) ) {
+                    // the transition engine will make use of the pub/sub system... 
+                    // expect commands to go this way.. requesting changes in the backend such as a file moving directories, etc.
+                    let response = await this.trans_engine.publish(topic,post_body)
+                    if ( reponse === "OK" || (response.status === "OK" ) ) {
+                        return true
+                    }
+                }
+                return (false)
+            }
+        }
+    }
+
 }
 
 class DashboardAuth  extends GeneralAuth {

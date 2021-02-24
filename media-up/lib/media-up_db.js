@@ -13,6 +13,10 @@ const g_keyValueSessions =  g_ephemeral.get_LRUManager();
 
 const SLOW_MESSAGE_QUERY_INTERVAL = 5000
 const FAST_MESSAGE_QUERY_INTERVAL = 1000
+
+const WRITE_OBJECT_MAP_EVERY_INTERVAL = 1000*60*30  // 30 minutes
+const WRITE_UNUSED_LARGE_ENTRIES_EVERY_INTERVAL = 1000*60*60  // ones an hour
+
 //
 const NOTIFICATION_PATH = 'notify'
 //
@@ -60,8 +64,10 @@ async function run_persistence() {   // describe the entry point to super storag
 class UploaderDBClass extends DBClass {
 
     constructor() {
-      let persistenceDB = new CustomPersistenceDB(g_persistence.message_fowarding)  // pass app messages to the backend
-      let staticDB = new CustomStaticDB(g_persistence.message_fowarding)
+      let stash_interval = WRITE_OBJECT_MAP_EVERY_INTERVAL
+      let persistenceDB = new CustomPersistenceDB(g_persistence.message_fowarding,stash_interval,'uploaded')
+      stash_interval = WRITE_UNUSED_LARGE_ENTRIES_EVERY_INTERVAL
+      let staticDB = new CustomStaticDB(g_persistence.message_fowarding,stash_interval,'uploaded','email')
       super(g_keyValueDB,g_keyValueSessions,persistenceDB,staticDB)
     }
 

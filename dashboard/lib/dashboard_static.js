@@ -22,7 +22,7 @@ class DashboardStatic extends GeneralStatic {
       })
       this.db.static_synchronizer((user) => {  
         let [static_dash,dash_info] = this. _user_static_descriptors(user)
-        [static_dash,dash_info]
+        //[static_dash,dash_info]
       })
     }
 
