@@ -72,17 +72,86 @@ class PubSubmissionPaths extends MediaSubmitTransition {
 }
 
 
+// 'dashboard-options'
+class ConfigurableSubmissionPaths extends MediaSubmitTransition {
+
+    constructor() {
+        super("do_param_upload")
+        this.business = false
+        this.transition_defs = {}
+        this.current_file_in_motion = false
+        this.target_dir = false
+    }
+
+    prep(pars) {
+        if ( pars && this.transition_defs ) {
+            let conf_keys = pars.file_topic
+            let pars = this.transition_defs[conf_keys]
+            if ( pars ) {
+                this.current_file_in_motion = pars
+                let custom_path = pars[this.primary_key()]
+                if ( custom_path && pars.category ) {
+                    this.target_dir = '/' + custom_path + '/' + pars.category
+                } else if ( custom_path ) {
+                    this.target_dir = '/' + custom_path
+                } else {
+                    this.target_dir = '/uploads'
+                }
+            }
+            return
+        }
+        this.current_file_in_motion = false
+    }
+
+    file_entry_id(file_key) {
+        let filediff = this.current_file_in_motion.differentiator
+        if ( filediff ) {
+            return('_' + file_key + filediff)
+        }
+        return('_' + file_key + '_from_dash')
+    }
+
+    file_type() {
+        if (  this.current_file_in_motion.ext ) {
+            return this.current_file_in_motion.ext
+        }
+        return('json')
+    }
+
+    initialize(conf) {
+        this.transition_defs = conf.transition_defs
+
+    }
+
+    directory() {
+        let base_dir = this.current_file_in_motion.dir
+        if ( !(base_dir) ) {
+            base_dir = process.cwd()
+        }
+        if ( this.target_dir ) {
+            return(base_dir + this.target_dir )
+        }
+        return(base_dir + '/uploads')
+    }
+
+}
+
+
+
 class MediaUpCustomTransitions {
     constructor() {
         this.uploader_keyed = new UploaderPaths()
         this.demo_submission_keyed = new DemoSubmissionPaths()
         this.pub_submission_keyed = new PubSubmissionPaths()
+        this.config_submission_keyed = new ConfigurableSubmissionPaths()
     }
 
-    initialize() {
+    initialize(conf) {
         global.G_uploader_trns = this.uploader_keyed
         global.G_demo_submit_trns = this.demo_submission_keyed
         global.G_publication_submit_trns = this.pub_submission_keyed
+        global.G_configurable_submit_trns = this.config_submission_keyed
+        this.config_submission_keyed.initialize(conf)
     }
 }
 

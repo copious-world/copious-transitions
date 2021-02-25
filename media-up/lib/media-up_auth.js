@@ -4,8 +4,8 @@ const cookieParser = require('cookie-parser');
 
 class UploaderSessionManager extends SessionManager {
 
-    constructor(exp_app,db_obj,business) {
-        super(exp_app,db_obj,business)
+    constructor(exp_app,db_obj,business,trans_engine) {
+        super(exp_app,db_obj,business,trans_engine)
         //
         this.middle_ware.push(cookieParser())           // use a cookie parser
      }
@@ -13,10 +13,12 @@ class UploaderSessionManager extends SessionManager {
     //process_asset(asset_id,post_body) {}
 
     which_uploaded_files(req,post_body) {
-        //let sampleFile = req.files.mp3file;
-        return(req.files)      // the application should handle this
+        if ( typeof this.trans_engine.which_uploaded_files === "function" ) {
+            return(this.trans_engine.which_uploaded_files(req,post_body))
+        } else {
+            return(req.files)      // the application should handle this
+        } //let sampleFile = req.files.mp3file;
     }
-
 
     feasible(transition,post_body,req) {
         if (  G_demo_submit_trns.tagged(transition) ) {
@@ -50,20 +52,29 @@ class UploaderSessionManager extends SessionManager {
     //
     //
     finalize_transition(transition,post_body,elements,req) {
+        let files = this.which_uploaded_files(req,post_body)
         if ( G_uploader_trns.tagged(transition) ) {
-            return(this.upload_file(post_body,G_uploader_trns,req))
+            return(this.trans_engine.upload_file(post_body,G_uploader_trns,files))
         }
         if ( G_demo_submit_trns.tagged(transition) ) {
-            let state = this.upload_file(post_body,G_demo_submit_trns,req)
+            let state = this.trans_engine.upload_file(post_body,G_demo_submit_trns,files)
             if ( this.business ) {
                 this.business.process('demo',post_body)
             }
             return(state)
         }
         if ( G_publication_submit_trns.tagged(transition) ) {
-            let state = this.upload_file(post_body,G_publication_submit_trns,req)
+            let state = this.trans_engine.upload_file(post_body,G_publication_submit_trns,files)
             if ( this.business ) {
                 this.business.process('submitter',post_body)
+            }
+            return(state)
+        }
+        if ( G_configurable_submit_trns.tagged(transition) ) {
+            G_configurable_submit_trns.prep(post_body)
+            let state = this.trans_engine.upload_file(post_body,G_configurable_submit_trns,files)
+            if ( G_configurable_submit_trns.business ) {
+                this.business.process('dashboard-options',post_body)
             }
             return(state)
         }

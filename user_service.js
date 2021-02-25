@@ -33,7 +33,7 @@ let g_expected_modules = [
 const conf_obj = load_parameters()                  // configuration parameters to select modules, etc.
 const g_custom_transitions = require(conf_obj.mod_path.custom_transitions)
 // SPECIAL NAMED TRANSITIONS (PATHS)
-g_custom_transitions.initialize()
+g_custom_transitions.initialize(conf_obj)
 // CONFIGURE
 const g_db = require(conf_obj.mod_path.db)                   // The database interface. Sets up session store, static store, and other DB pathways
 const g_middleware = require(conf_obj.mod_path.middleware)   // This is middleware for Express applications
@@ -58,6 +58,7 @@ async function initialize_all() {
     //
     g_session_manager = g_authorizer.sessions(g_app,g_db,g_business,g_transition_engine)   // setup session management, session, cookies, tokens, etc. Use database and Express api.
                                                                 // sessions inializes the custom session manager determined in the application authorizer.
+    g_transition_engine.initialize(conf_obj,g_db,g_session_manager)
     g_middleware.setup(g_app,g_db,g_session_manager)            // use a module to cusomize the use of Express middleware.
     g_validator.initialize(conf_obj,g_db,g_session_manager)     // The validator may refer to stored items and look at other context dependent information
     g_statics.initialize(g_db,conf_obj)                         // Static assets may be taken out of DB storage or from disk, etc.
