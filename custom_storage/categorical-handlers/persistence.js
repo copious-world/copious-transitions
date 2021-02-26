@@ -5,25 +5,29 @@ const fsPromises = require('fs/promises')
 //
 
 // Parent class handles publication 
+ /* conf.directories :: For example:
+    "blog" : conf.blog_directory,
+    "stream" : conf.stream_directory,
+    "demo" : conf.demo_directory,
+    "assets" : conf.assets_directory,
+    "ownership" : conf.ownership_directory,
+    "notify" : conf.notification_directory
+*/
 
 class PersistenceMessageEndpoint extends ServeMessageEndpoint {
 
     constructor(conf) {
         super(conf)
         this.user_directory = conf.user_directory
-        this._type_directories = {
-            "blog" : conf.blog_directory,
-            "stream" : conf.stream_directory,
-            "demo" : conf.demo_directory,
-            "assets" : conf.assets_directory,
-            "ownership" : conf.ownership_directory,
-            "notify" : conf.notification_directory
+        this._type_directories = {}
+        if ( conf.directories ) {
+            this._type_directories = Object.assign({},conf.directories)
         }
         this.create_OK = conf.create_OK
     }
 
-
     async ensure_directories(user_id) {
+        //
         let upath = this.user_directory + '/' + user_id
         try {
             await fsPromises.mkdir(upath)
@@ -39,7 +43,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint {
                 if ( e.code !== 'EEXIST') console.error(e)
             }
         }
-
+        //
     }
 
 
@@ -152,8 +156,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint {
         return "ERR"
     }
 
-
-
+    
     async app_message_handler(msg_obj) {
         let op = msg_obj.op
         let result = "OK"

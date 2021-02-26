@@ -1,12 +1,23 @@
 'use strict';
 const {EventEmitter} = require('events')
 //
+// ---- ---- ---- ---- ---- ---- ---- ----
+const USER_PATH = 'user'                // to a user endpoint
+const PERSISTENCE_PATH = 'persistence'  // most things take this path (data object are used to discern sub categories)
 //
-const EMAIL_PATH = 'app_email'
-const USER_PATH = 'user'
-const CONTACT_PATH = 'contact'
-const PERSISTENCE_PATH = 'persistence'
-const NOTIFICATION_PATH = 'notify'
+const EMAIL_PATH = 'outgo_email'        // app email -- likely to a spool file or mailbox file
+const CONTACT_PATH = 'contact'          // intake spool similar to email or same with proper interface
+const NOTIFICATION_PATH = 'notify'      // admin or user to user (should be a special endpoint)
+// ---- ---- ---- ---- ---- ---- ---- ----
+const g_path_impls = {
+    'outgo_email' : null,
+    'user' : null,
+    'contact' : null,
+    'persistence' : null,
+    'notify' : null
+}
+// g_path_classes gathered below
+// ---- ---- ---- ---- ---- ---- ---- ----
 
 
 class PathHandler extends EventEmitter {
@@ -140,21 +151,14 @@ class NotificationHandler extends PathHandler {
     }
 }
 
-const g_path_classes = {
-    'app_email' : OutgoingEmailHandler,
-    'user' : UserHandler,
-    'contact' : ContactHandler,
-    'persistence' : PersistenceHandler,
-    'notify' : NotificationHandler
-}
 
-const g_path_impls = {
-    'app_email' : null,
-    'user' : null,
-    'contact' : null,
-    'persistence' : null,
-    'notify' : null
-}
+const g_path_classes = {}
+g_path_classes[USER_PATH] = UserHandler
+g_path_classes[PERSISTENCE_PATH] = PersistenceHandler
+g_path_classes[EMAIL_PATH] = OutgoingEmailHandler
+g_path_classes[CONTACT_PATH] = ContactHandler
+g_path_classes[NOTIFICATION_PATH] = NotificationHandler
+
 
 function Path_handler_factory(path,path_conf,FanoutRelayerClass) {
     let PathClass = g_path_classes[path]
@@ -170,3 +174,9 @@ function Path_handler_factory(path,path_conf,FanoutRelayerClass) {
 
 
 module.exports = Path_handler_factory;
+//
+module.exports.USER_PATH = USER_PATH
+module.exports.PERSISTENCE_PATH = PERSISTENCE_PATH
+module.exports.EMAIL_PATH = EMAIL_PATH
+module.exports.CONTACT_PATH = CONTACT_PATH
+module.exports.NOTIFICATION_PATH = NOTIFICATION_PATH

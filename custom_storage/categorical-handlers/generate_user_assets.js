@@ -10,7 +10,7 @@ const Handlebars = require('handlebars')
 const g_output_dir = "test_output"
 const g_template_dir = './user_templates'
 
-
+// 
 async function load_template_package(dirpath,noisy,cb) {
     try {
         let files = await fsPromises.readdir(dirpath)
