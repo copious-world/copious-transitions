@@ -29,7 +29,7 @@ class DashboardSessionManager extends SessionManager {
     async process_transition(transition,post_body,req) {
         let trans_object = super.process_transition(transition,post_body,req)
         if ( G_dashboard_trns.tagged(transition) ) {
-            post_body._uuid_prefix =  G_dashboard_trns.uuid_prefix()
+            post_body._uuid_prefix = G_dashboard_trns.uuid_prefix()
         }
         return(trans_object)
     }
@@ -44,7 +44,7 @@ class DashboardSessionManager extends SessionManager {
 
     //
     async finalize_transition(transition,post_body,elements,req) {
-        if ( G_dashboard_trns.tagged(transition) ) {
+        if ( G_dashboard_trns.tagged(transition) || G_dashboard_commands_trns.tagged(transition) ) {
             if ( post_body._t_match_field ) {
                 let status = await this.update_session_state(transition,post_body,req)
                 let finalization_state = {      // this has to get fancy
@@ -127,7 +127,7 @@ class DashboardSessionManager extends SessionManager {
 
     //
     async update_session_state(transition,post_body,req) {    // req for session cookies if any
-        if ( G_dashboard_trns.tagged(transition) ) {
+        if ( G_dashboard_commands_trns.tagged(transition) ) {
             if ( this.trans_engine && post_body.topic ) {
                 let topic = post_body.topic
                 if ( G_dashboard_trns.can_publish(topic) ) {
@@ -141,6 +141,14 @@ class DashboardSessionManager extends SessionManager {
                 return (false)
             }
         }
+        if ( G_dashboard_trns.tagged(transition) ) {
+            let response = await this.trans_engine.forward_user_asset(post_body)
+            if ( reponse === "OK" || (response.status === "OK" ) ) {
+                return true
+            }
+            return (false)
+        }
+        return(true)
     }
 
 }

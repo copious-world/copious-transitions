@@ -1,6 +1,5 @@
 
 const {ServeMessageEndpoint} = require("message-relay-services")
-const fs = require('fs')
 const fsPromises = require('fs/promises')
 //
 
@@ -14,7 +13,7 @@ const fsPromises = require('fs/promises')
     "notify" : conf.notification_directory
 */
 
-class PersistenceMessageEndpoint extends ServeMessageEndpoint {
+class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general class forwards publication...
 
     constructor(conf) {
         super(conf)
@@ -47,7 +46,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint {
     }
 
 
-    async publish(msg_obj) {
+    async publish(msg_obj) {        // actual pulication... this file becomes available to the general public...
         try {
             let user_id = msg_obj.uid
             let user_path = this.user_directory + '/' + user_id + '/'
@@ -66,6 +65,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint {
     }
 
 
+    // data coming from a user dashboard, profile, etc.
     async create_entry_type(msg_obj) {  // to the user's directory
         try {
             let user_id = msg_obj.uid
@@ -156,7 +156,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint {
         return "ERR"
     }
 
-    
+
     async app_message_handler(msg_obj) {
         let op = msg_obj.op
         let result = "OK"

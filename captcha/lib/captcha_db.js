@@ -5,6 +5,8 @@ const CustomStaticDB = require.main.require('./custom_storage/static_db')
 //
 const apiKeys = require.main.require('./local/api_keys')
 //
+//  We may allow the persitence manager to choose the message relay, 
+//  or override with the one chosen by the application...
 //
 const g_persistence = new PersistenceManager(apiKeys.persistence,apiKeys.message_relays)
 const g_ephemeral = new PersistenceManager(apiKeys.session)
@@ -97,14 +99,22 @@ class CaptchaDBClass extends DBClass {
         }
     }
 
+
+    // // FileAndRelays will use the MessageRelayer from global_persistence to send the user data to the backend...
+    // // apiKeys = require.main.require('./local/api_keys') configures it...
+    // // The relayer may talk to a relay service or an endpoint.... (for captcha, it will be user endpoint...)
+    // // the end points are categorical handlers that are tied to message pathways... in this case a 'user' pathway.. 
+    // // (see path_handlers.js)
+
     // // // 
     store_user(fdata) {
         if ( G_users_trns.tagged('user') ) {
-          let [udata,tandems] = G_users_trns.update(fdata)          // custom user storage (seconday service)
+          let [udata,tandems] = G_users_trns.update(fdata)          // custom user storage (seconday service) clean up fields
           //G_users_trns.enqueue(tandems)
           //
-          let key_key = G_users_trns.kv_store_key()
+          let key_key = G_users_trns.kv_store_key() // application key for key-value store from data object
           let key = udata[key_key]
+          // store the user object in two place (faster == cache and slower == persistence)
           this.store_cache(key,udata,G_users_trns.back_ref());  // this app will use cache to echo persitent storage
           super.store_user(udata,key_key)                       // use persitent storage
         }
@@ -118,14 +128,14 @@ class CaptchaDBClass extends DBClass {
         } else {
           let key_key = G_users_trns.kv_store_key()  // more persistent than the cache
           let key = fdata[key_key]
-          udata = super.fetch_user(key)  // no callback, just get value
+          udata = super.fetch_user(key)  // no callback, just get value -- means the user has been entered into storage somewhere...
           if ( udata ) {
             this.store_cache(key,udata,G_users_trns.back_ref());    // from persitence to local cache
             return(udata)
           }
         }
       }
-      return(false)
+      return(false)     // never saw this user
     }
 
     update_user(udata) {

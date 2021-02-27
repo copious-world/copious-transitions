@@ -266,7 +266,7 @@ g_app.post(['/users/login','/users/logout','/users/register','/users/forgot'], a
                 let tObjCached = { 'tobj' : transitionObj, 'elements' : transitionObj.elements, 'action' : user_op }
                 add_local_cache_transition(g_secondary_user_actions,transitionObj.token,tObjCached)
                 delete transitionObj.elements
-                if ( transitionObj.secondary_action ) {
+                if ( transitionObj.secondary_action ) {     // tell the application what it needs to know so that it can respond to completion..
                     return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));
                 } else if ( transitionObj.foreign_authorizer_endpoint ) {
                     if ( g_going_ws_session[transitionObj.token] ) {
@@ -298,15 +298,15 @@ g_app.post(['/users/login','/users/logout','/users/register','/users/forgot'], a
 g_app.post('/secondary/users/:action', async (req, res) => {
     let body = req.body
     let action = req.params['action']
-    if ( body.token !== undefined ) {                                   // the token must be present
+    if ( body.token !== undefined ) {               // the token must be present -------->>
         let cached_transition = fetch_local_cache_transition(g_secondary_user_actions,body.token)
         if ( (cached_transition !== undefined) && (action == cached_transition.action) ) {      // the action must match (artifac of use an array of paths)
-            cached_transition.action += '-secondary'
+            cached_transition.action += '-secondary'  // this is a key for the second part of an ongoing transition...
             // this is the asset needed by the client to turn on personlization and key access (aside from sessions and cookies)
             if ( g_session_manager.match(body,cached_transition)  ) {   // check the tokens and any other application specific information required
                 let transitionObj = cached_transition.tobj
-                let session_token = g_session_manager.unstash_session_token(cached_transition)
-                if ( session_token ) {
+                let session_token = g_session_manager.unstash_session_token(cached_transition)  // gets info from the object
+                if ( session_token ) {  // assuming the token is there...
                     let elements = await g_session_manager.initialize_session_state('user',session_token,transitionObj,res)
                     res.status(200).send(JSON.stringify({ 'type' : transitionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token, 'elements' : elements  }));
                     return;
@@ -614,6 +614,12 @@ g_app_wss.on("connection", (ws,req) => {
 }       // WEB APP SCOCKETS OPTION (END)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
     
+
+// keep basic transition information around between calls for certain flow processes.
+// this is not shared with other system processes, so just use local data structures. 
+// (this could be modularized with C++ or other..)
+
+// more than one use of caches is expected.  (just these two methods ... using a class seems too much
 
 function fetch_local_cache_transition(cache_map,token) {
     if ( cache_map ) {

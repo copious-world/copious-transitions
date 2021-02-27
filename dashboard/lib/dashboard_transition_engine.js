@@ -47,7 +47,24 @@ class DashboardTransitionEngineClass extends GeneralTransitionEngine {
         }
     }
     //
-    
+    async forward_user_asset(key,info_obj) {
+        let result = await this.db.pdb.search_one(key)
+        if ( !!(result) ) {
+            info_obj._id = result._id
+            await this.db.pdb.update(info_obj)
+        } else {
+            await this.db.pdb.create(info_obj)
+        }
+        if ( result ) {
+            if ( result.state ) return(result.state)
+            if ( typeof result === 'string' ) {
+                return result
+            }
+            if ( typeof result.status === "string" ) return result
+            if ( result !== false ) return "OK"
+            return "ERR"
+        }
+    }
     //
 }
 

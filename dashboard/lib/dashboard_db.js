@@ -45,9 +45,9 @@ class DashboardDBClass extends DBClass {
     }
 
 
-    asset_intake(obj) {
-      let static_dash = 'dashboard+' + obj.email
-      this.put_static_store(static_dash,obj,"application/json")
+    asset_intake(obj) {   // This object has not been put into static store by the backend. the backned created the file and sent it.
+      let static_dash = 'dashboard+' + obj.email 
+      this.put_static_store(static_dash,obj,"application/json")  // store it ... means a local file copy... staticDB
     }
 
 }

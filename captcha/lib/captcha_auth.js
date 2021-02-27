@@ -57,6 +57,7 @@ class CaptchaSessionManager extends SessionManager {
         this.set_cookie(res,'copious+tester',`yozie-dozie${cnt++}`,60000)
         let pkey = G_users_trns.primary_key()
         let transtionObj = await super.process_user(user_op,body,req,res,pkey)
+        // at this point the transition object has two tokens...
         if ( G_users_trns.action_selector(user_op) ) {
             transtionObj[pkey] = body[pkey]
         } else {
@@ -67,7 +68,7 @@ class CaptchaSessionManager extends SessionManager {
         return(transtionObj)
     }
 
-    //process_asset(asset_id,post_body) {}
+    //  process_asset(asset_id,post_body) {}
     feasible(transition,post_body,req) {                // is the transition something that can be done?
         if (  G_captcha_trns.tagged(transition) || G_contact_trns.tagged(transition) ) {
             return(true)
@@ -150,7 +151,7 @@ class CaptchaSessionManager extends SessionManager {
         return(finalization_state)
     }
 
-
+    //
     which_uploaded_files(req,post_body) {
         if ( req ) {
             let files = req.files
@@ -183,7 +184,7 @@ class CaptchaSessionManager extends SessionManager {
 
     //
     async initialize_session_state(transition,session_token,transtionObj,res) {
-        if ( G_users_trns.tagged('user') ) {
+        if ( G_users_trns.tagged('user') ) {        // application gives the correct field to the general initialize_session_state
             transtionObj._t_u_key = G_users_trns.session_key()
             transtionObj._db_session_key = transtionObj[transtionObj._t_u_key]
             return await super.initialize_session_state(transition,session_token,transtionObj,res)
