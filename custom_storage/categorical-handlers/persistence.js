@@ -4,15 +4,7 @@ const fsPromises = require('fs/promises')
 //
 
 // Parent class handles publication 
- /* conf.directories :: For example:
-    "blog" : conf.blog_directory,
-    "stream" : conf.stream_directory,
-    "demo" : conf.demo_directory,
-    "assets" : conf.assets_directory,
-    "ownership" : conf.ownership_directory,
-    "notify" : conf.notification_directory
-*/
-
+ 
 class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general class forwards publication...
 
     constructor(conf) {
@@ -23,6 +15,9 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
             this._type_directories = Object.assign({},conf.directories)
         }
         this.create_OK = conf.create_OK
+        //
+        this.ensure_directories('admin')
+        this.init_public_directories()
     }
 
     async ensure_directories(user_id) {
@@ -33,7 +28,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
         } catch(e) {
             if ( e.code !== 'EEXIST') console.error(e)
         }
-
+        //
         for ( let dr in this._type_directories ) {
             let subdr = upath + '/' + dr
             try {
@@ -43,6 +38,18 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
             }
         }
         //
+    }
+
+    async init_public_directories() {
+        //
+        for ( let dr in this._type_directories ) {
+            let pub_path = this._type_directories[dr]
+            try {
+                await fsPromises.mkdir(pub_path)
+            } catch(e)  {
+                if ( e.code !== 'EEXIST') console.error(e)
+            }
+        }
     }
 
 

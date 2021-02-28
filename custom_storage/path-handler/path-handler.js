@@ -167,7 +167,7 @@ function Path_handler_factory(path,path_conf,FanoutRelayerClass) {
         g_path_impls[path] = pc
         return(pc)
     }
-    let pc = new PathHandler(path_conf,FanoutRelayerClass)
+    let pc = new PathHandler(path,path_conf,FanoutRelayerClass)
     g_path_impls[path] = pc
     return pc
 }

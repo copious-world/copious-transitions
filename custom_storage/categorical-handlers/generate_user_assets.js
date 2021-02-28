@@ -70,7 +70,9 @@ async function run_all(input_dir,user_dir,user_obj) {
     await load_template_package(input_dir,true, async (html_template,ky_path) => {
         let out_path = `${user_dir}/${ky_path}.html`
         if ( user_obj.dir_paths ) {
-            user_obj.dir_paths[`${ky_path}`] = out_path.substr(1)
+            let stored_path = `/${user_obj._id }/${ky_path}.html`
+console.log(stored_path)
+            user_obj.dir_paths[`${ky_path}`] = stored_path
         }
         generate_user_custom_file(out_path,html_template,user_obj)
     })

@@ -16,6 +16,8 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
         this.all_users = conf.all_users
         this.template_dir = conf.asset_template_dir
         this.create_OK = true
+
+        console.log(process.cwd())
     }
 
     //
@@ -53,7 +55,8 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
     async create_entry_type(msg_obj) {  // to the user's directory
         try {
             let user_id = msg_obj._id
-            let user_path = `${this.all_users}/${user_id}_${msg_obj[msg_obj.key_field]}.json`
+            // password is a hash of the password, might encrypt it... (also might carry other info to the back..)
+            let user_path = `${this.all_users}/${user_id}_${msg_obj.password}.json`
             await fsPromises.writeFile(user_path,(JSON.stringify(msg_obj)),{ 'flag' : 'wx' })
             return "OK"
         } catch(e) {
