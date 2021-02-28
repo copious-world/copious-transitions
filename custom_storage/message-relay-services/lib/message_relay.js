@@ -164,11 +164,11 @@ class Server {
 
         let onClientConnected_func = (sock) => {
             // // // 
-            let clientName = `${sock.remoteAddress}:${sock.remotePort}`;
-            if ( NOISY ) console.log(`new client connected: ${clientName}`);
+            let client_name = `${sock.remoteAddress}:${sock.remotePort}`;
+            if ( NOISY ) console.log(`new client connected: ${client_name}`);
             //
             // CREATE A MESSAGE HANDLER OBJECT
-            g_messenger_connections[clientName] = new JsonMessage({
+            g_messenger_connections[client_name] = new JsonMessage({
                 'sock' : sock,
                 'server' : server,
                 'client_name' : client_name
@@ -177,7 +177,7 @@ class Server {
             //
             // RESPOND TO DATA ... when ready, use the data handler object to determine the fate of the message.
             sock.on('data', (data) => {
-                let mescon = g_messenger_connections[clientName]
+                let mescon = g_messenger_connections[client_name]
                 mescon.add_data(data)
                 if ( mescon.message_complete() ) {
                     (async () => { await mescon.forward_op() })();
@@ -185,13 +185,13 @@ class Server {
             });
             //
             sock.on('close', () => {
-                let mescon = g_messenger_connections[clientName]
+                let mescon = g_messenger_connections[client_name]
                 mescon.cleanup()
-                delete g_messenger_connections[clientName]
+                delete g_messenger_connections[client_name]
             });
             //
             sock.on('error', (err) => {
-                console.error(`Connection ${clientName} error: ${err.message}`);
+                console.error(`Connection ${client_name} error: ${err.message}`);
             });
             //
         }

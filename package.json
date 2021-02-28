@@ -90,6 +90,7 @@
     "secure-password": "^4.0.0",
     "shm-lru-cache": "^0.0.2",
     "shm-typed-array": "0.0.12",
+    "shm-typed-lru": "^0.0.4",
     "sodium-native": "^3.2.0",
     "svg-captcha": "^1.4.0",
     "tape": "^5.0.1",

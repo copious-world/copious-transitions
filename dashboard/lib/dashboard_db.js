@@ -24,7 +24,10 @@ class DashboardDBClass extends DBClass {
       let persistenceDB = new CustomPersistenceDB(g_persistence.message_fowarding)  // pass app messages to the backend
       let staticDB = new CustomStaticDB(g_persistence.message_fowarding)
       //
-      g_persistence.message_fowarding.subscribe('user-dashboard',this.asset_intake)
+      let asset_intake = (obj) => {
+        this.this.asset_intake(obj)
+      } 
+      g_persistence.message_fowarding.subscribe('user-dashboard',{ "source" : "dashboad" },asset_intake)
       //
       super(g_keyValueDB,g_keyValueSessions,persistenceDB,staticDB)
     }

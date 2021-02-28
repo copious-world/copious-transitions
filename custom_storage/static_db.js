@@ -7,6 +7,7 @@ const uuid = require('uuid/v4')
 const MAX_LAX_CACHE_TIME = 1000*3600*4
 const MAX_BYTES_ALLOWED = (1<<24)
 const MAX_GROUP_STORAGE_SIZE = 256  // ??  The max length of data passed to the parent class, which will write all data to a file for restore
+const DEFAULT_DB_DIR = "local/static_db"
 //
 
 class PageableMemStoreElement {
@@ -22,6 +23,7 @@ class PageableMemStoreElement {
         this.back_up_on_delete = buod
         this.flat_object = flat_obj
         this.clip_big_fields(obj)
+        this.blob_dir = DEFAULT_DB_DIR
     }
 
     update(obj,flat_obj) {
@@ -73,22 +75,22 @@ class StaticContracts extends FilesAndRelays {
         this.allocated = 0
         this._whokey_field = whokey_field ? whokey_field : "email"
         this.back_up_on_delete = false
-        this._adjusted_field_prefix = `_$_`
         this._max_group_storage = MAX_GROUP_STORAGE_SIZE
     }
     //
     initialize(conf) {
-        super.initialize(conf)
+        super.initialize(conf.static_db)
         if ( conf.static_db ) {
             //
             this.blob_dir = conf.static_db.blob_dir
             let freeloading_timeout = conf.static_db.freeloading_timeout
             this.max_freeloading_time =  freeloading_timeout ? freeloading_timeout : MAX_LAX_CACHE_TIME
             this.memory_allocation_preference = conf.static_db.max_data_RAM
-            this._adjusted_field_prefix = conf.static_db.adjusted_field_prefix ? conf.static_db.adjusted_field_prefix : this._adjusted_field_prefix
             this._max_group_storage = conf.static_db.max_forwarded_storage ? conf.static_db.max_forwarded_storage : MAX_GROUP_STORAGE_SIZE
             //
-            this.load_dir(this.blob_dir)
+            if ( this.blob_dir ) {
+                this.load_dir(this.blob_dir)
+            }
         }
     }
     //
@@ -341,6 +343,7 @@ class StaticContracts extends FilesAndRelays {
 
     // 
     async remove_file(file) {
+        if ( this.blob_dir === undefined ) return;
         if ( file !== undefined ) {
             try {
                 let fpath = this.blob_dir + '/' + file
@@ -350,6 +353,7 @@ class StaticContracts extends FilesAndRelays {
     }
 
     load_file(file) {
+        if ( this.blob_dir === undefined ) return;
         if ( file !== undefined ) {
             try {
                 let fpath = this.blob_dir + '/' + file
@@ -363,6 +367,7 @@ class StaticContracts extends FilesAndRelays {
 
     // //
     load_dir(blob_dir) {
+        if ( this.blob_dir === undefined ) return;
         try {
             fs.mkdirSync(blob_dir)
         } catch (e) {
@@ -397,7 +402,8 @@ class StaticContracts extends FilesAndRelays {
     // static_backup
     //  write the larger data objects to a file.. one per object if it has not been saved
     //  
-    async static_backup() {  
+    async static_backup() {
+        if ( this.blob_dir === undefined ) return;
         //this.unhooked = false
         for ( let hh in this._ids_to_data_rep ) {
             let pmse = this._ids_to_data_rep[hh]

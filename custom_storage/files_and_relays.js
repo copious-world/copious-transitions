@@ -28,6 +28,15 @@ class FilesAndRelays extends AppLifeCycle {
 
     initialize(conf) {
         //
+        if ( conf.persistence_db ) {
+            conf = conf.persistence_db 
+        }
+        //
+        if ( conf === undefined ) {
+            console.log("files and relays: initialize: no configuration parameter ... shutting donnw")
+            process.exit(0)
+        }
+        //
         // Subscribe to new information coming in on this local channel (default.. users)
         let knowledge_domains = conf.knowledge_domains ? conf.knowledge_domains : undefined
         if ( knowledge_domains && knowledge_domains.length ) {

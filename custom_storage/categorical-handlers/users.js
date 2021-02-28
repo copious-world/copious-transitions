@@ -39,7 +39,7 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
 
 
     async create_user_assets(msg_obj) {
-        let user_id = msg_obj.uid
+        let user_id = msg_obj._id
         let assets_dir = `${this.user_directory}/${user_id}`
         // assumes that the assets directories have been created
         let dir_paths = {
@@ -52,7 +52,7 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
     //
     async create_entry_type(msg_obj) {  // to the user's directory
         try {
-            let user_id = msg_obj.uid
+            let user_id = msg_obj._id
             let user_path = `${this.all_users}/${user_id}_${msg_obj[msg_obj.key_field]}.json`
             await fsPromises.writeFile(user_path,(JSON.stringify(msg_obj)),{ 'flag' : 'wx' })
             return "OK"
@@ -65,7 +65,7 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
     //
     async load_data(msg_obj) {
         try {
-            let user_id = msg_obj.uid
+            let user_id = msg_obj._id
             let user_path = `${this.all_users}/${user_id}_${msg_obj[msg_obj.key_field]}.json`
             let data = await fsPromises.readFile(user_path)
             return(data.toString())
@@ -82,13 +82,13 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
     //
     async update_entry_type(msg_obj) {
         try {
-            let user_id = msg_obj.uid
+            let user_id = msg_obj._id
             let user_path = `${this.all_users}/${user_id}_${msg_obj[msg_obj.key_field]}.json`
             let data = await fsPromises.readFile(user_path)
             try {
                 let u_obj = JSON.parse(data.toString())
                 for ( let ky in msg_obj ) {
-                    if ( ky === 'uid' ) continue;
+                    if ( ky === '_id' ) continue;
                     u_obj[ky] = msg_obj[ky]
                 }
                 await fsPromises.writeFile(user_path,JSON.stringify(u_obj))
@@ -116,7 +116,7 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
         //
         let op = msg_obj.op
         let result = "OK"
-        let user_id = msg_obj.uid
+        let user_id = msg_obj._id
         if ( this.create_OK ) {
             await this.ensure_directories(user_id)
         }
