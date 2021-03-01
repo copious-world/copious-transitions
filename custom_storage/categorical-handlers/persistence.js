@@ -20,6 +20,22 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
         this.init_public_directories()
     }
 
+
+    make_path(u_obj) {
+        let entry_type = u_obj.asset_type
+        let user_id = u_obj._id
+        let user_path = this.user_directory + '/' + user_id + '/'
+        user_path += entry_type + '/' + u_obj[u_obj.key_field] + ".json"
+        return(user_path)
+    }
+
+    make_public_path(msg_obj) {
+        let entry_type = msg_obj.asset_type
+        //
+        let public_path = this._type_directories[entry_type]
+        public_path += '/' + msg_obj[msg_obj.key_field] + ".json"    
+    }
+
     async ensure_directories(user_id) {
         //
         let upath = this.user_directory + '/' + user_id
@@ -55,14 +71,10 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
 
     async publish(msg_obj) {        // actual pulication... this file becomes available to the general public...
         try {
-            let user_id = msg_obj.uid
-            let user_path = this.user_directory + '/' + user_id + '/'
-            let entry_type = msg_obj.asset_type
-            user_path += entry_type + '/' + msg_obj[msg_obj.key_field] + ".json"
-    
-            let public_path = this._type_directories[entry_type]
-            public_path += '/' + msg_obj[msg_obj.key_field] + ".json"
-    
+            //
+            let user_path = this.make_path(msg_obj)
+            let public_path = this.make_public_path(msg_obj)
+            ///
             await fsPromises.copyFile(user_path,public_path)
             return "OK"
         } catch(e) {
@@ -75,10 +87,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
     // data coming from a user dashboard, profile, etc.
     async create_entry_type(msg_obj) {  // to the user's directory
         try {
-            let user_id = msg_obj.uid
-            let entry_type = msg_obj.asset_type
-            let user_path = this.user_directory + '/' + user_id + '/'
-                        + entry_type + '/' + msg_obj[msg_obj.key_field] + ".json"
+            let user_path = this.make_path(msg_obj)
             await fsPromises.writeFile(user_path,JSON.stringify(msg_obj))
             return "OK"
         } catch(e) {
@@ -89,10 +98,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
 
     async load_data(msg_obj) {
         try {
-            let user_id = msg_obj.uid
-            let entry_type = msg_obj.asset_type
-            let user_path = this.user_directory + '/' + user_id + '/'
-                            + entry_type + '/' + msg_obj[msg_obj.key_field] + ".json"
+            let user_path = this.make_path(msg_obj)
             let data = await fsPromises.readFile(user_path)
             return(data.toString())
         } catch (e) {
@@ -108,15 +114,12 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
 
     async update_entry_type(msg_obj) {
         try {
-            let user_id = msg_obj.uid
-            let entry_type = msg_obj.asset_type
-            let user_path = this.user_directory + '/' + user_id + '/'
-                            + entry_type + '/' + msg_obj[msg_obj.key_field] + ".json"
+            let user_path = this.make_path(msg_obj)
             let data = await fsPromises.readFile(user_path)
             try {
                 let u_obj = JSON.parse(data.toString())
                 for ( let ky in msg_obj ) {
-                    if ( ky === 'uid' ) continue;
+                    if ( ky === '_id' ) continue;
                     u_obj[ky] = msg_obj[ky]
                 }
                 await fsPromises.writeFile(user_path,JSON.stringify(u_obj))
@@ -141,17 +144,12 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
     async delete(msg_obj) {
         // check for some criteria... a sys admin token, a ref count ... replicated, etc.
         try {
-            let user_id = msg_obj.uid
-            let entry_type = msg_obj.asset_type
-            let user_path = this.user_directory + '/' + user_id + '/'
-                            + entry_type + '/' + msg_obj[msg_obj.key_field] + ".json"
-            //
+            let user_path = this.make_path(msg_obj)
             await fsPromises.rm(user_path)
             //
-            let public_path = this._type_directories[entry_type]
-            public_path += '/' + msg_obj[msg_obj.key_field] + ".json"
-            //
+            let public_path = this.make_public_path(msg_obj)
             await fsPromises.rm(public_path)
+            //
             return "OK"
         } catch (e) {
             console.log(">>-------------update read------------------------")
@@ -167,7 +165,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
     async app_message_handler(msg_obj) {
         let op = msg_obj.op
         let result = "OK"
-        let user_id = msg_obj.uid
+        let user_id = msg_obj._id
         if ( this.create_OK ) {
             await this.ensure_directories(user_id)
         }
