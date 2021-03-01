@@ -779,7 +779,7 @@ html {
 					</a>
 				</td>
 				<td  style="text-align:center">
-                    {{user_name}} :: <span class="dboard-title" >Dashboard</span>
+                    <span id="header_user_name" >{{user_name}} </span> :: <span class="dboard-title" >Dashboard</span>
 				</td>
 				<td>
 					&nbsp;
@@ -793,20 +793,20 @@ html {
 		<div class="items">
 			<div class="item">
 				<div style="height: fit-content;text-align: center;border-bottom: 1px solid darkslateblue;">
-					<h4 id="collection-title">{{user_name}}</h4>
+					<h4 id="user_name">{{user_name}}</h4>
 				</div>
 				<div style="border: thistle 2px solid;padding: 4px;background-color: rgb(248, 238, 220);">
 					<span id="date" style="text-decoration: underline;color: rgb(88, 13, 13);">
 						{{date}}
 					</span>
 					<br>
-					<span id="panel_key">
-						{{file}}
+					<span id="tag_line">
+						{{tag_line}}
 					</span>
 					<br>
 				</div>
-				<div id = 'which_dashboard' style="border: thistle 2px solid;padding: 4px;background-color: rgb(247, 236, 216);" >
-					{{text}}
+				<div id ='dashboard_text' style="border: thistle 2px solid;padding: 4px;background-color: rgb(247, 236, 216);" >
+					{{dashboard_text}}
 				</div>
 			</div>			
 			<!--  -->
@@ -927,7 +927,7 @@ html {
 			<input id='current-display-item' type="hidden" value="something">
 		</div>
 
-		<div id="floating-info-entry" >
+		<div id="floating-info-entry" contenteditable="true" >
 			
 		</div>
 	</div>
@@ -1197,12 +1197,8 @@ function get_line_element(obj) {
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-
-function edit_entry(ev) {
-	let el = ev.target //document.getElementById(which)
-	let text = ""
-	if ( el ) {
-		let op_button_1 = document.getElementById('floating-info-entry-do-publish')
+function update_edit_display(el) {
+	let op_button_1 = document.getElementById('floating-info-entry-do-publish')
 		let op_button_2 = document.getElementById('floating-info-entry-do-unpublish')
 		op_button_1.disabled = false
 		op_button_2.disabled = false
@@ -1217,9 +1213,6 @@ function edit_entry(ev) {
 		let contents_view = document.getElementById('floating-info-entry')
 		contents_view.innerHTML = get_data(el.id)
 		//
-		let container = document.getElementById('floating-info')
-		container.style.display = "block"
-		container.style.visibility = "visible"
 		//
 		let is_pub = get_is_published(el.id)
 		let is_del = get_is_del(el.id)
@@ -1243,6 +1236,18 @@ function edit_entry(ev) {
 		//
 		let cur_item_holder = document.getElementById('current-display-item')
 		cur_item_holder.value = get_id(el.id)
+}
+
+
+function edit_entry(ev) {
+	let el = ev.target //document.getElementById(which)
+	let text = ""
+	if ( el ) {
+		update_edit_display(el)
+		let container = document.getElementById('floating-info')
+		container.style.display = "block"
+		container.style.visibility = "visible"
+
 	}
 }
 
@@ -1269,7 +1274,6 @@ function save(item_holder) {
 		obj.deleted = false
 		unpublish(item_holder)
 	}
-	
 }
 
 
@@ -1309,7 +1313,6 @@ function unpublish(item_holder) {
 	let el_id = `span-c${index}`
 	let t_el = document.getElementById(el_id)
 	if ( t_el ) t_el.style.color = UNPUBLISHED_COLOR
-
 }
 
 
@@ -1469,7 +1472,17 @@ function undo_data_drop(item_holder) {
 }
 
 //
-function  prepare_file_text(text,file_name,category) {
+let g_code_files = [ ".js", ".c",  ".cpp", ".c++",  ".cc", ".v", ".rs" ]
+//
+function prepare_file_text(text,file_name,category) {
+	//
+	if ( file_name.indexOf('.') > 0 ) {
+		let ext_pos = file_name.lastIndexOf('.')
+		let ext = file_name.substr(ext_pos)
+		if ( g_code_files.indexOf(ext) >= 0 ) {
+			text = "<code>" + text + "</code>"
+		}
+	}
 	//
 	let res = {
 				"result" : text,
@@ -1603,7 +1616,10 @@ function dragOverHandler(ev,subst_key) {
 		'owner' : user,
 		'date'  : ('' + Date.now()),
 		'panel_key' : generate_password(),
-		'which_dashboard' : 'test dashboard'
+		'dashboard_text' : 'test dashboard_text'
+		//obj.header_user_name = g_dashboard_info.header_user_name
+		//obj.dashboard_text = dashboard_text
+		//obj.tag_line = obj.tag_line
 	}
 */
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -1614,15 +1630,16 @@ var g_dashboard_info = null
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 // sends the data file in an identifying packet to the backend for saving to a user directory...
-function real_save(obj) {
+async function real_save(obj) {
 	obj.saved_ever = true
 	let proxyPath = 'dashboard'
 	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/dashboard`
 	if ( g_dashboard_info ) {
 		obj.user_name = g_dashboard_info.user_name
+		obj._id = obj.user_name
 		obj.email = g_dashboard_info.email
 		obj.token = g_dashboard_info.token
-		let result = postData(endpoint,obj)
+		let result = await postData(endpoint,obj)
 	}
 }
 
@@ -1631,30 +1648,62 @@ function real_save(obj) {
 
 // copy a file from a user directory to a public one.
 // this a published topic command...
-function real_publish(obj) {
+async function real_publish(obj) {
 	obj.published = true
-
+	//
+	let send_obj = Object.assign({},obj)
+	delete send_obj.data			// for a command don't send all the data (it will be on the server)
+	let proxyPath = 'dashboard'
+	let endpoint = `${location.protocol}//${g_siteURL}${port}/${proxyPath}/transition/dash-commands`
+	send_obj.topic = "command-publish"
+	send_obj.user_name = g_dashboard_info.user_name
+	send_obj.email = g_dashboard_info.email
+	send_obj.token = g_dashboard_info.token
+	let result = await postData(endpoint,send_obj) 	// send everything to be stored....
 }
 
 // remove a user's file from a public directory
-function real_unpublish(obj) {
+async function real_unpublish(obj) {
 	obj.published = false
+	//
+	let send_obj = Object.assign({},obj)
+	delete send_obj.data			// for a command don't send all the data (it will be on the server)
+	let proxyPath = 'dashboard'
+	let endpoint = `${location.protocol}//${g_siteURL}${port}/${proxyPath}/transition/dash-commands`
+	send_obj.topic = "command-recind"
+	send_obj.user_name = g_dashboard_info.user_name
+	send_obj.email = g_dashboard_info.email
+	send_obj.token = g_dashboard_info.token
+	let result = await postData(endpoint,send_obj)
 }
 
 // fetch the file from the backend once again...
-function real_reload(obj) {
+async function real_reload(obj) {
 	let proxyPath = 'dashboard'
 	let endpoint = `${location.protocol}//${g_siteURL}${port}/${proxyPath}/transition/dashboard`
-	obj.user_name = g_dashboard_info.user_name
-	obj.eamil = g_dashboard_info.ematil
-	obj.token = g_dashboard_info.token
-	let result = postData(endpoint,obj)
-
+	let send_obj = Object.assign({},obj)
+	delete send_obj.data			// for a command don't send all the data (it will be on the server)
+	//
+	send_obj.user_name = g_dashboard_info.user_name
+	send_obj.email = g_dashboard_info.email
+	send_obj.token = g_dashboard_info.token
+	let result = await postData(endpoint,obj)			// send everything and then update it on this page.
+	if ( result.status === "OK" ) {
+		let data = result.data
+		obj.title = data.title
+		obj.data = data.data
+		obj.id = data.id
+		obj.published = data.published
+		obj.deleted = data.deleted
+		obj.saved_ever = false
+		show_stuff(g_current_sel_display)
+		update_edit_display(obj)
+	}
 }
 
 
 // this is a publish command that will decrement a refernce count to a file, ultimately unpinning it.
-function real_delete(obj) {
+async function real_delete(obj) {
 	if ( !(obj.saved_ever) ) {
 		let index = g_current_entry_dom_map[obj.id]
 		let div_container_id = `div-${index}`
@@ -1671,26 +1720,100 @@ function real_delete(obj) {
 		g_all_user_entries[g_current_sel_display] = entries
 		//
 	} else {
-		
+		let send_obj = Object.assign({},obj)
+		delete send_obj.data			// for a command don't send all the data (it will be on the server)
+		let proxyPath = 'dashboard'
+		let endpoint = `${location.protocol}//${g_siteURL}${port}/${proxyPath}/transition/dash-commands`
+		send_obj.topic = "command-delete"
+		send_obj.user_name = g_dashboard_info.user_name
+		send_obj.email = g_dashboard_info.email
+		send_obj.token = g_dashboard_info.token
+		let result = await postData(endpoint,send_obj)
 	}
-//saved_ever
 }
 
 
+var g_backup_edit_for_change = {}
+//
+function setChangeListener (div, listener) {
+	div.addEventListener("blur", listener);
+	div.addEventListener("keyup", listener);
+	div.addEventListener("paste", listener);
+	div.addEventListener("copy", listener);
+	div.addEventListener("cut", listener);
+	div.addEventListener("delete", listener);
+	div.addEventListener("mouseup", listener);
+}
+
+
+function drop_content_aware() {
+	
+	let target = document.getElementById("floating-info-entry")
+	let title_el = document.getElementById("floating-info-entry-title-field")
+	if ( target ) {
+		target.addEventListener('focus',(ev) => {
+			//
+			let current_text = target.innerHTML
+			let title = title_el.value
+			g_backup_edit_for_change = {
+				"result" : current_text,
+				"name"   : title
+			}
+			//
+		})
+		//
+		setChangeListener(target, (event) => {
+			let current_text = target.innerHTML
+			let title = title_el.value
+			if ( g_backup_edit_for_change.result !== current_text ) {
+				if ( event.type === "keyup" ) {
+					let c = current_text[current_text.length-1]
+					if ( (c !== ' ') || (c !== '\n') ) {
+						return;
+					}
+				}
+				let res = {
+					"result" : current_text,
+					"name"   : title
+				}
+				perpare_for_upate(res)
+			}
+		});
+	}
+}
+
 
 function setup_user_dashboard(dashboardResponse) {
+
+	// this is a response object from the parent window....
+	g_dashboard_info = dashboardResponse		// it becomes the dahsboard info
+	
+	// use the field in the info object to populate elements with the same names 
+	// as the object field names
 	for ( let ky in dashboardResponse ) {
 		let el = document.getElementById(ky)
 		if ( el ) {
 			el.innerHTML = dashboardResponse[ky]
 		}
 	}
-	g_dashboard_info = dashboardResponse
 
 	g_all_user_entries = g_dashboard_info.entries
 	show_stuff('blog')
+	drop_content_aware()
 }
 
+/*
+{
+	'owner' : user,
+	'date'  : ('' + Date.now()),
+	'panel_key' : generate_password(),
+	'dashboard_text' : 'test dashboard_text'
+	//obj.header_user_name = g_dashboard_info.header_user_name
+	//obj.dashboard_text = dashboard_text
+	//obj.tag_line = obj.tag_line
+	'entries' : {}
+}
+*/
 
 // handle logout from the main control point....
 function site_wide_logout() {
@@ -1714,6 +1837,7 @@ function test_stuff() {
 			})
 		}
 	}
+	drop_content_aware()
 }
 /*
 */

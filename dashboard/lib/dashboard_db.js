@@ -25,9 +25,11 @@ class DashboardDBClass extends DBClass {
       let staticDB = new CustomStaticDB(g_persistence.message_fowarding)
       //
       let asset_intake = (obj) => {
-        this.this.asset_intake(obj)
+console.log("asset_intake")
+console.dir(obj)
+        this.asset_intake(obj)
       } 
-      g_persistence.message_fowarding.subscribe('user-dashboard',{ "source" : "dashboad" },asset_intake)
+      g_persistence.message_fowarding.subscribe('user-dashboard',{ "source" : "dashboad", "m_path" : "persistence" },asset_intake)
       //
       super(g_keyValueDB,g_keyValueSessions,persistenceDB,staticDB)
     }
@@ -50,6 +52,8 @@ class DashboardDBClass extends DBClass {
 
     asset_intake(obj) {   // This object has not been put into static store by the backend. the backned created the file and sent it.
       let static_dash = 'dashboard+' + obj.email 
+console.log("asset_intake " + static_dash)
+console.dir(obj)
       this.put_static_store(static_dash,obj,"application/json")  // store it ... means a local file copy... staticDB
     }
 

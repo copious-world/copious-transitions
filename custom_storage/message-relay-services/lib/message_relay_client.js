@@ -9,21 +9,99 @@ const PORT = 1234;
 const HOST = 'localhost';
 const MAX_UNANSWERED_MESSAGES = 100
 const DEFAULT_CONF_WRAP_LIMIT = 100
+const DEFAULT_MAX_RECONNECT = 20
+const DEFAULT_RECONNECT_WAIT = 5
  
+// // 
 class Client extends EventEmitter {
     //
     constructor(conf) {
         super()
         this.port = conf ? conf.port || PORT : PORT
         this.address = conf ? conf.address || HOST : HOST
-        this.max_unanswered =  conf ? conf.max_unanswered_messages || MAX_UNANSWERED_MESSAGES : MAX_UNANSWERED_MESSAGES  
+        this.max_unanswered =  conf ? conf.max_pending_messages || MAX_UNANSWERED_MESSAGES : MAX_UNANSWERED_MESSAGES  
         this.file_shunting = conf ? conf.file_shunting || false : false
         this.files_only = false
         this.file_per_message = false
         //
         this.socket = null
         this.files_going = false
+        this.attempt_reconnect = false
+        //
+        this.reconnect_wait = DEFAULT_RECONNECT_WAIT
+        this.max_reconnect = DEFAULT_MAX_RECONNECT
+        this.reconnect_count = 0
         if ( conf ) this.init(conf);
+    }
+
+
+    connection_processing(client,conf) {
+        //
+        client.waiting_for_response = new Array(client.max_unanswered)
+        client.waiting_for_response.fill(false,0,client.max_unanswered)
+        //
+        client.socket = new net.Socket();
+        //
+        client.socket.connect(client.port, client.address, () => {
+            client.reconnect_count = 0
+            console.log(`Client connected to: ${client.address} :  ${client.port}`);
+        });
+        //
+        client.socket.on('close', (onErr) => {
+            if ( onErr ) {
+                console.log(`got a closing error on ${client.address} :  ${client.port}`)
+            }
+            console.log('Client closed');
+            if ( client.attempt_reconnect ) {
+                client.reconnect_count++
+                if ( client.reconnect_count < client.max_reconnect ) {
+                    //
+                    setTimeout(() => { 
+                        client.connection_processing(client,conf)
+                    },client.reconnect_wait)
+                    //
+                }
+            }
+        });
+        //
+        client.socket.on('data', (data) => {
+            let str = data.toString()
+            let message = undefined
+            try {
+                message = JSON.parse(str)
+                if ( message._response_id !== undefined ) {
+                    let resolver = client.waiting_for_response[message._response_id]
+                    resolver(message)
+                    return;
+                }
+            } catch (e) {
+            }
+            client.handle_unsolicited(str,message)
+        });
+        //
+        client.socket.on('error',(err) => {
+            console.log(__filename)
+            console.log(err);
+            if ( client.attempt_reconnect ) {
+                if ( client.reconnect_count < client.max_reconnect ) {
+                    return;
+                }
+            }
+            if ( client.file_shunting ) {
+                let output_dir = process.cwd()
+                if ( conf.output_dir !== undefined ) {
+                    output_dir = conf.output_dir
+                }
+                let output_file = '/message_relay.txt'
+                if ( conf.output_file !== undefined ) {
+                    output_file = conf.output_file
+                }
+                console.log(`falling back to ${output_dir + output_file}`)
+                let fpath = output_dir + output_file
+                client.file_output = fs.createWriteStream(fpath)
+                client.files_going = true
+            }
+        })
     }
 
     //
@@ -39,54 +117,20 @@ class Client extends EventEmitter {
             this.files_going = true
             this.setup_file_output(conf)
         } else {
+            this.attempt_reconnect = conf.attempt_reconnect ? conf.attempt_reconnect : false
+            if ( this.attempt_reconnect ) {
+                this.max_reconnect = conf.max_reconnect ? conf.max_reconnect : this.max_reconnect
+                this.reconnect_wait = conf.reconnect_wait ? conf.reconnect_wait : this.reconnect_wait
+                if ( typeof this.reconnect_wait === "string" ) {
+                    this.reconnect_wait = parseInt(this.reconnect_wait)
+                }
+                this.reconnect_wait = this.reconnect_wait*1000
+                this.reconnect_count = 0
+            }
+            //
             let client = this;
+            this.connection_processing(client,conf) 
             //
-            this.waiting_for_response = new Array(this.max_unanswered)
-            this.waiting_for_response.fill(false,0,this.max_unanswered)
-            //
-            this.socket = new net.Socket();
-            //
-            client.socket.connect(client.port, client.address, () => {
-                console.log(`Client connected to: ${client.address} :  ${client.port}`);
-            });
-            //
-            client.socket.on('close', () => {
-                console.log('Client closed');
-            });
-            //
-            client.socket.on('data', (data) => {
-                let str = data.toString()
-                let message = undefined
-                try {
-                    message = JSON.parse(str)
-                    if ( message._response_id !== undefined ) {
-                        let resolver = this.waiting_for_response[message._response_id]
-                        resolver(message)
-                        return;
-                    }
-                } catch (e) {
-                }
-                this.handle_unsolicited(str,message)
-            });
-            //
-            client.socket.on('error',(err) => {
-                console.log(__filename)
-                console.log(err);
-                if ( this.file_shunting ) {
-                    let output_dir = process.cwd()
-                    if ( conf.output_dir !== undefined ) {
-                        output_dir = conf.output_dir
-                    }
-                    let output_file = '/message_relay.txt'
-                    if ( conf.output_file !== undefined ) {
-                        output_file = conf.output_file
-                    }
-                    console.log(`falling back to ${output_dir + output_file}`)
-                    let fpath = output_dir + output_file
-                    this.file_output = fs.createWriteStream(fpath)
-                    this.files_going = true
-                }
-            })
         }
         //
     }

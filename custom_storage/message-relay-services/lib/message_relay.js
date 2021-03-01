@@ -34,9 +34,10 @@ class JsonMessage {
     // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
     //
 
-    message_complete() {
-        let msg = this.last_message
+    message_complete(mescon) {
+        let msg = mescon.last_message
         msg = msg.trim()
+        console.log(msg)
         if ( !(msg.length) ) return ""
         //
         msg = msg.replace(/\}\s+\{/g,'}{')
@@ -50,13 +51,13 @@ class JsonMessage {
             if ( i > 0 ) str = '{' + str
             try {
                 let m_obj = JSON.parse(str)
-                this.message_queue.push(m_obj)
+                mescon.message_queue.push(m_obj)
             } catch (e) {
                 console.log(e)
-                this.last_message = rest
+                return(rest)
             }
         }
-        return(this.message_queue.length > 0)
+        return("")
     }
 
     // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -100,6 +101,7 @@ class JsonMessage {
                             let resp_id = this.current_message._response_id
                             if (  this.current_message.ps_op === 'sub'  ) {
                                 // path
+                                let topic = this.current_message.topic
                                 let listener = ((sock,tt) => {
                                                     return (msg) => {
                                                             msg.topic = tt
@@ -108,7 +110,6 @@ class JsonMessage {
                                                     }
                                                 )(this.sock,topic)
                                 this.handlers_by_path[path] = listener
-                                let topic = this.current_message
                                 result = path_handler.subscribe(topic,this.current_message,listener)
                             } else {
                                 result = await path_handler.send(this.current_message)
@@ -179,7 +180,9 @@ class Server {
             sock.on('data', (data) => {
                 let mescon = g_messenger_connections[client_name]
                 mescon.add_data(data)
-                if ( mescon.message_complete() ) {
+
+                mescon.last_message = mescon.message_complete(mescon)
+                if (  mescon.message_queue.length  ) {
                     (async () => { await mescon.forward_op() })();
                 }
             });

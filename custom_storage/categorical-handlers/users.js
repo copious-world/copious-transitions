@@ -15,11 +15,19 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
         this._type_directories = [ "blog", "stream", "demo", "assets", "ownership", "notify" ]
         this.all_users = conf.all_users
         this.template_dir = conf.asset_template_dir
+        this._gen_targets = conf._gen_targets
         this.create_OK = true
 
         console.log(process.cwd())
     }
 
+
+    make_path(u_obj) {
+        let user_id = u_obj._id
+                    // password is a hash of the password, might encrypt it... (also might carry other info to the back..)
+        let user_path = `${this.all_users}/${user_id}_${msg_obj.password}.json`
+        return(user_path)
+    }
     //
     async ensure_directories(user_id) {
         let upath = this.user_directory + '/' + user_id
@@ -48,15 +56,14 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
             "base" : assets_dir.substr(1)  // no '.' at front
         }
         msg_obj.dir_paths = dir_paths
-        await asset_generator(this.template_dir,assets_dir,msg_obj)
+        await asset_generator(this.template_dir,assets_dir,msg_obj,this._gen_targets)
     }
+
 
     //
     async create_entry_type(msg_obj) {  // to the user's directory
         try {
-            let user_id = msg_obj._id
-            // password is a hash of the password, might encrypt it... (also might carry other info to the back..)
-            let user_path = `${this.all_users}/${user_id}_${msg_obj.password}.json`
+            let user_path = this.make_path(msg_obj)
             await fsPromises.writeFile(user_path,(JSON.stringify(msg_obj)),{ 'flag' : 'wx' })
             return "OK"
         } catch(e) {
@@ -68,8 +75,7 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
     //
     async load_data(msg_obj) {
         try {
-            let user_id = msg_obj._id
-            let user_path = `${this.all_users}/${user_id}_${msg_obj[msg_obj.key_field]}.json`
+            let user_path = this.make_path(msg_obj)
             let data = await fsPromises.readFile(user_path)
             return(data.toString())
         } catch (e) {
@@ -85,8 +91,7 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
     //
     async update_entry_type(msg_obj) {
         try {
-            let user_id = msg_obj._id
-            let user_path = `${this.all_users}/${user_id}_${msg_obj[msg_obj.key_field]}.json`
+            let user_path = this.make_path(msg_obj)
             let data = await fsPromises.readFile(user_path)
             try {
                 let u_obj = JSON.parse(data.toString())

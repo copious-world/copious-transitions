@@ -10,7 +10,7 @@ const Handlebars = require('handlebars')
 const g_output_dir = "test_output"
 const g_template_dir = './user_templates'
 
-// 
+// // 
 async function load_template_package(dirpath,noisy,cb) {
     try {
         let files = await fsPromises.readdir(dirpath)
@@ -52,29 +52,37 @@ async function load_template_package(dirpath,noisy,cb) {
 // to be spawned --- do not want to keep this in process... 
 
 
-async function generate_user_custom_file(path,template_src,user_obj) {
-    try {
-        let template = Handlebars.compile(template_src);
-        let content = template(user_obj);
-        fs.writeFile(path,content,(err) => {})    
-    } catch (e) {
-        console.error(e)
+async function generate_user_custom_file(path,template_src,user_obj,custom_gen) {
+    if ( custom_gen ) {
+        content = custom_gen(user_obj)
+        fs.writeFile(path,content,(err) => {})
+    } else {
+        try {
+            let template = Handlebars.compile(template_src);
+            let content = template(user_obj);
+            fs.writeFile(path,content,(err) => {})    
+        } catch (e) {
+            console.error(e)
+        }    
     }
 }
 
 
-
-
-async function run_all(input_dir,user_dir,user_obj) {
+async function run_all(input_dir,user_dir,user_obj,custom_procs) {
     //
     await load_template_package(input_dir,true, async (html_template,ky_path) => {
-        let out_path = `${user_dir}/${ky_path}.html`
-        if ( user_obj.dir_paths ) {
-            let stored_path = `/${user_obj._id }/${ky_path}.html`
-console.log(stored_path)
-            user_obj.dir_paths[`${ky_path}`] = stored_path
+        let ext = ".html"
+        if ( custom_procs ) {
+            ext = custom_procs.extension
         }
-        generate_user_custom_file(out_path,html_template,user_obj)
+        let out_path = `${user_dir}/${ky_path}${ext}`
+        let custom_gen = false
+        if ( user_obj.dir_paths ) {
+            let stored_path = `/${user_obj._id }/${ky_path}${ext}`
+            user_obj.dir_paths[`${ky_path}`] = stored_path
+            custom_gen = custom_procs[`${ky_path}`]
+        }
+        generate_user_custom_file(out_path,html_template,user_obj,custom_gen)
     })
     //
 }
