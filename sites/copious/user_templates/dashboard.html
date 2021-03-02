@@ -793,7 +793,7 @@ html {
 		<div class="items">
 			<div class="item">
 				<div style="height: fit-content;text-align: center;border-bottom: 1px solid darkslateblue;">
-					<h4 id="user_name">{{user_name}}</h4>
+					<h4 id="email">{{user_name}}</h4>
 				</div>
 				<div style="border: thistle 2px solid;padding: 4px;background-color: rgb(248, 238, 220);">
 					<span id="date" style="text-decoration: underline;color: rgb(88, 13, 13);">
@@ -1797,7 +1797,12 @@ function setup_user_dashboard(dashboardResponse) {
 		}
 	}
 
-	g_all_user_entries = g_dashboard_info.entries
+	let _entries = g_dashboard_info.entries
+	for ( let ky in g_all_user_entries ) {
+		if ( _entries[ky] !== undefined ) {
+			g_all_user_entries[ky] = _entries[ky]
+		}
+	}
 	show_stuff('blog')
 	drop_content_aware()
 }
@@ -1841,8 +1846,8 @@ function test_stuff() {
 }
 /*
 */
-test_stuff()
-show_stuff("blog")
+//test_stuff()
+//show_stuff("blog")
 
 
 </script>

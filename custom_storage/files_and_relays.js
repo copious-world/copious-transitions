@@ -9,9 +9,9 @@ const AGED_OUT_DELTA = (1000*60*30)
 //
 class FilesAndRelays extends AppLifeCycle {
     //
-    constructor(persistence_messenger,stash_interval,default_m_type) {
+    constructor(persistence_messenger,stash_interval,default_m_path) {
         super()
-        this.default_m_type = default_m_type ? default_m_type : 'persistence'
+        this.default_m_path = default_m_path ? default_m_path : 'persistence'
         this.messenger = persistence_messenger
         if ( this.messenger === undefined ) {
             throw new Error("Files and Relays -- must have a defined messenger -- cannot proceed without it.")
@@ -115,7 +115,7 @@ class FilesAndRelays extends AppLifeCycle {
             let ts = stamps.shift()
             if ( ctime > ts ) {
                 let ids = this._time_to_id[ts]
-                this.remote_store(ids,prune)
+                this.remote_store(ids,true)
                 if ( Object.keys(ids) == 0 ) {
                     delete this._time_to_id[ts]
                 }
@@ -163,9 +163,9 @@ class FilesAndRelays extends AppLifeCycle {
     /// --- COMMUNICATION METHODS....
 
     async remote_fetch_message(id,field) {
-        let m_type = this.default_m_type
+        let m_path = this.default_m_path
         let msg = {
-            "m_type" : m_type,
+            "m_path" : m_path,
             "el_id"  : id,
             "op"     : "G"
         }
@@ -181,17 +181,17 @@ class FilesAndRelays extends AppLifeCycle {
     }
 
     remote_store_message(obj) {
-        let m_type = obj.m_type ? obj.m_type : this.default_m_type
+        let m_path = obj.m_path ? obj.m_path : this.default_m_path
         let msg = Object.assign({},obj)
-        msg.m_type = m_type
+        msg.m_path = m_path
         msg.op = "S"
         this.messenger.send(msg)
     }
 
     remote_store_dereference(id) {
-        let m_type = obj.m_type ? obj.m_type : this.default_m_type
+        let m_path = obj.m_path ? obj.m_path : this.default_m_path
         let msg = {
-            "m_type" : m_type,
+            "m_path" : m_path,
             "el_id"  : id,
             "op"     : "D"
         }

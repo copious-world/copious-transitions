@@ -20,10 +20,12 @@ class DashboardStatic extends GeneralStatic {
         let [static_dash,dash_info] = this. _user_static_descriptors(user)
         this.db.put_static_store(static_dash,dash_info,"application/json")
       })
+      /*
       this.db.static_synchronizer((user) => {  
         let [static_dash,dash_info] = this. _user_static_descriptors(user)
         //[static_dash,dash_info]
       })
+      */
     }
 
     _user_static_descriptors(user_id) {

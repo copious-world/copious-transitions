@@ -2853,17 +2853,32 @@ async function fetchUploader(theDiv) {
                let body = {
                   'token' : g_Loggedin_session_token
                }
-               let dashboardResponse = await postData(g_dashboard_url,body)
-               if ( dashboardResponse.owner === g_dashboard_owner ) {
-                  var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
-                  let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,
+               	let dashboardResponse = await postData(g_dashboard_url,body)
+               	if ( dashboardResponse.owner === g_dashboard_owner ) {
+					let label = dashboardResponse.which_dashboard ? dashboardResponse.which_dashboard : (dashboardResponse._id + 'dashboard')
+                	var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
+                	let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,
                                                    `${dashboardResponse.which_dashboard}`,windowFeatures)
                   if ( dashboard ) {
                      dashboard.onload = (ev) => {
                         try {
-                           dashboard.setup_user_dashboard(dashboardResponse)
-                           g_app_dashboard = dashboard
-                           dashboard.focus()
+							g_app_dashboard = dashboard
+							if ( dashboardResponse.dashboard ) {
+								let dash_data = decodeURIComponent(dashboardResponse.dashboard)
+								try {
+									dash_data = JSON.parse(dash_data)
+									for ( let ky in dashboardResponse ) {
+										if ( ky === 'dashboard' ) continue
+										dash_data[ky] = dashboardResponse[ky]
+									}
+									dashboard.setup_user_dashboard(dash_data)
+								} catch (e) {
+
+								}
+							} else {
+								dashboard.setup_user_dashboard(dashboardResponse)
+							}
+                           g_app_dashboard.focus()
                         } catch (e) {
                         }
                      }

@@ -128,7 +128,7 @@ class CaptchaDBClass extends DBClass {
         } else {
           let key_key = G_users_trns.kv_store_key()  // more persistent than the cache
           let key = fdata[key_key]
-          udata = super.fetch_user(key)  // no callback, just get value -- means the user has been entered into storage somewhere...
+          udata = await super.fetch_user(key)  // no callback, just get value -- means the user has been entered into storage somewhere...
           if ( udata ) {
             this.store_cache(key,udata,G_users_trns.back_ref());    // from persitence to local cache
             return(udata)

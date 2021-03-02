@@ -63,8 +63,8 @@ function mime_to_file_type(mime_type) {
 //
 class StaticContracts extends FilesAndRelays {
     //
-    constructor(messenger,stash_interval,default_m_type,whokey_field) {
-        super(messenger,stash_interval,default_m_type)
+    constructor(messenger,stash_interval,default_m_path,whokey_field) {
+        super(messenger,stash_interval,default_m_path)
 
         this._whokey_to_ids = {}
         this._whokey_to_hash = {}
@@ -394,7 +394,7 @@ class StaticContracts extends FilesAndRelays {
 
     schedule(sync_function,static_sync_interval) {  // sync_function this may go away, but it is here for now...
         if ( static_sync_interval ) {
-            this.storage_interval = setInterval(() => { this.static_backup() })
+            this.storage_interval = setInterval(() => { this.static_backup() },static_sync_interval)
         }
     }
     //

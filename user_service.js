@@ -139,8 +139,10 @@ g_app.post('/guarded/static/:asset', async (req, res) => {
                 return(res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));    // transition object has token
             } else {
                 let asset_obj = await g_statics.fetch(asset);     // no checks being done, just send the asset. No token field included
-                res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
-                return(res.end(asset_obj.string));
+                if ( (asset_obj !== false)  && ( asset_obj.mime_type !== undefined )) {
+                    res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
+                    return(res.end(asset_obj.string));
+                }
             }
         }
     }
@@ -161,8 +163,10 @@ g_app.post('/guarded/dynamic/:asset', async (req, res) => {
                 return(res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));    // transition object has token
             } else {
                 let asset_obj = await g_dynamics.fetch(asset,transitionObj);     // no checks being done, just send the asset. No token field included
-                res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
-                return(res.end(asset_obj.string));
+                if ( (asset_obj !== false)  && ( asset_obj.mime_type !== undefined )) {
+                    res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
+                    return(res.end(asset_obj.string));
+                }
             }
         }
     }
@@ -178,8 +182,10 @@ g_app.post('/secondary/guarded', async (req,res) => {
             if ( g_session_manager.match(body,cached_transition)  ) {                // check on matching tokens and possibly other things
                 if ( g_session_manager.key_mime_type_transition(req) ) {
                     let asset_obj = cached_transition.data                          // Finally, send the asset 
-                    res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
-                    return(res.end(asset_obj.string));
+                    if ( (asset_obj !== false)  && ( asset_obj.mime_type !== undefined )) {
+                        res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
+                        return(res.end(asset_obj.string));
+                    }
                 }
             }
         }

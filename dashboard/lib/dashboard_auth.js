@@ -80,8 +80,11 @@ class DashboardSessionManager extends SessionManager {
         if ( this.user_cookie !== undefined ) {
             if ( req && (req.cookies !== undefined) ) {
                 let session_from_cookie = req.cookies[this.user_cookie]
-                if ( !(this.token_match(session_from_cookie,session_token)) ) {
-                    return(false)
+                if ( session_from_cookie !== undefined ) {  
+                    // will check this if it is being used... otherwise, out the weight on having the token in the body.
+                    if ( !(this.token_match(session_from_cookie,session_token)) ) {
+                        return(false)
+                    }    
                 }
             }
         }
