@@ -20,7 +20,6 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
         this.init_public_directories()
     }
 
-
     make_path(u_obj) {
         let entry_type = u_obj.asset_type
         let user_id = u_obj._id
@@ -35,6 +34,8 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
         let public_path = this._type_directories[entry_type]
         public_path += '/' + msg_obj[msg_obj.key_field] + ".json"    
     }
+
+    user_action_keyfile(op,obj) {}
 
     async ensure_directories(user_id) {
         //
@@ -68,7 +69,6 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
         }
     }
 
-
     async publish(msg_obj) {        // actual pulication... this file becomes available to the general public...
         try {
             //
@@ -83,12 +83,12 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
         }
     }
 
-
     // data coming from a user dashboard, profile, etc.
     async create_entry_type(msg_obj) {  // to the user's directory
         try {
             let user_path = this.make_path(msg_obj)
             await fsPromises.writeFile(user_path,JSON.stringify(msg_obj))
+            this.user_action_keyfile('C',msg_obj)
             return "OK"
         } catch(e) {
             console.log(e)
@@ -111,7 +111,6 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
         return false
     }
 
-
     async update_entry_type(msg_obj) {
         try {
             let user_path = this.make_path(msg_obj)
@@ -123,6 +122,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
                     u_obj[ky] = msg_obj[ky]
                 }
                 await fsPromises.writeFile(user_path,JSON.stringify(u_obj))
+                this.user_action_keyfile('U',msg_obj)
                 return "OK"
             } catch (e) {
                 console.log(">>-------------update parse data------------------------")
@@ -150,6 +150,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
             let public_path = this.make_public_path(msg_obj)
             await fsPromises.rm(public_path)
             //
+            this.user_action_keyfile('D',msg_obj)
             return "OK"
         } catch (e) {
             console.log(">>-------------update read------------------------")
@@ -160,7 +161,6 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
         }
         return "ERR"
     }
-
 
     async app_message_handler(msg_obj) {
         let op = msg_obj.op
@@ -184,7 +184,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
                 result = await this.delete(msg_obj)
                 break
             }
-            default: {  // or send
+            default: {  // or send 'S'
                 let action = msg_obj.user_op
                 if ( action === "create" ) {
                     result = await this.create_entry_type(msg_obj)

@@ -51,8 +51,10 @@ class DashboardTransitionEngineClass extends GeneralTransitionEngine {
         let result = await this.db.pdb.search_one(key)
         if ( !!(result) ) {
             info_obj._id = result._id
+            info_obj.user_op = 'update' 
             await this.db.pdb.update(info_obj)
         } else {
+            info_obj.user_op = 'create' 
             await this.db.pdb.create(info_obj)
         }
         if ( result ) {

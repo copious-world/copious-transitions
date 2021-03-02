@@ -41,19 +41,15 @@ class PathHandler extends EventEmitter {
     }
 
     async get(message) {
-        let op_message = {
-            "op" : "G",
-            "param" : message
-        }
+        let op_message = Object.assign({},message)
+        if ( op_message.op !== 'G' ) op_message.op = 'G'
         let response = await this.message_relayer.sendMessage(op_message)
         return response
     }
 
     async del(message) {
-        let op_message = {
-            "op" : "D",
-            "param" : message
-        }
+        let op_message = Object.assign({},message)
+        if ( op_message.op !== 'D' ) op_message.op = 'D'
         let response = await this.message_relayer.sendMessage(op_message)
         return response
     }

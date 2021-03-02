@@ -76,20 +76,27 @@ class JsonMessage {
                     let op = this.current_message.op
                     switch ( op ) {
                         case "G" : {
+                            let old_response_id = this.current_message._response_id
                             let result = await path_handler.get(this.current_message)
                             result = result !== false ? result : "ERROR"
-                            let response = {
-                                "_response_id" : this.current_message._response_id,
-                                "msg" : result
+                            if ( typeof result === "string" ) {
+                                let response = {
+                                    "_response_id" : old_response_id,
+                                    "msg" : result
+                                }
+                                this.sock.write(JSON.stringify(response))    
+                            } else {
+                                result._response_id = old_response_id
+                                this.sock.write(JSON.stringify(response)) 
                             }
-                            this.sock.write(JSON.stringify(response))
                             break;
                         }
                         case "D" : {
+                            let old_response_id = this.current_message._response_id
                             let result = await path_handler.del(this.current_message)
                             result = result !== false ? result : "ERROR"
                             let response = {
-                                "_response_id" : this.current_message._response_id,
+                                "_response_id" : old_response_id,
                                 "msg" : result
                             }
                             this.sock.write(JSON.stringify(response))
@@ -98,7 +105,7 @@ class JsonMessage {
                         case "S" :
                         default : {  // sending forward op message or any other message. May be a subscription..
                             let result = false
-                            let resp_id = this.current_message._response_id
+                            let old_response_id = this.current_message._response_id
                             if (  this.current_message.ps_op === 'sub'  ) {
                                 // path
                                 let topic = this.current_message.topic
@@ -116,7 +123,7 @@ class JsonMessage {
                             }
                             result = result !== false ? result : "ERROR"
                             let response = {
-                                "_response_id" : resp_id,
+                                "_response_id" : old_response_id,
                                 "msg" : result
                             }
                             this.sock.write(JSON.stringify(response))

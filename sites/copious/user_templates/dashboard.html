@@ -1633,7 +1633,8 @@ var g_dashboard_info = null
 async function real_save(obj) {
 	obj.saved_ever = true
 	let proxyPath = 'dashboard'
-	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/dashboard`
+	let ky = g_current_sel_display
+	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/${ky}`
 	if ( g_dashboard_info ) {
 		obj.user_name = g_dashboard_info.user_name
 		obj._id = obj.user_name
@@ -1838,7 +1839,8 @@ function test_stuff() {
 				'title' : `${ky}_${i}_a bunch of stuff that can be said.....`,
 				'data'  : `All about ${ky}_${i}_a bunch of stuff that can be said..... if you will\on a better day something random`,
 				'deleted' : false,
-				'saved_ever' : true
+				'saved_ever' : true,
+				'asset_type' : ky
 			})
 		}
 	}

@@ -1,4 +1,5 @@
 const TaggedTransition = require.main.require("./lib/tagged_transitions")
+const uuid = require('uuid/v4')
 
 // Dashboard Users
 class Dashboards extends TaggedTransition {
@@ -86,6 +87,7 @@ class DashboardsCommands extends Dashboards {
         //
     }
 
+
     can_publish(topic) {
         // check to see if the topic belongs to a profile operation...
         if ( (topic in this.ok_topics) || (topic in this.ok_command)) {
@@ -97,15 +99,56 @@ class DashboardsCommands extends Dashboards {
 }
 
 
+class DashboardsAssets extends Dashboards {
+    constructor() {
+        super('dash-commands')
+        //
+        this.ok_assets = [
+            "blog",
+            "demo",  // encryption check as well...
+            "streams",
+            "link_package"
+        ]
+        //
+        this.last_tagged = undefined
+    }
+
+    tagged(asset_type) {
+        this.last_tagged = undefined
+        if ( this.ok_assets.indexOf(asset_type) >= 0 ) {
+            this.last_tagged = asset_type
+            return(true)
+        }
+        return(false)
+    }
+
+    update(data) {
+        data.asset_type = this.last_tagged
+        if ( data._id ) {
+            data._tracking = data._id
+            data.key_field = "_tracking"
+            data.trans_path =`${data._tracking}+${data.asset_type}+${data.email}`
+        } else {
+            data._tracking = uuid()
+            data.key_field = "_tracking"
+            data.trans_path =`${data._tracking}+${data.asset_type}+${data.email}`
+        }
+    }
+
+}
+
+
 class DashboardCustomTransitions {
     constructor() {
         this.dashboard_keyed = new Dashboards()
         this.dash_command_keyed = new DashboardsCommands()
+        this.dash_assets_keyed = new DashboardsAssets()
     }
 
     initialize() {
         global.G_dashboard_trns = this.dashboard_keyed
         global.G_dashboard_commands_trns = this.dash_command_keyed
+        global.G_dashboard_asset = this.dash_assets_keyed
     }
 }
 
