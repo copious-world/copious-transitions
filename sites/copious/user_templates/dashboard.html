@@ -1159,7 +1159,14 @@ function get_object(item_id)  {
 function get_data(id) {
 	let index = get_index(id)
 	let entries = g_all_user_entries[g_current_sel_display]
-	return (entries[index].data)
+	let data = entries[index].data
+	if ( data === undefined ) {
+		data = entries[index].txt_full
+		if ( data ) {
+			entries[index].data = data
+		} else data = ""
+	}
+	return (data)
 }
 
 function get_title(id) {

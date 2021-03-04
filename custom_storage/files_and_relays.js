@@ -2,6 +2,7 @@
 const AppLifeCycle = require('../lib/general_lifecyle')
 const fs = require('fs')
 const uuid = require('uuid/v4')
+const { type } = require('os')
 
 const DB_STASH_INTERVAL = 10000
 const AGED_OUT_DELTA = (1000*60*30)
@@ -175,6 +176,22 @@ class FilesAndRelays extends AppLifeCycle {
         }
         let response = await this.messenger.send(msg)
         if ( response ) {
+            if ( typeof response === 'object' ) {
+                if ( response.msg ) return response.msg
+                if ( response.status === "OK") {
+                    let data = response.data
+                    if ( typeof data === "string" ) {
+                        try {
+                            let obj = JSON.parse(data)
+                            return obj
+                        } catch (e) {}  // parse error
+                    }
+                    return response.data
+                }
+                if ( response.status === "ERR" ) {
+                    return false
+                }
+            }
             return response
         }
         return(false)
@@ -236,8 +253,11 @@ class FilesAndRelays extends AppLifeCycle {
             // the object in 'storage_map' is not going to keep lots of data around
             // the data is assumed to be in a remote machine (e.g. db server or other...)
             let sender = this.application_stash_large_data(obj)     // so make the app responsible for managing the large data
-            sender.user_op = 'create'
-            this.remote_store_message(sender)             // send it away, large data and all....
+            if ( !(obj._tx_no_remote) ) {      // in cases where it is known that the object was published from the same remote store.
+                sender.user_op = 'create'
+                this.remote_store_message(sender)             // send it away, large data and all....    
+            }
+            if ( obj._tx_no_remote ) delete sender._tx_no_remote
             return true    
         }
         return false
@@ -276,18 +296,18 @@ class FilesAndRelays extends AppLifeCycle {
         return(app_version)
     }
 
-
     async update(obj,dont_remote) {
         if ( !(obj._id) || !(this._storage_map[obj._id]) ) {
             return new Error("does not exists")
         }
         this._storage_map[obj._id] = obj
         obj._tstamp = this.update_stamp(obj._tstamp,obj._id)
-        if ( !(dont_remote) ) {
+        if ( !(dont_remote) && !(obj._tx_no_remote) ) {
             let sender = await this.application_unstash_large_data(obj)
             sender.user_op = 'update'
             this.remote_store_message(sender)
         }
+        if ( obj._tx_no_remote ) delete sender._tx_no_remote
         this.application_stash_large_data(obj)
         this.dirty = true
         return(false)  // false is good

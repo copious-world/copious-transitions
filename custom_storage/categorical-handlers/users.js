@@ -65,6 +65,7 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
         try {
             let user_path = this.make_path(msg_obj)
             if ( !(user_path) ) return "ERR"
+console.log(`create_entry_type  ${user_path}`)
             await fsPromises.writeFile(user_path,(JSON.stringify(msg_obj)),{ 'flag' : 'wx' })
             return "OK"
         } catch(e) {
@@ -78,6 +79,7 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
         try {
             let user_path = this.make_path(msg_obj)
             if ( !(user_path) ) return "ERR"
+console.log(`load_data  ${user_path}`)
             let data = await fsPromises.readFile(user_path)
             return(data.toString())
         } catch (e) {
@@ -102,6 +104,7 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
                     if ( ky === '_id' ) continue;
                     u_obj[ky] = msg_obj[ky]
                 }
+console.log(`load_data  ${user_path}`)
                 await fsPromises.writeFile(user_path,JSON.stringify(u_obj))
                 return "OK"
             } catch (e) {

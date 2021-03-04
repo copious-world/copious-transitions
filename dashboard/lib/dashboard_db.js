@@ -25,8 +25,6 @@ class DashboardDBClass extends DBClass {
       let staticDB = new CustomStaticDB(g_persistence.message_fowarding)
       //
       let asset_intake = (obj) => {
-console.log("asset_intake")
-console.dir(obj)
         this.asset_intake(obj)
       } 
       g_persistence.message_fowarding.subscribe('user-dashboard',{ "source" : "dashboad", "m_path" : "persistence" },asset_intake)
@@ -54,6 +52,7 @@ console.dir(obj)
       let static_dash = 'dashboard+' + obj.email 
 console.log("asset_intake " + static_dash)
 console.dir(obj)
+      obj._tx_no_remote = true
       this.put_static_store(static_dash,obj,"application/json")  // store it ... means a local file copy... staticDB
     }
 

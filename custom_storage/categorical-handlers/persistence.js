@@ -106,7 +106,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
         let user_path = ""
         try {
             user_path = this.make_path(msg_obj)
-            if ( !(user_path) ) return "ERR"
+            if ( !(user_path) ) return false
             let data = await fsPromises.readFile(user_path)
             return(data.toString())
         } catch (e) {
@@ -180,7 +180,10 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
         let op = msg_obj._tx_op
         let result = "OK"
         let user_id = msg_obj._user_dir_key ? msg_obj[msg_obj._user_dir_key] : msg_obj._id
-        if ( this.create_OK && !!(user_id) ) {
+        if ( (user_id === undefined) && (msg_obj._id !== undefined) ) {
+            user_id = msg_obj._id
+        }
+        if ( this.create_OK && !!(user_id) && (msg_obj._tx_directory_ensurance) ) {
             await this.ensure_directories(user_id)
         }
         switch ( op ) {
@@ -191,7 +194,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
             case 'G' : {        // get user information
                 let stat = "OK"
                 let data = await this.load_data(msg_obj)
-                if ( data === false ) stat = "ERR"
+                if ( data === false ) { stat = "ERR"; data = "" }
                 return({ "status" : stat, "data" : data,  "explain" : "get", "when" : Date.now() })
             }
             case 'D' : {        // delete asset from everywhere if all ref counts to zero. (unpinned)

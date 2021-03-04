@@ -210,7 +210,7 @@ class Client extends EventEmitter {
     }
 
     send(message) {     // sometimes synonyms help
-        this.sendMessage(message)
+        return this.sendMessage(message)
     }
 
     //
