@@ -1,6 +1,7 @@
 const { GeneralTransitionEngine } = require.main.require('./lib/general_transition_engine')
 const hexUtils = require.main.require('./lib/hex_utils')
 const fs = require('fs')
+const uuid = require('uuid/v4')
 
 //const EventEmitter = require('events')
 //const cached = require('cached')
@@ -50,10 +51,17 @@ class DashboardTransitionEngineClass extends GeneralTransitionEngine {
     async forward_user_asset(key,info_obj) {
         let result = await this.db.pdb.search_one(key)
         if ( !!(result) ) {
-            info_obj._id = result._id
+            if ( !!(info_obj._id) ) {
+                info_obj._id = result._id
+            }
             info_obj.user_op = 'update' 
             await this.db.pdb.update(info_obj)
         } else {
+            if ( info_obj._id && info_obj._id[0] === '+' ) {
+                info_obj._id = uuid() + info_obj._id
+            } else {
+                info_obj._id = uuid() + `+${info_obj.asset_type}+${info_obj.email}`
+            }
             info_obj.user_op = 'create' 
             await this.db.pdb.create(info_obj)
         }
@@ -64,8 +72,8 @@ class DashboardTransitionEngineClass extends GeneralTransitionEngine {
             }
             if ( typeof result.status === "string" ) return result
             if ( result !== false ) return "OK"
-            return "ERR"
         }
+        return "ERR"
     }
     //
 }

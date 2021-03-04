@@ -122,16 +122,30 @@ class DashboardsAssets extends Dashboards {
         return(false)
     }
 
+    has_secondary_action(asset_type) {
+        return(false)
+    }
+
     update(data) {
         data.asset_type = this.last_tagged
         if ( data._id ) {
             data._tracking = data._id
-            data.key_field = "_tracking"
-            data.trans_path =`${data._tracking}+${data.asset_type}+${data.email}`
+            data.key_field = "_transition_path"
+            data._user_dir_key = "email"
+            data._transition_path =`${data._tracking}+${data.asset_type}+${data.email}`
+            if ( data.data ) {
+                data.txt_full = data.data
+                data.data = undefind
+            }
         } else {
             data._tracking = uuid()
-            data.key_field = "_tracking"
-            data.trans_path =`${data._tracking}+${data.asset_type}+${data.email}`
+            data.key_field = "_transition_path"
+            data._user_dir_key = "email"
+            data._transition_path =`${data._tracking}+${data.asset_type}+${data.email}`
+            if ( data.data ) {
+                data.txt_full = data.data
+                data.data = undefined
+            }
         }
     }
 

@@ -1,0 +1,13 @@
+{
+    "email" : "user@email.org",
+    "color":"grey",
+    "title" : "testing with a title entry",
+    "subject" : "subject stuff",
+    "txt_full"  : "this has a bunch of stuff that people like to read or maybe not. This is usually longer...",
+    "keys":  ["interesting","boring"],
+    "t_type":"json",
+    "links": [
+		{ "label" : "the link text", "link" : "http://that.computer//p1/p2/...", "html" : "rendering text generated for the user" },
+		{ "label" : "the other link text", "link" : "http://that.computer//p1/p2/...", "html" : "<a href='@link' ... >" }
+	]
+}

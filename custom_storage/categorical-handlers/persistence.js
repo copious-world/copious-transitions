@@ -70,14 +70,17 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
     }
 
     async publish(msg_obj) {        // actual pulication... this file becomes available to the general public...
+        let user_path = ""
         try {
             //
-            let user_path = this.make_path(msg_obj)
+            user_path = this.make_path(msg_obj)
+            if ( !(user_path) ) return "ERR"
             let public_path = this.make_public_path(msg_obj)
             ///
             await fsPromises.copyFile(user_path,public_path)
             return "OK"
         } catch(e) {
+            console.log(user_path)
             console.log(e)
             return "ERR"
         }
@@ -85,25 +88,30 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
 
     // data coming from a user dashboard, profile, etc.
     async create_entry_type(msg_obj) {  // to the user's directory
+        let user_path = ""
         try {
-            let user_path = this.make_path(msg_obj)
+            user_path = this.make_path(msg_obj)
+            if ( !(user_path) ) return "ERR"
             await fsPromises.writeFile(user_path,JSON.stringify(msg_obj))
             this.user_action_keyfile('C',msg_obj)
             return "OK"
         } catch(e) {
+            console.log(user_path)
             console.log(e)
             return "ERR"
         }
     }
 
     async load_data(msg_obj) {
+        let user_path = ""
         try {
-            let user_path = this.make_path(msg_obj)
+            user_path = this.make_path(msg_obj)
+            if ( !(user_path) ) return "ERR"
             let data = await fsPromises.readFile(user_path)
             return(data.toString())
         } catch (e) {
-            console.log(">>-------------update read------------------------")
-            console.log(data.toString())
+            console.log(">>-------------load_data read------------------------")
+            console.log(user_path)
             console.log(e)
             console.dir(msg_obj)
             console.log("<<-------------------------------------")
@@ -112,8 +120,10 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
     }
 
     async update_entry_type(msg_obj) {
+        let user_path = ""
         try {
-            let user_path = this.make_path(msg_obj)
+            user_path = this.make_path(msg_obj)
+            if ( !(user_path) ) return "ERR"
             let data = await fsPromises.readFile(user_path)
             try {
                 let u_obj = JSON.parse(data.toString())
@@ -126,6 +136,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
                 return "OK"
             } catch (e) {
                 console.log(">>-------------update parse data------------------------")
+                console.log(user_path)
                 console.log(data.toString())
                 console.error(e)
                 console.dir(msg_obj)
@@ -134,6 +145,7 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
             }
         } catch (e) {
             console.log(">>-------------update read------------------------")
+            console.log(user_path)
             console.log(e)
             console.dir(msg_obj)
             console.log("<<-------------------------------------")
@@ -143,8 +155,10 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
 
     async delete(msg_obj) {
         // check for some criteria... a sys admin token, a ref count ... replicated, etc.
+        let user_path = ""
         try {
-            let user_path = this.make_path(msg_obj)
+            user_path = this.make_path(msg_obj)
+            if ( !(user_path) ) return "ERR"
             await fsPromises.rm(user_path)
             //
             let public_path = this.make_public_path(msg_obj)
@@ -163,10 +177,10 @@ class PersistenceMessageEndpoint extends ServeMessageEndpoint { // the general c
     }
 
     async app_message_handler(msg_obj) {
-        let op = msg_obj.op
+        let op = msg_obj._tx_op
         let result = "OK"
-        let user_id = msg_obj._id
-        if ( this.create_OK ) {
+        let user_id = msg_obj._user_dir_key ? msg_obj[msg_obj._user_dir_key] : msg_obj._id
+        if ( this.create_OK && !!(user_id) ) {
             await this.ensure_directories(user_id)
         }
         switch ( op ) {

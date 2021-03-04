@@ -19,6 +19,9 @@ class DashboardSessionManager extends SessionManager {
 
     //process_asset(asset_id,post_body) {}
     feasible(transition,post_body,req) {                // is the transition something that can be done?
+        if (  G_dashboard_asset.tagged(transition) ) {
+            return(true)
+        }
         if (  G_dashboard_trns.tagged(transition) ) {
             return(true)
         }
@@ -33,6 +36,8 @@ class DashboardSessionManager extends SessionManager {
         }
         if ( G_dashboard_asset.tagged(transition) ) {
             G_dashboard_asset.update(post_body)
+            trans_object.secondary_action = G_dashboard_asset.has_secondary_action(transition)
+            
         }
         return(trans_object)
     }
@@ -134,7 +139,8 @@ class DashboardSessionManager extends SessionManager {
             }
         } else {
             let token = body.token
-            let active = await this.tokenCurrent(token)
+            let email = body.email
+            let active = await this.sessionCurrent(token,email)
             return active
         }
         return(true)    // true by default
@@ -151,7 +157,7 @@ class DashboardSessionManager extends SessionManager {
                     // the transition engine will make use of the pub/sub system... 
                     // expect commands to go this way.. requesting changes in the backend such as a file moving directories, etc.
                     let response = await this.trans_engine.publish(topic,post_body)
-                    if ( reponse === "OK" || (response.status === "OK" ) ) {
+                    if ( response === "OK" || (response.status === "OK" ) ) {
                         return true
                     }
                 }
@@ -159,8 +165,8 @@ class DashboardSessionManager extends SessionManager {
             }
         }
         if ( G_dashboard_asset.tagged(transition) ) {
-            let response = await this.trans_engine.forward_user_asset(post_body)
-            if ( reponse === "OK" || (response.status === "OK" ) ) {
+            let response = await this.trans_engine.forward_user_asset(post_body._transition_path,post_body)
+            if ( response === "OK" || (response.status === "OK" ) ) {
                 return true
             }
             return (false)

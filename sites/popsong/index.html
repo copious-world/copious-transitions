@@ -2480,6 +2480,9 @@ async function fetchUploader(theDiv) {
     async function app_process_logout(site_wide = true) {
         try {
             let url = `${location.protocol}//${g_siteURL}/captcha/users/logout`
+			if ( (g_Loggedin_session_token === undefined) || (g_Loggedin_session_token.length === 0) ) {
+				return false
+			}
             let data = { 'action' : 'logout', 'token' : g_Loggedin_session_token }
             let resp = await postData(url, data, 'include')
             site_wide_logout(g_Loggedin_session_token,site_wide)
@@ -2847,20 +2850,25 @@ async function fetchUploader(theDiv) {
    var g_app_dashboard = null
 
    async function project_dashboards() {
+	   if ( (g_Loggedin_session_token === undefined) || (g_Loggedin_session_token.length === 0) ) {
+		   alert("session no longer active")
+		   logout(true)
+	   }
       if ( g_dashboard_url.length ) {
          try {
             if ( !g_app_dashboard ) {
-               let body = {
-                  'token' : g_Loggedin_session_token
-               }
-               	let dashboardResponse = await postData(g_dashboard_url,body)
-               	if ( dashboardResponse.owner === g_dashboard_owner ) {
+				//
+            	let body = {
+            		'token' : g_Loggedin_session_token
+            	}
+            	let dashboardResponse = await postData(g_dashboard_url,body)
+			   //
+               if ( (dashboardResponse.owner === g_dashboard_owner) || (dashboardResponse._id === g_dashboard_owner ) ) {
 					let label = dashboardResponse.which_dashboard ? dashboardResponse.which_dashboard : (dashboardResponse._id + 'dashboard')
                 	var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
-                	let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,
-                                                   `${dashboardResponse.which_dashboard}`,windowFeatures)
-                  if ( dashboard ) {
-                     dashboard.onload = (ev) => {
+                	let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,label,windowFeatures)
+                  	if ( dashboard ) {
+					dashboard.onload = (ev) => {
                         try {
 							g_app_dashboard = dashboard
 							if ( dashboardResponse.dashboard ) {
@@ -2871,7 +2879,7 @@ async function fetchUploader(theDiv) {
 										if ( ky === 'dashboard' ) continue
 										dash_data[ky] = dashboardResponse[ky]
 									}
-									dashboard.setup_user_dashboard(dash_data)
+									dashboard.setup_user_dashboard(dash_data,g_Loggedin_session_token)
 								} catch (e) {
 
 								}
@@ -2881,11 +2889,11 @@ async function fetchUploader(theDiv) {
                            g_app_dashboard.focus()
                         } catch (e) {
                         }
-                     }
+                    }
 
-                     dashboard.onunload = (ev) => {
-                        g_app_dashboard = null
-                     }
+					dashboard.onunload = (ev) => {
+						g_app_dashboard = null
+					}
                   }
                } else {
                   let msgbox = document.getElementById('dashboard_response_messages')

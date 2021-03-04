@@ -73,7 +73,7 @@ class JsonMessage {
                 }
                 if ( path_handler && (typeof path_handler.send === 'function') ) {
                     // defer to the path handler how to take care of operations...
-                    let op = this.current_message.op
+                    let op = this.current_message._tx_op
                     switch ( op ) {
                         case "G" : {
                             let old_response_id = this.current_message._response_id
@@ -87,7 +87,7 @@ class JsonMessage {
                                 this.sock.write(JSON.stringify(response))    
                             } else {
                                 result._response_id = old_response_id
-                                this.sock.write(JSON.stringify(response)) 
+                                this.sock.write(JSON.stringify(result)) 
                             }
                             break;
                         }

@@ -1080,7 +1080,7 @@ function append_to_container(key,obj) {
 			}
 		}
 
-		g_current_entry_dom_map[obj.id] = i
+		g_current_entry_dom_map[obj._dash_entry_id] = i
 
 		let from_template = `
 				<div id="div-${i}" >
@@ -1120,7 +1120,7 @@ function show_stuff(key) {
 			}
 		}
 
-		g_current_entry_dom_map[obj.id] = i
+		g_current_entry_dom_map[obj._dash_entry_id] = i
 
 		let from_template = `
 				<div id="div-${i}" >
@@ -1149,7 +1149,7 @@ function get_index(id) {
 function get_object(item_id)  {
 	let entries = g_all_user_entries[g_current_sel_display]
 	for ( let i = 0; i < entries.length; i++ ) {
-		if ( entries[i].id == item_id ) {
+		if ( entries[i]._dash_entry_id == item_id ) {
 			return entries[i]
 		}
 	}
@@ -1171,7 +1171,7 @@ function get_title(id) {
 function get_id(id) {
 	let index = get_index(id)
 	let entries = g_all_user_entries[g_current_sel_display]
-	return (entries[index].id)
+	return (entries[index]._dash_entry_id)
 }
 
 function get_is_published(id) {
@@ -1189,7 +1189,7 @@ function get_is_del(id) {
 
 
 function get_line_element(obj) {
-	let index = g_current_entry_dom_map[obj.id]
+	let index = g_current_entry_dom_map[obj._dash_entry_id]
 	return(`span-c${index}`)
 }
 
@@ -1289,7 +1289,7 @@ function publish(item_holder) {
 	let where_p = document.getElementById('floating-info-entry-published')
 	where_p.innerHTML = "published"
 	where_p.style.color = PUBLISHED_STATE_COLOR
-	let index = g_current_entry_dom_map[obj.id]
+	let index = g_current_entry_dom_map[obj._dash_entry_id]
 	let el_id = `span-c${index}`
 	let t_el = document.getElementById(el_id)
 	if ( t_el ) t_el.style.color = PUBLISHED_COLOR
@@ -1309,7 +1309,7 @@ function unpublish(item_holder) {
 	let where_p = document.getElementById('floating-info-entry-published')
 	where_p.innerHTML = "draft"
 	where_p.style.color = UNPUBLISHED_STATE_COLOR
-	let index = g_current_entry_dom_map[obj.id]
+	let index = g_current_entry_dom_map[obj._dash_entry_id]
 	let el_id = `span-c${index}`
 	let t_el = document.getElementById(el_id)
 	if ( t_el ) t_el.style.color = UNPUBLISHED_COLOR
@@ -1401,6 +1401,38 @@ function hide_window(which) {
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
+function is_json_file(file) {
+	let idx = file.indexOf(".json")
+	if ( idx > 0 ) {
+		if ( file.lastIndexOf('.') === idx ) {
+			return true
+		}
+	}
+	return false
+}
+
+
+function get_random_id(entries,nn) {
+	let n = entries.length
+	let rand_id = Math.floor(Math.random()*1000*(n+1)*(nn ? nn : 7)) + 600
+	//
+	let tst_id = rand_id
+	let j = 0
+	while ( (tst_id === rand_id) && (j < 20) ) {
+		j++
+		for ( let i = 0; i < n; i++ ) {
+			tst_id = entries[i]._dash_entry_id
+			if ( tst_id === rand_id ) {
+				break
+			}
+		}
+		rand_id = Math.floor(Math.random()*1000*(n+1)*(nn ? nn : 7)) + 600
+	}
+	if ( j < 20 ) return(rand_id)
+	rand_id = Math.floor(Math.random()*600)
+	return(rand_id)
+}
+
 
 //
 function done_with_file(category,obj) {
@@ -1408,15 +1440,48 @@ function done_with_file(category,obj) {
 		alert("no file loaded")
 	} else {
 		let entries = g_all_user_entries[category]
-		let entry = {
-			"id" : Math.floor(Math.random()*5000),
-			"published" : false,
-			'title' : obj.name,
-			'data'  : obj.result,
-			'deleted' : false
+		//
+		let fname = obj.file_name
+		if ( is_json_file(fname) ) {
+			let new_dash_id = get_random_id(entries)
+			let entry = {}
+			try {
+				entry = JSON.parse(obj.result)
+				entry._dash_entry_id = new_dash_id
+				entry.deleted = false
+				entry.published = false
+				entry.file_name = obj.file_name
+				if ( entry.title == undefined ) {
+					entry.title =  obj.file_name
+				}
+				if ( entry.txt_full ) {
+					entry.data = entry.txt_full
+					delete entry.txt_full
+				}
+			} catch (e) {
+				entry = {
+					"_dash_entry_id" : new_dash_id,
+					"published" : false,
+					'deleted' : false,
+					'title' : obj.file_name,
+					'data'  : obj.result
+				}
+			}
+			entry.asset_type = category
+			entries.push(entry)
+			append_to_container(category,entry)
+		} else {
+			let entry = {
+				"_dash_entry_id" : get_random_id(entries),
+				"published" : false,
+				'deleted' : false,
+				'title' : obj.file_name,
+				'data'  : obj.result
+			}
+			entry.asset_type = category
+			entries.push(entry)
+			append_to_container(category,entry)
 		}
-		entries.push(entry)
-		append_to_container(category,entry)
 	}
 }
 
@@ -1433,7 +1498,7 @@ function perpare_for_upate(res) {
 	g_undo_list[cat][id].push(clone)
 	//
 	obj.data = res.result
-	obj.title = res.name
+	obj.title = res.file_name
 	//
 	
 	let title_field = document.getElementById('floating-info-entry-title-field')
@@ -1486,7 +1551,7 @@ function prepare_file_text(text,file_name,category) {
 	//
 	let res = {
 				"result" : text,
-				"name"   : file_name
+				"file_name"   : file_name
 			}
 	if ( category === 'update-only' ) {
 		let edit_el = document.getElementById('floating-info-entry')
@@ -1524,7 +1589,7 @@ function  get_file(key) {
 		fr.onload = (ev) => {
 			let res = {
 				"result" : fr.result,
-				"name"   : fr.name ? fr.name : category_name_get(key)
+				"file_name"   : fr.name ? fr.name : category_name_get(key)
 			}
 			done_with_file(key,res)
 		}
@@ -1635,9 +1700,9 @@ async function real_save(obj) {
 	let proxyPath = 'dashboard'
 	let ky = g_current_sel_display
 	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/${ky}`
-	if ( g_dashboard_info ) {
+	if ( g_dashboard_info ) {		// later this will be fetched with uuid+${ky}+%{email}
 		obj.user_name = g_dashboard_info.user_name
-		obj._id = obj.user_name
+		let asset_id = `+${ky}+${obj.email}}`
 		obj.email = g_dashboard_info.email
 		obj.token = g_dashboard_info.token
 		let result = await postData(endpoint,obj)
@@ -1680,20 +1745,24 @@ async function real_unpublish(obj) {
 
 // fetch the file from the backend once again...
 async function real_reload(obj) {
+	// always keep the email inthe object
+	obj.email = g_dashboard_info.email
+	//
 	let proxyPath = 'dashboard'
-	let endpoint = `${location.protocol}//${g_siteURL}${port}/${proxyPath}/transition/dashboard`
+	let ky = g_current_sel_display
+	let asset_id = `${obj._id}+${ky}+${obj.email}}`
+	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/guarded/dynamic/${asset_id}`
 	let send_obj = Object.assign({},obj)
 	delete send_obj.data			// for a command don't send all the data (it will be on the server)
-	//
 	send_obj.user_name = g_dashboard_info.user_name
-	send_obj.email = g_dashboard_info.email
 	send_obj.token = g_dashboard_info.token
+	//
 	let result = await postData(endpoint,obj)			// send everything and then update it on this page.
 	if ( result.status === "OK" ) {
 		let data = result.data
 		obj.title = data.title
 		obj.data = data.data
-		obj.id = data.id
+		obj._dash_entry_id = data._dash_entry_id
 		obj.published = data.published
 		obj.deleted = data.deleted
 		obj.saved_ever = false
@@ -1706,17 +1775,17 @@ async function real_reload(obj) {
 // this is a publish command that will decrement a refernce count to a file, ultimately unpinning it.
 async function real_delete(obj) {
 	if ( !(obj.saved_ever) ) {
-		let index = g_current_entry_dom_map[obj.id]
+		let index = g_current_entry_dom_map[obj._dash_entry_id]
 		let div_container_id = `div-${index}`
 		//
 		let div_el = document.getElementById(div_container_id)
 		div_el.parentNode.removeChild(div_el)
 		//
-		delete g_current_entry_dom_map[obj.id]
+		delete g_current_entry_dom_map[obj._dash_entry_id]
 		// g_all_user_entries
 		let entries = g_all_user_entries[g_current_sel_display]
 		entries = entries.filter((entry) => {
-			return(entry.id != obj.id)
+			return(entry._dash_entry_id != obj._dash_entry_id)
 		})
 		g_all_user_entries[g_current_sel_display] = entries
 		//
@@ -1758,7 +1827,7 @@ function drop_content_aware() {
 			let title = title_el.value
 			g_backup_edit_for_change = {
 				"result" : current_text,
-				"name"   : title
+				"file_name"   : title
 			}
 			//
 		})
@@ -1775,7 +1844,7 @@ function drop_content_aware() {
 				}
 				let res = {
 					"result" : current_text,
-					"name"   : title
+					"file_name"   : title
 				}
 				perpare_for_upate(res)
 			}
@@ -1784,10 +1853,11 @@ function drop_content_aware() {
 }
 
 
-function setup_user_dashboard(dashboardResponse) {
+function setup_user_dashboard(dashboardResponse,session_token) {
 
 	// this is a response object from the parent window....
 	g_dashboard_info = dashboardResponse		// it becomes the dahsboard info
+	g_dashboard_info.token = session_token
 	
 	// use the field in the info object to populate elements with the same names 
 	// as the object field names
@@ -1808,18 +1878,6 @@ function setup_user_dashboard(dashboardResponse) {
 	drop_content_aware()
 }
 
-/*
-{
-	'owner' : user,
-	'date'  : ('' + Date.now()),
-	'panel_key' : generate_password(),
-	'dashboard_text' : 'test dashboard_text'
-	//obj.header_user_name = g_dashboard_info.header_user_name
-	//obj.dashboard_text = dashboard_text
-	//obj.tag_line = obj.tag_line
-	'entries' : {}
-}
-*/
 
 // handle logout from the main control point....
 function site_wide_logout() {
@@ -1827,20 +1885,39 @@ function site_wide_logout() {
 }
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-
+// entries
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+// data -> txt_full
+// "media_type" : "video"
+// "media_type" : "audio"
+// "media_type" : "image"      "jpg" "png" ....
+// "t_type" : "html",
+// "t_type" : "svg",
 
 function test_stuff() {
 	for ( let ky in g_all_user_entries ) {
 		let entries = g_all_user_entries[ky]
 		for ( let i = 0; i < 10; i++ ) {
 			entries.push({
-				"id" : Math.floor(Math.random()*5000),
+				"_id" : "user@email.org", 			// the id for use through the storage system....
+				"_dash_entry_id" : Math.floor(Math.random()*5000), // (?? this is only for use in the dashboard)
+				"color":"grey",					// a color
 				"published" : (Math.random()>0.667),
+				// title and subject may be the same...
 				'title' : `${ky}_${i}_a bunch of stuff that can be said.....`,
+				'subject' : `subject stuff`,
+
 				'data'  : `All about ${ky}_${i}_a bunch of stuff that can be said..... if you will\on a better day something random`,
 				'deleted' : false,
 				'saved_ever' : true,
-				'asset_type' : ky
+				'asset_type' : ky,
+				"keys":  ["GLA","fogas%20tina%20beags%20dagga%20cag"],
+				"t_type":"html",
+				"media_type":"video",			// for this media type... this goes here....
+				"media" : {
+					"poster":"https://i1.sndcdn.com/artworks-qh9D0xD7SNI8ztFG-Sq46rA-t500x500.jpg",
+					"source":"https://www.popsongnow.com/streamer/streamoftheday"
+				}
 			})
 		}
 	}
@@ -1850,6 +1927,18 @@ function test_stuff() {
 */
 //test_stuff()
 //show_stuff("blog")
+
+function test_faux_user() {
+	g_dashboard_info = {}
+	g_dashboard_info.user_name = "who is who is"
+	g_dashboard_info.email = "whodedo@you.com"
+	g_dashboard_info.token = "73988742983798273948723947"
+	g_dashboard_info.entries = {}
+	//
+	setup_user_dashboard(g_dashboard_info)
+}
+
+//test_faux_user()
 
 
 </script>

@@ -35,21 +35,21 @@ class PathHandler extends EventEmitter {
         this.message_relayer = new this.RelayerClass(conf.relay)
     }
 
-    async send(message) {
+    async send(message) {       // no _tx_op thereby handling 'P', 'S', and others such as 'U'... which write for particular purposes
         let response = await this.message_relayer.sendMessage(message)
         return response
     }
 
     async get(message) {
         let op_message = Object.assign({},message)
-        if ( op_message.op !== 'G' ) op_message.op = 'G'
+        if ( op_message._tx_op !== 'G' ) op_message._tx_op = 'G'
         let response = await this.message_relayer.sendMessage(op_message)
         return response
     }
 
     async del(message) {
         let op_message = Object.assign({},message)
-        if ( op_message.op !== 'D' ) op_message.op = 'D'
+        if ( op_message._tx_op !== 'D' ) op_message._tx_op = 'D'
         let response = await this.message_relayer.sendMessage(op_message)
         return response
     }

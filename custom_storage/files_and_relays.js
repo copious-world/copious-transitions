@@ -166,8 +166,8 @@ class FilesAndRelays extends AppLifeCycle {
         let m_path = this.default_m_path
         let msg = {
             "m_path" : m_path,
-            "el_id"  : id,
-            "op"     : "G"
+            "_id"  : id,
+            "_tx_op"     : "G"
         }
         if ( field !== undefined ) {
             msg.key_field = field
@@ -181,19 +181,20 @@ class FilesAndRelays extends AppLifeCycle {
     }
 
     remote_store_message(obj) {
+        if ( obj === undefined ) return
         let m_path = obj.m_path ? obj.m_path : this.default_m_path
         let msg = Object.assign({},obj)
         msg.m_path = m_path
-        msg.op = "S"
+        msg._tx_op = "S"
         this.messenger.send(msg)
     }
 
     remote_store_dereference(id) {
-        let m_path = obj.m_path ? obj.m_path : this.default_m_path
+        let m_path = this.default_m_path
         let msg = {
             "m_path" : m_path,
-            "el_id"  : id,
-            "op"     : "D"
+            "_id"  : id,
+            "_tx_op"     : "D"
         }
         this.messenger.send(msg)
     }
@@ -235,6 +236,7 @@ class FilesAndRelays extends AppLifeCycle {
             // the object in 'storage_map' is not going to keep lots of data around
             // the data is assumed to be in a remote machine (e.g. db server or other...)
             let sender = this.application_stash_large_data(obj)     // so make the app responsible for managing the large data
+            sender.user_op = 'create'
             this.remote_store_message(sender)             // send it away, large data and all....
             return true    
         }
@@ -283,6 +285,7 @@ class FilesAndRelays extends AppLifeCycle {
         obj._tstamp = this.update_stamp(obj._tstamp,obj._id)
         if ( !(dont_remote) ) {
             let sender = await this.application_unstash_large_data(obj)
+            sender.user_op = 'update'
             this.remote_store_message(sender)
         }
         this.application_stash_large_data(obj)
