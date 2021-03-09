@@ -8,7 +8,7 @@ const HOST = 'localhost';
 //
 const NOISY = true
 
-const Path_handler_factory = require('path-handler')
+const Path_handler_factory = require('../path-handler')
 
 let g_messenger_connections = {}
 let g_message_paths = {}

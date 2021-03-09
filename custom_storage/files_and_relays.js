@@ -188,7 +188,7 @@ class FilesAndRelays extends AppLifeCycle {
                     }
                     return response.data
                 }
-                if ( response.status === "ERR" ) {
+                if ( (response.status === "ERR") || (response.status === undefined) ) {
                     return false
                 }
             }
@@ -289,6 +289,7 @@ class FilesAndRelays extends AppLifeCycle {
             return false
         }
         this.application_fix_keys_obj(obj,key,field)
+        obj._tx_no_remote = true /// just got it 
         this.create(obj)   // remote data will be stashed before unstashing...
         obj._tstamp = this.update_stamp(obj._tstamp,obj._id)
         let app_version = await this.application_unstash_large_data(obj)

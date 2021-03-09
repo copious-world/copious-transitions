@@ -13,6 +13,12 @@ const g_keyValueDB = g_persistence.get_LRUManager();      // leave it to the mod
 const g_keyValueSessions =  g_ephemeral.get_LRUManager();
 //
 
+function random_enough_dash_id() {
+  let dd = Math.random()*934593411
+  dd = Math.floor(dd)
+  return("Dash" + dd)
+}
+
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
 
@@ -22,7 +28,7 @@ class DashboardDBClass extends DBClass {
     constructor() {
       //
       let persistenceDB = new CustomPersistenceDB(g_persistence.message_fowarding)  // pass app messages to the backend
-      let staticDB = new CustomStaticDB(g_persistence.message_fowarding)
+      let staticDB = new CustomStaticDB(g_persistence.message_fowarding,false,false,"_transition_path")
       //
       let asset_intake = (obj) => {
         this.asset_intake(obj)
@@ -49,11 +55,27 @@ class DashboardDBClass extends DBClass {
 
 
     asset_intake(obj) {   // This object has not been put into static store by the backend. the backned created the file and sent it.
-      let static_dash = 'dashboard+' + obj.email 
-console.log("asset_intake " + static_dash)
-console.dir(obj)
-      obj._tx_no_remote = true
-      this.put_static_store(static_dash,obj,"application/json")  // store it ... means a local file copy... staticDB
+      let static_dash = 'dashboard+' + obj.email
+      //
+
+      let dash_obj = decodeURIComponent(obj.dashboard) //
+      try {
+        dash_obj = JSON.parse(dash_obj)
+      } catch(e) {
+        dash_obj = {}
+      }
+
+      dash_obj.email = obj.email
+      dash_obj.owner = obj.email
+      dash_obj._id = static_dash
+      dash_obj.which_dashboard = random_enough_dash_id()
+      //
+      let extension = {}
+      extension._tx_no_remote = true
+      extension.email = obj.email
+      G_dashboard_trns.update(extension)
+      
+      this.put_static_store(static_dash,dash_obj,"application/json",extension)  // store it ... means a local file copy... staticDB
     }
 
 }

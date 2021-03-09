@@ -25,6 +25,9 @@ class DashboardSessionManager extends SessionManager {
         if (  G_dashboard_trns.tagged(transition) ) {
             return(true)
         }
+        if ( G_dashboard_commands_trns.tagged(transition) ) {
+            return(true)
+        }
         return(super.feasible(transition,post_body,req))
     }
 
@@ -37,7 +40,9 @@ class DashboardSessionManager extends SessionManager {
         if ( G_dashboard_asset.tagged(transition) ) {
             G_dashboard_asset.update(post_body)
             trans_object.secondary_action = G_dashboard_asset.has_secondary_action(transition)
-            
+        }
+        if ( G_dashboard_commands_trns.tagged(transition) ) {
+            trans_object.secondary_action = G_dashboard_commands_trns.has_secondary_action(transition)
         }
         return(trans_object)
     }
@@ -54,15 +59,13 @@ class DashboardSessionManager extends SessionManager {
     async finalize_transition(transition,post_body,elements,req) {
         //
         if ( G_dashboard_trns.tagged(transition) || G_dashboard_commands_trns.tagged(transition) ) {
-            if ( post_body._t_match_field ) {
-                let status = await this.update_session_state(transition,post_body,req)
-                let finalization_state = {      // this has to get fancy
-                    "state" : "computed",
-                    "OK" : (status ? "true" : "false")
-                }
-                // set a cookie for use by other micro services
-                return(finalization_state)
+            let status = await this.update_session_state(transition,post_body,req)
+            let finalization_state = {      // this has to get fancy
+                "state" : "computed",
+                "OK" : (status ? "true" : "false")
             }
+            // set a cookie for use by other micro services
+            return(finalization_state)
         }
         //
         if ( G_dashboard_asset.tagged(transition) ) {
@@ -153,7 +156,7 @@ class DashboardSessionManager extends SessionManager {
         if ( G_dashboard_commands_trns.tagged(transition) ) {
             if ( this.trans_engine && post_body.topic ) {
                 let topic = post_body.topic
-                if ( G_dashboard_trns.can_publish(topic) ) {
+                if ( G_dashboard_commands_trns.can_publish(topic) ) {
                     // the transition engine will make use of the pub/sub system... 
                     // expect commands to go this way.. requesting changes in the backend such as a file moving directories, etc.
                     let response = await this.trans_engine.publish(topic,post_body)

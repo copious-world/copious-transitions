@@ -258,7 +258,7 @@ class StaticContracts extends FilesAndRelays {
                 if ( data._id ) delete data._id
                 let up_obj = Object.assign(obj,data)
                 if ( super.missing(obj) ) {
-                    let remote_obj = await this.findOne(id,true)
+                    let remote_obj = await this.findOne(id,true)   /// tells it not to create, see next step
                     if ( this.newer(remote_obj,up_obj) ) {
                         up_obj = Object.assign(up_obj,remote_obj)
                     }
@@ -274,13 +274,13 @@ class StaticContracts extends FilesAndRelays {
                 if ( data._id ) delete data._id
                 let up_obj = Object.assign(obj,data)
                 if ( super.missing(obj) ) {
-                    await this.findOne(id,true)     // let remote_obj = if this returns a remote object, it could be checked
+                    await this.findOne(data._id,true)     // let remote_obj = if this returns a remote object, it could be checked
                     if ( this.newer(remote_obj,up_obj) ) {
                         up_obj = Object.assign(up_obj,remote_obj)
                     }
                     this.create(up_obj)  // use the current object
                 } else {
-                    this.update(up_obj)   // having found it still have to send new data back....
+                    this.update(up_obj)   // having found it still have to send new data back.... (if no_remote, then update just stores the local copy)
                 }
             } else {
                 obj = {

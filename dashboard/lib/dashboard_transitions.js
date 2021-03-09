@@ -62,12 +62,17 @@ class Dashboards extends TaggedTransition {
     }
 
     update(data) {
+        data._tracking = uuid()
+        data.key_field = "_transition_path"
+        data._user_dir_key = "email"
+        data._transition_path =`dashboard+${data.email}`
         return([data,{}])
     }
 
 }
 
 class DashboardsCommands extends Dashboards {
+    //
     constructor() {
         super('dash-commands')
         //
@@ -88,9 +93,14 @@ class DashboardsCommands extends Dashboards {
     }
 
 
+    has_secondary_action(command_type) {
+        return(false)
+    }
+
+    
     can_publish(topic) {
         // check to see if the topic belongs to a profile operation...
-        if ( (topic in this.ok_topics) || (topic in this.ok_command)) {
+        if ( ( this.ok_command.indexOf(topic) >= 0 ) || ( this.ok_topics.indexOf(topic) >= 0 ) ) {
             return true
         }
         return false
@@ -135,7 +145,7 @@ class DashboardsAssets extends Dashboards {
             data._transition_path =`${data._tracking}+${data.asset_type}+${data.email}`
             if ( data.data ) {
                 data.txt_full = data.data
-                data.data = undefind
+                data.data = undefined
             }
         } else {
             data._tracking = uuid()

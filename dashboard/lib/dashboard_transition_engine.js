@@ -36,6 +36,8 @@ class DashboardTransitionEngineClass extends GeneralTransitionEngine {
         if ( this.db === undefined ) return
         let pdb = this.db.pdb
         if ( pdb === undefined ) return
+console.log("DashboardTransitionEngineClass + publish :: " + topic)
+console.dir(object)
         let result = await pdb.publish(topic,object)
         if ( result ) {
             if ( result.state ) return(result.state)

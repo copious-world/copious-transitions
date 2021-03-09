@@ -1727,7 +1727,7 @@ async function real_publish(obj) {
 	let send_obj = Object.assign({},obj)
 	delete send_obj.data			// for a command don't send all the data (it will be on the server)
 	let proxyPath = 'dashboard'
-	let endpoint = `${location.protocol}//${g_siteURL}${port}/${proxyPath}/transition/dash-commands`
+	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/dash-commands`
 	send_obj.topic = "command-publish"
 	send_obj.user_name = g_dashboard_info.user_name
 	send_obj.email = g_dashboard_info.email
@@ -1742,7 +1742,7 @@ async function real_unpublish(obj) {
 	let send_obj = Object.assign({},obj)
 	delete send_obj.data			// for a command don't send all the data (it will be on the server)
 	let proxyPath = 'dashboard'
-	let endpoint = `${location.protocol}//${g_siteURL}${port}/${proxyPath}/transition/dash-commands`
+	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/dash-commands`
 	send_obj.topic = "command-recind"
 	send_obj.user_name = g_dashboard_info.user_name
 	send_obj.email = g_dashboard_info.email
@@ -1800,7 +1800,7 @@ async function real_delete(obj) {
 		let send_obj = Object.assign({},obj)
 		delete send_obj.data			// for a command don't send all the data (it will be on the server)
 		let proxyPath = 'dashboard'
-		let endpoint = `${location.protocol}//${g_siteURL}${port}/${proxyPath}/transition/dash-commands`
+		let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/dash-commands`
 		send_obj.topic = "command-delete"
 		send_obj.user_name = g_dashboard_info.user_name
 		send_obj.email = g_dashboard_info.email
@@ -1864,7 +1864,9 @@ function setup_user_dashboard(dashboardResponse,session_token) {
 
 	// this is a response object from the parent window....
 	g_dashboard_info = dashboardResponse		// it becomes the dahsboard info
-	g_dashboard_info.token = session_token
+	if ( session_token !== undefined ) {
+		g_dashboard_info.token = session_token
+	}
 	
 	// use the field in the info object to populate elements with the same names 
 	// as the object field names
