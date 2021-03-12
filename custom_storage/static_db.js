@@ -273,12 +273,12 @@ class StaticContracts extends FilesAndRelays {
                 obj._whokey = whokey
                 if ( data._id ) delete data._id
                 let up_obj = Object.assign(obj,data)
-                if ( super.missing(obj) ) {
+                if ( super.missing(obj) ) {     // see if persistence knows about this object...
                     await this.findOne(data._id,true)     // let remote_obj = if this returns a remote object, it could be checked
                     if ( this.newer(remote_obj,up_obj) ) {
                         up_obj = Object.assign(up_obj,remote_obj)
                     }
-                    this.create(up_obj)  // use the current object
+                    this.create(up_obj)  // use the current object, keep a copy in the persistence side of things...
                 } else {
                     this.update(up_obj)   // having found it still have to send new data back.... (if no_remote, then update just stores the local copy)
                 }

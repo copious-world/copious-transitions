@@ -3,7 +3,7 @@ const {ServeMessageEndpoint} = require("message-relay-services")
 const fsPromises = require('fs/promises')
 //
 const {asset_generator} = require('./generate_user_assets')
-
+const uuid4 = require('uuid/v4')
 // Parent class handles publication 
 
 
@@ -25,7 +25,7 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
     make_path(u_obj) {
         let user_id = u_obj._id
                     // password is a hash of the password, might encrypt it... (also might carry other info to the back..)
-        let user_path = `${this.all_users}/${user_id}_${u_obj.password}.json`
+        let user_path = `${this.all_users}/${user_id}_${u_obj._tracking}.json`
         return(user_path)
     }
     //
@@ -63,9 +63,9 @@ class UserMessageEndpoint extends ServeMessageEndpoint {
     //
     async create_entry_type(msg_obj) {  // to the user's directory
         try {
+            msg_obj._tracking = this.app_generate_tracking(msg_obj)
             let user_path = this.make_path(msg_obj)
             if ( !(user_path) ) return "ERR"
-console.log(`create_entry_type  ${user_path}`)
             await fsPromises.writeFile(user_path,(JSON.stringify(msg_obj)),{ 'flag' : 'wx' })
             return "OK"
         } catch(e) {
@@ -160,6 +160,12 @@ console.log(`load_data  ${user_path}`)
         }
         //
         return({ "status" : result, "explain" : "op performed", "when" : Date.now() })
+    }
+
+
+    app_generate_tracking(msg_obj) {
+        console.log("the application class should implement app_generate_tracking")
+        return uuid4()
     }
 }
 

@@ -29,4 +29,4 @@ class ProfileDynamic extends GeneralDynamic {
 
     
 
-module.exports = new ProfileDynamic()
+module.exports = new DashboardDynamic()

@@ -71,10 +71,12 @@ class DashboardDBClass extends DBClass {
       dash_obj.which_dashboard = random_enough_dash_id()
       //
       let extension = {}
-      extension._tx_no_remote = true
-      extension.email = obj.email
-      G_dashboard_trns.update(extension)
+      // avoid publication looping...
+      extension._tx_no_remote = true      // tell local DB handler that this object has already been created elsewhere, so just keep a local copy
+      extension.email = obj.email         // who it belongs to 
+      G_dashboard_trns.update(extension)  // get further refinement by custom data operators.
       
+      // wrap the object in a carrier, in which the object is serialized with its mime-type for future transport..
       this.put_static_store(static_dash,dash_obj,"application/json",extension)  // store it ... means a local file copy... staticDB
     }
 

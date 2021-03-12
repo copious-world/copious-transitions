@@ -4,7 +4,7 @@ const GeneralBusiness = require.main.require('./lib/general_business')
 
 
 
-class ProfileBusines extends GeneralBusiness {
+class ProfileBusiness extends GeneralBusiness {
     //
     constructor() {
         super()
@@ -29,4 +29,4 @@ class ProfileBusines extends GeneralBusiness {
 
     
 
-module.exports = new ProfileBusines()
+module.exports = new ProfileBusiness()
