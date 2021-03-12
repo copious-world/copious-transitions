@@ -30,7 +30,7 @@ html {
  * Always hide an element when it has the `hidden` HTML attribute.
  */
 
- .hidden,
+.hidden,
 [hidden] {
     display: none !important;
 }
@@ -273,6 +273,16 @@ html {
 		button:hover {
 			background-color : #CACAFF;
 			color: darkred;
+		}
+
+		.button-hit-once {
+			box-shadow: blanchedalmond;
+		}
+
+		.button-hit-once:disabled {
+			cursor:none;
+			color:lightsteelblue;
+			background-color:antiquewhite;
 		}
 	
 		@media screen and (max-width: 390px) {
@@ -688,6 +698,11 @@ html {
 			cursor: pointer;
 		}
 
+		#for_testing_dialogs {
+			display: none;
+			visibility: hidden;
+		}
+
 	</style>
 </head>
 <script>
@@ -902,7 +917,7 @@ viewBox="0 0 360 38">
 	width="360"
 	height="40"
 	viewBox="0 0 360 40">
-		<a id="a4187" xlink:href="/webcit/dotgoto?room=Copious.World"   style="cursor:pointer" target="CITBLOG">
+		<a id="a4187" xlink:href="/blog/"   style="cursor:pointer" target="CITBLOG">
 		<rect
 			y="0"
 			x="10"
@@ -923,7 +938,7 @@ viewBox="0 0 360 38">
 				x="60"
 				id="tspan4339">Blog</tspan></text>
 		</a>
-		<a id="a4193" xlink:href="/webcit/dotgoto?room=Demo-notes"  style="cursor:pointer" target="CITBLOG">
+		<a id="a4193" xlink:href="/demos/"  style="cursor:pointer" target="CITBLOG">
 		<rect
 			y="0"
 			x="144"
@@ -990,7 +1005,7 @@ viewBox="0 0 360 38">
 		</div>
 	</div>
 	
-	</main>
+</main>
 
 <footer>
 	<ul class="footer-list">
@@ -2441,7 +2456,6 @@ viewBox="0 0 360 38">
 
     function app_tandem_login(tandems) {       // get cookie for webcit -- specific to this application
         if ( tandems ) {
-			/*
             let loginForm = document.getElementById('the-login-form')
             let lname = document.getElementById('login-cit-name')
             let pname = document.getElementById('login-cit-password')
@@ -2449,8 +2463,7 @@ viewBox="0 0 360 38">
                 lname.value = tandems.name.replace('@','')  // testing.... this should be removed from here on out
                 pname.value = tandems.pass
                 loginForm.submit()
-			}
-			*/
+            }
         }
     }
 
@@ -2820,69 +2833,169 @@ viewBox="0 0 360 38">
 </div>
 
 
-<div id='profile-line-container' style="visibility: hidden;display:none" >
+<div id='profile-line-container'  style="visibility:hidden;display:none" >
    <div style="padding:6px;border:darkgreen solid 1px">
-   I am <span >$$WHOAMI</span>
-   <br>
-   <a id='who-my-profile'  class="nav-link" href="/webcit/do_template?template=user_show?who=$$WHOAMI" target="WEBCIT" >
-      View my Profile
-   </a>
+      I am <span >$$WHOAMI</span>:
+      <br> 
+      <button onclick="project_profiles()"  style="white-space: nowrap;width: min-content;">
+         View my Profile
+      </button>
+   </div>
+   <div id="profile_response_messages" style="border:honeydew 1px solid;padding:4px;background-color: rgba(245, 245, 245, 0.842);" >
+   
    </div>
 </div>
+   
+   <script>
+   
+      var g_profile_url = ''
+      var g_profile_owner = ''
+      var g_app_profile = null
+   
+    //
+    async function project_profiles() {
+	   if ( (g_Loggedin_session_token === undefined) || (g_Loggedin_session_token.length === 0) ) {
+		   alert("session no longer active")
+		   logout(true)
+	   }
+      if ( g_profile_url.length ) {
+         try {
+            if ( !g_app_profile ) {
+				//
+            	let body = {
+            		'token' : g_Loggedin_session_token
+            	}
+            	let profileResponse = await postData(g_profile_url,body)
+			   	//
+               if ( (profileResponse.owner === g_profile_owner) || (profileResponse._id === g_profile_owner ) ) {
+                  profileResponse.token = g_Loggedin_session_token
+                  let label = profileResponse.which_profile ? profileResponse.which_profile : (profileResponse._id + 'profile')
+                  var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
+                  let profile = window.open(`${location.protocol}//${g_siteURL}/profile.html`,label,windowFeatures)
+                  if ( profile ) {
+                     profile.onload = (ev) => {
+                           try {
+                              g_app_profile = profile
+                              if ( profileResponse.profile ) {
+                                 let prof_data = decodeURIComponent(profileResponse.profile)
+                                 try {
+                                    prof_data = JSON.parse(prof_data)
+                                    for ( let ky in profileResponse ) {
+                                       if ( ky === 'profile' ) continue
+                                       prof_data[ky] = profileResponse[ky]
+                                    }
+                                    prof_data.token = g_Loggedin_session_token
+                                    profile.setup_user_profile(prof_data)
+                                 } catch (e) {
 
-<script>
-   g_loginValueViews[`profile_view`] = (acctData,html) => {
-      try {
-         let uid = acctData.data.email
-         html = html.replace('$$WHOAMI',uid)
-         html = html.replace('$$WHOAMI',uid)
-      } catch (e) {
+                                 }
+                              } else {
+                                 profile.setup_user_profile(profileResponse)
+                              }
+                              g_app_profile.focus()
+                           } catch (e) {
+                           }
+                     }
+
+                     profile.onunload = (ev) => {
+                        g_app_profile = null
+                     }
+                  }
+               } else {
+                  let msgbox = document.getElementById('profile_response_messages')
+                  if ( msgbox ) msgbox.innerHTML = "The user information does not match."
+               }
+            } else {
+               g_app_profile.focus()
+            }
+         } catch (e) {
+            let msgbox = document.getElementById('profile_response_messages')
+            if ( msgbox ) msgbox.innerHTML = e.message
+         }
+      } else {
+         let msgbox = document.getElementById('profile_response_messages')
+         if ( msgbox ) msgbox.innerHTML = "The profile URL is not defined"
       }
-      return(html)
    }
-</script>
-
+   
+      g_loginValueViews[``] = (acctData,html) => {
+         try {
+            let uid = acctData.data.email
+            g_profile_owner = uid
+            g_profile_url = `${location.protocol}//${g_siteURL}/profile/guarded/static/profile+${uid}`
+            html = html.replace('$$WHOAMI',uid)
+            html = html.replace('$$WHOAMI',uid)
+         } catch (e) {
+         }
+         return(html)
+      }
+   
+   </script>
+   
+   
 
 
 <div id='dashboard-line-container'  style="visibility:hidden;display:none" >
-<div style="padding:6px;border:darkgreen solid 1px">
-   Dashboards for <span class='user-id' > $$WHOAMI </span>:
-   <br> 
-   <button onclick="project_dashboards()"  style="white-space: nowrap;width: min-content;">
-      projects dashboard
-   </button>
+   <div style="padding:6px;border:darkgreen solid 1px">
+      Dashboards for <span class='user-id' > $$WHOAMI </span>:
+      <br> 
+      <button onclick="project_dashboards()"  style="white-space: nowrap;width: min-content;">
+         projects dashboard
+      </button>
+   </div>
+   <div id="dashboard_response_messages" style="border:honeydew 1px solid;padding:4px;background-color: rgba(245, 245, 245, 0.842);" >
+   
+   </div>
 </div>
-<div id="dashboard_response_messages" style="border:honeydew 1px solid;padding:4px;background-color: rgba(245, 245, 245, 0.842);" >
-
-</div>
-</div>
-
+   
 <script>
 
    var g_dashboard_url = ''
    var g_dashboard_owner = ''
    var g_app_dashboard = null
-
+   //
    async function project_dashboards() {
+	   if ( (g_Loggedin_session_token === undefined) || (g_Loggedin_session_token.length === 0) ) {
+		   alert("session no longer active")
+		   logout(true)
+	   }
       if ( g_dashboard_url.length ) {
          try {
             if ( !g_app_dashboard ) {
-               let body = {
-                  'token' : g_Loggedin_session_token
-               }
-               let dashboardResponse = await postData(g_dashboard_url,body)
-               if ( dashboardResponse.owner === g_dashboard_owner ) {
+				//
+            	let body = {
+            		'token' : g_Loggedin_session_token
+            	}
+            	let dashboardResponse = await postData(g_dashboard_url,body)
+			   	//
+               if ( (dashboardResponse.owner === g_dashboard_owner) || (dashboardResponse._id === g_dashboard_owner ) ) {
+                  dashboardResponse.token = g_Loggedin_session_token
+                  let label = dashboardResponse.which_dashboard ? dashboardResponse.which_dashboard : (dashboardResponse._id + 'dashboard')
                   var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
-                  let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,
-                                                   `${dashboardResponse.which_dashboard}`,windowFeatures)
+                  let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,label,windowFeatures)
                   if ( dashboard ) {
                      dashboard.onload = (ev) => {
-                        try {
-                           dashboard.setup_user_dashboard(dashboardResponse)
-                           g_app_dashboard = dashboard
-                           dashboard.focus()
-                        } catch (e) {
-                        }
+                           try {
+                              g_app_dashboard = dashboard
+                              if ( dashboardResponse.dashboard ) {
+                                 let dash_data = decodeURIComponent(dashboardResponse.dashboard)
+                                 try {
+                                    dash_data = JSON.parse(dash_data)
+                                    for ( let ky in dashboardResponse ) {
+                                       if ( ky === 'dashboard' ) continue
+                                       dash_data[ky] = dashboardResponse[ky]
+                                    }
+                                    dash_data.token = g_Loggedin_session_token
+                                    dashboard.setup_user_dashboard(dash_data)
+                                 } catch (e) {
+
+                                 }
+                              } else {
+                                 dashboard.setup_user_dashboard(dashboardResponse)
+                              }
+                              g_app_dashboard.focus()
+                           } catch (e) {
+                           }
                      }
 
                      dashboard.onunload = (ev) => {
@@ -2906,7 +3019,8 @@ viewBox="0 0 360 38">
       }
    }
 
-   g_loginValueViews[`dashboard_view`] = (acctData,html) => {
+
+   g_loginValueViews[`dashboard`] = (acctData,html) => {
       try {
          let uid = acctData.data.email
          g_dashboard_owner = uid
@@ -2921,7 +3035,9 @@ viewBox="0 0 360 38">
 
 
 
-
+<dialog id="for_testing_dialogs">
+	<span>This is a dialog test</span>
+</dialog>
 
 </body>
 </html>
@@ -2965,6 +3081,43 @@ viewBox="0 0 360 38">
 		whereScipt.appendChild(scriptEl);
 	}
 
+	function addstyle(script) {
+		var styleEl = document.createElement('style');
+		styleEl.type = 'text/css';
+		styleEl.text = script;
+		let whereScript = document.getElementsByTagName('head')
+		if ( whereScript && whereScript.length ) {
+			whereScript[0].appendChild(styleEl);
+		}
+	}
+
+	async function ensure_dialog_elements() {
+		let test_dialog = document.getElementById("for_testing_dialogs")  // thought to be in the template... if not this does nothing
+		if ( test_dialog ) {
+			if ( typeof test_dialog.showModal !== "function" ) {
+				let element_supportJson =  await wv_fetchEndPoint('uploaders/static/dialogs')
+				if ( element_supportJson ) {
+					let css_support = decodeURIComponent(element_supportJson.html)
+					addstyle(css_support)
+					let html_els = document.getElementsByTagName('html')
+					let html = null
+					if ( html_els && html_els.length ) {
+					html = html_els[0]
+					addscript(decodeURIComponent(element_supportJson.script),html)
+					// register the dialogs
+					let dialogs = document.getElementsByTagName('dialog')
+					let n = dialogs.length
+					for ( let i = 0; i < n; i++ ) {
+						let dial = dialogs[i]
+						dialogPolyfill.registerDialog(dial);
+					}
+					}
+				}
+			}
+		}
+	}
+
+
     function getCookie(cname) {  // modified from w3school
         var name = cname + "=";
         var ca = document.cookie.split(';');
@@ -2978,6 +3131,18 @@ viewBox="0 0 360 38">
             }
         }
         return "";
+	}
+
+
+	// not_https_switch 
+	// switch to HTTPS before doing any ops that may require a data exchange
+	function not_https_switch() {
+		if (location.protocol !== 'https:') {           // start from a secure page
+			alert("Switching to a secure version of this page in 1sec.")
+			setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
+			return(true)
+		}
+		return(false)
 	}
 
 	// streamer-scratchpad  -- in the stream app was using this.
@@ -3005,7 +3170,7 @@ viewBox="0 0 360 38">
 	}
 
 	//
-	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true,ctype) {
+	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true, ctype) {
 		let content_type = 'application/json'
 		if ( ctype !== undefined ) {
 			content_type = ctype
@@ -3037,17 +3202,28 @@ viewBox="0 0 360 38">
 		}
 	}
 
-   	// CONTENT FETCHING CLASS
-	class Uploader {
+
+	// CONTENT FETCHING CLASS
+    class Uploader {
         //
         constructor(props) {
             this.errorDiv = props.errorDiv
             this.fileDiv = props.fileDiv
 			this.uploadEndpoint = props.uploadEndpoint
 			this.fileType = props.fileType ? props.fileType : '.mp3'
+			this.emailField = props.emailField
+			this.positiveCompletion = props.positiveCompletion
 			//
+			delete props.errorDiv
+			delete props.fileDiv
+			delete props.uploadEndpoint
+			delete props.fileType
+			delete props.emailField
+			delete props.positiveCompletion
+			//
+			this.extra_props = {}
 			for ( let prop in props ) {
-				this[prop] = props[prop]
+				this.extra_props[prop] = props[prop]
 			}
 			//
             this._msgTimeout = null
@@ -3112,7 +3288,6 @@ viewBox="0 0 360 38">
             return(true)
         }
 
-
         async uploader() {
             if ( this.checkForm() ) {
                 try {
@@ -3130,14 +3305,16 @@ viewBox="0 0 360 38">
                 }
             }
 		}
-
 		
 		app_prepData(data) {		// mp3 one file as default -- subclass and override
 			let files = document.querySelector(this.fileDiv)
 			let file = files.files[0]
 			data.append('mp3file', file)
             let email = document.querySelector(this.emailField).value;
-            data.append('email', email)
+			data.append('email', email)
+			for ( let p in this.extra_props ) {
+				data.append(p, this.extra_props[p])
+			}
 		}
 
 		success_report(json) {
@@ -3145,7 +3322,6 @@ viewBox="0 0 360 38">
 			document.querySelector(this.errorDiv).style.color = "blue"
 		}
 	}
-	
 	
 
 	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
@@ -3334,7 +3510,7 @@ viewBox="0 0 360 38">
 					if ( g_currenCaptchaTOKEN ) {
 						let data = calcAppDataDB()		// calcAppDataDB
 						try {
-							let resp = await postData(g_CurContainer.service_url, data)
+							let resp = await postData(g_CurContainer.service_url, data,'include')
 							if ( resp.OK === "true" ) {
 								g_currenCaptchaTOKEN = null;     // check for duplicates
                                 if ( completionaAction ) completionaAction(resp);
@@ -3419,6 +3595,7 @@ viewBox="0 0 360 38">
 	function hide_thankyou_box(theBox) {
 		theBox.style.visibility = "hidden"
 		theBox.style.display = "none";
+		theBox.style.zIndex = 0
 	}
 
 	function show_thankyou_box(msg) {
@@ -3429,8 +3606,9 @@ viewBox="0 0 360 38">
 				if ( mbox ) mbox.innerHTML = msg
 
 			}
-			theBox.style.visibility = "visible"
 			theBox.style.display = "block";
+			theBox.style.visibility = "visible"
+			theBox.style.zIndex = 2000
 		}
 	}
 
@@ -3685,6 +3863,9 @@ viewBox="0 0 360 38">
 		}
 	}
 	function pin_ItsAlive(pinned) {
+		if ( pinned && (typeof pinned.openAction === 'function')) {
+			pinned.openAction()
+		}
 		g_apparition = null;
 	}
 	// ---- ---- ---- ---- ---- ----
@@ -3876,6 +4057,7 @@ viewBox="0 0 360 38">
 				if ( captchaPlacement ) {
 					captchaPlacement.innerHTML = svgText
 					g_currenCaptchaTOKEN = captchaObject.transition.token
+					g_CurContainer.captch_input.value = ''
 				}
 				//
 				return await captchaPromises();  // wait for user interaction to finish else 
@@ -3896,7 +4078,7 @@ viewBox="0 0 360 38">
 	var g_contact_Handling = null
 	function initContact() {
 		g_contact_Handling = new ValidationContainer({
-			"auth_port" : g_contact_port,
+			"auth_port" : "",
             "service_url" : `${location.protocol}//${g_siteURL}/captcha/transition/contact`,
             "errors_here" : document.getElementById('contact-errors_here'),
             "failure_msg_prefix" : "Cannot Process Captcha",
@@ -3944,7 +4126,7 @@ viewBox="0 0 360 38">
 	}
 	
 	function processContact() {
-		processUI_captchaService( contact_calcAppDataDB,
+		processUI_captchaService( g_contact_Handling,
 									contact_calcAppDataDB,
 									contact_completionaAction )
 	}
@@ -4131,4 +4313,6 @@ viewBox="0 0 360 38">
 	//
 	resize()
 	setupLogoutRestoration()
+
+
 </script>

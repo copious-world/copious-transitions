@@ -1,43 +1,65 @@
 
 <div id='dashboard-line-container'  style="visibility:hidden;display:none" >
-<div style="padding:6px;border:darkgreen solid 1px">
-   Dashboards for <span class='user-id' > $$WHOAMI </span>:
-   <br> 
-   <button onclick="project_dashboards()"  style="white-space: nowrap;width: min-content;">
-      projects dashboard
-   </button>
+   <div style="padding:6px;border:darkgreen solid 1px">
+      Dashboards for <span class='user-id' > $$WHOAMI </span>:
+      <br> 
+      <button onclick="project_dashboards()"  style="white-space: nowrap;width: min-content;">
+         projects dashboard
+      </button>
+   </div>
+   <div id="dashboard_response_messages" style="border:honeydew 1px solid;padding:4px;background-color: rgba(245, 245, 245, 0.842);" >
+   
+   </div>
 </div>
-<div id="dashboard_response_messages" style="border:honeydew 1px solid;padding:4px;background-color: rgba(245, 245, 245, 0.842);" >
-
-</div>
-</div>
-
+   
 <script>
 
    var g_dashboard_url = ''
    var g_dashboard_owner = ''
    var g_app_dashboard = null
-
+   //
    async function project_dashboards() {
+	   if ( (g_Loggedin_session_token === undefined) || (g_Loggedin_session_token.length === 0) ) {
+		   alert("session no longer active")
+		   logout(true)
+	   }
       if ( g_dashboard_url.length ) {
          try {
             if ( !g_app_dashboard ) {
-               let body = {
-                  'token' : g_Loggedin_session_token
-               }
-               let dashboardResponse = await postData(g_dashboard_url,body)
-               if ( dashboardResponse.owner === g_dashboard_owner ) {
+				//
+            	let body = {
+            		'token' : g_Loggedin_session_token
+            	}
+            	let dashboardResponse = await postData(g_dashboard_url,body)
+			   	//
+               if ( (dashboardResponse.owner === g_dashboard_owner) || (dashboardResponse._id === g_dashboard_owner ) ) {
+                  dashboardResponse.token = g_Loggedin_session_token
+                  let label = dashboardResponse.which_dashboard ? dashboardResponse.which_dashboard : (dashboardResponse._id + 'dashboard')
                   var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
-                  let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,
-                                                   `${dashboardResponse.which_dashboard}`,windowFeatures)
+                  let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,label,windowFeatures)
                   if ( dashboard ) {
                      dashboard.onload = (ev) => {
-                        try {
-                           dashboard.setup_user_dashboard(dashboardResponse)
-                           g_app_dashboard = dashboard
-                           dashboard.focus()
-                        } catch (e) {
-                        }
+                           try {
+                              g_app_dashboard = dashboard
+                              if ( dashboardResponse.dashboard ) {
+                                 let dash_data = decodeURIComponent(dashboardResponse.dashboard)
+                                 try {
+                                    dash_data = JSON.parse(dash_data)
+                                    for ( let ky in dashboardResponse ) {
+                                       if ( ky === 'dashboard' ) continue
+                                       dash_data[ky] = dashboardResponse[ky]
+                                    }
+                                    dash_data.token = g_Loggedin_session_token
+                                    dashboard.setup_user_dashboard(dash_data)
+                                 } catch (e) {
+
+                                 }
+                              } else {
+                                 dashboard.setup_user_dashboard(dashboardResponse)
+                              }
+                              g_app_dashboard.focus()
+                           } catch (e) {
+                           }
                      }
 
                      dashboard.onunload = (ev) => {
@@ -61,7 +83,8 @@
       }
    }
 
-   g_loginValueViews[`{{yourDashboardLinks.instantiate}}`] = (acctData,html) => {
+
+   g_loginValueViews[`dashboard`] = (acctData,html) => {
       try {
          let uid = acctData.data.email
          g_dashboard_owner = uid

@@ -1824,6 +1824,7 @@ html {
 				if ( captchaPlacement ) {
 					captchaPlacement.innerHTML = svgText
 					g_currenCaptchaTOKEN = captchaObject.transition.token
+					g_CurContainer.captch_input.value = ''
 				}
 				//
 				return await captchaPromises();  // wait for user interaction to finish else 

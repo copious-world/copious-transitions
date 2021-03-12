@@ -30,7 +30,7 @@ html {
  * Always hide an element when it has the `hidden` HTML attribute.
  */
 
- .hidden,
+.hidden,
 [hidden] {
     display: none !important;
 }
@@ -273,6 +273,16 @@ html {
 		button:hover {
 			background-color : #CACAFF;
 			color: darkred;
+		}
+
+		.button-hit-once {
+			box-shadow: blanchedalmond;
+		}
+
+		.button-hit-once:disabled {
+			cursor:none;
+			color:lightsteelblue;
+			background-color:antiquewhite;
 		}
 	
 		@media screen and (max-width: 390px) {
@@ -688,6 +698,11 @@ html {
 			cursor: pointer;
 		}
 
+		#for_testing_dialogs {
+			display: none;
+			visibility: hidden;
+		}
+
 	</style>
 </head>
 <script>
@@ -771,7 +786,7 @@ html {
 		</div>
 	</div>
 	
-	</main>
+</main>
 
 <footer>
 	<ul class="footer-list">
@@ -903,7 +918,9 @@ html {
 {{{yourProileLinks.content}}}
 {{{yourDashboardLinks.content}}}
 
-
+<dialog id="for_testing_dialogs">
+	<span>This is a dialog test</span>
+</dialog>
 
 </body>
 </html>
@@ -947,6 +964,43 @@ html {
 		whereScipt.appendChild(scriptEl);
 	}
 
+	function addstyle(script) {
+		var styleEl = document.createElement('style');
+		styleEl.type = 'text/css';
+		styleEl.text = script;
+		let whereScript = document.getElementsByTagName('head')
+		if ( whereScript && whereScript.length ) {
+			whereScript[0].appendChild(styleEl);
+		}
+	}
+
+	async function ensure_dialog_elements() {
+		let test_dialog = document.getElementById("for_testing_dialogs")  // thought to be in the template... if not this does nothing
+		if ( test_dialog ) {
+			if ( typeof test_dialog.showModal !== "function" ) {
+				let element_supportJson =  await wv_fetchEndPoint('uploaders/static/dialogs')
+				if ( element_supportJson ) {
+					let css_support = decodeURIComponent(element_supportJson.html)
+					addstyle(css_support)
+					let html_els = document.getElementsByTagName('html')
+					let html = null
+					if ( html_els && html_els.length ) {
+					html = html_els[0]
+					addscript(decodeURIComponent(element_supportJson.script),html)
+					// register the dialogs
+					let dialogs = document.getElementsByTagName('dialog')
+					let n = dialogs.length
+					for ( let i = 0; i < n; i++ ) {
+						let dial = dialogs[i]
+						dialogPolyfill.registerDialog(dial);
+					}
+					}
+				}
+			}
+		}
+	}
+
+
     function getCookie(cname) {  // modified from w3school
         var name = cname + "=";
         var ca = document.cookie.split(';');
@@ -960,6 +1014,18 @@ html {
             }
         }
         return "";
+	}
+
+
+	// not_https_switch 
+	// switch to HTTPS before doing any ops that may require a data exchange
+	function not_https_switch() {
+		if (location.protocol !== 'https:') {           // start from a secure page
+			alert("Switching to a secure version of this page in 1sec.")
+			setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
+			return(true)
+		}
+		return(false)
 	}
 
 	// streamer-scratchpad  -- in the stream app was using this.
@@ -987,7 +1053,7 @@ html {
 	}
 
 	//
-	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true,ctype) {
+	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true, ctype) {
 		let content_type = 'application/json'
 		if ( ctype !== undefined ) {
 			content_type = ctype
@@ -1019,17 +1085,28 @@ html {
 		}
 	}
 
-   	// CONTENT FETCHING CLASS
-	class Uploader {
+
+	// CONTENT FETCHING CLASS
+    class Uploader {
         //
         constructor(props) {
             this.errorDiv = props.errorDiv
             this.fileDiv = props.fileDiv
 			this.uploadEndpoint = props.uploadEndpoint
 			this.fileType = props.fileType ? props.fileType : '.mp3'
+			this.emailField = props.emailField
+			this.positiveCompletion = props.positiveCompletion
 			//
+			delete props.errorDiv
+			delete props.fileDiv
+			delete props.uploadEndpoint
+			delete props.fileType
+			delete props.emailField
+			delete props.positiveCompletion
+			//
+			this.extra_props = {}
 			for ( let prop in props ) {
-				this[prop] = props[prop]
+				this.extra_props[prop] = props[prop]
 			}
 			//
             this._msgTimeout = null
@@ -1094,7 +1171,6 @@ html {
             return(true)
         }
 
-
         async uploader() {
             if ( this.checkForm() ) {
                 try {
@@ -1112,14 +1188,16 @@ html {
                 }
             }
 		}
-
 		
 		app_prepData(data) {		// mp3 one file as default -- subclass and override
 			let files = document.querySelector(this.fileDiv)
 			let file = files.files[0]
 			data.append('mp3file', file)
             let email = document.querySelector(this.emailField).value;
-            data.append('email', email)
+			data.append('email', email)
+			for ( let p in this.extra_props ) {
+				data.append(p, this.extra_props[p])
+			}
 		}
 
 		success_report(json) {
@@ -1127,7 +1205,6 @@ html {
 			document.querySelector(this.errorDiv).style.color = "blue"
 		}
 	}
-	
 	
 
 	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
@@ -1316,7 +1393,7 @@ html {
 					if ( g_currenCaptchaTOKEN ) {
 						let data = calcAppDataDB()		// calcAppDataDB
 						try {
-							let resp = await postData(g_CurContainer.service_url, data)
+							let resp = await postData(g_CurContainer.service_url, data,'include')
 							if ( resp.OK === "true" ) {
 								g_currenCaptchaTOKEN = null;     // check for duplicates
                                 if ( completionaAction ) completionaAction(resp);
@@ -1417,6 +1494,7 @@ html {
 			theBox.style.zIndex = 2000
 		}
 	}
+
 	// ---- ---- ---- ---- ---- ----
 	function lowerFillerText() {
 		return `<div class="fillLower">
@@ -1552,6 +1630,9 @@ html {
 		}
 	}
 	function pin_ItsAlive(pinned) {
+		if ( pinned && (typeof pinned.openAction === 'function')) {
+			pinned.openAction()
+		}
 		g_apparition = null;
 	}
 	// ---- ---- ---- ---- ---- ----
@@ -1743,6 +1824,7 @@ html {
 				if ( captchaPlacement ) {
 					captchaPlacement.innerHTML = svgText
 					g_currenCaptchaTOKEN = captchaObject.transition.token
+					g_CurContainer.captch_input.value = ''
 				}
 				//
 				return await captchaPromises();  // wait for user interaction to finish else 
@@ -1763,7 +1845,7 @@ html {
 	var g_contact_Handling = null
 	function initContact() {
 		g_contact_Handling = new ValidationContainer({
-			"auth_port" : g_contact_port,
+			"auth_port" : "",
             "service_url" : `${location.protocol}//${g_siteURL}/{{auth_path}}/transition/contact`,
             "errors_here" : document.getElementById('contact-errors_here'),
             "failure_msg_prefix" : "Cannot Process Captcha",
@@ -1998,4 +2080,6 @@ html {
 	//
 	resize()
 	setupLogoutRestoration()
+
+
 </script>

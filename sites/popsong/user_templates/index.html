@@ -2805,127 +2805,50 @@ async function fetchUploader(theDiv) {
 </div>
 
 
-<div id='profile-line-container'  style="visibility:hidden;display:none" >
+<div id='profile-line-container' style="visibility: hidden;display:none" >
    <div style="padding:6px;border:darkgreen solid 1px">
-      I am <span >$$WHOAMI</span>:
-      <br> 
-      <button onclick="project_profiles()"  style="white-space: nowrap;width: min-content;">
-         View my Profile
-      </button>
-   </div>
-   <div id="profile_response_messages" style="border:honeydew 1px solid;padding:4px;background-color: rgba(245, 245, 245, 0.842);" >
-   
+   I am <span >$$WHOAMI</span>
+   <br>
+   <a id='who-my-profile'  class="nav-link" href="/profile/guarded/static/profile+$$WHOAMI" target="COPIOUS-PROFILE" >
+      View my Profile
+   </a>
    </div>
 </div>
-   
-   <script>
-   
-      var g_profile_url = ''
-      var g_profile_owner = ''
-      var g_app_profile = null
-   
-    //
-    async function project_profiles() {
-	   if ( (g_Loggedin_session_token === undefined) || (g_Loggedin_session_token.length === 0) ) {
-		   alert("session no longer active")
-		   logout(true)
-	   }
-      if ( g_profile_url.length ) {
-         try {
-            if ( !g_app_profile ) {
-				//
-            	let body = {
-            		'token' : g_Loggedin_session_token
-            	}
-            	let profileResponse = await postData(g_profile_url,body)
-			   	//
-               if ( (profileResponse.owner === g_profile_owner) || (profileResponse._id === g_profile_owner ) ) {
-                  profileResponse.token = g_Loggedin_session_token
-                  let label = profileResponse.which_profile ? profileResponse.which_profile : (profileResponse._id + 'profile')
-                  var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
-                  let profile = window.open(`${location.protocol}//${g_siteURL}/profile.html`,label,windowFeatures)
-                  if ( profile ) {
-                     profile.onload = (ev) => {
-                           try {
-                              g_app_profile = profile
-                              if ( profileResponse.profile ) {
-                                 let prof_data = decodeURIComponent(profileResponse.profile)
-                                 try {
-                                    prof_data = JSON.parse(prof_data)
-                                    for ( let ky in profileResponse ) {
-                                       if ( ky === 'profile' ) continue
-                                       prof_data[ky] = profileResponse[ky]
-                                    }
-                                    prof_data.token = g_Loggedin_session_token
-                                    profile.setup_user_profile(prof_data)
-                                 } catch (e) {
 
-                                 }
-                              } else {
-                                 profile.setup_user_profile(profileResponse)
-                              }
-                              g_app_profile.focus()
-                           } catch (e) {
-                           }
-                     }
-
-                     profile.onunload = (ev) => {
-                        g_app_profile = null
-                     }
-                  }
-               } else {
-                  let msgbox = document.getElementById('profile_response_messages')
-                  if ( msgbox ) msgbox.innerHTML = "The user information does not match."
-               }
-            } else {
-               g_app_profile.focus()
-            }
-         } catch (e) {
-            let msgbox = document.getElementById('profile_response_messages')
-            if ( msgbox ) msgbox.innerHTML = e.message
-         }
-      } else {
-         let msgbox = document.getElementById('profile_response_messages')
-         if ( msgbox ) msgbox.innerHTML = "The profile URL is not defined"
+<script>
+   g_loginValueViews[`profile`] = (acctData,html) => {
+      try {
+         let uid = acctData.data.email
+         //
+         html = html.replace('$$WHOAMI',uid)
+         html = html.replace('$$WHOAMI',uid)
+      } catch (e) {
       }
+      return(html)
    }
-   
-      g_loginValueViews[``] = (acctData,html) => {
-         try {
-            let uid = acctData.data.email
-            g_profile_owner = uid
-            g_profile_url = `${location.protocol}//${g_siteURL}/profile/guarded/static/profile+${uid}`
-            html = html.replace('$$WHOAMI',uid)
-            html = html.replace('$$WHOAMI',uid)
-         } catch (e) {
-         }
-         return(html)
-      }
-   
-   </script>
-   
-   
+</script>
+
 
 
 <div id='dashboard-line-container'  style="visibility:hidden;display:none" >
-   <div style="padding:6px;border:darkgreen solid 1px">
-      Dashboards for <span class='user-id' > $$WHOAMI </span>:
-      <br> 
-      <button onclick="project_dashboards()"  style="white-space: nowrap;width: min-content;">
-         projects dashboard
-      </button>
-   </div>
-   <div id="dashboard_response_messages" style="border:honeydew 1px solid;padding:4px;background-color: rgba(245, 245, 245, 0.842);" >
-   
-   </div>
+<div style="padding:6px;border:darkgreen solid 1px">
+   Dashboards for <span class='user-id' > $$WHOAMI </span>:
+   <br> 
+   <button onclick="project_dashboards()"  style="white-space: nowrap;width: min-content;">
+      projects dashboard
+   </button>
 </div>
-   
+<div id="dashboard_response_messages" style="border:honeydew 1px solid;padding:4px;background-color: rgba(245, 245, 245, 0.842);" >
+
+</div>
+</div>
+
 <script>
 
    var g_dashboard_url = ''
    var g_dashboard_owner = ''
    var g_app_dashboard = null
-   //
+
    async function project_dashboards() {
 	   if ( (g_Loggedin_session_token === undefined) || (g_Loggedin_session_token.length === 0) ) {
 		   alert("session no longer active")
@@ -2940,39 +2863,39 @@ async function fetchUploader(theDiv) {
             	}
             	let dashboardResponse = await postData(g_dashboard_url,body)
 			   	//
-               if ( (dashboardResponse.owner === g_dashboard_owner) || (dashboardResponse._id === g_dashboard_owner ) ) {
-                  dashboardResponse.token = g_Loggedin_session_token
-                  let label = dashboardResponse.which_dashboard ? dashboardResponse.which_dashboard : (dashboardResponse._id + 'dashboard')
-                  var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
-                  let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,label,windowFeatures)
-                  if ( dashboard ) {
-                     dashboard.onload = (ev) => {
-                           try {
-                              g_app_dashboard = dashboard
-                              if ( dashboardResponse.dashboard ) {
-                                 let dash_data = decodeURIComponent(dashboardResponse.dashboard)
-                                 try {
-                                    dash_data = JSON.parse(dash_data)
-                                    for ( let ky in dashboardResponse ) {
-                                       if ( ky === 'dashboard' ) continue
-                                       dash_data[ky] = dashboardResponse[ky]
-                                    }
-                                    dash_data.token = g_Loggedin_session_token
-                                    dashboard.setup_user_dashboard(dash_data)
-                                 } catch (e) {
+               	if ( (dashboardResponse.owner === g_dashboard_owner) || (dashboardResponse._id === g_dashboard_owner ) ) {
+					dashboardResponse.token = g_Loggedin_session_token
+					let label = dashboardResponse.which_dashboard ? dashboardResponse.which_dashboard : (dashboardResponse._id + 'dashboard')
+                	var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
+                	let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,label,windowFeatures)
+                  	if ( dashboard ) {
+					dashboard.onload = (ev) => {
+                        try {
+							g_app_dashboard = dashboard
+							if ( dashboardResponse.dashboard ) {
+								let dash_data = decodeURIComponent(dashboardResponse.dashboard)
+								try {
+									dash_data = JSON.parse(dash_data)
+									for ( let ky in dashboardResponse ) {
+										if ( ky === 'dashboard' ) continue
+										dash_data[ky] = dashboardResponse[ky]
+									}
+									dash_data.token = g_Loggedin_session_token
+									dashboard.setup_user_dashboard(dash_data)
+								} catch (e) {
 
-                                 }
-                              } else {
-                                 dashboard.setup_user_dashboard(dashboardResponse)
-                              }
-                              g_app_dashboard.focus()
-                           } catch (e) {
-                           }
-                     }
+								}
+							} else {
+								dashboard.setup_user_dashboard(dashboardResponse)
+							}
+                           g_app_dashboard.focus()
+                        } catch (e) {
+                        }
+                    }
 
-                     dashboard.onunload = (ev) => {
-                        g_app_dashboard = null
-                     }
+					dashboard.onunload = (ev) => {
+						g_app_dashboard = null
+					}
                   }
                } else {
                   let msgbox = document.getElementById('dashboard_response_messages')
@@ -2990,7 +2913,6 @@ async function fetchUploader(theDiv) {
          if ( msgbox ) msgbox.innerHTML = "The dashboard URL is not defined"
       }
    }
-
 
    g_loginValueViews[`dashboard`] = (acctData,html) => {
       try {

@@ -384,6 +384,9 @@
     async function app_process_logout(site_wide = true) {
         try {
             let url = `${location.protocol}//${g_siteURL}/{{auth_path}}/users/logout`
+			if ( (g_Loggedin_session_token === undefined) || (g_Loggedin_session_token.length === 0) ) {
+				return false
+			}
             let data = { 'action' : 'logout', 'token' : g_Loggedin_session_token }
             let resp = await postData(url, data, 'include')
             site_wide_logout(g_Loggedin_session_token,site_wide)
