@@ -2862,8 +2862,9 @@ async function fetchUploader(theDiv) {
             		'token' : g_Loggedin_session_token
             	}
             	let dashboardResponse = await postData(g_dashboard_url,body)
-			   //
-               if ( (dashboardResponse.owner === g_dashboard_owner) || (dashboardResponse._id === g_dashboard_owner ) ) {
+			   	//
+               	if ( (dashboardResponse.owner === g_dashboard_owner) || (dashboardResponse._id === g_dashboard_owner ) ) {
+					dashboardResponse.token = g_Loggedin_session_token
 					let label = dashboardResponse.which_dashboard ? dashboardResponse.which_dashboard : (dashboardResponse._id + 'dashboard')
                 	var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
                 	let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard.html`,label,windowFeatures)
@@ -2879,7 +2880,8 @@ async function fetchUploader(theDiv) {
 										if ( ky === 'dashboard' ) continue
 										dash_data[ky] = dashboardResponse[ky]
 									}
-									dashboard.setup_user_dashboard(dash_data,g_Loggedin_session_token)
+									dash_data.token = g_Loggedin_session_token
+									dashboard.setup_user_dashboard(dash_data)
 								} catch (e) {
 
 								}
