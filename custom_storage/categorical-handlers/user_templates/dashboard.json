@@ -1,9 +1,0 @@
-{
-	"owner" : "{{_id}}",
-	"date"  : "{{date}}",
-	"panel_key" : "{{password}}",
-	"dashboard_text" : "test dashboard_text",
-	"header_user_name" : "{{name}}",
-	"tag_line" : "{{title}}",
-	"entries" : {}
-}
