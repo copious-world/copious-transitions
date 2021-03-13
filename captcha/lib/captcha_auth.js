@@ -56,6 +56,9 @@ class CaptchaSessionManager extends SessionManager {
     async process_user(user_op,body,req,res) {
         this.set_cookie(res,'copious+tester',`yozie-dozie${cnt++}`,60000)
         let pkey = G_users_trns.primary_key()
+        if ( user_op === 'register' ) {
+            G_users_trns.tracking(body)
+        }
         let transtionObj = await super.process_user(user_op,body,req,res,pkey)
         // at this point the transition object has two tokens...
         if ( G_users_trns.action_selector(user_op) ) {

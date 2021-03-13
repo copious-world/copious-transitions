@@ -61,6 +61,10 @@ class CaptchaUsers extends TaggedTransition {
         return([data,""])
     }
 
+    tracking(u_obj) {
+        u_obj._tracking = do_hash(JSON.stringify(u_obj))
+    }
+    
 }
 
 // Captcha Paths
