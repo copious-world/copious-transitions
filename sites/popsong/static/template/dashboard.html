@@ -1707,6 +1707,7 @@ async function real_save(obj) {
 		let asset_id = `+${ky}+${obj.email}}`
 		obj.email = g_dashboard_info.email
 		obj.token = g_dashboard_info.token
+		obj._origin = "{{origin}}"
 		let result = await postData(endpoint,obj)
 	}
 }
@@ -1727,6 +1728,7 @@ async function real_publish(obj) {
 	send_obj.user_name = g_dashboard_info.user_name
 	send_obj.email = g_dashboard_info.email
 	send_obj.token = g_dashboard_info.token
+	send_obj._origin = "{{origin}}"
 	let result = await postData(endpoint,send_obj) 	// send everything to be stored....
 }
 
@@ -1742,6 +1744,7 @@ async function real_unpublish(obj) {
 	send_obj.user_name = g_dashboard_info.user_name
 	send_obj.email = g_dashboard_info.email
 	send_obj.token = g_dashboard_info.token
+	send_obj._origin = "{{origin}}"	
 	let result = await postData(endpoint,send_obj)
 }
 
@@ -1758,6 +1761,7 @@ async function real_reload(obj) {
 	delete send_obj.data			// for a command don't send all the data (it will be on the server)
 	send_obj.user_name = g_dashboard_info.user_name
 	send_obj.token = g_dashboard_info.token
+	send_obj._origin = "{{origin}}"
 	//
 	let result = await postData(endpoint,obj)			// send everything and then update it on this page.
 	if ( result.status === "OK" ) {
@@ -1800,6 +1804,7 @@ async function real_delete(obj) {
 		send_obj.user_name = g_dashboard_info.user_name
 		send_obj.email = g_dashboard_info.email
 		send_obj.token = g_dashboard_info.token
+		send_obj._origin = "{{origin}}"
 		let result = await postData(endpoint,send_obj)
 	}
 }
