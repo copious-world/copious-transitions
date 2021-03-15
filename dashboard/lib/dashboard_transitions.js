@@ -138,8 +138,7 @@ class DashboardsAssets extends Dashboards {
 
     update(data) {
         data.asset_type = this.last_tagged
-        if ( data._id ) {
-            data._tracking = data._id
+        if ( data._tracking ) {
             data.key_field = "_transition_path"
             data._user_dir_key = "email"
             data._transition_path =`${data._tracking}+${data.asset_type}+${data.email}`
