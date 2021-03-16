@@ -96,7 +96,7 @@ g_app.get('/', (req, res) => {
 g_app.get('/static/:asset', async (req, res) => {
     let asset = req.params['asset']
     let body = {}
-    let proceed = await g_session_manager.guard(asset,body,req)
+    let proceed = await g_session_manager.guard_static(asset,body,req)
     if ( proceed ) {     // returns a true value by default, but may guard some assets
         var asset_obj = await g_statics.fetch(asset);     // returns an object with fields mime_type, and string e.g. text/html with uriEncoded html
         if ( typeof asset_obj !== 'object' || asset_obj.mime_type == undefined ) {
