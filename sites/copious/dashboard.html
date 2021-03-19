@@ -928,6 +928,7 @@ html {
 			<button id='floating-info-entry-do-publish' onclick="publish('current-display-item')">publish</button>&nbsp;
 			<button id='floating-info-entry-do-unpublish' onclick="unpublish('current-display-item')">unpublish</button>
 			<input id='current-display-item' type="hidden" value="something">
+			<input id='shareable' type="hidden" value="some agreed upon flag">
 		</div>
 
 		<div id="floating-info-entry" contenteditable="true" >
@@ -1477,6 +1478,7 @@ function done_with_file(category,obj) {
 					'title' : obj.file_name,
 					'data'  : obj.result
 				}
+				entry.file_name = obj.file_name
 			}
 			entry.asset_type = category
 			entries.push(entry)
@@ -1490,6 +1492,7 @@ function done_with_file(category,obj) {
 				'data'  : obj.result
 			}
 			entry.asset_type = category
+			entry.file_name = obj.file_name
 			entries.push(entry)
 			append_to_container(category,entry)
 		}
@@ -1700,7 +1703,18 @@ function dragOverHandler(ev,subst_key) {
 */
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-var g_dashboard_info = null
+var g_dashboard_info = {
+	"email" : "al@oicious.com",
+	"date" : ('' + Date.now()),
+	"header_user_name" : 'Al Always Oicious',
+	"dashboard_text" : "not much",
+	"tag_line" : "play a game of tag"
+}
+
+let shareable_field = document.getElementById("shareable")
+g_dashboard_info.page_host = document.location.href   //document.location.hostname
+shareable_field.value = JSON.stringify(g_dashboard_info)
+
 
 //
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -1880,13 +1894,18 @@ function setup_user_dashboard(dashboardResponse,session_token) {
 			el.innerHTML = dashboardResponse[ky]
 		}
 	}
-
+	//
 	let _entries = g_dashboard_info.entries
 	for ( let ky in g_all_user_entries ) {
 		if ( _entries[ky] !== undefined ) {
 			g_all_user_entries[ky] = _entries[ky]
 		}
 	}
+	//
+	g_dashboard_info.page_host = document.host
+	let shar = document.getElementById("shareable")
+	shar.value = JSON.stringify(g_dashboard_info)
+
 	show_stuff('blog')
 	drop_content_aware()
 }
@@ -1896,6 +1915,29 @@ function setup_user_dashboard(dashboardResponse,session_token) {
 function site_wide_logout() {
 
 }
+
+
+
+window.addEventListener("message", (event) => {
+  if (event.source == window &&
+      event.data.direction &&
+      event.data.direction == "from-content-script") {
+	let message = event.data.message
+	if ( typeof message === "string" ) {
+		try {
+			message = JSON.parse(message)
+		} catch (e) {}
+	}
+
+	if ( event.data.category === "links" ) {
+		done_with_file("links",message)
+	}
+
+    //alert("Page script received message: \"" + message + "\"");
+  }
+});
+
+
 
 </script>
 	
