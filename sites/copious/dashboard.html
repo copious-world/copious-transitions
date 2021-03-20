@@ -1235,20 +1235,20 @@ var g_uploader_cache = {}
 
 
 function upload_audio(obj) {
-	obj.email = g_dashboard_info.email
-	let url = `http://${g_siteURL}/uploaders/transition/do_demo_upload/generic-audio`
+	obj.email = g_profile_info.email
+	let url = `http://${g_siteURL}/uploaders/transition/do_generic_upload/audio-`
 	postData(url,obj)
 }
 
 function upload_video(obj) {
-	obj.email = g_dashboard_info.email
-	let url = `http://${g_siteURL}/uploaders/transition/do_demo_upload/generic-video`
+	obj.email = g_profile_info.email
+	let url = `http://${g_siteURL}/uploaders/transition/do_generic_upload/video-`
 	postData(url,obj)
 }
 
 function upload_image(obj) {
-	obj.email = g_dashboard_info.email
-	let url = `http://${g_siteURL}/uploaders/transition/do_demo_upload/generic-image`
+	obj.email = g_profile_info.email
+	let url = `http://${g_siteURL}/uploaders/transition/do_generic_upload/image-`
 	postData(url,obj)	
 }
 
@@ -1854,7 +1854,7 @@ function done_with_file(category,obj) {
 					obj.media.source = make_video_upload_link(obj)
 					break
 				}
-				case 'image' {
+				case 'image' : {
 					obj.media.poster = make_image_upload_link(obj)
 					break;
 				}
@@ -2087,7 +2087,7 @@ function dropHandler(ev,category) {
 				} else {
 					reader.readAsDataURL(file)
 				}
-\				break
+				break
 			}
 		}
 	} else {
