@@ -886,7 +886,7 @@ html {
 			<!--  -->
 			<div  style="width: 70%">
 				<div style="height: fit-content;text-align: center;border-bottom: 1px solid darkslateblue;">
-				<h4 id="collection-title">assets by line</h4>
+					<h4 id="collection-title" style="text-transform: capitalize;">Links by line</h4>
 				</div>
 				<div style="height: fit-content;text-align: left;padding-left: 10px; background-color: floralwhite;">
 					checked:  <button onclick="send_checked()">send</button>
@@ -923,7 +923,7 @@ html {
 		<div class="items">
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-contacts" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Contacts Drop
+					Contacts (drag & drop)
 				</span><br>
 				<button onclick="show_stuff('contacts')">list</button>
 				<button onclick="get_file('contacts')">&plus;</button>
@@ -936,7 +936,7 @@ html {
 		<!--  -->
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-ownership" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Ownership Drop
+					Ownership (drag & drop)
 				</span><br>
 				<button onclick="show_stuff('ownership')" >list</button>
 				<button onclick="get_file('ownership')">&plus;</button>
@@ -949,7 +949,7 @@ html {
 		<!--  -->
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-wallet" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Wallet Drop
+					Wallet (drag & drop)
 				</span><br>
 				<button onclick="show_stuff('wallet')" >list</button>
 				<button onclick="get_file('wallet')">&plus;</button>
@@ -962,7 +962,7 @@ html {
 		<!--  -->
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-assets" style="text-decoration: underline;color: #000;font-weight: 600;">
-					My Stuff Drop
+					My Stuff (drag & drop)
 				</span><br>
 				<button onclick="show_stuff('assets')" >list</button>
 				<button onclick="get_file('assets')">&plus;</button>
@@ -1353,7 +1353,16 @@ function best_fit_media_type(file_name) {
 }
 
 
+function sel_display_title(key) {
+	let title_field = document.getElementById('collection-title')
+	let title_txt = key + " > click on lines"
+	title_field.innerHTML = title_txt
+}
+
 function show_stuff(key) {
+
+	sel_display_title(key)
+
 	g_current_sel_display = key
 	let entries =  g_all_user_entries[key]
 	let container = document.getElementById('collection')

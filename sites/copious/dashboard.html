@@ -885,7 +885,7 @@ html {
 			<!--  -->
 			<div  style="width: 70%">
 				<div style="height: fit-content;text-align: center;border-bottom: 1px solid darkslateblue;">
-				<h4 id="collection-title">Links by line</h4>
+					<h4 id="collection-title" style="text-transform: capitalize;">Links by line</h4>
 				</div>
 				<div style="height: fit-content;text-align: left;padding-left: 10px; background-color: floralwhite;">
 					checked:  <button onclick="publish_checked()">publish</button>
@@ -922,7 +922,7 @@ html {
 		<div class="items">
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-blog" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Blog Drop
+					Blog Drop (drag & drop)
 				</span><br>
 				<button onclick="show_stuff('blog')">list</button>
 				<button onclick="get_file('blog')">&plus;</button>
@@ -935,7 +935,7 @@ html {
 		<!--  -->
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-stream" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Stream Drop
+					Stream Drop (drag & drop)
 				</span><br>
 				<button onclick="show_stuff('stream')" >list</button>
 				<button onclick="get_file('stream')">&plus;</button>
@@ -948,7 +948,7 @@ html {
 		<!--  -->
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-demo" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Demo Drop
+					Demo Drop (drag & drop)
 				</span><br>
 				<button onclick="show_stuff('demo')" >list</button>
 				<button onclick="get_file('demo')">&plus;</button>
@@ -961,7 +961,7 @@ html {
 		<!--  -->
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-links" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Link Package Drop
+					Link Package Drop (drag & drop)
 				</span><br>
 				<button onclick="show_stuff('links')" >list</button>
 				<button onclick="get_file('links')">&plus;</button>
@@ -1357,8 +1357,16 @@ function best_fit_media_type(file_name) {
 	return undefined
 }
 
+function sel_display_title(key) {
+	let title_field = document.getElementById('collection-title')
+	let title_txt = key + " > click on lines"
+	title_field.innerHTML = title_txt
+}
 
 function show_stuff(key) {
+
+	sel_display_title(key)
+
 	g_current_sel_display = key
 	let entries =  g_all_user_entries[key]
 	let container = document.getElementById('collection')
