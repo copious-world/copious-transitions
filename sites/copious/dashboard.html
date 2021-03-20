@@ -1199,6 +1199,165 @@ function append_to_container(key,obj) {
 
 // // // // //
 
+//
+let g_code_files = [ ".js", ".c",  ".cpp", ".c++",  ".cc", ".v", ".rs" ]
+let g_media_files = [ ".mp3", ".mp4",  ".mpeg", ".ogg",  ".wav", ".jpeg", ".gif", ".png" ]
+let g_text_files = [ ".txt", ".text", ".html", ".svg", ".htm" ]
+
+let g_ext_to_media_type = {
+	".mp3" : "audio", 
+	".mp4" : "video",  
+	".mpeg" : "video", 
+	".ogg" : "audio",  
+	".wav" : "audio", 
+	".jpeg" : "image", 
+	".gif" : "image",
+	".png" : "image"
+}
+
+const AUDIO_STREAMING_SERVICE = "https://www.popsongnow.com/streamer/"
+const VIDEO_STREAMING_SERVICE = "https://www.popsongnow.com/video/"
+const IMAGE_STORAGE_SERVICE = "https://www.popsongnow.com/images/"
+
+
+
+
+/*
+var url = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+
+fetch(url)
+.then(res => res.blob())
+.then(blob => console.log(blob))
+*/
+
+
+var g_uploader_cache = {}
+
+
+function upload_audio(obj) {
+	obj.email = g_dashboard_info.email
+	let url = `http://${g_siteURL}/uploaders/transition/do_demo_upload/generic-audio`
+	postData(url,obj)
+}
+
+function upload_video(obj) {
+	obj.email = g_dashboard_info.email
+	let url = `http://${g_siteURL}/uploaders/transition/do_demo_upload/generic-video`
+	postData(url,obj)
+}
+
+function upload_image(obj) {
+	obj.email = g_dashboard_info.email
+	let url = `http://${g_siteURL}/uploaders/transition/do_demo_upload/generic-image`
+	postData(url,obj)	
+}
+
+
+function prep_upload_for(obj,uploader_fun) {
+	//
+	g_uploader_cache[obj._dash_entry_id] = () => {
+		uploader_fun(obj)
+	}
+	//
+}
+
+
+function do_media_upload(obj) {
+	let id = obj._dash_entry_id
+	let uploader = g_uploader_cache[id]
+	if ( uploader ) uploader()
+}
+
+// 
+function make_audio_upload_link(obj) {
+	let file_name = obj.file_name
+	let sream_link = AUDIO_STREAMING_SERVICE + file_name
+	prep_upload_for(obj,upload_audio)
+	return(stream_link)
+}
+
+function make_video_upload_link(obj) {
+	let file_name = obj.file_name
+	let sream_link = VIDEO_STREAMING_SERVICE + file_name
+	prep_upload_for(obj,upload_video)
+	return(stream_link)
+}
+
+function make_image_upload_link(obj) {
+	let file_name = obj.file_name
+	let sream_link = IMAGE_STORAGE_SERVICE + file_name
+	prep_upload_for(obj,upload_image)
+	return(stream_link)	
+}
+
+
+function extract_sound_media_ext(file_src) {
+	let dot = file_src.lastIndexOf('.')
+	if ( dot < 0 ) return("mpeg") // default .. e.g. from a streaming service
+	let ext = file_src.substr(dot)
+	if ( ext === '.ogg') return("ogg")
+	return("mpeg")
+}
+
+
+function get_ext(fname) {
+	let ext = fname.slice((Math.max(0, fname.lastIndexOf(".")) || Infinity) + 1);
+	if ( ext.length > 0 ) ext = '.' + ext
+	return ext
+}
+
+
+function best_cat_for_ext(ext) {
+	if ( g_code_files.indexOf(ext) >= 0 ) return ("blog")
+	else if ( g_text_files.indexOf(ext) >= 0 ) return ("blog")
+	else if ( g_media_files.indexOf(ext) >= 0 ) return ("stream")
+	return("blog")
+}
+
+
+function is_link(file_name) {
+	if ( file_name[0] === '/' ) return(true)
+	let tester = "http:"
+	if ( file_name.substr(0,tester.length) === tester) return true
+	tester = "https:"
+	if ( file_name.substr(0,tester.length) === tester) return true
+	tester = "wss:"
+	if ( file_name.substr(0,tester.length) === tester) return true
+	tester = "ipfs:"
+	if ( file_name.substr(0,tester.length) === tester) return true
+	return(false)
+}
+
+
+function check_category(category,file_name) {
+	//
+	if ( file_name === undefined ) {
+		return category
+	}
+	if ( is_link(file_name) ) {
+		return category
+	}
+	//
+	let ext = get_ext(file_name)
+	if ( ext.length ) {
+		let fit_cat = best_cat_for_ext(ext)
+		return(fit_cat)
+	}
+	//
+	return category
+}
+
+
+function best_fit_media_type(file_name) {
+	if ( category == 'stream' ) {
+		let ext =  get_ext(file_name)
+		let mtype = g_ext_to_media_type[ext]
+		return(mtype)
+	}
+	return undefined
+}
+
+
 function show_stuff(key) {
 	g_current_sel_display = key
 	let entries =  g_all_user_entries[key]
@@ -1237,7 +1396,6 @@ function show_stuff(key) {
 
 	container.innerHTML = total_txt
 }
-
 
 
 function category_name_get(key) {
@@ -1399,14 +1557,6 @@ function hide_all_special_data_fields() {
 }
 
 
-function extract_media_ext(file_src) {
-	let dot = file_src.lastIndexOf('.')
-	if ( dot < 0 ) return("mpeg") // default .. e.g. from a streaming service
-	let ext = file_src.substr(dot)
-	if ( ext === '.ogg') return("ogg")
-	return("mpeg")
-}
-
 
 var g_app_populators = {
 	"blog" : (entry) => { 
@@ -1447,7 +1597,7 @@ var g_app_populators = {
 			}
 		} else {	//  sound
 			if ( sound ) {
-				let ext = extract_media_ext(media.source)
+				let ext = extract_sound_media_ext(media.source)
 				let sound_src = document.getElementById(`asset-type-stream-sound-${ext}`)
 				if ( sound_src ) {
 					sound_src.src = media.source
@@ -1517,6 +1667,7 @@ function save(item_holder) {
 	line_el.innerHTML = title
 	//
 	real_save(obj)
+	do_media_upload(obj)
 	if ( obj.deleted ) {
 		obj.deleted = false
 		unpublish(item_holder)
@@ -1682,74 +1833,91 @@ function get_random_id(entries,nn) {
 
 
 //
+//	done_with_file
+//
 function done_with_file(category,obj) {
 	if ( obj === null ) {
 		alert("no file loaded")
 	} else {
+		let check_cat = check_category(category,obj.file_name)
+		if ( (check_cat !== category)  && (obj.media_type === undefined)) {
+			category = check_cat
+			obj.media_type = best_fit_media_type(obj.file_name)
+			switch ( obj.media_type ) {
+				case 'audio' : {
+					obj.media.poster = ""
+					obj.media.source = make_audio_upload_link(obj)
+					break
+				}
+				case 'video' : {
+					obj.media.poster = ""
+					obj.media.source = make_video_upload_link(obj)
+					break
+				}
+				case 'image' {
+					obj.media.poster = make_image_upload_link(obj)
+					break;
+				}
+			}
+		}
+		if ( obj.media_type ) {
+			if ( (obj.media_type === 'audio') || (obj.media_type === 'video') ) {
+				category = 'stream'
+			}
+		}
+		//
 		let entries = g_all_user_entries[category]
 		//
 		let fname = obj.file_name
+		let os_drop_result = obj.result
+		let new_dash_id = get_random_id(entries)
+		let entry = {}
 		if ( is_json_file(fname) ) {
-			let new_dash_id = get_random_id(entries)
-			let entry = Object.assign({},obj)
 			try {
-				entry = JSON.parse(obj.result)
-				entry._dash_entry_id = new_dash_id
-				entry.deleted = false
-				entry.published = false
-				entry.file_name = obj.file_name
-				if ( entry.title == undefined ) {
-					entry.title =  obj.file_name
-				}
-				if ( entry.txt_full && !( entry.abstract ) ) {
-					entry.data = entry.txt_full
-				}
-				if ( (entry.abstract !== undefined) && (typeof entry.abstract === "string" ) ) {
-					entry.data = entry.abstract
-				}
+				entry = JSON.parse(os_drop_result)		// contents of file is a JSON string (most likely)
 			} catch (e) {
 				entry = {
 					"_dash_entry_id" : new_dash_id,
 					"published" : false,
 					'deleted' : false,
 					'title' : obj.file_name,
-					'data'  : obj.data
+					'data'  : obj.result			// guess again... just take the data along ... it will appear in the abstract field on displays
 				}
 				entry.file_name = obj.file_name
 			}
-			entry.asset_type = category
-			entries.push(entry)
-			append_to_container(category,entry)
 		} else {
-			let new_dash_id = get_random_id(entries)
-			let entry = Object.assign({},obj)
-			entry._dash_entry_id = new_dash_id
-			entry.deleted = false
-			entry.published = false
-			entry.file_name = obj.file_name
-			if ( entry.title == undefined ) {
-				entry.title =  obj.file_name
+			entry = Object.assign({},obj)
+			if ( obj.result ) {
+				entry.data = obj.result		// known to be some kind of text format or other
 			}
-			if ( entry.txt_full && !( entry.abstract)) {
-				entry.data = entry.txt_full
-			}
-			if ( (entry.abstract !== undefined) && (typeof entry.abstract === "string" ) ) {
-				entry.data = entry.abstract
-			}
-			if ( entry.data === undefined ) {
-				entry.data = "Please enter a description"
-			}
-			entry.asset_type = category
-			entry.file_name = obj.file_name
-			entries.push(entry)
-			append_to_container(category,entry)
+			delete entry.result
 		}
+		//
+		entry._dash_entry_id = new_dash_id		// for use in the dashboard UI operations
+		entry.deleted = false
+		entry.published = false
+		entry.file_name = obj.file_name			// use the one from the system if it got here from the file system
+		if ( entry.title == undefined ) {
+			entry.title =  obj.file_name		// no title specified, so use the file name
+		}
+		if ( entry.txt_full && !( entry.abstract ) ) {		// a stuctured entry with a txt_full field, but without an abstract
+			entry.data = entry.txt_full						// so put the text into the first text display... (usually abstract)  .. sort of fudgy
+		}
+		if ( (entry.abstract !== undefined) && (typeof entry.abstract === "string" ) ) {
+			entry.data = entry.abstract				// abstract goes on display
+		}
+		if ( entry.data === undefined ) {			// Never got a version of data this dashboard knows about. So, tell the user to make some.
+			entry.data = "Please enter a description"
+		}
+		entry.asset_type = category
+		entries.push(entry)
+		append_to_container(category,entry)
 	}
 }
 
 
 
-function perpare_for_upate(res) {
+function prepare_for_update(res) {
 	let cat =  g_current_sel_display
 	let cur_item_holder = document.getElementById('current-display-item')
 	let id = cur_item_holder.value
@@ -1801,8 +1969,6 @@ function undo_data_drop(item_holder) {
 }
 
 //
-let g_code_files = [ ".js", ".c",  ".cpp", ".c++",  ".cc", ".v", ".rs" ]
-//
 function prepare_file_text(text,file_name,category) {
 	//
 	if ( file_name.indexOf('.') > 0 ) {
@@ -1822,13 +1988,14 @@ function prepare_file_text(text,file_name,category) {
 		if ( edit_el ) {
 			edit_el.innerHTML = text
 		}
-		perpare_for_upate(res)
+		prepare_for_update(res)
 	} else {
 		done_with_file(category,res)
 		show_stuff(category)
 	}
 	//
 }
+
 
 //
 async function capture_clicks(ev,subst_key) {
@@ -1845,21 +2012,22 @@ async function capture_clicks(ev,subst_key) {
 	}
 
 
+// called in response to a file selection through the system file browser
 //
-function  get_file(key) {
-	let file_el = document.getElementById(`drop-click-file_loader-${key}`)
+function  get_file(category) {
+	let file_el = document.getElementById(`drop-click-file_loader-${category}`)
 	file_el.addEventListener('change',(ev) => {
 		let file = file_el.files[0]
 		let fr = new FileReader()
 		fr.onload = (ev) => {
 			let res = {
 				"result" : fr.result,
-				"file_name"   : fr.name ? fr.name : category_name_get(key)
+				"file_name"   : fr.name ? fr.name : category_name_get(category)
 			}
-			done_with_file(key,res)
+			done_with_file(category,res)
 		}
 		fr.onerror = (ev) => {
-			done_with_file(key,null)
+			done_with_file(category,null)
 		}
 
 		fr.readAsText(file)
@@ -1909,12 +2077,17 @@ function dropHandler(ev,category) {
 			if (ev.dataTransfer.items[i].kind === 'file') {
 				let file = ev.dataTransfer.items[i].getAsFile();
 				let fname = file.name
+				let mtype = best_fit_media_type(fname)
 				var reader = new FileReader();
 				reader.onload = (e) => {
 					prepare_file_text(e.target.result,fname,category)
 				};
-				reader.readAsText(file);
-				break
+				if ( mtype == 'text' ) {
+					reader.readAsText(file);
+				} else {
+					reader.readAsDataURL(file)
+				}
+\				break
 			}
 		}
 	} else {
@@ -1922,11 +2095,16 @@ function dropHandler(ev,category) {
 		for (let i = 0; i < ev.dataTransfer.files.length; i++) {
 			let file = ev.dataTransfer.files[i].getAsFile();
 			let fname = file.name
+			let mtype = best_fit_media_type(fname)
 			var reader = new FileReader();
 			reader.onload = (e) => {
 				prepare_file_text(e.target.result,fname,category)
 			};
-			reader.readAsText(file);
+			if ( mtype == 'text' ) {
+				reader.readAsText(file);
+			} else {
+				reader.readAsDataURL(file)
+			}
 			break
 		}
 	}
@@ -2122,7 +2300,7 @@ function drop_content_aware() {
 					"result" : current_text,
 					"file_name"   : title
 				}
-				perpare_for_upate(res)
+				prepare_for_update(res)
 			}
 		});
 	}
