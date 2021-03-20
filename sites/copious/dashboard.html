@@ -733,10 +733,76 @@ html {
 			background-color: ghostwhite;
 			padding: 6px;
 			border: 1px solid darkslateblue;
+			min-height: 200px;
+			max-height: 30%;
+			overflow: scroll;
+		}
+
+		#floating-info-entry-include-abstract {
+			display: block;
+		}
+
+		#floating-info-special-type-blog {
+			background-color: ghostwhite; 
+			padding: 6px;
+			border: 1px solid darkslateblue;
+			min-height: 400px;
+			max-height: 50%;
+			overflow: scroll;
+			display: none;
+		}
+
+		#floating-info-special-type-stream {
+			background-color: ghostwhite; 
+			padding: 6px;
+			border: 1px solid darkslateblue;
 			min-height: 400px;
 			max-height: 80%;
 			overflow: scroll;
+			display: none;
 		}
+
+
+		#asset-type-stream-poster {
+			display: none;
+		}
+
+		#asset-type-stream-sound {
+			display: none;
+		}
+
+		#asset-type-stream-video {
+			display: none;
+		}
+
+/*
+		#asset-type-stream-video-ogg {
+			display: inherit;
+		}
+		#asset-type-stream-video-mpeg {
+			display: inherit;
+		}
+*/
+		#floating-info-special-type-demo {
+			background-color: ghostwhite; 
+			padding: 6px;
+			border: 1px solid darkslateblue;
+			min-height: 400px;
+			max-height: 80%;
+			overflow: scroll;
+			display: none;
+		}
+
+		#floating-info-special-type-links {
+			background-color: ghostwhite; 
+			padding: 6px;
+			border: 1px solid darkslateblue;
+			min-height: 400px;
+			max-height: 80%;
+			overflow: scroll;
+			display: none;
+		}
+
 
 		.dboard-title {
 			text-transform:capitalize;
@@ -751,6 +817,11 @@ html {
 		.no-view-file-field {
 			display: none;
 			visibility: hidden;
+		}
+
+		.fle_asset_type {
+			color:rgb(4, 4, 107);
+			font-weight: bold;
 		}
 
 	</style>
@@ -917,7 +988,7 @@ html {
 	<div id="floating-info">
 		<div id="floating-info-entry-title" style="cursor:pointer;text-align:center;width: 100%;background-color:lightgreen;height: 24px;color: #000;font-weight:bold;padding-top:2px;border: solid 1px magenta;vertical-align: middle;" onclick="hide_window('floating-info')"> title </div>
 		<div class="droppable"  style="vertical-align:middle;text-align:center;max-height:40px;background-color: rgb(250, 248, 248);border: 1px solid rgb(4, 44, 4)" ondrop="dropHandlerUpdates(event);" ondragover="dragOverHandler(event,'update');">
-			Drop Replacement Content Here
+			Drop Replacement Content Here For &gt;&gt; <span class="fle_asset_type" id='floating-info-entry-asset_type' >..</span>
 			<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'update')" />
 		</div>
 		<div id="floating-info-entry-controls" style="width: 100%;background-color:rgb(215, 233, 240);height:fit-content;text-align:right;vertical-align: middle;padding-top: 4px;padding-right: 6px;" >
@@ -930,10 +1001,34 @@ html {
 			<input id='current-display-item' type="hidden" value="something">
 			<input id='shareable' type="hidden" value="some agreed upon flag">
 		</div>
-
+		<div id="floating-info-entry-include-abstract" style="font-weight: bold;width: 100%;background-color:rgb(234, 245, 240);height:fit-content;text-align:left;vertical-align: middle;padding-top: 4px;padding-right: 6px;border: 1px solid green;">
+			Abstract:
+		</div>
 		<div id="floating-info-entry" contenteditable="true" >
 			
 		</div>
+		<!-- Special fields for entries contain data types in addition to the abstract-->
+		<div id="floating-info-special-type-blog"  contenteditable="true" >
+
+		</div>
+		<div id="floating-info-special-type-stream" >
+			<image id="asset-type-stream-poster" src="images/drop-target.png" height="120px" />
+			<audio id="asset-type-stream-sound" controls controlsList="nodownload"  >
+				<source id="asset-type-stream-sound-ogg" src="" type="audio/ogg">
+				<source id="asset-type-stream-sound-mpeg" src="" type="audio/mpeg">
+			</audio>
+			<video id="asset-type-stream-video" src="" poster="" />
+		</div>
+		<div id="floating-info-special-type-links" >
+
+			<ul id="asset-type-links-list" >
+			</ul>
+
+		</div>
+		<div id="floating-info-special-type-demo" >
+
+		</div>
+
 	</div>
 
 
@@ -1071,6 +1166,9 @@ var g_undo_list = {
 function append_to_container(key,obj) {
 	if ( g_current_sel_display === key ) {
 		let title = obj.title
+		//
+		if ( !(obj.decoded) ) title = decodeURIComponent(title)
+
 		let line_color = "black"
 		let entries = g_all_user_entries[key]
 		let i = entries.length - 1
@@ -1114,6 +1212,7 @@ function show_stuff(key) {
 		let i = n
 		let obj = entries[i]
 		let title = obj.title
+		if ( !(obj.decoded) ) title = decodeURIComponent(title)
 
 		if ( obj.deleted ) {
 			line_color = DELETE_COLOR
@@ -1161,6 +1260,13 @@ function get_object(item_id)  {
 	return false 
 }
 
+function get_asset_type(id) {
+	let index = get_index(id)
+	let entries = g_all_user_entries[g_current_sel_display]
+	let at = entries[index].asset_type
+	return (at)
+}
+
 function get_data(id) {
 	let index = get_index(id)
 	let entries = g_all_user_entries[g_current_sel_display]
@@ -1171,13 +1277,17 @@ function get_data(id) {
 			entries[index].data = data
 		} else data = ""
 	}
+	if ( !(entries[index].decoded) ) data = decodeURIComponent(data)
 	return (data)
 }
+
 
 function get_title(id) {
 	let index = get_index(id)
 	let entries = g_all_user_entries[g_current_sel_display]
-	return (entries[index].title)
+	let title = entries[index].title
+	if ( !(entries[index].decoded) ) title = decodeURIComponent(title)
+	return (title)
 }
 
 function get_id(id) {
@@ -1211,43 +1321,57 @@ function get_line_element(obj) {
 
 function update_edit_display(el) {
 	let op_button_1 = document.getElementById('floating-info-entry-do-publish')
-		let op_button_2 = document.getElementById('floating-info-entry-do-unpublish')
-		op_button_1.disabled = false
-		op_button_2.disabled = false
-		//
-		text = get_title(el.id)
-		let where_data = document.getElementById('floating-info-entry-title')
-		where_data.innerHTML = text
+	let op_button_2 = document.getElementById('floating-info-entry-do-unpublish')
+	op_button_1.disabled = false
+	op_button_2.disabled = false
+	//
+	text = get_title(el.id)
+	let where_data = document.getElementById('floating-info-entry-title')
+	where_data.innerHTML = text
 
-		let title_el = document.getElementById('floating-info-entry-title-field')
-		title_el.value = text
-		//
-		let contents_view = document.getElementById('floating-info-entry')
-		contents_view.innerHTML = get_data(el.id)
-		//
-		//
-		let is_pub = get_is_published(el.id)
-		let is_del = get_is_del(el.id)
-		let published = is_pub ? "published" : "draft"
-		if ( is_del ) published = "deleted"
-		let where_p = document.getElementById('floating-info-entry-published')
-		where_p.innerHTML = published
-		where_p.style.color = is_pub ? PUBLISHED_STATE_COLOR : UNPUBLISHED_STATE_COLOR
-		if ( is_del ) {
-			where_p.style.color = DELETE_STATE_COLOR
-			where_p.style.fontWeight = "bolder"
-			op_button_1.disabled = true
-			op_button_2.disabled = true
+	let title_el = document.getElementById('floating-info-entry-title-field')
+	title_el.value = text
+	//
+	let contents_view = document.getElementById('floating-info-entry')
+	contents_view.innerHTML = get_data(el.id)
+
+	let asset_type_view = document.getElementById('floating-info-entry-asset_type')
+	let asset_type = get_asset_type(el.id)
+	//
+	asset_type_view.innerHTML = asset_type
+	//
+	hide_all_special_data_fields()
+	let special_data_field = document.getElementById('floating-info-special-type-' + asset_type)
+	if ( special_data_field ) {
+		if ( populate_special_fields(asset_type,el.id) ) {
+			special_data_field.style.display = "block"
 		}
-		if ( is_pub ) {
-			op_button_1.disabled = true
-		} else {
-			op_button_2.disabled = true
-		}
-		//
-		//
-		let cur_item_holder = document.getElementById('current-display-item')
-		cur_item_holder.value = get_id(el.id)
+	}
+	//
+	//
+	//
+	let is_pub = get_is_published(el.id)
+	let is_del = get_is_del(el.id)
+	let published = is_pub ? "published" : "draft"
+	if ( is_del ) published = "deleted"
+	let where_p = document.getElementById('floating-info-entry-published')
+	where_p.innerHTML = published
+	where_p.style.color = is_pub ? PUBLISHED_STATE_COLOR : UNPUBLISHED_STATE_COLOR
+	if ( is_del ) {
+		where_p.style.color = DELETE_STATE_COLOR
+		where_p.style.fontWeight = "bolder"
+		op_button_1.disabled = true
+		op_button_2.disabled = true
+	}
+	if ( is_pub ) {
+		op_button_1.disabled = true
+	} else {
+		op_button_2.disabled = true
+	}
+	//
+	//
+	let cur_item_holder = document.getElementById('current-display-item')
+	cur_item_holder.value = get_id(el.id)
 }
 
 
@@ -1264,6 +1388,117 @@ function edit_entry(ev) {
 }
 
 
+function hide_all_special_data_fields() {
+	let known_asset_types = Object.keys(g_all_user_entries)
+	for ( let asset_type of known_asset_types ) {
+		let special_data_field = document.getElementById('floating-info-special-type-' + asset_type)
+		if ( special_data_field ) {
+			special_data_field.style.display = "none"
+		}
+	}
+}
+
+
+function extract_media_ext(file_src) {
+	let dot = file_src.lastIndexOf('.')
+	if ( dot < 0 ) return("mpeg") // default .. e.g. from a streaming service
+	let ext = file_src.substr(dot)
+	if ( ext === '.ogg') return("ogg")
+	return("mpeg")
+}
+
+
+var g_app_populators = {
+	"blog" : (entry) => { 
+		//
+		if ( !(entry.abstract) ) {
+			let abstract_tag = document.getElementById('floating-info-entry-include-abstract')
+			abstract_tag.style.display = "none"
+			return false
+		}
+		//
+		let doc = document.getElementById('floating-info-special-type-blog')
+		doc.innerHTML = entry.txt_full
+		//
+		return true
+	},
+	"demo" : (entry) => { return false },
+	"stream" : (entry) => { 
+		let poster = document.getElementById('asset-type-stream-poster')
+		poster.style.display = "none"
+		let sound = document.getElementById('asset-type-stream-sound')
+		sound.style.display = "none"
+		let video = document.getElementById('asset-type-stream-video')
+		video.style.display = "none"
+		//
+		let media = entry.media
+		//
+		let media_type = entry.media_type
+		if ( media_type === 'video' ) {
+			if ( video ) {
+				video.poster = media.poster
+				video.src = media.source
+				video.style.display = "block"
+			}
+		} else if ( media_type === 'image' ) {
+			if ( poster ) {
+				poster.src = media.poster
+				poster.style.display = "block"
+			}
+		} else {	//  sound
+			if ( sound ) {
+				let ext = extract_media_ext(media.source)
+				let sound_src = document.getElementById(`asset-type-stream-sound-${ext}`)
+				if ( sound_src ) {
+					sound_src.src = media.source
+				}
+				if ( poster ) {
+					poster.src = media.poster
+				}
+				sound.style.display = "block"
+				poster.style.display = "block"
+			}
+		}
+		
+		return true 
+	},
+	"links" : (entry) => {
+		let links = entry.links
+		if ( links ) {
+			let list = document.getElementById('asset-type-links-list')
+			if ( list ) {
+				list.innerHTML = ""
+				for ( let link of links ) {
+					let element = document.createElement('li')
+					let anchor = document.createElement('a')
+					anchor.href = link
+					anchor.innerHTML = link
+					anchor.target = "copious-check-links"  // tab name
+					element.appendChild(anchor)
+					list.appendChild(element)
+				}
+			}
+		}
+		return true
+	}
+}
+
+
+function populate_special_fields(asset_type,id) {
+	let index = get_index(id)
+	let entries = g_all_user_entries[g_current_sel_display]
+	let entry = entries[index]
+	let populator = g_app_populators[asset_type]
+	//
+	let abstract_tag = document.getElementById('floating-info-entry-include-abstract')
+	abstract_tag.style.display = "block"
+	//
+	return populator(entry)
+}
+
+
+
+//
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
@@ -1456,7 +1691,7 @@ function done_with_file(category,obj) {
 		let fname = obj.file_name
 		if ( is_json_file(fname) ) {
 			let new_dash_id = get_random_id(entries)
-			let entry = {}
+			let entry = Object.assign({},obj)
 			try {
 				entry = JSON.parse(obj.result)
 				entry._dash_entry_id = new_dash_id
@@ -1466,9 +1701,11 @@ function done_with_file(category,obj) {
 				if ( entry.title == undefined ) {
 					entry.title =  obj.file_name
 				}
-				if ( entry.txt_full ) {
+				if ( entry.txt_full && !( entry.abstract ) ) {
 					entry.data = entry.txt_full
-					delete entry.txt_full
+				}
+				if ( (entry.abstract !== undefined) && (typeof entry.abstract === "string" ) ) {
+					entry.data = entry.abstract
 				}
 			} catch (e) {
 				entry = {
@@ -1476,7 +1713,7 @@ function done_with_file(category,obj) {
 					"published" : false,
 					'deleted' : false,
 					'title' : obj.file_name,
-					'data'  : obj.result
+					'data'  : obj.data
 				}
 				entry.file_name = obj.file_name
 			}
@@ -1484,12 +1721,23 @@ function done_with_file(category,obj) {
 			entries.push(entry)
 			append_to_container(category,entry)
 		} else {
-			let entry = {
-				"_dash_entry_id" : get_random_id(entries),
-				"published" : false,
-				'deleted' : false,
-				'title' : obj.file_name,
-				'data'  : obj.result
+			let new_dash_id = get_random_id(entries)
+			let entry = Object.assign({},obj)
+			entry._dash_entry_id = new_dash_id
+			entry.deleted = false
+			entry.published = false
+			entry.file_name = obj.file_name
+			if ( entry.title == undefined ) {
+				entry.title =  obj.file_name
+			}
+			if ( entry.txt_full && !( entry.abstract)) {
+				entry.data = entry.txt_full
+			}
+			if ( (entry.abstract !== undefined) && (typeof entry.abstract === "string" ) ) {
+				entry.data = entry.abstract
+			}
+			if ( entry.data === undefined ) {
+				entry.data = "Please enter a description"
 			}
 			entry.asset_type = category
 			entry.file_name = obj.file_name
@@ -1498,6 +1746,8 @@ function done_with_file(category,obj) {
 		}
 	}
 }
+
+
 
 function perpare_for_upate(res) {
 	let cat =  g_current_sel_display
@@ -1575,6 +1825,7 @@ function prepare_file_text(text,file_name,category) {
 		perpare_for_upate(res)
 	} else {
 		done_with_file(category,res)
+		show_stuff(category)
 	}
 	//
 }
@@ -1931,6 +2182,7 @@ window.addEventListener("message", (event) => {
 
 	if ( event.data.category === "links" ) {
 		done_with_file("links",message)
+		show_stuff('links')
 	}
 
     //alert("Page script received message: \"" + message + "\"");
