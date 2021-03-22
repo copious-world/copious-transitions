@@ -1234,21 +1234,43 @@ fetch(url)
 var g_uploader_cache = {}
 
 
-function upload_audio(obj) {
+function upload_audio(obj) {			// 	obj.media_type
 	obj.email = g_profile_info.email
-	let url = `http://${g_siteURL}/uploaders/transition/do_generic_upload/audio-`
-	postData(url,obj)
+	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
+	//
+	var filefromblob = new File([obj.blob], obj.file_name);
+	let formdata = new FormData()
+	formdata.append('media_file', filefromblob)
+	for ( let ky in obj ) {
+		if ( ky === 'blob' ) continue
+		formdata.append(ky, obj[ky])
+	}
+	postData(url,data,'omit',true,'multipart/form-data')
 }
 
 function upload_video(obj) {
 	obj.email = g_profile_info.email
-	let url = `http://${g_siteURL}/uploaders/transition/do_generic_upload/video-`
+	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
+	var filefromblob = new File([obj.blob], obj.file_name);
+	let formdata = new FormData()
+	formdata.append('media_file', filefromblob)
+	for ( let ky in obj ) {
+		if ( ky === 'blob' ) continue
+		formdata.append(ky, obj[ky])
+	}
 	postData(url,obj)
 }
 
 function upload_image(obj) {
 	obj.email = g_profile_info.email
-	let url = `http://${g_siteURL}/uploaders/transition/do_generic_upload/image-`
+	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
+	var filefromblob = new File([obj.blob], obj.file_name);
+	let formdata = new FormData()
+	formdata.append('media_file', filefromblob)
+	for ( let ky in obj ) {
+		if ( ky === 'blob' ) continue
+		formdata.append(ky, obj[ky])
+	}
 	postData(url,obj)	
 }
 
@@ -1262,10 +1284,10 @@ function prep_upload_for(obj,uploader_fun) {
 }
 
 
-function do_media_upload(obj) {
+function do_media_upload(obj) {		// earlier a link was made for the media, which will be uploaded if ever the user "save"s it.
 	let id = obj._dash_entry_id
-	let uploader = g_uploader_cache[id]
-	if ( uploader ) uploader()
+	let _uploader = g_uploader_cache[id]	// _uploader from map
+	if ( _uploader ) _uploader()
 }
 
 // 
@@ -1855,15 +1877,21 @@ function done_with_file(category,obj) {
 				case 'audio' : {
 					obj.media.poster = ""
 					obj.media.source = make_audio_upload_link(obj)
+					obj.blob = obj.result
+					obj.result = "abstact required"
 					break
 				}
 				case 'video' : {
 					obj.media.poster = ""
 					obj.media.source = make_video_upload_link(obj)
+					obj.blob = obj.result
+					obj.result = "abstact required"
 					break
 				}
 				case 'image' : {
 					obj.media.poster = make_image_upload_link(obj)
+					obj.blob = obj.result
+					obj.result = "abstact required"
 					break;
 				}
 			}
@@ -2005,6 +2033,17 @@ function prepare_file_text(text,file_name,category) {
 }
 
 
+function prepare_file_blob(blob64,fname,category) {
+	if ( category === 'update-only' ) return;
+	let res = {
+		"result" : blob64,
+		"file_name"   : file_name
+	}
+	done_with_file(category,res)
+	show_stuff(category)
+}
+
+
 //
 async function capture_clicks(ev,subst_key) {
 		ev.preventDefault();
@@ -2022,7 +2061,7 @@ async function capture_clicks(ev,subst_key) {
 
 // called in response to a file selection through the system file browser
 //
-function  get_file(category) {
+function get_file(category) {
 	let file_el = document.getElementById(`drop-click-file_loader-${category}`)
 	file_el.addEventListener('change',(ev) => {
 		let file = file_el.files[0]
@@ -2087,12 +2126,15 @@ function dropHandler(ev,category) {
 				let fname = file.name
 				let mtype = best_fit_media_type(fname)
 				var reader = new FileReader();
-				reader.onload = (e) => {
-					prepare_file_text(e.target.result,fname,category)
-				};
 				if ( mtype == 'text' ) {
+					reader.onload = (e) => {
+						prepare_file_text(e.target.result,fname,category)
+					};
 					reader.readAsText(file);
 				} else {
+					reader.onload = (e) => {
+						prepare_file_blob(e.target.result,fname,category)
+					};
 					reader.readAsDataURL(file)
 				}
 				break
