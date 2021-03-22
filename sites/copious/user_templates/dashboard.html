@@ -1395,6 +1395,9 @@ function show_stuff(key) {
 	}
 
 	container.innerHTML = total_txt
+	setTimeout(() => {
+		special_content_responsiveness(key,".editable-line")
+	},0)
 }
 
 
@@ -1413,6 +1416,17 @@ function get_object(item_id)  {
 	for ( let i = 0; i < entries.length; i++ ) {
 		if ( entries[i]._dash_entry_id == item_id ) {
 			return entries[i]
+		}
+	}
+	return false 
+}
+
+
+function get_object_index(item_id)  {
+	let entries = g_all_user_entries[g_current_sel_display]
+	for ( let i = 0; i < entries.length; i++ ) {
+		if ( entries[i]._dash_entry_id == item_id ) {
+			return i
 		}
 	}
 	return false 
@@ -1618,12 +1632,16 @@ var g_app_populators = {
 			let list = document.getElementById('asset-type-links-list')
 			if ( list ) {
 				list.innerHTML = ""
-				for ( let link of links ) {
+				let n = links.length
+				for ( let i = 0; i < n; i++ ) {
+					let link = links[i]
 					let element = document.createElement('li')
 					let anchor = document.createElement('a')
 					anchor.href = link
 					anchor.innerHTML = link
 					anchor.target = "copious-check-links"  // tab name
+					anchor.id = `lnk_pkg_${entry._dash_entry_id}-${i}`
+					make_draggable(anchor)
 					element.appendChild(anchor)
 					list.appendChild(element)
 				}
@@ -2367,6 +2385,88 @@ window.addEventListener("message", (event) => {
   }
 });
 
+
+
+function dragStart(e) {
+    e.dataTransfer.setData('text/plain', e.target.id);
+    setTimeout(() => {
+        e.target.classList.add('hide');
+    }, 0);
+}
+
+
+function dragEnter(e) {
+    e.preventDefault();
+    e.target.classList.add('drag-over');
+}
+
+function dragOver(e) {
+    e.preventDefault();
+    e.target.classList.add('drag-over');
+}
+
+function dragLeave(e) {
+    e.target.classList.remove('drag-over');
+}
+
+
+function extract_dash_id(id) {
+	//`lnk_pkg_${entry._dash_entry_id}-${i}`
+	let d_id_parts = id.split('-')
+	let d_id = d_id_parts[0]
+	let index = d_id_parts[1]
+	d_id = d_id.replace('lnk_pkg_','')
+	return([d_id,index])
+}
+
+function drop(e) {
+    e.target.classList.remove('drag-over');
+
+    // get the draggable element
+    const id = e.dataTransfer.getData('text/plain');
+	const [dash_id,index] = extract_dash_id(id)
+	let source = get_object(dash_id)
+	let link = source.links[index]
+	source.splice(index,1)
+	let oi =  get_object_index(dash_id)
+	if ( oi ) {
+		let source_el = document.getElementById(`"span-c${oi}"`)
+		update_edit_display(source_el)
+	}
+
+    // add it to the drop target
+	let el = ev.target
+	let e_index = get_index(el.id)
+	let entries = g_all_user_entries[g_current_sel_display]
+	let entry = entries[e_index]
+	entry.links.push(link)
+	//
+
+    // display the draggable element
+    draggable.classList.remove('hide');
+}
+
+function make_draggable(item) {
+	item.addEventListener('dragstart', dragStart);
+}
+
+function make_droppable(item) {
+    item.addEventListener('dragenter', dragEnter)
+    item.addEventListener('dragover', dragOver);
+    item.addEventListener('dragleave', dragLeave);
+    box.addEventListener('drop', drop);
+}
+
+function special_content_responsiveness(key,css_class) {
+	if ( key === "links" ) {
+		let link_packages = document.querySelectorAll(css_class)
+		if ( link_packages && link_packages.length ) {
+			for ( let span_el of link_packages ) {
+				make_droppable(span_el)
+			}
+		}
+	}
+}
 
 
 </script>
