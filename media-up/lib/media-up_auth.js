@@ -31,7 +31,7 @@ class UploaderSessionManager extends SessionManager {
     }
 
     //
-    process_transition(transition,post_body,req) {
+    async process_transition(transition,post_body,req) {
         let trans_object = super.process_transition(transition,post_body,req)
         //
         if ( G_uploader_trns.tagged(transition) ) {
@@ -42,8 +42,14 @@ class UploaderSessionManager extends SessionManager {
             post_body.file_type = G_demo_submit_trns.file_type()
         }
         if ( G_publication_submit_trns.tagged(transition) ) {
-            trans_object.secondary_action = false
             post_body.file_type = G_publication_submit_trns.file_type()
+            G_configurable_submit_trns.prep(post_body)
+            let state = await this.trans_engine.upload_file(post_body,G_configurable_submit_trns,files)
+            if ( state.OK == false ) return false
+            trans_object.elements = {
+                "protocol" : "ipfs",
+                "media_id" : state.ids[0]
+            }
         }
         //
         return(trans_object)
@@ -71,8 +77,6 @@ class UploaderSessionManager extends SessionManager {
             return(state)
         }
         if ( G_configurable_submit_trns.tagged(transition) ) {
-            G_configurable_submit_trns.prep(post_body)
-            let state = this.trans_engine.upload_file(post_body,G_configurable_submit_trns,files)
             if ( G_configurable_submit_trns.business ) {
                 this.business.process('dashboard-options',post_body)
             }

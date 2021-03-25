@@ -1034,10 +1034,34 @@ html {
 
 </body>
 </html>
+<script src="https://unpkg.com/ipfs@0.41.0-rc.2/dist/index.min.js"></script>
+<script src="https://unpkg.com/hlsjs-ipfs-loader@0.2.3/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+// Setting HLS Config values
+Hls.DefaultConfig.loader = HlsjsIpfsLoader
+Hls.DefaultConfig.debug = false
+
+var g_ipfs_node = false
+async function setup_ipfs_node() {
+  // Create an IPFS node inside your browser
+  let node = false;
+  // Init a new repo for this run
+  const repoPath = 'ipfs-' + Math.random()
+  try {
+    // Instatiate your IPFS node
+    node = await Ipfs.create({ repo: repoPath })
+
+  } catch(err) {
+    displayError(err)
+  }
+  g_ipfs_node = node
+}
+
+// ---- ---- ---- 
 
 function clonify(obj) {
 	if ( typeof obj === 'string' ) return(obj)
@@ -1234,7 +1258,27 @@ fetch(url)
 var g_uploader_cache = {}
 
 
-function upload_audio(obj) {			// 	obj.media_type
+
+async function finalize_media_storage(primary_response) {
+	if ( primary_response.transition && primary_response.transition.token ) {
+		let transaction_token = primary_response.transition.token
+		let protocol = primary_response.elements.protocol
+		let media_id = primary_response.elements.media_id
+		let url = `http://${g_siteURL}/uploaders/secondary/transition`
+		let body = {
+			"token" : transaction_token,
+			"match" : "handshake",
+		}
+		body.protocol = protocol
+		body.media_id = media_id   // maybe a checksum
+		let secondary_resp =  await postData(url,body)
+		return [protocol,media_id]
+	}
+	return [false,false]
+}
+
+
+async function upload_audio(obj) {			// 	obj.media_type
 	obj.email = g_profile_info.email
 	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
 	//
@@ -1245,10 +1289,17 @@ function upload_audio(obj) {			// 	obj.media_type
 		if ( ky === 'blob' ) continue
 		formdata.append(ky, obj[ky])
 	}
-	postData(url,data,'omit',true,'multipart/form-data')
+	formdata.append('protocol', 'p2p-default')
+	let primary_response =  await postData(url,data,'omit',true,'multipart/form-data')
+	if ( primary_response.status === "OK" ) {
+		let media_store_characteristics = await finalize_media_storage(primary_response)
+		return media_store_characteristics
+	} else {
+		return [false, false]
+	}
 }
 
-function upload_video(obj) {
+async function upload_video(obj) {
 	obj.email = g_profile_info.email
 	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
 	var filefromblob = new File([obj.blob], obj.file_name);
@@ -1258,10 +1309,17 @@ function upload_video(obj) {
 		if ( ky === 'blob' ) continue
 		formdata.append(ky, obj[ky])
 	}
-	postData(url,obj)
+	formdata.append('protocol', 'p2p-default')
+	let primary_response =  await postData(url,data,'omit',true,'multipart/form-data')
+	if ( primary_response.status === "OK" ) {
+		let media_store_characteristics = await finalize_media_storage(primary_response)
+		return media_store_characteristics
+	} else {
+		return [false, false]
+	}
 }
 
-function upload_image(obj) {
+async function upload_image(obj) {
 	obj.email = g_profile_info.email
 	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
 	var filefromblob = new File([obj.blob], obj.file_name);
@@ -1271,7 +1329,14 @@ function upload_image(obj) {
 		if ( ky === 'blob' ) continue
 		formdata.append(ky, obj[ky])
 	}
-	postData(url,obj)	
+	formdata.append('protocol', 'p2p-default')
+	let primary_response =  await postData(url,data,'omit',true,'multipart/form-data')
+	if ( primary_response.status === "OK" ) {
+		let media_store_characteristics = await finalize_media_storage(primary_response)
+		return media_store_characteristics
+	} else {
+		return [false, false]
+	}
 }
 
 
@@ -1284,13 +1349,20 @@ function prep_upload_for(obj,uploader_fun) {
 }
 
 
-function do_media_upload(obj) {		// earlier a link was made for the media, which will be uploaded if ever the user "save"s it.
+async function do_media_upload(obj) {		// earlier a link was made for the media, which will be uploaded if ever the user "save"s it.
 	let id = obj._dash_entry_id
 	let _uploader = g_uploader_cache[id]	// _uploader from map
-	if ( _uploader ) _uploader()
+	if ( _uploader ) {
+		let [protocol,asset_id] = await _uploader()
+		return [protocol,asset_id]
+	}
 }
 
 // 
+//
+// All of these make a link that will server the stored object given its placement into a p2p service cloud.
+// The link may be filtered through a service worker that translates it into the p2p pathway such as ipfs.
+//
 function make_audio_upload_link(obj) {
 	let file_name = obj.file_name
 	let sream_link = AUDIO_STREAMING_SERVICE + file_name
@@ -1588,6 +1660,40 @@ function hide_all_special_data_fields() {
 
 
 
+
+
+
+async function media_startup(video,v_cid,src) {
+  if (!Hls.isSupported()) {
+    return displayError(new Error('Your Browser does not support the HTTP Live Streaming Protocol'))
+  }
+  const hls = new Hls()
+  hls.config.ipfs = g_ipfs_node
+  hls.config.ipfsHash = v_cid
+  hls.loadSource(src)  										//'master.m3u8'
+  hls.attachMedia(video)
+  hls.on(Hls.Events.MANIFEST_PARSED, () =>	 video.play())
+}
+
+
+//
+function displayError(err) {
+  const modalElement = document.getElementById('modal');
+  modalElement.style.display = 'flex';
+
+  const errStr = String(err).toLowerCase();
+  const spanElement = document.getElementById('errorText');
+
+  spanElement.innerHTML = errStr.includes('SecurityError'.toLowerCase()) 
+    ? 'You must use Chrome or Firefox to test this embedded app!' 
+    : 'Something went wrong. See the console to get further details.';
+}
+
+P2PMagic()
+
+
+
+
 var g_app_populators = {
 	"blog" : (entry) => { 
 		//
@@ -1617,7 +1723,13 @@ var g_app_populators = {
 		if ( media_type === 'video' ) {
 			if ( video ) {
 				video.poster = media.poster
-				video.src = media.source
+				if ( entry.protocol === 'ipfs' ) {
+					let v_proto = media.protocol
+					let v_cid = media[v_proto]
+					media_startup(video,v_cid,media.source)
+				} else {
+					video.src = media.source
+				}
 				video.style.display = "block"
 			}
 		} else if ( media_type === 'image' ) {
@@ -1628,9 +1740,16 @@ var g_app_populators = {
 		} else {	//  sound
 			if ( sound ) {
 				let ext = extract_sound_media_ext(media.source)
-				let sound_src = document.getElementById(`asset-type-stream-sound-${ext}`)
-				if ( sound_src ) {
-					sound_src.src = media.source
+				let sound_player = document.getElementById(`asset-type-stream-sound-${ext}`)
+				if ( sound_player ) {
+					if ( entry.protocol === 'ipfs' ) {
+						let a_proto = media.protocol		// a is for audio
+						let a_cid = media[a_proto]
+						media_startup(sound_player,a_cid,media.source)
+					} else {
+						sound_player.src = media.source
+					}
+					sound_player.style.display = "block"
 				}
 				if ( poster ) {
 					poster.src = media.poster
@@ -1682,7 +1801,7 @@ function populate_special_fields(asset_type,id) {
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-function save(item_holder) {
+async function save(item_holder) {
 	let cur_item_holder = document.getElementById(item_holder)
 	let item_id = cur_item_holder.value
 	let obj = get_object(item_id)
@@ -1696,8 +1815,13 @@ function save(item_holder) {
 	let line_el = document.getElementById(el_id)
 	line_el.innerHTML = title
 	//
-	real_save(obj)
-	do_media_upload(obj)
+	if ( obj._real_media ) {
+		let [protocol,asset_id] = await do_media_upload(obj)
+		if ( protocol ) {
+			obj[protocol] = asset_id		// save this with the media record... the media will not ride along in the object
+		}
+	}
+	real_save(obj)	// send the access record out
 	if ( obj.deleted ) {
 		obj.deleted = false
 		unpublish(item_holder)
@@ -1870,26 +1994,26 @@ function done_with_file(category,obj) {
 		alert("no file loaded")
 	} else {
 		let check_cat = check_category(category,obj.file_name)
-		if ( (check_cat !== category)  && (obj.media_type === undefined)) {
+		if (  obj._real_media || ((check_cat !== category) && (obj.media_type === undefined)) ) {
 			category = check_cat
 			obj.media_type = best_fit_media_type(obj.file_name)
 			switch ( obj.media_type ) {
 				case 'audio' : {
 					obj.media.poster = ""
-					obj.media.source = make_audio_upload_link(obj)
+					obj.media.source = make_audio_upload_link(obj)	// get the link that will serve this in a blog or other presentation services (upload later when saving)
 					obj.blob = obj.result
 					obj.result = "abstact required"
 					break
 				}
 				case 'video' : {
 					obj.media.poster = ""
-					obj.media.source = make_video_upload_link(obj)
+					obj.media.source = make_video_upload_link(obj)	// get the link that will serve this in a blog or other presentation services (upload later when saving)
 					obj.blob = obj.result
 					obj.result = "abstact required"
 					break
 				}
 				case 'image' : {
-					obj.media.poster = make_image_upload_link(obj)
+					obj.media.poster = make_image_upload_link(obj)	// get the link that will serve this in a blog or other presentation services (upload later when saving)
 					obj.blob = obj.result
 					obj.result = "abstact required"
 					break;
@@ -1968,10 +2092,9 @@ function prepare_for_update(res) {
 	obj.data = res.result
 	obj.title = res.file_name
 	//
-	
 	let title_field = document.getElementById('floating-info-entry-title-field')
 	title_field.value = obj.title
-
+	//
 }
 
 
@@ -2017,7 +2140,8 @@ function prepare_file_text(text,file_name,category) {
 	//
 	let res = {
 				"result" : text,
-				"file_name"   : file_name
+				"file_name"   : file_name,
+				"_real_media" : false
 			}
 	if ( category === 'update-only' ) {
 		let edit_el = document.getElementById('floating-info-entry')
@@ -2037,7 +2161,8 @@ function prepare_file_blob(blob64,fname,category) {
 	if ( category === 'update-only' ) return;
 	let res = {
 		"result" : blob64,
-		"file_name"   : file_name
+		"file_name"   : file_name,
+		"_real_media" : true
 	}
 	done_with_file(category,res)
 	show_stuff(category)
@@ -2065,22 +2190,24 @@ function get_file(category) {
 	let file_el = document.getElementById(`drop-click-file_loader-${category}`)
 	file_el.addEventListener('change',(ev) => {
 		let file = file_el.files[0]
-		let fr = new FileReader()
-		fr.onload = (ev) => {
-			let res = {
-				"result" : fr.result,
-				"file_name"   : fr.name ? fr.name : category_name_get(category)
-			}
-			done_with_file(category,res)
+		let fname =  file.name ? file.name : category_name_get(category)
+		let mtype = best_fit_media_type(fname)
+		var reader = new FileReader();
+		if ( mtype == 'text' ) {
+			reader.onload = (e) => {
+				prepare_file_text(e.target.result,fname,category)
+			};
+			reader.readAsText(file);
+		} else {
+			reader.onload = (e) => {
+				prepare_file_blob(e.target.result,fname,category)
+			};
+			reader.readAsDataURL(file)
 		}
-		fr.onerror = (ev) => {
-			done_with_file(category,null)
-		}
-
-		fr.readAsText(file)
 	})
 	file_el.click()
 }
+
 
 
 function dropHandlerUpdates(ev) {
@@ -2112,8 +2239,8 @@ function dropHandlerUpdates(ev) {
 			break
 		}
 	}
-
 }
+
 
 //
 function dropHandler(ev,category) {
@@ -2151,8 +2278,14 @@ function dropHandler(ev,category) {
 				prepare_file_text(e.target.result,fname,category)
 			};
 			if ( mtype == 'text' ) {
+				reader.onload = (e) => {
+					prepare_file_text(e.target.result,fname,category)
+				};
 				reader.readAsText(file);
 			} else {
+				reader.onload = (e) => {
+					prepare_file_blob(e.target.result,fname,category)
+				};
 				reader.readAsDataURL(file)
 			}
 			break
@@ -2387,6 +2520,7 @@ function setup_user_dashboard(dashboardResponse,session_token) {
 
 	show_stuff('blog')
 	drop_content_aware()
+	setup_ipfs_node() 
 }
 
 
