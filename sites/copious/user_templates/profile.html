@@ -380,12 +380,12 @@ html {
 		border-left: solid 3px navy;
 		border-top: solid 3px navy;
 		border-bottom: solid 3px rgba(252,252,255,0.7);
-		min-height: 90px
-		padding: 20px
+		min-height: 90px;
+		padding: 20px;
 		background: -webkit-linear-gradient(to left, rgba(242, 242, 210, 0.3), white);
 		background: linear-gradient(to left, rgba(242, 242, 210, 0.3), white );
-		
 	}
+
 
 	#mainNav table {
 		padding-left: 3%;
@@ -409,8 +409,6 @@ html {
 		display:inline;
 	}
 
-	
-	
 	#mainNav  table  .navbar-nav li.nav-item a.nav-link {
 		color: darkgreen;
 		text-decoration: none;
@@ -1848,7 +1846,7 @@ function done_with_file(category,obj) {
 		alert("no file loaded")
 	} else {
 		let check_cat = check_category(category,obj.file_name)
-		if ( (check_cat !== category)  && (obj.media_type === undefined)) {
+		if ( (check_cat !== category) && (obj.media_type === undefined) ) {
 			category = check_cat
 			obj.media_type = best_fit_media_type(obj.file_name)
 			switch ( obj.media_type ) {

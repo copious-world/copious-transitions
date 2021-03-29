@@ -1117,8 +1117,14 @@ function dragElement(floater_id,float_header_id) {
     pos3 = e.clientX;
     pos4 = e.clientY;
     // set the element's new position:
-    floater.style.top = (floater.offsetTop - pos2) + "px";
-    floater.style.left = (floater.offsetLeft - pos1) + "px";
+	let newtop = (floater.offsetTop - pos2)
+	let newleft =  (floater.offsetLeft - pos1)
+	if ( newtop > 10 ) {
+		floater.style.top = newtop + "px";
+	}
+	if ( newleft > 4 ) {
+		floater.style.left = newleft + "px";
+	}
   }
 
   function closeDragElement() {
@@ -1240,6 +1246,7 @@ const PUBLISHED_COLOR = "limegreen"
 const UNPUBLISHED_COLOR = "black"
 
 var g_current_sel_display = "blog"
+var g_current_edit_el = null
 
 //
 var g_all_user_entries = {
@@ -1635,7 +1642,9 @@ var g_drop_handlers = {
 	"links" : (ev) => {
 		ev.preventDefault();
 		const sources_id = ev.dataTransfer.getData("application/link-package");
-		let drop_el_id = ev.target.id
+		let t_el = ev.target
+		let drop_el_id = t_el.id
+
 		//
 		let [key,index,src_app_id] = sources_id.split('-')
 		let src_entry = get_object(src_app_id)
@@ -1651,6 +1660,9 @@ var g_drop_handlers = {
 				//
 				g_unsaved_items[src_app_id] = src_entry
 				g_unsaved_items[dst_app_id] = dst_entry
+				if ( g_current_edit_el ) {
+					update_edit_display(g_current_edit_el) 
+				}
 			} catch (e) {
 			}
 		}
@@ -1762,6 +1774,7 @@ function get_line_element(obj) {
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 function update_edit_display(el) {
+	g_current_edit_el = el
 	let op_button_1 = document.getElementById('floating-info-entry-do-publish')
 	let op_button_2 = document.getElementById('floating-info-entry-do-unpublish')
 	op_button_1.disabled = false
@@ -2243,6 +2256,7 @@ function done_with_file(category,obj) {
 				entry.data = obj.result		// known to be some kind of text format or other
 			}
 			delete entry.result
+			entry.decoded = true
 		}
 		//
 		entry._dash_entry_id = new_dash_id		// for use in the dashboard UI operations
