@@ -1024,7 +1024,7 @@ html {
 				<source id="asset-type-stream-sound-ogg" src="" type="audio/ogg">
 				<source id="asset-type-stream-sound-mpeg" src="" type="audio/mpeg">
 			</audio>
-			<video id="asset-type-stream-video" src="" poster="" />
+			<video id="asset-type-stream-video" src="" poster="" width="320" height="240" controls />
 		</div>
 		<div id="floating-info-special-type-links" >
 
@@ -1539,6 +1539,39 @@ function check_category(category,file_name) {
 	return category
 }
 
+var g_url_match = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+function matches_url(maybe_url) {
+	return g_url_match.test(maybe_url)
+}
+
+
+function add_or_use_url(url) {
+	let cat = g_current_sel_display
+	// update_edit_display(g_current_edit_el)
+	if ( g_current_edit_el ) {
+		let el_id = g_current_edit_el.id
+		let entry = get_entry(get_id(el_id))
+		if ( !(entry) ) return;
+		//
+		switch ( entry.asset_type ) {
+			case "links" : {
+				//
+				entry.links.push(url)
+				break;
+			}
+			case "stream" : {
+				//
+				if ( entry.media ) {
+					entry.media.source = url
+				}
+				break;
+			}
+			default : return
+		}
+		//
+		update_edit_display(g_current_edit_el) 
+	}
+}
 
 
 function best_fit_media_type(file_name) {
@@ -1914,7 +1947,9 @@ var g_app_populators = {
 		if ( media_type === 'video' ) {
 			if ( video ) {
 				video.poster = media.poster
-				if ( entry.protocol === 'ipfs' ) {
+				if ( entry.blob ) {
+					video.src = entry.blob
+				} else if ( entry.protocol === 'ipfs' ) {
 					let v_proto = media.protocol
 					let v_cid = media[v_proto]
 					media_startup(video,v_cid,media.source)
@@ -1925,15 +1960,22 @@ var g_app_populators = {
 			}
 		} else if ( media_type === 'image' ) {
 			if ( poster ) {
-				poster.src = media.poster
+				if ( entry.blob ) {
+					poster.src = entry.blob
+				} else {
+					poster.src = media.poster
+				}
 				poster.style.display = "block"
 			}
 		} else {	//  sound
 			if ( sound ) {
-				let ext = extract_sound_media_ext(media.source)
-				let sound_player = document.getElementById(`asset-type-stream-sound-${ext}`)
+				//let ext = extract_sound_media_ext(media.source)
+				let sound_player = document.getElementById(`asset-type-stream-sound`)
+				//let sound_player = document.getElementById(`asset-type-stream-sound-${ext}`)
 				if ( sound_player ) {
-					if ( entry.protocol === 'ipfs' ) {
+					if ( entry.blob ) {
+						sound_player.src = entry.blob
+					} else if ( entry.protocol === 'ipfs' ) {
 						let a_proto = media.protocol		// a is for audio
 						let a_cid = media[a_proto]
 						media_startup(sound_player,a_cid,media.source)
@@ -2016,6 +2058,12 @@ async function save(item_holder) {
 			obj[protocol] = asset_id		// save this with the media record... the media will not ride along in the object
 		}
 	}
+	//
+	let saver = Object.asset_type({},obj)
+	if ( obj._real_media ) {
+		delete saver.blob			// don't store the blob that is uploaded
+	}
+	//
 	real_save(obj)	// send the access record out
 	delete g_unsaved_items[item_id]
 	if ( obj.deleted ) {
@@ -2189,6 +2237,13 @@ function done_with_file(category,obj) {
 	if ( obj === null ) {
 		alert("no file loaded")
 	} else {
+		if ( category === "demo" ) {
+			let ext = get_ext(obj.file_name)
+			if ( ext !== '.json' ) {
+				alert("the demo elements require a specific JSON format stored in a .json file")
+				return;
+			}
+		}
 		let check_cat = check_category(category,obj.file_name)
 		if (  obj._real_media || ((check_cat !== category) && (obj.media_type === undefined)) ) {
 			category = check_cat
@@ -2410,6 +2465,11 @@ function dropHandlerUpdates(ev) {
 				};
 				reader.readAsText(file);
 				break
+			} else if (ev.dataTransfer.items[i].kind === 'string') {
+				let maybe_url = ev.dataTransfer.items[i].getAsString()
+				if ( matches_url(maybe_url) ) {
+					add_or_use_url(maybe_url)
+				}
 			}
 		}
 	} else {
@@ -2665,7 +2725,7 @@ function setChangeListener (div, listener) {
 
 
 function drop_content_aware() {
-	
+	//
 	let target = document.getElementById("floating-info-entry")
 	let title_el = document.getElementById("floating-info-entry-title-field")
 	if ( target ) {
