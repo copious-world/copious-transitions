@@ -12,6 +12,14 @@ class MediaUpDynamic extends GeneralDynamic {
     initialize(db) {
         this.db = db
     }
+
+    fetch_elements(asset,trans_object) {
+        if ( "do_param_upload" === asset ) {
+            return [trans_object.elements,{}]
+        }
+        return [{},{}]
+    }
+
 }
 
 

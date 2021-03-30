@@ -27,6 +27,9 @@ class UploaderSessionManager extends SessionManager {
         if (  G_publication_submit_trns.tagged(transition) ) {
             return(true)
         }
+        if ( G_configurable_submit_trns.tagged(transition) ) {
+            return(true)
+        }
         return(super.feasible(transition,post_body,req))
     }
 
@@ -41,9 +44,10 @@ class UploaderSessionManager extends SessionManager {
             trans_object.secondary_action = false
             post_body.file_type = G_demo_submit_trns.file_type()
         }
-        if ( G_publication_submit_trns.tagged(transition) ) {
-            post_body.file_type = G_publication_submit_trns.file_type()
+        if ( G_configurable_submit_trns.tagged(transition) ) {
+            post_body.file_type = G_configurable_submit_trns.file_type()
             G_configurable_submit_trns.prep(post_body)
+            let files = this.which_uploaded_files(req,post_body)
             let state = await this.trans_engine.upload_file(post_body,G_configurable_submit_trns,files)
             if ( state.OK == false ) return false
             trans_object.elements = {
@@ -58,30 +62,33 @@ class UploaderSessionManager extends SessionManager {
     //
     //
     finalize_transition(transition,post_body,elements,req) {
-        let files = this.which_uploaded_files(req,post_body)
-        if ( G_uploader_trns.tagged(transition) ) {
-            return(this.trans_engine.upload_file(post_body,G_uploader_trns,files))
-        }
-        if ( G_demo_submit_trns.tagged(transition) ) {
-            let state = this.trans_engine.upload_file(post_body,G_demo_submit_trns,files)
-            if ( this.business ) {
-                this.business.process('demo',post_body)
-            }
-            return(state)
-        }
-        if ( G_publication_submit_trns.tagged(transition) ) {
-            let state = this.trans_engine.upload_file(post_body,G_publication_submit_trns,files)
-            if ( this.business ) {
-                this.business.process('submitter',post_body)
-            }
-            return(state)
-        }
+        
         if ( G_configurable_submit_trns.tagged(transition) ) {
             if ( G_configurable_submit_trns.business ) {
                 this.business.process('dashboard-options',post_body)
             }
             return(state)
+        } else {
+            let files = this.which_uploaded_files(req,post_body)
+            if ( G_uploader_trns.tagged(transition) ) {
+                return(this.trans_engine.upload_file(post_body,G_uploader_trns,files))
+            }
+            if ( G_demo_submit_trns.tagged(transition) ) {
+                let state = this.trans_engine.upload_file(post_body,G_demo_submit_trns,files)
+                if ( this.business ) {
+                    this.business.process('demo',post_body)
+                }
+                return(state)
+            }
+            if ( G_publication_submit_trns.tagged(transition) ) {
+                let state = this.trans_engine.upload_file(post_body,G_publication_submit_trns,files)
+                if ( this.business ) {
+                    this.business.process('submitter',post_body)
+                }
+                return(state)
+            }    
         }
+
         let finalization_state = {
             "state" : "ERROR",
             "OK" : "false"

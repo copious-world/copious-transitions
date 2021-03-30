@@ -29,9 +29,14 @@ class UploaderTransitionEngineClass extends GeneralTransitionEngine {
     //
     constructor() {
         super()
-        
+        //
+        this.init_ipfs()
+    }
+
+    //
+    async init_ipfs() {
         this.node = await IPFS.create()
-        const version = await node.version()
+        const version = await this.node.version()
         console.log('Version:', version.version)
     }
 
@@ -45,15 +50,26 @@ class UploaderTransitionEngineClass extends GeneralTransitionEngine {
         return file_data
     }
 
+/*
+var image = 'data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAA..kJggg==';
+
+var data = image.replace(/^data:image\/\w+;base64,/, '');
+
+fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
+  //Finished
+});
+*/
+
     //
     async file_mover(file_descriptor,target_path,cb) {
-        let file_name = file_descriptor.file_name
-        let file_data = file_descriptor.buffer          // assuming this to be a uint8Array
+        let file_name = file_descriptor.name
+        let file_data = file_descriptor.data          // assuming this to be a uint8Array
 
-        file_name = target_path + file_name
+        //file_name = target_path + file_name
+        console.log(file_name)
         file_data = this.store_encrypted(file_data)
         //
-        const file = await node.add({
+        const file = await this.node.add({
             path: file_name,
             content: file_data
         })

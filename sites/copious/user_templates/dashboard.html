@@ -1041,16 +1041,20 @@ html {
 
 </body>
 </html>
+<!--
 <script src="https://unpkg.com/ipfs@0.41.0-rc.2/dist/index.min.js"></script>
 <script src="https://unpkg.com/hlsjs-ipfs-loader@0.2.3/dist/index.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+-->
 <script>
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 // Setting HLS Config values
+/*
 Hls.DefaultConfig.loader = HlsjsIpfsLoader
 Hls.DefaultConfig.debug = false
+*/
 
 var g_ipfs_node = false
 async function setup_ipfs_node() {
@@ -1376,20 +1380,24 @@ async function finalize_media_storage(primary_response) {
 }
 
 
+// data:[<MIME-type>][;charset=<encoding>][;base64],<data>
+
+
 async function upload_audio(obj) {			// 	obj.media_type
-	obj.email = g_profile_info.email
+	obj.email = g_dashboard_info.email
 	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
+	const mime = obj.mime
 	//
-	var filefromblob = new File([obj.blob], obj.file_name);
 	let formdata = new FormData()
-	formdata.append('media_file', filefromblob)
 	for ( let ky in obj ) {
 		if ( ky === 'blob' ) continue
 		formdata.append(ky, obj[ky])
 	}
 	formdata.append('protocol', 'p2p-default')
-	let primary_response =  await postData(url,data,'omit',true,'multipart/form-data')
-	if ( primary_response.status === "OK" ) {
+	formdata.append('media_file', new Blob([obj.blob]), obj.file_name)
+	//
+	let primary_response =  await postData(url,formdata,'omit',false,'multipart/form-data')
+	if ( primary_response.OK === "true" ) {
 		let media_store_characteristics = await finalize_media_storage(primary_response)
 		return media_store_characteristics
 	} else {
@@ -1398,18 +1406,18 @@ async function upload_audio(obj) {			// 	obj.media_type
 }
 
 async function upload_video(obj) {
-	obj.email = g_profile_info.email
+	obj.email = g_dashboard_info.email
 	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
-	var filefromblob = new File([obj.blob], obj.file_name);
+	const mime = obj.mime
 	let formdata = new FormData()
-	formdata.append('media_file', filefromblob)
 	for ( let ky in obj ) {
 		if ( ky === 'blob' ) continue
 		formdata.append(ky, obj[ky])
 	}
 	formdata.append('protocol', 'p2p-default')
-	let primary_response =  await postData(url,data,'omit',true,'multipart/form-data')
-	if ( primary_response.status === "OK" ) {
+	formdata.append('media_file', new Blob([obj.blob]), obj.file_name)
+	let primary_response =  await postData(url,formdata,'omit',false,'multipart/form-data')
+	if ( primary_response.OK === "true" ) {
 		let media_store_characteristics = await finalize_media_storage(primary_response)
 		return media_store_characteristics
 	} else {
@@ -1418,18 +1426,18 @@ async function upload_video(obj) {
 }
 
 async function upload_image(obj) {
-	obj.email = g_profile_info.email
+	obj.email = g_dashboard_info.email
 	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
-	var filefromblob = new File([obj.blob], obj.file_name);
+	const mime = obj.mime
 	let formdata = new FormData()
-	formdata.append('media_file', filefromblob)
 	for ( let ky in obj ) {
 		if ( ky === 'blob' ) continue
 		formdata.append(ky, obj[ky])
 	}
 	formdata.append('protocol', 'p2p-default')
-	let primary_response =  await postData(url,data,'omit',true,'multipart/form-data')
-	if ( primary_response.status === "OK" ) {
+	formdata.append('media_file', new Blob([obj.blob]), obj.file_name)
+	let primary_response =  await postData(url,formdata,'omit',false,'multipart/form-data')
+	if ( primary_response.OK === "true" ) {
 		let media_store_characteristics = await finalize_media_storage(primary_response)
 		return media_store_characteristics
 	} else {
@@ -1440,8 +1448,8 @@ async function upload_image(obj) {
 
 function prep_upload_for(obj,uploader_fun) {
 	//
-	g_uploader_cache[obj._dash_entry_id] = () => {
-		uploader_fun(obj)
+	g_uploader_cache[obj._dash_entry_id] = async () => {
+		return await uploader_fun(obj)
 	}
 	//
 }
@@ -1892,6 +1900,7 @@ function hide_all_special_data_fields() {
 
 
 async function media_startup(video,v_cid,src) {
+	/*
   if (!Hls.isSupported()) {
     return displayError(new Error('Your Browser does not support the HTTP Live Streaming Protocol'))
   }
@@ -1901,20 +1910,21 @@ async function media_startup(video,v_cid,src) {
   hls.loadSource(src)  										//'master.m3u8'
   hls.attachMedia(video)
   hls.on(Hls.Events.MANIFEST_PARSED, () =>	 video.play())
+  */
 }
 
 
 //
 function displayError(err) {
-  const modalElement = document.getElementById('modal');
-  modalElement.style.display = 'flex';
-
-  const errStr = String(err).toLowerCase();
-  const spanElement = document.getElementById('errorText');
-
-  spanElement.innerHTML = errStr.includes('SecurityError'.toLowerCase()) 
-    ? 'You must use Chrome or Firefox to test this embedded app!' 
-    : 'Something went wrong. See the console to get further details.';
+	const modalElement = document.getElementById('modal');
+	if ( modalElement ) {
+		modalElement.style.display = 'flex';
+		const errStr = String(err).toLowerCase();
+		const spanElement = document.getElementById('errorText');
+		spanElement.innerHTML = errStr.includes('SecurityError'.toLowerCase())
+												? 'You must use Chrome or Firefox to test this embedded app!' 
+												: 'Something went wrong. See the console to get further details.';
+  }
 }
 
 
@@ -2053,18 +2063,22 @@ async function save(item_holder) {
 	line_el.innerHTML = title
 	//
 	if ( obj._real_media ) {
-		let [protocol,asset_id] = await do_media_upload(obj)
-		if ( protocol ) {
-			obj[protocol] = asset_id		// save this with the media record... the media will not ride along in the object
+		try {
+			let [protocol,asset_id] = await do_media_upload(obj)
+			if ( protocol ) {
+				obj[protocol] = asset_id		// save this with the media record... the media will not ride along in the object
+			}
+		} catch (e) {
+			//obj._real_media = false  // this is problematic, but if things are buggy, don't throw away data unexpectedly.
 		}
 	}
 	//
-	let saver = Object.asset_type({},obj)
+	let saver = Object.assign({},obj)
 	if ( obj._real_media ) {
 		delete saver.blob			// don't store the blob that is uploaded
 	}
 	//
-	real_save(obj)	// send the access record out
+	real_save(saver)	// send the access record out
 	delete g_unsaved_items[item_id]
 	if ( obj.deleted ) {
 		obj.deleted = false
@@ -2244,9 +2258,21 @@ function done_with_file(category,obj) {
 				return;
 			}
 		}
-		let check_cat = check_category(category,obj.file_name)
-		if (  obj._real_media || ((check_cat !== category) && (obj.media_type === undefined)) ) {
-			category = check_cat
+		//
+		let entries = g_all_user_entries[category]
+		let new_dash_id = get_random_id(entries)
+		obj._dash_entry_id = new_dash_id
+		//
+		if (  obj._real_media ) {
+			let check_cat = check_category(category,obj.file_name)
+			if ( check_cat !== category ) {
+				category = check_cat
+				// get the id again
+				entries = g_all_user_entries[category]
+				new_dash_id = get_random_id(entries)
+				obj._dash_entry_id = new_dash_id
+			}
+			//	assign the media type...
 			obj.media_type = best_fit_media_type(obj.file_name)
 			switch ( obj.media_type ) {
 				case 'audio' : {
@@ -2286,11 +2312,8 @@ function done_with_file(category,obj) {
 			}
 		}
 		//
-		let entries = g_all_user_entries[category]
-		//
 		let fname = obj.file_name
 		let os_drop_result = obj.result
-		let new_dash_id = get_random_id(entries)
 		let entry = {}
 		if ( is_json_file(fname) ) {
 			try {
@@ -2306,7 +2329,7 @@ function done_with_file(category,obj) {
 				entry.file_name = obj.file_name
 			}
 		} else {
-			entry = Object.assign({},obj)
+			entry = Object.assign({},obj)	// get the fields passed, carries:  mime, result, file_name, _real_media
 			if ( obj.result ) {
 				entry.data = obj.result		// known to be some kind of text format or other
 			}
@@ -2314,12 +2337,12 @@ function done_with_file(category,obj) {
 			entry.decoded = true
 		}
 		//
-		entry._dash_entry_id = new_dash_id		// for use in the dashboard UI operations
+				// for use in the dashboard UI operations
 		entry.deleted = false
 		entry.published = false
 		entry.file_name = obj.file_name			// use the one from the system if it got here from the file system
 		if ( entry.title == undefined ) {
-			entry.title =  obj.file_name		// no title specified, so use the file name
+			entry.title = obj.file_name		// no title specified, so use the file name
 		}
 		if ( entry.txt_full && !( entry.abstract ) ) {		// a stuctured entry with a txt_full field, but without an abstract
 			entry.data = entry.txt_full						// so put the text into the first text display... (usually abstract)  .. sort of fudgy

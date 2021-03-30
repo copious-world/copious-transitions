@@ -1,13 +1,13 @@
 const GeneralStatic = require.main.require('./lib/general_static')
 
-const myStorageClass = null
+const myStorageClass = false
 
 class MediaUpStatic extends GeneralStatic {
     //
     constructor() {
         super(myStorageClass)
         //
-        this.preloaded = {
+        this._preloaded = {
             "demo_uploader" : { "fname" : '/uploader.html', "ftype" : "html" },
             "pub_submit" : { "fname" : '/submitter.html', "ftype" : "html" },
             "recorder" : { "fname" : '/recorder.html', "ftype" : "html" },
@@ -31,7 +31,7 @@ class MediaUpStatic extends GeneralStatic {
         super.preload_all()
         //
         // A) DEMO UPLOAD FORM -- uploader  --- e.g. singer demo, program demo..
-        let data = this.preloaded.demo_uploader.data
+        let data = this._preloaded.demo_uploader.data
         let json = this.prepare_asset(data)
         //
         this.demo_asset_media_object = {
@@ -40,7 +40,7 @@ class MediaUpStatic extends GeneralStatic {
         }
         //
         // B) PUBLICATION SUBMISSION FORM -- pub_submit  -- e.g. song of day submission, article, etc.
-        data = this.preloaded.pub_submit.data
+        data = this._preloaded.pub_submit.data
         json = this.prepare_asset(data)
         //
         this.publication_asset_media_object = {
@@ -49,7 +49,7 @@ class MediaUpStatic extends GeneralStatic {
         }
         //
         // C) RECORDER APPLICATION -- recorder  -- e.g. recorder app for audio ownership, etc.
-        data = this.preloaded.recorder.data
+        data = this._preloaded.recorder.data
         json = this.prepare_asset(data)
         //
         this.recorder_object = {
@@ -58,7 +58,7 @@ class MediaUpStatic extends GeneralStatic {
         }
         //
         // D) POLYFILL FOR DIALOGS (HTML in transition)
-        data = this.preloaded.dialogs.data
+        data = this._preloaded.dialogs.data
         json = this.prepare_asset(data)
         //
         this.dialogs_packaged = {

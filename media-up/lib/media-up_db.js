@@ -6,7 +6,7 @@ const CustomStaticDB = require.main.require('./custom_storage/static_db')
 //
 const apiKeys = require.main.require('./local/api_keys')
 const g_ephemeral = new PersistenceManager(apiKeys.session)
-
+const g_persistence = g_ephemeral
 
 const g_keyValueDB = g_persistence.get_LRUManager();      // leave it to the module to figure out how to connect
 const g_keyValueSessions =  g_ephemeral.get_LRUManager();
@@ -14,8 +14,7 @@ const g_keyValueSessions =  g_ephemeral.get_LRUManager();
 const SLOW_MESSAGE_QUERY_INTERVAL = 5000
 const FAST_MESSAGE_QUERY_INTERVAL = 1000
 
-const WRITE_OBJECT_MAP_EVERY_INTERVAL = 1000*60*30  // 30 minutes
-const WRITE_UNUSED_LARGE_ENTRIES_EVERY_INTERVAL = 1000*60*60  // ones an hour
+const WRITE_OBJECT_MAP_EVERY_INTERVAL = 1000*60*60  // 30 minutes
 
 //
 const NOTIFICATION_PATH = 'notify'
@@ -65,10 +64,8 @@ class UploaderDBClass extends DBClass {
 
     constructor() {
       let stash_interval = WRITE_OBJECT_MAP_EVERY_INTERVAL
-      let persistenceDB = new CustomPersistenceDB(g_persistence.message_fowarding,stash_interval,'uploaded')
-      stash_interval = WRITE_UNUSED_LARGE_ENTRIES_EVERY_INTERVAL
       let staticDB = new CustomStaticDB(g_persistence.message_fowarding,stash_interval,'uploaded','email')
-      super(g_keyValueDB,g_keyValueSessions,persistenceDB,staticDB)
+      super(g_keyValueDB,g_keyValueSessions,false,staticDB)
     }
 
     // // // 
