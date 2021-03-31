@@ -116,8 +116,8 @@ class DashboardsAssets extends Dashboards {
         this.ok_assets = [
             "blog",
             "demo",  // encryption check as well...
-            "streams",
-            "link_package"
+            "stream",
+            "links"
         ]
         //
         this.last_tagged = undefined

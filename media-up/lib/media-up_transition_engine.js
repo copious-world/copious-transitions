@@ -58,6 +58,35 @@ var data = image.replace(/^data:image\/\w+;base64,/, '');
 fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
   //Finished
 });
+
+
+
+
+
+async function main () {
+  const node = await IPFS.create()
+  const version = await node.version()
+
+  console.log('Version:', version.version)
+
+  const fileAdded = await node.add({
+    path: 'hello.txt',
+    content: 'Hello World 101'
+  })
+
+  console.log('Added file:', fileAdded.path, fileAdded.cid)
+
+  const chunks = []
+  for await (const chunk of node.cat(fileAdded.cid)) {
+      chunks.push(chunk)
+  }
+
+  console.log('Added file contents:', uint8ArrayConcat(chunks).toString())
+}
+
+
+
+
 */
 
     //
@@ -73,6 +102,14 @@ fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
             path: file_name,
             content: file_data
         })
+
+        let cid = file.cid.toString()
+
+
+        console.log(`${__filename}::file_mover : ${cid}`)
+
+
+        file_descriptor.mv("./debug/" + file_name,cb)
 
         return file.cid.toString()
         //

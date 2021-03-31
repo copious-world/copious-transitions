@@ -26,3 +26,4 @@ user_keys*
 *.DS*
 sites/popsong/static/dialog-polyfill-master/*
 custom_storage/test/*
+debug/*

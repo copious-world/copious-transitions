@@ -1041,10 +1041,10 @@ html {
 
 </body>
 </html>
+<script src="https://unpkg.com/ipfs@latest/dist/index.min.js"></script>
 <!--
-<script src="https://unpkg.com/ipfs@0.41.0-rc.2/dist/index.min.js"></script>
-<script src="https://unpkg.com/hlsjs-ipfs-loader@0.2.3/dist/index.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hlsjs-ipfs-loader@latest/dist/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 -->
 <script>
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -1072,6 +1072,64 @@ async function setup_ipfs_node() {
   g_ipfs_node = node
 }
 
+
+// 'audio/mp4; codecs="mp4a.40.2"'
+// 'video/mp4; codecs="avc1.64001e"'
+/*
+// for the audio SourceBuffer
+fetch("http://server.com/audio.mp4").then(function(response) {
+  // The data has to be a JavaScript ArrayBuffer
+  return response.arrayBuffer();
+}).then(function(audioData) {
+ 
+});
+*/
+
+async function ipfs_loader(medial_el,codecs,hash_id) {	
+	const myMediaSource = new MediaSource();
+	const url = URL.createObjectURL(myMediaSource);
+	medial_el.src = url;
+
+	// 1. add source buffers
+	const audioSourceBuffer = codecs.audio ?  myMediaSource.addSourceBuffer(codecs.audio) : false
+	const videoSourceBuffer = codecs.video ?  myMediaSource.addSourceBuffer(codecs.video) : false
+
+	// 2. download and add our audio/video to the SourceBuffers
+	if ( audioSourceBuffer ) {
+		for ( let chunk of ipfs.cat(hash_id) ) {
+			audioSourceBuffer.appendBuffer(chunk);
+		}
+	}
+	if ( videoSourceBuffer ) {
+		for ( let chunk of await ipfs.cat(hash_id) ) {
+			videoSourceBuffer.appendBuffer(chunk);
+		}
+	}
+}
+
+function store_encrypted(data) {
+	return(data)
+}
+
+async function ipfs_add_media(file_name,blob_url) {
+	let blob_data = ""
+	//
+	try {
+		let res = await fetch(blob_url)
+		blob_data = await res.blob()
+		//
+		file_data = store_encrypted(file_data)
+        //
+        const cid = await g_ipfs_nodeadd({
+            path: file_name,
+            content: blob_data
+        })
+		return(cid)
+	} catch(e) {
+		return
+	}
+
+}
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -1382,11 +1440,25 @@ async function finalize_media_storage(primary_response) {
 
 // data:[<MIME-type>][;charset=<encoding>][;base64],<data>
 
-
 async function upload_audio(obj) {			// 	obj.media_type
 	obj.email = g_dashboard_info.email
 	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
 	const mime = obj.mime
+	//
+	let blob_data = ""
+	//
+	if ( obj.blob.length > 2000000 ) {
+		let cid = await ipfs_add_media(obj.file_name,obj.blob)
+		return ['ipfs', cid]
+	}
+	// ELSE
+	//
+	try {
+		let res = await fetch(obj.blob)
+		blob_data = await res.blob()
+	} catch(e) {
+		return
+	}
 	//
 	let formdata = new FormData()
 	for ( let ky in obj ) {
@@ -1394,7 +1466,7 @@ async function upload_audio(obj) {			// 	obj.media_type
 		formdata.append(ky, obj[ky])
 	}
 	formdata.append('protocol', 'p2p-default')
-	formdata.append('media_file', new Blob([obj.blob]), obj.file_name)
+	formdata.append('media_file', new Blob([blob_data]), obj.file_name)
 	//
 	let primary_response =  await postData(url,formdata,'omit',false,'multipart/form-data')
 	if ( primary_response.OK === "true" ) {
@@ -1405,10 +1477,26 @@ async function upload_audio(obj) {			// 	obj.media_type
 	}
 }
 
+
 async function upload_video(obj) {
 	obj.email = g_dashboard_info.email
 	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
 	const mime = obj.mime
+	let blob_data = ""
+	//
+	if ( obj.blob.length > 2000000 ) {
+		let cid = await ipfs_add_media(obj.file_name,obj.blob)
+		return ['ipfs', cid]
+	}
+	// ELSE
+	//
+	try {
+		let res = await fetch(obj.blob)
+		blob_data = await res.blob()
+	} catch(e) {
+		return
+	}
+	//
 	let formdata = new FormData()
 	for ( let ky in obj ) {
 		if ( ky === 'blob' ) continue
@@ -1429,6 +1517,21 @@ async function upload_image(obj) {
 	obj.email = g_dashboard_info.email
 	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
 	const mime = obj.mime
+	let blob_data = ""
+	//
+		if ( obj.blob.length > 2000000 ) {
+		let cid = await ipfs_add_media(obj.file_name,obj.blob)
+		return ['ipfs', cid]
+	}
+	// ELSE
+	//
+	try {
+		let res = await fetch(obj.blob)
+		blob_data = await res.blob()
+	} catch(e) {
+		return
+	}
+	//
 	let formdata = new FormData()
 	for ( let ky in obj ) {
 		if ( ky === 'blob' ) continue
