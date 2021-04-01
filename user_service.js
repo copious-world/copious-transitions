@@ -236,7 +236,7 @@ g_app.post('/transition/:transition', async (req, res) => {           // the tra
 g_app.post('/secondary/transition',async (req, res) => {
     let body = req.body
     if ( body.token !== undefined ) {
-        let cached_transition = fetch_local_cache_transition(g_finalize_transitions,body.token)
+        let cached_transition = fetch_local_cache_transition(g_finalize_transitions,body.token,body.next)
         if ( cached_transition !== undefined ) {
             if ( g_session_manager.match(body,cached_transition)  ) {        // check on matching tokens and possibly other things 
                 // some kind of transition takes place and becomes the state of the session. It may not be the same as the one
@@ -626,10 +626,10 @@ g_app_wss.on("connection", (ws,req) => {
 
 // more than one use of caches is expected.  (just these two methods ... using a class seems too much
 
-function fetch_local_cache_transition(cache_map,token) {
+function fetch_local_cache_transition(cache_map,token,next) {
     if ( cache_map ) {
         let transObject = cache_map[token]
-        delete cache_map[token]
+        if ( !(next) ) delete cache_map[token]
         return transObject
     }
     return undefined
