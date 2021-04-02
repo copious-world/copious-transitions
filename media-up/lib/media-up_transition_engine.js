@@ -105,14 +105,30 @@ async function main () {
 
         let cid = file.cid.toString()
 
-
         console.log(`${__filename}::file_mover : ${cid}`)
-
-
-        file_descriptor.mv("./debug/" + file_name,cb)
 
         return file.cid.toString()
         //
+    }
+
+    //
+
+    async store_data(file_descriptor,target_path,writeable_data,id) {
+        let file_name = file_descriptor.name
+        //
+        console.log(file_name)
+        let file_data = this.store_encrypted(writeable_data)
+        //
+        const file = await this.node.add({
+            path: file_name,
+            content: file_data
+        })
+
+        let cid = file.cid.toString()
+
+        console.log(`${__filename}::file_mover : ${cid}`)
+        return file.cid.toString()
+        
     }
 
     //

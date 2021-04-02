@@ -46,13 +46,17 @@ class UploaderSessionManager extends SessionManager {
         }
         if ( G_configurable_submit_trns.tagged(transition) ) {
             post_body.file_type = G_configurable_submit_trns.file_type()
-            G_configurable_submit_trns.prep(post_body)
-            let files = this.which_uploaded_files(req,post_body)
-            let state = await this.trans_engine.upload_file(post_body,G_configurable_submit_trns,files)
-            if ( state.OK == false ) return false
-            trans_object.elements = {
-                "protocol" : "ipfs",
-                "media_id" : state.ids[0]
+            if ( (post_body.preamble !== undefined) && (post_body.preamble !== 0) ) {
+                this.trans_engine.files_coming_in_chunks(post_body,trans_object.token)
+            } else {
+                G_configurable_submit_trns.prep(post_body)
+                let files = this.which_uploaded_files(req,post_body)
+                let state = await this.trans_engine.upload_file(post_body,G_configurable_submit_trns,files)
+                if ( state.OK == false ) return false
+                trans_object.elements = {
+                    "protocol" : "ipfs",
+                    "media_id" : state.ids[0]
+                }    
             }
         }
         //
@@ -62,11 +66,32 @@ class UploaderSessionManager extends SessionManager {
     //
     //
     finalize_transition(transition,post_body,elements,req) {
-        
+        //
         if ( G_configurable_submit_trns.tagged(transition) ) {
-            if ( G_configurable_submit_trns.business ) {
-                this.business.process('dashboard-options',post_body)
+            let state
+            if ( post_body.next ) {
+                G_configurable_submit_trns.prep(post_body)
+                let files = this.which_uploaded_files(req,post_body)
+                state = await this.trans_engine.upload_chunk(post_body,G_configurable_submit_trns,files)
+                if ( state.OK == false ) return false
+                state.elements = {
+                    "protocol" : "ipfs",
+                    "media_id" : state.ids[0]
+                }
+            } else {
+                G_configurable_submit_trns.prep(post_body)
+                let files = this.which_uploaded_files(req,post_body)
+                state = await this.trans_engine.upload_file(post_body,G_configurable_submit_trns,files)
+                if ( state.OK == false ) return false
+                state.elements = {
+                    "protocol" : "ipfs",
+                    "media_id" : state.ids[0]
+                }
+                if ( G_configurable_submit_trns.business ) {
+                    this.business.process('dashboard-options',post_body)
+                }
             }
+            //
             return(state)
         } else {
             let files = this.which_uploaded_files(req,post_body)

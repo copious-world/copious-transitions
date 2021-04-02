@@ -27,3 +27,6 @@ user_keys*
 sites/popsong/static/dialog-polyfill-master/*
 custom_storage/test/*
 debug/*
+sites/*/ipfs*
+*.mp3
+

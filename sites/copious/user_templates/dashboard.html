@@ -1354,6 +1354,25 @@ var g_uploader_cache = {}
 const DEFINED_CHUNK_SIZE = 5000000
 const DEFINED_MAX_SIZE = 9000000
 
+async function finalize_small_media_storage(primary_response) {
+	if ( primary_response.transition && primary_response.transition.token ) {
+		let transaction_token = primary_response.transition.token
+		let protocol = primary_response.elements.protocol
+		let media_id = primary_response.elements.media_id
+		let url = `http://${g_siteURL}/uploaders/secondary/transition`
+		let body = {
+			"token" : transaction_token,
+			"match" : "handshake",
+		}
+		body.protocol = protocol
+		body.media_id = media_id   // maybe a checksum
+		let secondary_resp =  await postData(url,body)
+		return [protocol,media_id]
+	}
+	return [false,false]
+}
+
+
 async function finalize_media_storage(primary_response,formdata,blob) {
 
 	let seconday_resp = primary_response
@@ -1432,7 +1451,7 @@ async function upload_small(obj,blob_already) {			// 	obj.media_type
 	//
 	let primary_response =  await postData(url,formdata,'omit',false,'multipart/form-data')
 	if ( primary_response.OK === "true" ) {
-		let media_store_characteristics = await finalize_media_storage(primary_response)
+		let media_store_characteristics = await finalize_small_media_storage(primary_response)
 		return media_store_characteristics
 	} else {
 		return [false, false]
@@ -1965,7 +1984,10 @@ function hide_all_special_data_fields() {
 
 
 
-async function media_startup(video,v_cid,src) {
+async function media_startup(player,codecs,protocol,cid,src) {
+	if ( protocol === 'ipfs' ) {
+		await ipfs_loader(player,codecs,cid)
+	}
 	/*
   if (!Hls.isSupported()) {
     return displayError(new Error('Your Browser does not support the HTTP Live Streaming Protocol'))
@@ -2020,21 +2042,7 @@ var g_app_populators = {
 		let media = entry.media
 		//
 		let media_type = entry.media_type
-		if ( media_type === 'video' ) {
-			if ( video ) {
-				video.poster = media.poster
-				if ( entry.blob ) {
-					video.src = entry.blob
-				} else if ( entry.protocol === 'ipfs' ) {
-					let v_proto = media.protocol
-					let v_cid = media[v_proto]
-					media_startup(video,v_cid,media.source)
-				} else {
-					video.src = media.source
-				}
-				video.style.display = "block"
-			}
-		} else if ( media_type === 'image' ) {
+		if ( media_type === 'image' ) {
 			if ( poster ) {
 				if ( entry.blob ) {
 					poster.src = entry.blob
@@ -2042,6 +2050,24 @@ var g_app_populators = {
 					poster.src = media.poster
 				}
 				poster.style.display = "block"
+			}
+		} else if ( media_type === 'video' ) {
+			if ( video ) {
+				video.poster = media.poster
+				if ( entry.blob ) {
+					video.src = entry.blob
+				} else if ( entry.use_protocol ) {
+					let v_proto = media.protocol
+					let v_cid = media[v_proto]
+					let v_codec = {
+						"type" : "video",
+						"video" : 'video/mp4; codecs="avc1.64001e"'
+					}
+					media_startup(video,v_codec,v_proto,v_cid,media.source)
+				} else {
+					video.src = media.source
+				}
+				video.style.display = "block"
 			}
 		} else {	//  sound
 			if ( sound ) {
@@ -2051,10 +2077,14 @@ var g_app_populators = {
 				if ( sound_player ) {
 					if ( entry.blob ) {
 						sound_player.src = entry.blob
-					} else if ( entry.protocol === 'ipfs' ) {
+					} else if ( entry.use_protocol ) {
 						let a_proto = media.protocol		// a is for audio
 						let a_cid = media[a_proto]
-						media_startup(sound_player,a_cid,media.source)
+						let a_codec = {
+							"type" : "audio",
+							"audio" : 'audio/mp4; codecs="mp4a.40.2"'
+						}
+						media_startup(sound_player,a_codec,a_proto,a_cid,media.source)
 					} else {
 						sound_player.src = media.source
 					}
@@ -2132,7 +2162,12 @@ async function save(item_holder) {
 		try {
 			let [protocol,asset_id] = await do_media_upload(obj)
 			if ( protocol ) {
-				obj[protocol] = asset_id		// save this with the media record... the media will not ride along in the object
+				obj.use_protocol = true
+				if ( obj.media === undefined ) {
+					obj.media = {}
+				}
+				obj.media.protocol = protocol
+				obj.media[protocol] = asset_id
 			}
 		} catch (e) {
 			//obj._real_media = false  // this is problematic, but if things are buggy, don't throw away data unexpectedly.
@@ -2977,6 +3012,26 @@ link_entry = {
 g_all_user_entries.links.push(link_entry)
 
 
+let audio_entry = {
+	"title" : "A really good old songs",
+	"published" : false,
+	"decoded" : true,
+	"deleted" : false,
+	"sent" : false,
+	"asset_type" : "stream",
+	"abstract" : "This song is stored in IPFS",
+	"use_protocol" : true,
+	"_dash_entry_id" :get_random_id([]),
+	"media" : {
+		"protocol" : "ipfs",
+		"ipfs" : "QmdBKa2m1PxZRcnSGizQdwRyp21pKhXTkHjVgdAb6YhmRh",
+		"poster" : "",
+		"source" : "https://www.popsongnow.com/audio/allofmytime.mp3"
+	}
+}
+g_all_user_entries.stream.push(audio_entry)
+
+
 // // // // // // // // // // // // // //
 setup_user_dashboard(g_dashboard_info,"9359252529852")
 
@@ -3040,27 +3095,20 @@ fetch("http://server.com/audio.mp4").then(function(response) {
 });
 */
 
-async function ipfs_loader(medial_el,codecs,hash_id) {	
-	const myMediaSource = new MediaSource();
-	const url = URL.createObjectURL(myMediaSource);
-	medial_el.src = url;
-
-	// 1. add source buffers
-	const audioSourceBuffer = codecs.audio ?  myMediaSource.addSourceBuffer(codecs.audio) : false
-	const videoSourceBuffer = codecs.video ?  myMediaSource.addSourceBuffer(codecs.video) : false
-
-	// 2. download and add our audio/video to the SourceBuffers
-	// QmdBKa2m1PxZRcnSGizQdwRyp21pKhXTkHjVgdAb6YhmRh
-	if ( audioSourceBuffer ) {
-		for ( let chunk of ipfs.cat(hash_id) ) {
-			audioSourceBuffer.appendBuffer(chunk);
-		}
+async function ipfs_loader(medial_el,codecs,hash_id) {
+	//
+	let endpoint = 'streamer/ipfs/'
+	//
+	if ( codecs.type == "audio" ) {
+		endpoint = 'streamer/ipfs/'
+	} else if ( codecs.type == "video" ) { 
+		endpoint = 'movies/ipfs/'
 	}
-	if ( videoSourceBuffer ) {
-		for ( let chunk of await ipfs.cat(hash_id) ) {
-			videoSourceBuffer.appendBuffer(chunk);
-		}
-	}
+	//
+	endpoint += hash_id
+	//
+	medial_el.src = `${location.protocol}//${g_siteURL}/${endpoint}`
+	//
 }
 
 

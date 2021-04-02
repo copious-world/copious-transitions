@@ -47,6 +47,7 @@ const g_transition_engine = require(conf_obj.mod_path.transition_engine)
 var g_app = require(conf_obj.mod_path.expression)(conf_obj,g_db); // exports a function
 var g_session_manager = null
 
+var g_max_cache_time = 3600000*2  // once every two hours
 //
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
@@ -636,11 +637,34 @@ function fetch_local_cache_transition(cache_map,token,next) {
 }
 
 
+
 function add_local_cache_transition(cache_map,token,tobject) {
     if ( cache_map ) {
         cache_map[token] = tobject
         if (  tobject.tobj.session_token ) {
             delete tobject.tobj.session_token
+        }
+        if ( tobject.tobj && tobject.tobj.entry_time ) {
+            tobject.entry_time = tobject.tobj.entry_time
+        }
+    }
+}
+
+
+function timeout_transition_cache(cache_map) {
+    if ( cache_map ) {
+        let now_time = Date.now()
+        let delete_these = []
+        for ( let token in cache_map ) {
+            let tobj = cache_map[token]
+            if ( tobj.entry_time ) {
+                if ( (now_time - tobj.entry_time) > g_max_cache_time ) {
+                    delete_these.push(token)
+                }
+            }
+        }
+        for ( let token of delete_these ) {
+            delete cache_map[token]
         }
     }
 }
