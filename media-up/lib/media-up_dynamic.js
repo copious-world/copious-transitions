@@ -15,7 +15,12 @@ class MediaUpDynamic extends GeneralDynamic {
 
     fetch_elements(asset,trans_object) {
         if ( "do_param_upload" === asset ) {
-            return [trans_object.elements,{}]
+            // send, store
+            let send_elements = {}
+            if ( trans_object.file_key ) {
+                send_elements.match = trans_object.file_key
+            }
+            return [trans_object.elements,send_elements]
         }
         return [{},{}]
     }

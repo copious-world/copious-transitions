@@ -26,6 +26,7 @@ class UploaderPaths extends TaggedTransition {
 class MediaSubmitTransition extends TaggedTransition {
     constructor(trans) {
         super(trans)
+        this.protocol_select = false
     }
     //
     transform_file_name(proto_file_name) {
@@ -43,6 +44,11 @@ class MediaSubmitTransition extends TaggedTransition {
 
     directory() {
         return(process.cwd() + '/uploads')
+    }
+
+
+    p2p_protocol() {
+        return this.protocol_select
     }
 
 }
@@ -81,9 +87,13 @@ class ConfigurableSubmissionPaths extends MediaSubmitTransition {
         this.transition_defs = {}
         this.current_file_in_motion = false
         this.target_dir = false
+        this.protocol_select = 'p2p-default'
     }
 
     prep(pars) {
+        if ( pars && pars.protocol ) {
+            this.protocol_select =  pars.protocol
+        }
         if ( pars && this.transition_defs ) {
             let conf_keys = pars.file_topic
             let pars = this.transition_defs[conf_keys]

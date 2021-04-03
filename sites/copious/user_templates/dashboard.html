@@ -1372,47 +1372,57 @@ async function finalize_small_media_storage(primary_response) {
 	return [false,false]
 }
 
+//
+// finalize_media_storage
+//	There are likely faster ways of sending the data. But, this way requires some permission and safe guarding by the server sid.
+async function finalize_media_storage(primary_response,formdata,blob,obj) {
 
-async function finalize_media_storage(primary_response,formdata,blob) {
+	let secondary_resp = primary_response
 
-	let seconday_resp = primary_response
-
-	if ( primary_response.transition && primary_response.transition.token ) {
+	if ( primary_response.transition && primary_response.transition.token ) {	// A token has to be associated with the transaction
 		//
-		let transaction_token = seconday_resp.transition.token
-		let protocol = seconday_resp.elements.protocol
-		let media_id = seconday_resp.elements.media_id
+		let transaction_token = secondary_resp.transition.token		// call the transition token the transaction_token
+		let protocol = 'p2p-default'				// These fields have no real value until the end, but are always checked in case they may be used for security.
+		let media_id = ""
 		//
-		formdata.set("protocol",protocol)
-		formdata.set("media_id",media_id)
+		formdata.set("protocol",protocol)				// Most likely ipfs ... 
+		formdata.set("media_id",media_id)				// not set until the storage system can identify 
 		formdata.set("token",transaction_token)
-		formdata.set("match","upload-next")
-		formdata.set("next",true)
-		let url = `http://${g_siteURL}/uploaders/secondary/transition`
+		formdata.set("match","upload-next")				// tell the server that you are sending one chunk after another
+		formdata.set("next",true)  // NEXT
+		formdata.set("_t_match_field",obj.file_name)
+		let url = `http://${g_siteURL}/uploaders/secondary/transition`		// generic seconday keyed by the token
 		//
-		let size_end = blob.size
+		let size_end = blob.size						// total length of the data in flight
 		let start = 0;
-		let span = DEFINED_CHUNK_SIZE
-		let num_sends = Math.floor(size_end/span) + 1
+		let span = DEFINED_CHUNK_SIZE					// application generation sets this (tuning upstream)
+		let num_sends = Math.floor(size_end/span) + 1	// size/chunk_size
 		//
-		for ( let i = 0; i < num_sends; i++ ) {
+		for ( let i = 0; i < num_sends; i++ ) {			// the number of times this is called is determined by the client
 			//
-			let blob_part = i*span + Math.min((i+1)*span,size_end)
+			let start = i*span
+			let end = Math.min((i+1)*span,size_end)
+			let blob_part = blob.slice(start,end)  				// next part of the blob
 			formdata.set('media_file', new Blob([blob_part]),obj.file_name)
-			secondary_resp = await postData(url,formdata, 'omit',false,'multipart/form-data')
+			secondary_resp = await postData(url,formdata, 'omit',false,'multipart/form-data')  // send it as a separate file
 			//
+			if ( (secondary_resp.OK !== "true") && (secondary_resp.OK !== true) ) {
+				break;			// This last send failed. Bailout  (If failed, the server will shutdown the communication)
+			}
 		}
 		//
-		if ( secondary_resp.OK === "true" ) {
-			let elements = seconday_resp.state.elements
-			protocol = elements.protocol  // final hash and provider returned in state
-			media_id = elements.media_id
+		if ( (secondary_resp.OK === "true") || (secondary_resp.OK === true) ) {						// The last send was good.
 			let body = {
 				"token" : transaction_token,
 				"match" : "complete",
-				"next"	: false
+				"_t_match_field" : obj.file_name,
+				"file" : { "name" : obj.file_name },
+				"next"	: false		// NO NEXT
 			}
-			secondary_resp =  await postData(url,body)
+			secondary_resp =  await postData(url,body)			// Tell the server that this transaction is done...
+			let elements = secondary_resp.state.elements			// The good stuff is returned in a state field 
+			protocol = elements.protocol  // final hash and provider returned in state (same as for the shor but in the state field)
+			media_id = elements.media_id
 		}
 		//
 		return [protocol,media_id]
@@ -1449,6 +1459,8 @@ async function upload_small(obj,blob_already) {			// 	obj.media_type
 	formdata.append('protocol', 'p2p-default')
 	formdata.append('media_file', new Blob([blob_data]), obj.file_name)
 	//
+	// in the small versions, the file is sent immediately. No preamble
+	//
 	let primary_response =  await postData(url,formdata,'omit',false,'multipart/form-data')
 	if ( primary_response.OK === "true" ) {
 		let media_store_characteristics = await finalize_small_media_storage(primary_response)
@@ -1483,10 +1495,13 @@ async function upload_big(obj,blob_already) {
 	}
 	formdata.append('protocol', 'p2p-default')
 	formdata.append('preamble',blob_data.size)	// tell the size of data to come
-	
-	let primary_response =  await postData(url,formdata)
-	if ( primary_response.OK === "true" ) {
-		let media_store_characteristics = await finalize_media_storage(primary_response,formdata,blob_data)
+	//
+	// in the large versions, a preamble is sent with the size of the data. No data is sent in the first message
+	//
+	let primary_response =  await postData(url,formdata,'omit',false,'multipart/form-data')
+	//
+	if ( primary_response.OK === "true" ) {		// If the system can handle the request, start a cycle of sends
+		let media_store_characteristics = await finalize_media_storage(primary_response,formdata,blob_data,obj)
 		return media_store_characteristics
 	} else {
 		return [false, false]
@@ -2054,7 +2069,7 @@ var g_app_populators = {
 		} else if ( media_type === 'video' ) {
 			if ( video ) {
 				video.poster = media.poster
-				if ( entry.blob ) {
+				if ( entry.blob && !(media.protocol)) {  // testing
 					video.src = entry.blob
 				} else if ( entry.use_protocol ) {
 					let v_proto = media.protocol
@@ -2075,7 +2090,7 @@ var g_app_populators = {
 				let sound_player = document.getElementById(`asset-type-stream-sound`)
 				//let sound_player = document.getElementById(`asset-type-stream-sound-${ext}`)
 				if ( sound_player ) {
-					if ( entry.blob ) {
+					if ( entry.blob && !(media.protocol) ) {  // testing
 						sound_player.src = entry.blob
 					} else if ( entry.use_protocol ) {
 						let a_proto = media.protocol		// a is for audio
@@ -2161,7 +2176,7 @@ async function save(item_holder) {
 	if ( obj._real_media ) {
 		try {
 			let [protocol,asset_id] = await do_media_upload(obj)
-			if ( protocol ) {
+			if ( protocol && asset_id.length ) {
 				obj.use_protocol = true
 				if ( obj.media === undefined ) {
 					obj.media = {}

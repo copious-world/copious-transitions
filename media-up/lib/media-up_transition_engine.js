@@ -59,10 +59,6 @@ fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
   //Finished
 });
 
-
-
-
-
 async function main () {
   const node = await IPFS.create()
   const version = await node.version()
@@ -84,40 +80,41 @@ async function main () {
   console.log('Added file contents:', uint8ArrayConcat(chunks).toString())
 }
 
-
-
-
 */
 
     //
-    async file_mover(file_descriptor,target_path,cb) {
-        let file_name = file_descriptor.name
-        let file_data = file_descriptor.data          // assuming this to be a uint8Array
-
-        //file_name = target_path + file_name
-        console.log(file_name)
-        file_data = this.store_encrypted(file_data)
+    async file_mover(file_descriptor,target_path,ttrans,cb) {
         //
-        const file = await this.node.add({
-            path: file_name,
-            content: file_data
-        })
-
-        let cid = file.cid.toString()
-
-        console.log(`${__filename}::file_mover : ${cid}`)
-
-        return file.cid.toString()
+        if ( ttrans.p2p_protocol() ) {
+            let file_name = file_descriptor.name
+            let file_data = file_descriptor.data          // assuming this to be a uint8Array
+    
+            //file_name = target_path + file_name
+            console.log(file_name)
+            file_data = this.store_encrypted(file_data)
+            //
+            const file = await this.node.add({
+                path: file_name,
+                content: file_data
+            })
+    
+            let cid = file.cid.toString()
+    
+            console.log(`${__filename}::file_mover : ${cid}`)
+    
+            return file.cid.toString()    
+        } else {
+            return super.file_mover(file_descriptor,target_path,ttrans,cb)
+        }
         //
     }
 
     //
-
-    async store_data(file_descriptor,target_path,writeable_data,id) {
-        let file_name = file_descriptor.name
+    async store_data(file_descriptor,target_path,writeable_data,id) {  // id ignored
+        let file_name = file_descriptor.name                // from a parsed header
         //
         console.log(file_name)
-        let file_data = this.store_encrypted(writeable_data)
+        let file_data = this.store_encrypted(writeable_data)        // any application wide encryption policy
         //
         const file = await this.node.add({
             path: file_name,
@@ -127,8 +124,7 @@ async function main () {
         let cid = file.cid.toString()
 
         console.log(`${__filename}::file_mover : ${cid}`)
-        return file.cid.toString()
-        
+        return file.cid.toString()          // ipfs entry...
     }
 
     //
