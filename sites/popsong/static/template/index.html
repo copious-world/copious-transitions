@@ -45,665 +45,669 @@ html {
     display: block;
 }
 
-		.items {
-			display: flex;
-			flex-wrap: wrap;
-			margin-left: -10px;
-			margin-top: -10px;
-		}
-	
-		.items .item {
-			flex: 1 0 300px;
-			box-sizing: border-box;
-			background: -webkit-linear-gradient(to right, rgba(242, 242, 210, 0.3), white));
-			background: linear-gradient(to right, rgba(242, 242, 210, 0.3), white );
-			color: #171e42;
-			padding: 10px;
-			margin-left: 10px;
-			margin-top: 0px;
-		}
-	
-		.items .extra-i {
-			padding-left: 10%;
-			padding-bottom: 4px;
-			padding-right: 12px;
-			font-size: 110%;
-			font-family: sans-serif;
-		}
-	
-		.middleBanner {
-			text-align: 'center';
-			padding-left: 10%;
-			padding-right: 10%;
-			font-weight:bold;
-			color: darkgreen;
-			padding-top:4%;
-			overflow:auto;
-		}
+.items {
+	display: flex;
+	flex-wrap: wrap;
+	margin-left: -10px;
+	margin-top: -10px;
+}
 
-		.applink {
-			padding:3px;
-			background-color: cornsilk;
-			width:inherit;
-			min-height: 100%;
-			color:darkolivegreen;
-			font-weight: bolder;
+.items .item {
+	flex: 1 0 300px;
+	box-sizing: border-box;
+	background: -webkit-linear-gradient(to right, rgba(242, 242, 210, 0.3), white));
+	background: linear-gradient(to right, rgba(242, 242, 210, 0.3), white );
+	color: #171e42;
+	padding: 10px;
+	margin-left: 10px;
+	margin-top: 0px;
+}
 
-		}
-	
-		.extraBanner {
-			text-align: 'center';
-			padding-left: 10%;
-			padding-right: 10%;
-			font-weight:bold;
-			color: #FF4400;
-			padding-top:4%;
-		}
-	
-	
-		.fillLowerWrap {
-			width: 66%;
-			margin-left:0px;
-			margin-right:0px;
-			padding: 8px;
-			margin-top:8px;
-			background: -webkit-linear-gradient(to right, white, #FAFAFF);
-			background: linear-gradient(to right, white, #FAFAFF );
-			margin-left: 10px;
-			min-height: fit-content;
-		}
+.items .extra-i {
+	padding-left: 10%;
+	padding-bottom: 4px;
+	padding-right: 12px;
+	font-size: 110%;
+	font-family: sans-serif;
+}
+
+.middleBanner {
+	text-align: 'center';
+	padding-left: 10%;
+	padding-right: 10%;
+	font-weight:bold;
+	color: darkgreen;
+	padding-top:4%;
+	overflow:auto;
+}
+
+.applink {
+	padding:3px;
+	background-color: cornsilk;
+	width:inherit;
+	min-height: 100%;
+	color:darkolivegreen;
+	font-weight: bolder;
+
+}
+
+.extraBanner {
+	text-align: 'center';
+	padding-left: 10%;
+	padding-right: 10%;
+	font-weight:bold;
+	color: #FF4400;
+	padding-top:4%;
+}
 
 
-		@media (max-width: 1225px) {
-			.fillLowerWrap {
-				visibility : "none";
-				height : 0px;
-			}
-		}
+.fillLowerWrap {
+	width: 66%;
+	margin-left:0px;
+	margin-right:0px;
+	padding: 8px;
+	margin-top:8px;
+	background: -webkit-linear-gradient(to right, white, #FAFAFF);
+	background: linear-gradient(to right, white, #FAFAFF );
+	margin-left: 10px;
+	min-height: fit-content;
+	display: table-column-group;
+}
 
+
+@media (max-width: 1225px) {
+	.fillLowerWrap {
+		visibility : "none";
+		height : 0px;
+	}
+}
+
+
+.fillLower {
+	border: darkred 2px solid;
+	height: fit-content;
+	width: 96%;
+	min-height: fit-content;
+	margin-left: 10px;
+	padding:8px;
+	background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE);
+	background: linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE );
+}
+
+.fillLower-respect {
+	max-width: 30%;
+}
+
+@media (min-width: 1220px) {
+	.fillLowerWrap {
+		width: 66%;
+	}
+}
+
+@media (max-width: 1219px) {
+	.fillLowerWrap {
+		width: 100%;
+	}
+}
+
+@media (max-width: 1100px) {
+	.fillLowerWrap {
+		width: 66%;
+	}
+}
+
+.fitMenuLower {
+	width: 95%;
+	height: 50%;
+	margin-left:0px;
+	margin-right:0px;
+	padding: 8px;
+	margin-top:8px;
+	background: -webkit-linear-gradient(to right, white, #FAFAFF);
+	background: linear-gradient(to right, white, #FAFAFF );
+	margin-left: 10px;
+}
+
+#squashMenu:hover {
+	border: 1px solid rgb(230,230,240,0.4);
+	padding-top:4px;
+	background-color: #EFEFEF;
+}
+
+#squashMenuContainer {
+	position:absolute;
+	visibility:hidden;
+	top : 0; left : 0;
+	height:100%;
+	width: 55%;
+	z-index:100;
+	border: rgba(252, 190, 190, 0.4) 2px solid;
+	background-color: white;
+}
+
+.fade_able {
+	position:absolute;
+	visibility:hidden;
+	top : 10px; left : 10px;
+	height:80%;
+	width: 40%;
+	z-index:101;
+	border: rgba(252, 190, 190, 0.4) 2px solid;
+	background-color: white;
+	overflow:hidden;
+}
+
+.solid_able {
+	position:absolute;
+	visibility:hidden;
+	top : 10px; left : 10px;
+	height:80%;
+	width: 40%;
+	z-index:111;
+	border: rgba(252, 190, 190, 0.4) 2px solid;
+	background-color: white;
+	overflow: hidden;
+}
+
+@media screen and (max-width: 950px) {
+	.solid_able {
+		width: 90%;
+	}
+}
+
+#thankyou_box {
+	position:absolute;
+	visibility:hidden;
+	top : 25%; left : 25%;
+	height:50%;
+	width: 50%;
+	z-index:150;
+	border: rgba(100, 5, 5, 0.6) 2px solid;
+	background-color: lightgoldenrodyellow;
+	overflow: auto;
+}
+
+@media screen and (max-width: 1040px) {
+	.fade_able {
+		width: 60%;
+	}
+}
+
+@media screen and (max-width: 600px) {
+	.fade_able {
+		width: 90%;
+	}
+}
+
+.fade_able_content {
+	height:100%;
+	width: 100%;
+	overflow:auto;
+}
+
+.togglebar {
+	height:20px;
+	visibility:inherit;
+	background-color: navy;
+	text-align:right;
+}
+
+.closer_x {
+	padding:2px;
+	color:purple;
+	font-weight:bolder;
+	border: solid 1px red;
+	cursor:pointer;
+}
+
+.user-id {
+	font-weight: bolder;
+	color: rgb(5, 44, 5);
+}
+
+button {
+	cursor: pointer;
+	font-size: 101%;
+	font-weight: bold;
+	color: darkblue;
+	margin: 2px;
+	width:120px;
+}
+
+button:hover {
+	background-color : #CACAFF;
+	color: darkred;
+}
+
+.button-hit-once {
+	box-shadow: blanchedalmond;
+}
+
+.button-hit-once:disabled {
+	cursor:none;
+	color:lightsteelblue;
+	background-color:antiquewhite;
+}
+
+@media screen and (max-width: 390px) {
+	.items .extra-i {
+		padding-left: 1%;
+	}
+}
+
+@media screen and (max-width: 600px) {
+	.items .extra-i {
+		padding-left: 3%;
+	}
+}
+
+.longviz {
+	visibility : "visibile";
+	height: 10px;
+	background-color:inherit;
+}
+
+@media (max-width: 1040px) {
+	.longviz {
+		visibility : "none";
+		height : 0px;
+	}
+}
+
+.shortviz {
+	visibility : "none";
+	height:0px;
+	margin-top:6px;
+}
+
+@media (max-width: 620px) {
+	.shortviz {
+		visibility : "visible";
+		height:2px;
+		background-color:darkgreen;
+		margin-bottom:12px;
+	}
+}
+
+@media (min-width: 1040px) {
+	.shortviz {
+		visibility : "visible";
+		height:120px;
+		border: 2px darkblue solid;
+		background-color:#FFFFF6;
+		margin-bottom:30px;
+		margin-top:5px;
+	}
+}
+
+@media (min-width: 380px) {
+	.items .item {
+		max-width: calc(100% - 20px);
+	}
+	.items .extra-i {
+		padding-left: 3%;
+	}
+}
+@media (min-width: 410px) {
+	.items .item {
+		max-width: calc(100% - 10px);
+	}
+}
+@media (min-width: 620px) {
+	.items .item {
+		max-width: calc(50% - 10px);
+	}
+}
+@media (min-width: 830px) {
+	.items .item {
+		max-width: calc(50% - 10px);
+	}
+}
+@media (min-width: 1040px) {
+	.items .item {
+		max-width: calc(33.33333% - 10px);
+	}
+}
+@media (min-width: 1250px) {
+	.items .item {
+		max-width: calc(25%- 10px);
+	}
+}
+@media (min-width: 1460px) {
+	.items .item {
+		max-width: calc(20% - 10px);
+	}
+}
+@media (min-width: 1670px) {
+	.items .item {
+		min-width: calc(16.66667% - 10px);
+	}
+}
+
+
+body {
+	border: 1px solid black;
 	
-		.fillLower {
-			border: darkred 2px solid;
-			height: fit-content;
-			width: 96%;
-			min-height: fit-content;
-			margin-left: 10px;
-			padding:8px;
-			background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE);
-			background: linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE );
-		}
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+
+@media screen and (orientation: portrait) {
+	#mainNav {
+		width: 100%;
+	}
+}
+
+@media screen and (orientation: landscape) {
+	#mainNav {
+		width: 100%;
+	}
+}
+
+main {
+	border-left: solid 3px navy;
+	border-top: solid 1px #8833BB;
+	padding : 4px;
+	height: fit-content;
+	margin-bottom: 0%;
+}
+
+@media (min-width: 1220px) {
+	main {
+		margin-bottom: 0%;
+		border: none;
+	}
+}
+
+@media (max-width: 1219px) {
+	main {
+		margin-bottom: 90px;
+	}
+}
+
+@media (max-width: 1100px) {
+	main {
+		margin-bottom: 0%;
+		border: none;
+	}
+}
+
+#mainNav {
+	font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-weight: 700;
+	text-transform: uppercase;
+	background: blue;
+	border-left: solid 3px navy;
+	border-top: solid 3px navy;
+	border-bottom: solid 3px rgba(252,252,255,0.7);
+	min-height: 90px;
+	padding: 20px
+	background: -webkit-linear-gradient(to left, rgba(242, 242, 210, 0.3), white);
+	background: linear-gradient(to left, rgba(242, 242, 210, 0.3), white );
 	
+}
 
-		@media (min-width: 1220px) {
-			.fillLowerWrap {
-				width: 66%;
-			}
-		}
+#mainNav table {
+	padding-left: 3%;
+}
 
-		@media (max-width: 1219px) {
-			.fillLowerWrap {
-				width: 100%;
-			}
-		}
 
-		@media (max-width: 1100px) {
-			.fillLowerWrap {
-				width: 66%;
-			}
-		}
+#mainNav  table  a:focus { outline: none; }
+#mainNav  table  .navbar-brand {
+	font-size: 1.1rem;
+	color: white;
+}
+
+#mainNav  table  .navbar-brand.active, #mainNav .navbar-brand:active, #mainNav .navbar-brand:focus, #mainNav .navbar-brand:hover {
+	color: white;
+}
+
+#mainNav  table  .navbar-nav {
+	letter-spacing: 1px; }
+
+#mainNav  table  .navbar-nav li.nav-item {
+	display:inline;
+}
+
+
+
+#mainNav  table  .navbar-nav li.nav-item a.nav-link {
+	color: darkgreen;
+	text-decoration: none;
+	vertical-align: top;
+	padding-right: 10px;
+}
+
+#mainNav  table  .navbar-nav li.nav-item a.nav-link:hover {
+	color: #18BC9C;
+	outline: none;
 	
-		.fitMenuLower {
-			width: 95%;
-			height: 50%;
-			margin-left:0px;
-			margin-right:0px;
-			padding: 8px;
-			margin-top:8px;
-			background: -webkit-linear-gradient(to right, white, #FAFAFF);
-			background: linear-gradient(to right, white, #FAFAFF );
-			margin-left: 10px;
-		}
-	
-		#squashMenu:hover {
-			border: 1px solid rgb(230,230,240,0.4);
-			padding-top:4px;
-			background-color: #EFEFEF;
-		}
-	
-		#squashMenuContainer {
-			position:absolute;
-			visibility:hidden;
-			top : 0; left : 0;
-			height:100%;
-			width: 55%;
-			z-index:100;
-			border: rgba(252, 190, 190, 0.4) 2px solid;
-			background-color: white;
-		}
-	
-		.fade_able {
-			position:absolute;
-			visibility:hidden;
-			top : 10px; left : 10px;
-			height:80%;
-			width: 40%;
-			z-index:101;
-			border: rgba(252, 190, 190, 0.4) 2px solid;
-			background-color: white;
-			overflow:hidden;
-		}
-
-		.solid_able {
-			position:absolute;
-			visibility:hidden;
-			top : 10px; left : 10px;
-			height:80%;
-			width: 40%;
-			z-index:111;
-			border: rgba(252, 190, 190, 0.4) 2px solid;
-			background-color: white;
-			overflow: hidden;
-		}
-
-		@media screen and (max-width: 950px) {
-			.solid_able {
-				width: 90%;
-			}
-		}
-
-		#thankyou_box {
-			position:absolute;
-			visibility:hidden;
-			top : 25%; left : 25%;
-			height:50%;
-			width: 50%;
-			z-index:150;
-			border: rgba(100, 5, 5, 0.6) 2px solid;
-			background-color: lightgoldenrodyellow;
-			overflow: auto;
-		}
-
-		@media screen and (max-width: 1040px) {
-			.fade_able {
-				width: 60%;
-			}
-		}
-
-		@media screen and (max-width: 600px) {
-			.fade_able {
-				width: 90%;
-			}
-		}
-
-		.fade_able_content {
-			height:100%;
-			width: 100%;
-			overflow:auto;
-		}
-
-		.togglebar {
-			height:20px;
-			visibility:inherit;
-			background-color: navy;
-			text-align:right;
-		}
-	
-		.closer_x {
-			padding:2px;
-			color:purple;
-			font-weight:bolder;
-			border: solid 1px red;
-			cursor:pointer;
-		}
-		
-		.user-id {
-			font-weight: bolder;
-			color: rgb(5, 44, 5);
-		}
-
-		button {
-			cursor: pointer;
-			font-size: 101%;
-			font-weight: bold;
-			color: darkblue;
-			margin: 2px;
-			width:120px;
-		}
-	
-		button:hover {
-			background-color : #CACAFF;
-			color: darkred;
-		}
-
-		.button-hit-once {
-			box-shadow: blanchedalmond;
-		}
-
-		.button-hit-once:disabled {
-			cursor:none;
-			color:lightsteelblue;
-			background-color:antiquewhite;
-		}
-	
-		@media screen and (max-width: 390px) {
-			.items .extra-i {
-				padding-left: 1%;
-			}
-		}
-	
-		@media screen and (max-width: 600px) {
-			.items .extra-i {
-				padding-left: 3%;
-			}
-		}
-	
-		.longviz {
-			visibility : "visibile";
-			height: 10px;
-			background-color:inherit;
-		}
-	
-		@media (max-width: 1040px) {
-			.longviz {
-				visibility : "none";
-				height : 0px;
-			}
-		}
-	
-		.shortviz {
-			visibility : "none";
-			height:0px;
-			margin-top:6px;
-		}
-
-		@media (max-width: 620px) {
-			.shortviz {
-				visibility : "visible";
-				height:2px;
-				background-color:darkgreen;
-				margin-bottom:12px;
-			}
-		}
-	
-		@media (min-width: 1040px) {
-			.shortviz {
-				visibility : "visible";
-				height:120px;
-				border: 2px darkblue solid;
-				background-color:#FFFFF6;
-				margin-bottom:30px;
-				margin-top:5px;
-			}
-		}
-	
-		@media (min-width: 380px) {
-			.items .item {
-				max-width: calc(100% - 20px);
-			}
-			.items .extra-i {
-				padding-left: 3%;
-			}
-		}
-		@media (min-width: 410px) {
-			.items .item {
-				max-width: calc(100% - 10px);
-			}
-		}
-		@media (min-width: 620px) {
-			.items .item {
-				max-width: calc(50% - 10px);
-			}
-		}
-		@media (min-width: 830px) {
-			.items .item {
-				max-width: calc(50% - 10px);
-			}
-		}
-		@media (min-width: 1040px) {
-			.items .item {
-				max-width: calc(33.33333% - 10px);
-			}
-		}
-		@media (min-width: 1250px) {
-			.items .item {
-				max-width: calc(25%- 10px);
-			}
-		}
-		@media (min-width: 1460px) {
-			.items .item {
-				max-width: calc(20% - 10px);
-			}
-		}
-		@media (min-width: 1670px) {
-			.items .item {
-				min-width: calc(16.66667% - 10px);
-			}
-		}
-	
-	
-		body {
-			border: 1px solid black;
-			
-			-moz-box-sizing: border-box;
-			box-sizing: border-box;
-		}
+}
 
 
-		@media screen and (orientation: portrait) {
-			#mainNav {
-				width: 100%;
-			}
-		}
-
-		@media screen and (orientation: landscape) {
-			#mainNav {
-				width: 100%;
-			}
-		}
-	
-		main {
-			border-left: solid 3px navy;
-			border-top: solid 1px #8833BB;
-			padding : 4px;
-			height: fit-content;
-			margin-bottom: 0%;
-		}
-
-		@media (min-width: 1220px) {
-			main {
-				margin-bottom: 0%;
-				border: none;
-			}
-		}
-
-		@media (max-width: 1219px) {
-			main {
-				margin-bottom: 90px;
-			}
-		}
-
-		@media (max-width: 1100px) {
-			main {
-				margin-bottom: 0%;
-				border: none;
-			}
-		}
-	
-		#mainNav {
-			font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-			font-weight: 700;
-			text-transform: uppercase;
-			background: blue;
-			border-left: solid 3px navy;
-			border-top: solid 3px navy;
-			border-bottom: solid 3px rgba(252,252,255,0.7);
-			min-height: 90px
-			padding: 20px
-			background: -webkit-linear-gradient(to left, rgba(242, 242, 210, 0.3), white);
-			background: linear-gradient(to left, rgba(242, 242, 210, 0.3), white );
-			
-		}
-	
-		#mainNav table {
-			padding-left: 3%;
-		}
-	
-	
-		#mainNav  table  a:focus { outline: none; }
-		#mainNav  table  .navbar-brand {
-			font-size: 1.1rem;
-			color: white;
-		}
-	
-		#mainNav  table  .navbar-brand.active, #mainNav .navbar-brand:active, #mainNav .navbar-brand:focus, #mainNav .navbar-brand:hover {
-			color: white;
-		}
-	
-		#mainNav  table  .navbar-nav {
-			letter-spacing: 1px; }
-	
-		#mainNav  table  .navbar-nav li.nav-item {
-			display:inline;
-		}
-	
-		
-		
-		#mainNav  table  .navbar-nav li.nav-item a.nav-link {
-			color: darkgreen;
-			text-decoration: none;
-			vertical-align: top;
-			padding-right: 10px;
-		}
-	
-		#mainNav  table  .navbar-nav li.nav-item a.nav-link:hover {
-			color: #18BC9C;
-			outline: none;
-			
-		}
-	
-	
-		#mainNav  table  .navbar-nav a.nav-text {
-			background-color : rgba(242,222,255,0.6);
-			border-radius: 25px;
-			margin-bottom: 9px;
-			margin-right: 6px;
-			white-space: nowrap;
-		}
+#mainNav  table  .navbar-nav a.nav-text {
+	background-color : rgba(242,222,255,0.6);
+	border-radius: 25px;
+	margin-bottom: 9px;
+	margin-right: 6px;
+	white-space: nowrap;
+}
 
 
-		#mainNav  table  .navbar-nav li.nav-item a.nav-link:active, #mainNav .navbar-nav li.nav-item a.nav-link:focus { color: white; }
-		
-		.footer-list li {
-			list-style-type: none;
-		}
-	
-		.footer-list li a:hover { color: gold; }
-		
-		.hover_group {
-			cursor:pointer;
-		}
-	
-		.hover_group rect {
-			fill:#e6e6e6;
-		}
-	
-		.hover_group:hover rect {
-			fill: #F6F6e6;
-		}
-	
-		footer {
-			padding:10px;
-			background: -webkit-linear-gradient(to left, rgba(252,252,255,0.5), #fffbe2 );
-			background: linear-gradient(to left, rgba(252,252,255,0.5), #fffbe2  );
-			text-align: center;
-			font-size: 0.85em;
-		}
-	
-		footer a {
-			text-decoration:none;
-			color:darkgreen;
-			font-weight:bold;
-			font-style: italic;
-		}
-	
-		.copiouslink:hover {
-			fill:navy;
-		}
-		.copiouslink {
-			fill:black;
-		}
-	
-		* {margin: 0; padding: 0; box-sizing: border-box}
-		
-		.PhIOtjDr_0 {
-			fill:none;
-			stroke:#1c1448;
-			stroke-width:4.59875107;
-			stroke-miterlimit:4;
-			stroke-dasharray: 2948 2950;
-			stroke-dashoffset: 2949;
-			animation: PhIOtjDr_draw 6666ms ease-in forwards;
-		}
+#mainNav  table  .navbar-nav li.nav-item a.nav-link:active, #mainNav .navbar-nav li.nav-item a.nav-link:focus { color: white; }
 
-		@keyframes PhIOtjDr_draw {
-			100% {stroke-dashoffset: 0}
-		}
+.footer-list li {
+	list-style-type: none;
+}
 
-		@keyframes PhIOtjDr_fade {
-			0% {stroke-opacity: 1}
-			97.1830985915493% {stroke-opacity: 1}
-			100% {stroke-opacity: 0}
-		}
-	
-		.form_el {
-			border:lightgray solid 1px;
-			padding:6px;
-			margin:2px;
-			width:80%;
-		}
+.footer-list li a:hover { color: gold; }
 
-		.form_el_inner {
-			border:lightgray solid 1px;
-			padding:6px;
-			margin:2px;
-			width:100%;
-		}
-	
-		label {
-			font-weight:bold;
-			color:darkgreen;
-			width:35%;
-		}
+.hover_group {
+	cursor:pointer;
+}
 
-		.field_el {
-			width:65%;
-		}
-	
-		@media (max-width: 1040px) {
-			.field_el {
-				width:94%;
-				margin-left:3%;
-				margin-right:3%;
-			}
-		}
+.hover_group rect {
+	fill:#e6e6e6;
+}
 
-		#contact_box {
-			background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE));
-			background: linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE );
-		}
-	
-		.textarea_field_el {
-			width: 94%;
-			margin:3%;
-		}
-	
-		.error-message {
-			visibility:hidden;
-			width:75%;
-			font-weight:bolder;
-			color:red;
-			background-color:white;
-			border: solid 1px orange;
-			padding:2px;
-			margin:3px;
-		}
+.hover_group:hover rect {
+	fill: #F6F6e6;
+}
 
-		/* The Modal (background) */
-		.modal {
-		  display: none; /* Hidden by default */
-		  position: relative; /* Stay in place */
-		  z-index: 1; /* Sit on top */
-		  left: 0;
-		  top: 0;
-		  width: 100%; /* Full width */
-		  height: 100%; /* Full height */
-		  overflow: auto; /* Enable scroll if needed */
-		  background-color: rgb(0,0,0); /* Fallback color */
-		  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-		  -webkit-animation-name: fadeIn; /* Fade in the background */
-		  -webkit-animation-duration: 0.4s;
-		  animation-name: fadeIn;
-		  animation-duration: 0.4s
-		}
+footer {
+	padding:10px;
+	background: -webkit-linear-gradient(to left, rgba(252,252,255,0.5), #fffbe2 );
+	background: linear-gradient(to left, rgba(252,252,255,0.5), #fffbe2  );
+	text-align: center;
+	font-size: 0.85em;
+}
 
-		/* Modal Content */
-		.modal-content {
-		  position: inherit;
-		  top: 0;
-		  background-color: #fefefe;
-		  width: 100%;
-		  -webkit-animation-name: slideIn;
-		  -webkit-animation-duration: 0.4s;
-		  animation-name: slideIn;
-		  animation-duration: 0.4s
-		}
+footer a {
+	text-decoration:none;
+	color:darkgreen;
+	font-weight:bold;
+	font-style: italic;
+}
 
-		/* The Close Button */
-		.close {
-		  color: white;
-		  float: right;
-		  font-size: 18px;
-		  font-weight: bold;
-		}
+.copiouslink:hover {
+	fill:navy;
+}
+.copiouslink {
+	fill:black;
+}
 
-		.close:hover,
-		.close:focus {
-		  color: #000;
-		  text-decoration: none;
-		  cursor: pointer;
-		}
+* {margin: 0; padding: 0; box-sizing: border-box}
 
-		.modal-header {
-		  padding: 2px 16px;
-		  background-color: #4ca85c;
-		  color: white;
-		}
+.PhIOtjDr_0 {
+	fill:none;
+	stroke:#1c1448;
+	stroke-width:4.59875107;
+	stroke-miterlimit:4;
+	stroke-dasharray: 2948 2950;
+	stroke-dashoffset: 2949;
+	animation: PhIOtjDr_draw 6666ms ease-in forwards;
+}
 
-		.modal-body {padding: 2px 16px;}
+@keyframes PhIOtjDr_draw {
+	100% {stroke-dashoffset: 0}
+}
 
-		.modal-footer {
-		  padding: 2px 16px;
-		  margin-bottom: 20px;
-		  background-color: darkgreen;
-		  color: white;
-		}
+@keyframes PhIOtjDr_fade {
+	0% {stroke-opacity: 1}
+	97.1830985915493% {stroke-opacity: 1}
+	100% {stroke-opacity: 0}
+}
 
-		/* Add Animation */
-		@-webkit-keyframes slideIn {
-		  from {bottom: -300px; opacity: 0}
-		  to {bottom: 0; opacity: 1}
-		}
+.form_el {
+	border:lightgray solid 1px;
+	padding:6px;
+	margin:2px;
+	width:80%;
+}
 
-		@keyframes slideIn {
-		  from {bottom: -300px; opacity: 0}
-		  to {top: 0; opacity: 1}
-		}
+.form_el_inner {
+	border:lightgray solid 1px;
+	padding:6px;
+	margin:2px;
+	width:100%;
+}
 
-		@-webkit-keyframes fadeIn {
-		  from {opacity: 0}
-		  to {opacity: 1}
-		}
+label {
+	font-weight:bold;
+	color:darkgreen;
+	width:35%;
+}
 
-		@keyframes fadeIn {
-		  from {opacity: 0}
-		  to {opacity: 1}
-		}
+.field_el {
+	width:65%;
+}
 
-		#logout-control-top {
-			visibility: hidden;
-			display: none;
-		}
+@media (max-width: 1040px) {
+	.field_el {
+		width:94%;
+		margin-left:3%;
+		margin-right:3%;
+	}
+}
 
-		a {
-			cursor: pointer;
-		}
+#contact_box {
+	background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE));
+	background: linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE );
+}
 
-		#for_testing_dialogs {
-			display: none;
-			visibility: hidden;
-		}
+.textarea_field_el {
+	width: 94%;
+	margin:3%;
+}
 
-	</style>
+.error-message {
+	visibility:hidden;
+	width:75%;
+	font-weight:bolder;
+	color:red;
+	background-color:white;
+	border: solid 1px orange;
+	padding:2px;
+	margin:3px;
+}
+
+/* The Modal (background) */
+.modal {
+	display: none; /* Hidden by default */
+	position: relative; /* Stay in place */
+	z-index: 1; /* Sit on top */
+	left: 0;
+	top: 0;
+	width: 100%; /* Full width */
+	height: 100%; /* Full height */
+	overflow: auto; /* Enable scroll if needed */
+	background-color: rgb(0,0,0); /* Fallback color */
+	background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+	-webkit-animation-name: fadeIn; /* Fade in the background */
+	-webkit-animation-duration: 0.4s;
+	animation-name: fadeIn;
+	animation-duration: 0.4s
+}
+
+/* Modal Content */
+.modal-content {
+	position: inherit;
+	top: 0;
+	background-color: #fefefe;
+	width: 100%;
+	-webkit-animation-name: slideIn;
+	-webkit-animation-duration: 0.4s;
+	animation-name: slideIn;
+	animation-duration: 0.4s
+}
+
+/* The Close Button */
+.close {
+	color: white;
+	float: right;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+	color: #000;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.modal-header {
+	padding: 2px 16px;
+	background-color: #4ca85c;
+	color: white;
+}
+
+.modal-body {padding: 2px 16px;}
+
+.modal-footer {
+	padding: 2px 16px;
+	margin-bottom: 20px;
+	background-color: darkgreen;
+	color: white;
+}
+
+/* Add Animation */
+@-webkit-keyframes slideIn {
+	from {bottom: -300px; opacity: 0}
+	to {bottom: 0; opacity: 1}
+}
+
+@keyframes slideIn {
+	from {bottom: -300px; opacity: 0}
+	to {top: 0; opacity: 1}
+}
+
+@-webkit-keyframes fadeIn {
+	from {opacity: 0}
+	to {opacity: 1}
+}
+
+@keyframes fadeIn {
+	from {opacity: 0}
+	to {opacity: 1}
+}
+
+#logout-control-top {
+	visibility: hidden;
+	display: none;
+}
+
+a {
+	cursor: pointer;
+}
+
+#for_testing_dialogs {
+	display: none;
+	visibility: hidden;
+}
+
+</style>
 </head>
 <script>
 		var g_siteURL = window.location.host;
@@ -943,36 +947,95 @@ html {
 
 	var g_LoggedIn = false
 
+
+	const DEFAULT_ERROR_TEXT_COLOR = "red"
+	const DEFAULT_PLAIN_TEXT_COLOR = "black"
+
 	// ---- ---- ---- ---- ---- ----
 	// CONTENT EXCHANGE
 	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
 
-	function clonify(obj) {
-		if ( typeof obj === 'string' ) return(obj)
-		try {
-			let out = JSON.parse(JSON.stringify(obj))
-			return(out)
-		} catch(e) {
-			return(null)
+	
+
+var g_url_match = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+function matches_url(maybe_url) {
+	return g_url_match.test(maybe_url)
+}
+
+// not_https_switch 
+// switch to HTTPS before doing any ops that may require a data exchange
+function not_https_switch() {
+	if (location.protocol !== 'https:') {           // start from a secure page
+		alert("Switching to a secure version of this page in 1sec.")
+		setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
+		return(true)
+	}
+	return(false)
+}
+
+
+function clonify(obj) {
+	if ( typeof obj === 'string' ) return(obj)
+	try {
+		let out = JSON.parse(JSON.stringify(obj))
+		return(out)
+	} catch(e) {
+		return(null)
+	}
+}
+
+
+// attach a script to a DOM element
+function addscript(script,whereScipt) {
+	var scriptEl = document.createElement('script');
+	scriptEl.type = 'text/javascript';
+	scriptEl.text = script;
+    if ( typeof whereScipt === "string" ) {
+        whereScipt = document.getElementById(whereScipt)
+    }
+	whereScipt.appendChild(scriptEl);
+}
+
+
+// simple check on cookies, searching by ';' delimited string with the cookie name at the start of the trimmed line.
+function getCookie(cname) {  // modified from w3school
+	var name = cname + "=";
+	var ca = document.cookie.split(';');
+	for(let i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		if ( typeof c === 'string' ) {
+			c = c.trim()
+			if (c.indexOf(name) == 0) {
+				return c.substring(name.length);
+			}
 		}
 	}
+	return "";
+}
 
-	function addscript(script,whereScipt) {
-		var scriptEl = document.createElement('script');
-		scriptEl.type = 'text/javascript';
-		scriptEl.text = script;
-		whereScipt.appendChild(scriptEl);
-	}
 
-	function addstyle(script) {
-		var styleEl = document.createElement('style');
-		styleEl.type = 'text/css';
-		styleEl.text = script;
-		let whereScript = document.getElementsByTagName('head')
-		if ( whereScript && whereScript.length ) {
-			whereScript[0].appendChild(styleEl);
-		}
-	}
+function addstyle(script) {
+    var styleEl = document.createElement('style');
+    styleEl.type = 'text/css';
+    styleEl.text = script;
+    let whereScript = document.getElementsByTagName('head')
+    if ( whereScript && whereScript.length ) {
+        whereScript[0].appendChild(styleEl);
+    }
+}
+
+
+//$$EXPORTABLE::
+/*
+matches_url
+clonify
+addscript
+addstyle
+getCookie
+*/
+
+
+
 
 	async function ensure_dialog_elements() {
 		let test_dialog = document.getElementById("for_testing_dialogs")  // thought to be in the template... if not this does nothing
@@ -1001,210 +1064,205 @@ html {
 	}
 
 
-    function getCookie(cname) {  // modified from w3school
-        var name = cname + "=";
-        var ca = document.cookie.split(';');
-        for(let i = 0; i < ca.length; i++) {
-            var c = ca[i];
-            if ( typeof c === 'string' ) {
-                c = c.trim()
-                if (c.indexOf(name) == 0) {
-                    return c.substring(name.length);
-                }
-            }
-        }
-        return "";
-	}
+	
 
 
-	// not_https_switch 
-	// switch to HTTPS before doing any ops that may require a data exchange
-	function not_https_switch() {
-		if (location.protocol !== 'https:') {           // start from a secure page
-			alert("Switching to a secure version of this page in 1sec.")
-			setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
-			return(true)
-		}
+//  fetchEndPoint
+// //
+// fetch with GET method
+async function fetchEndPoint(endpoint,port) {
+	port = !(port) ? '' : ( port.length ? `:${port}`   : '')
+	let myRequest = new Request(`${location.protocol}//${g_siteURL}${port}/${endpoint}`);
+	try {
+		const body = await fetch(myRequest, {
+									method: 'GET', // *GET, POST, PUT, DELETE, etc.
+									mode: 'cors', // no-cors, *cors, same-origin
+									cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+									credentials: 'omit', // include, *same-origin, omit
+									redirect: 'follow', // manual, *follow, error
+									referrerPolicy: 'no-referrer', // no-referrer, *client
+								});
+		//
+		let infoObj = await body.json();
+		return(infoObj)
+		//
+	} catch (e) {
+		console.log(e.message)
 		return(false)
 	}
+}
 
-	// streamer-scratchpad  -- in the stream app was using this.
-	// //
-	async function fetchEndPoint(endpoint,port) {
-		port = !(port) ? '' : ( port.length ? `:${port}`   : '')
-		let myRequest = new Request(`${location.protocol}//${g_siteURL}${port}/${endpoint}`);
-		try {
-			const body = await fetch(myRequest, {
-										method: 'GET', // *GET, POST, PUT, DELETE, etc.
-										mode: 'cors', // no-cors, *cors, same-origin
-										cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-										credentials: 'omit', // include, *same-origin, omit
-										redirect: 'follow', // manual, *follow, error
-										referrerPolicy: 'no-referrer', // no-referrer, *client
-									});
-			//
-			let infoObj = await body.json();
-			return(infoObj)
-			//
-		} catch (e) {
-			console.log(e.message)
-			return(false)
-		}
+//  postData
+// //
+//  call fetch with method POST tyr to help with parameters..  If data is FromData set do_stringify to false
+//  default content type 'application/json'
+//  User 'cors', Default cres = omit, If ctype == 'multipart/form-data' be sure to use FormData -- lets fetch set content type.
+//  RETURNS: parsed JSON object or an empty object. ... Check for fields
+//
+async function postData(url = '', data = {}, creds = 'omit', do_stringify = true,ctype) {
+	let content_type = 'application/json'
+	if ( ctype !== undefined ) {
+		content_type = ctype            // ctype is content type
+	}
+	let options = {
+		method: 'POST', // *GET, POST, PUT, DELETE, etc.
+		mode: 'cors', // no-cors, *cors, same-origin
+		cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+		credentials: creds, // include, *same-origin, omit
+		headers: {
+			'Content-Type': content_type
+		},
+		redirect: 'follow', // manual, *follow, error
+		referrerPolicy: 'no-referrer', // no-referrer, *client
+		body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
 	}
 
-	//
-	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true, ctype) {
-		let content_type = 'application/json'
-		if ( ctype !== undefined ) {
-			content_type = ctype
-		}
-		let options = {
-			method: 'POST', // *GET, POST, PUT, DELETE, etc.
-			mode: 'cors', // no-cors, *cors, same-origin
-			cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-			credentials: creds, // include, *same-origin, omit
-			headers: {
-				'Content-Type': content_type
-			},
-			redirect: 'follow', // manual, *follow, error
-			referrerPolicy: 'no-referrer', // no-referrer, *client
-			body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
-		}
-
-		if ( ctype === 'multipart/form-data') {
-			delete options.headers['Content-Type']  // content type will be set automatically with a boundary
-		}
-
-		// Default options are marked with *
-		const response = await fetch(url, options);
-		if ( response.ok == false ) {
-			console.log(response.status + ': ' + response.statusText)
-			return {}
-		} else {
-			return await response.json(); // parses JSON response into native JavaScript objects
-		}
+	if ( ctype === 'multipart/form-data') {
+		delete options.headers['Content-Type']  // content type will be set automatically with a boundary
 	}
 
+	// Default options are marked with *
+	const response = await fetch(url, options);
+	if ( response.ok == false ) {
+		console.log(response.status + ': ' + response.statusText)
+		return {}
+	} else {
+		return await response.json(); // parses JSON response into native JavaScript objects
+	}
+}
 
-	// CONTENT FETCHING CLASS
-    class Uploader {
+
+//$$EXPORTABLE::
+/*
+fetchEndPoint
+postData
+*/
+
+	
+	
+
+
+// CONTENT FETCHING CLASS
+class Uploader {
+    //
+    constructor(props) {
+        this.errorDiv = props.errorDiv
+        this.fileDiv = props.fileDiv
+        this.uploadEndpoint = props.uploadEndpoint
+        this.fileType = props.fileType ? props.fileType : '.mp3'
+        this.emailField = props.emailField
+        this.positiveCompletion = props.positiveCompletion
         //
-        constructor(props) {
-            this.errorDiv = props.errorDiv
-            this.fileDiv = props.fileDiv
-			this.uploadEndpoint = props.uploadEndpoint
-			this.fileType = props.fileType ? props.fileType : '.mp3'
-			this.emailField = props.emailField
-			this.positiveCompletion = props.positiveCompletion
-			//
-			delete props.errorDiv
-			delete props.fileDiv
-			delete props.uploadEndpoint
-			delete props.fileType
-			delete props.emailField
-			delete props.positiveCompletion
-			//
-			this.extra_props = {}
-			for ( let prop in props ) {
-				this.extra_props[prop] = props[prop]
-			}
-			//
-            this._msgTimeout = null
+        delete props.errorDiv
+        delete props.fileDiv
+        delete props.uploadEndpoint
+        delete props.fileType
+        delete props.emailField
+        delete props.positiveCompletion
+        //
+        this.extra_props = {}
+        for ( let prop in props ) {
+            this.extra_props[prop] = props[prop]
         }
         //
-        errorMessage(emsg) {
-            let errDiv = document.querySelector(this.errorDiv)
-            if ( errDiv ) {
-                if ( this._msgTimeout ) {
-                    clearTimeout(this._msgTimeout)
-                }
-                errDiv.innerHTML = emsg
-                this._msgTimeout = setTimeout(() => {
-                    let errDivNxt = document.querySelector(this.errorDiv)
-					errDivNxt.innerHTML = ""
-					this._msgTimeout = false
-                },1500)
+        this._msgTimeout = null
+    }
+    //
+    errorMessage(emsg) {
+        let errDiv = document.querySelector(this.errorDiv)
+        if ( errDiv ) {
+            if ( this._msgTimeout ) {
+                clearTimeout(this._msgTimeout)
             }
+            errDiv.innerHTML = emsg
+            this._msgTimeout = setTimeout(() => {
+                let errDivNxt = document.querySelector(this.errorDiv)
+                errDivNxt.innerHTML = ""
+                this._msgTimeout = false
+            },1500)
         }
-        // 
-        checkFilesSelected(fileType) {
-            let file = document.querySelector(this.fileDiv)
-            if ( !file ) {
+    }
+    // 
+    checkFilesSelected(fileType) {
+        let file = document.querySelector(this.fileDiv)
+        if ( !file ) {
+            return(false)
+        }
+        if ( !(file.value) || (file.value.indexOf(fileType) !== (file.value.length - 4)) ) {
+            // File type is not .mp3
+            return(false)
+        }
+        return(true)
+    }
+
+    checkForm(event) {
+        let errField = document.querySelector(this.errorDiv)
+        if ( this.emailField ) {
+            let inspect_field = document.querySelector(this.emailField)
+            if ( inspect_field && !checkEmailField(inspect_field) ) {
+                inspect_field.style.borderColor="red"
+                if (errField) errField.style.color = "red"
+                this.errorMessage("unrecognized mail format")
                 return(false)
             }
-            if ( !(file.value) || (file.value.indexOf(fileType) !== (file.value.length - 4)) ) {
-                // File type is not .mp3
+            if ( inspect_field ) inspect_field.style.borderColor="black"
+        }
+        //
+        if ( this.fileDiv ) {
+            let inspect_field = document.querySelector(this.fileDiv)
+            if ( !(inspect_field) || !(this.fileType) ) {
+                this.errorMessage("This page has not specified either a file container <div> or a file type in props [fileDiv,fileType]")
                 return(false)
             }
-            return(true)
-        }
-
-        checkForm(event) {
-			let errField = document.querySelector(this.errorDiv)
-			if ( this.emailField ) {
-				let inspect_field = document.querySelector(this.emailField)
-				if ( inspect_field && !checkEmailField(inspect_field) ) {
-					inspect_field.style.borderColor="red"
-					if (errField) errField.style.color = "red"
-					this.errorMessage("unrecognized mail format")
-					return(false)
-				}
-				if ( inspect_field ) inspect_field.style.borderColor="black"
-			}
-			//
-			if ( this.fileDiv ) {
-				let inspect_field = document.querySelector(this.fileDiv)
-				if ( !(inspect_field) || !(this.fileType) ) {
-					this.errorMessage("This page has not specified either a file container <div> or a file type in props [fileDiv,fileType]")
-					return(false)
-				}
-				if ( !this.checkFilesSelected(this.fileType) ) {
-					inspect_field.style.borderColor="red"
-					if (errField) errField.style.color = "red"
-					this.errorMessage("no file selected")
-					return(false)
-				}
-				if ( inspect_field ) inspect_field.style.borderColor="black"
-			}
-            if (errField) errField.style.color = "darkgreen"
-            this.errorMessage("")
-            return(true)
-        }
-
-        async uploader() {
-            if ( this.checkForm() ) {
-                try {
-					let data = new FormData()
-					this.app_prepData(data)
-					let json =  await postData(this.uploadEndpoint,data,'omit',false,'multipart/form-data')
-					this.success_report(json)
-                    this.errorMessage(this.positiveCompletion)
-                    document.querySelector(this.errorDiv).style.color = "blue"
-                    return true
-                } catch (e) {
-                    let emsg = e.message
-                    this.errorMessage(emsg)
-                    return false
-                }
+            if ( !this.checkFilesSelected(this.fileType) ) {
+                inspect_field.style.borderColor="red"
+                if (errField) errField.style.color = "red"
+                this.errorMessage("no file selected")
+                return(false)
             }
-		}
-		
-		app_prepData(data) {		// mp3 one file as default -- subclass and override
-			let files = document.querySelector(this.fileDiv)
-			let file = files.files[0]
-			data.append('mp3file', file)
-            let email = document.querySelector(this.emailField).value;
-			data.append('email', email)
-			for ( let p in this.extra_props ) {
-				data.append(p, this.extra_props[p])
-			}
-		}
+            if ( inspect_field ) inspect_field.style.borderColor="black"
+        }
+        if (errField) errField.style.color = "darkgreen"
+        this.errorMessage("")
+        return(true)
+    }
 
-		success_report(json) {
-			if ( this.positiveCompletion ) this.errorMessage(this.positiveCompletion)
-			document.querySelector(this.errorDiv).style.color = "blue"
-		}
-	}
+    async uploader() {
+        if ( this.checkForm() ) {
+            try {
+                let data = new FormData()
+                this.app_prepData(data)
+                let json =  await postData(this.uploadEndpoint,data,'omit',false,'multipart/form-data')
+                this.success_report(json)
+                this.errorMessage(this.positiveCompletion)
+                document.querySelector(this.errorDiv).style.color = "blue"
+                return true
+            } catch (e) {
+                let emsg = e.message
+                this.errorMessage(emsg)
+                return false
+            }
+        }
+    }
+    
+    app_prepData(data) {		// mp3 one file as default -- subclass and override
+        let files = document.querySelector(this.fileDiv)
+        let file = files.files[0]
+        data.append('mp3file', file)
+        let email = document.querySelector(this.emailField).value;
+        data.append('email', email)
+        for ( let p in this.extra_props ) {
+            data.append(p, this.extra_props[p])
+        }
+    }
+
+    success_report(json) {
+        if ( this.positiveCompletion ) this.errorMessage(this.positiveCompletion)
+        document.querySelector(this.errorDiv).style.color = "blue"
+    }
+}
+
+
 	
 
 	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
@@ -1214,6 +1272,7 @@ html {
 
 	var g_ComponentErrorsActivated = false
 	var g_CurContainer = null
+
 
 	//
 	var reEmail = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
@@ -1249,134 +1308,141 @@ html {
 	}
 
 
-	class ValidationContainer {
-		// 
-		constructor(props) {
-			this.errline = props.errors_here
-			this.fields = props.fields
-			this.checks = props.checks
 
-			this.modal = props.modal
-			this.closer = props.closer
-			this.form = props.form
-			this.where_captcha = props.captcha
-			this.captch_input = props.captcha_field
-			this.auth_port = props.auth_port
-			this.password_rules = props.password_rules
-			this.service_url = props.service_url
 
-			this.errline.style.visibility = "hidden"
-			this.failure_msg_prefix = props.failure_msg_prefix
-			this.empty_checker = props.is_empty ? props.is_empty : is_empty
-		}
 
-		hideFormErrorMessage() {
-			let errline = this.errline
-			if ( errline ) {
-				errline.innerHTML = ""
-				errline.style.visibility = "hidden"
-			}
-		}
+class ValidationContainer {
+    // 
+    constructor(props) {
+        this.errline = props.errors_here
+        this.fields = props.fields
+        this.checks = props.checks
 
-		formErrorMessage(msg) {
-			let errline = this.errline
-			if ( errline ) {
-				errline.innerHTML = msg
-				errline.style.visibility = "visible"
-			}
-		}
+        this.modal = props.modal
+        this.closer = props.closer
+        this.form = props.form
+        this.where_captcha = props.captcha
+        this.captch_input = props.captcha_field
+        this.auth_port = props.auth_port
+        this.password_rules = props.password_rules
+        this.service_url = props.service_url
 
-	 	emptyFieldMessage(fields) { // name_empty,email_empty,commment_empty
-			let msg = "The following fields require values: "
-			//
-			let sep = ','
-			msg += fields.join(sep)
-			this.formErrorMessage(msg);
-		}
+        this.plain_text_color = (props.plain_text_color !== undefined) ? props.plain_text_color : "black"
+        this.error_text_color = (props.error_text_color !== undefined) ? props.error_text_color : "black"
 
-		emailFormatError() {
-			this.formErrorMessage("Email does not match a known email format.");
-		}
+        this.errline.style.visibility = "hidden"
+        this.failure_msg_prefix = props.failure_msg_prefix
+        this.empty_checker = props.is_empty ? props.is_empty : is_empty
+    }
 
-		passwordFieldError(whichFields) {
-			this.formErrorMessage(`${whichFields} are required to have the same value`);
-		}
+    hideFormErrorMessage() {
+        let errline = this.errline
+        if ( errline ) {
+            errline.innerHTML = ""
+            errline.style.visibility = "hidden"
+        }
+    }
 
-		//
-		checkFormValid() {
-			if ( !g_ComponentErrorsActivated ) {
-				return(true);
-			}
+    formErrorMessage(msg) {
+        let errline = this.errline
+        if ( errline ) {
+            errline.innerHTML = msg
+            errline.style.visibility = "visible"
+        }
+    }
 
-			for ( let field in this.fields ) {
-				let c = this.fields[field]
-				colorize(c,"black")
-			}
+    emptyFieldMessage(fields) { // name_empty,email_empty,commment_empty
+        let msg = "The following fields require values: "
+        //
+        let sep = ','
+        msg += fields.join(sep)
+        this.formErrorMessage(msg);
+    }
 
-			//
-			let mustHaveValue = this.checks.is_empty
-			let empty_fields = mustHaveValue.filter((field) => {
-				let c = this.fields[field]
-				//colorize(c,"black")
-				return(this.empty_checker(c))
-			})
-			//
-			if ( empty_fields.length ) {
-				this.emptyFieldMessage(empty_fields)
-				empty_fields.forEach(field => {
-					let c = this.fields[field]
-					colorize(c,"red")
-				})
-				return(false)
-			}
-			//
-			let emailFields = this.checks.email
-			emailFields.forEach(e_field => {
-				let c = this.fields[e_field]
-				if ( !checkEmailField(c) ) {
-					this.emailFormatError();
-					colorize(c,"red")
-					return(false);
-				}
-			})
-			//
-			if ( this.password_rules && (typeof this.password_rules === "function") ) {
-				if ( this.checks.passwords && (this.checks.passwords.length) ) {
-					let pvalues = this.checks.passwords.map(pfield => {
-							let c = this.fields[pfield]
-							if ( c ) {
-								return(c.value)
-							} else {
-								return(null)
-							}
-						})
-					//
-					let [check,violation] = this.password_rules(pvalues)
-					//
-					if ( !check ) {
-						let message = violation()
-						this.passwordFieldError(message)
-						return(false)
-					}
-					//
-					this.hideFormErrorMessage()
-				}
-			}
-			//
-			return(true);
-		}
-		
-		switchCaptchaDisplay(on_off) {
-			if ( on_off ) {
-				this.modal.style.display = "block";  // show captcha
-				this.form.style.display = "none"
-			} else {
-				this.modal.style.display = "none";  // show captcha
-				this.form.style.display = "block"
-			}
-		}
+    emailFormatError() {
+        this.formErrorMessage("Email does not match a known email format.");
+    }
 
-	}
+    passwordFieldError(whichFields) {
+        this.formErrorMessage(`${whichFields} are required to have the same value`);
+    }
+
+    //
+    checkFormValid() {
+        //
+        if ( !g_ComponentErrorsActivated ) {
+            return(true);
+        }
+        //
+        for ( let field in this.fields ) {
+            let c = this.fields[field]
+            colorize(c,this.plain_text_color)
+        }
+        //
+        let mustHaveValue = this.checks.is_empty
+        let empty_fields = mustHaveValue.filter((field) => {
+            let c = this.fields[field]
+            //colorize(c,"black")
+            return(this.empty_checker(c))
+        })
+        //
+        if ( empty_fields.length ) {
+            this.emptyFieldMessage(empty_fields)
+            empty_fields.forEach(field => {
+                let c = this.fields[field]
+                colorize(c,this.error_text_color)
+            })
+            return(false)
+        }
+        //
+        let emailFields = this.checks.email
+        emailFields.forEach(e_field => {
+            let c = this.fields[e_field]
+            if ( !checkEmailField(c) ) {
+                this.emailFormatError();
+                colorize(c,this.error_text_color)
+                return(false);
+            }
+        })
+        //
+        if ( this.password_rules && (typeof this.password_rules === "function") ) {
+            if ( this.checks.passwords && (this.checks.passwords.length) ) {
+                let pvalues = this.checks.passwords.map(pfield => {
+                        let c = this.fields[pfield]
+                        if ( c ) {
+                            return(c.value)
+                        } else {
+                            return(null)
+                        }
+                    })
+                //
+                let [check,violation] = this.password_rules(pvalues)
+                //
+                if ( !check ) {
+                    let message = violation()
+                    this.passwordFieldError(message)
+                    return(false)
+                }
+                //
+                this.hideFormErrorMessage()
+            }
+        }
+        //
+        return(true);
+    }
+    
+    switchCaptchaDisplay(on_off) {
+        if ( on_off ) {
+            this.modal.style.display = "block";  // show captcha
+            this.form.style.display = "none"
+        } else {
+            this.modal.style.display = "none";  // show captcha
+            this.form.style.display = "block"
+        }
+    }
+}
+
+
 
 
 	async function processUI_captchaService(handlerDefsValidator,calcAppDataDB,completionaAction,failureAction) {
@@ -1497,8 +1563,10 @@ html {
 
 	// ---- ---- ---- ---- ---- ----
 	function lowerFillerText() {
+		let content = `{{{decoratedLinks.content}}}`
+		content = decodeURIComponent(content)
 		return `<div class="fillLower">
-			{{{decoratedLinks.content}}}
+			${content}
 		</div>`;
 	}
 	
@@ -1863,7 +1931,9 @@ html {
 			"closer" : document.querySelector('#contactModalCloser'),
 			"form" : document.querySelector('#myContactForm'),
 			"captcha" : document.querySelector('#captcha-goes-here'),
-			"captcha_field" : document.querySelector("#captcha-field")
+			"captcha_field" : document.querySelector("#captcha-field"),
+			"plain_text_color" : DEFAULT_PLAIN_TEXT_COLOR,
+			"error_text_color" : DEFAULT_ERROR_TEXT_COLOR
 		})
 		g_CurContainer = g_contact_Handling; // has to be initlialized in the function
 	}

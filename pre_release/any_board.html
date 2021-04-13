@@ -6,9 +6,9 @@
 	<meta name="author" content="Richard Leddy" />
 	<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 	<meta id="theme-color" name="theme-color" content="#452770">
-	<link rel="canonical" href="http://www.copious.world">
-	<title>Copious World</title>
-	<meta name="description" content="An entry point into the our world of AI, IoT, and Communities built around songs, etc.">
+	<link rel="canonical" href="{{canonical}}">
+	<title>{{pageTitle}}</title>
+	<meta name="description" content="{{pageDescription}}">
 	<style>
 		/*csslint important:false*/
 /* ==========================================================================
@@ -17,6 +17,7 @@
 
 /**
  * Extra rules that Pure adds on top of Normalize.css
+
 html {
 
 }
@@ -843,20 +844,11 @@ html {
 			<tr>
 				<td style="width:62;height:63">
 					<a class="nav-link" href="/">
-												    <svg version="1.0" width="60" height="60" viewBox="0 0 250 250" preserveAspectRatio="xMidYMid meet" id="logo" >
-								<defs id="defs10"/>
-								<path class="PhIOtjDr_0"  id="path6" d="m 30.107062,7.4672872 c 4.67725,2.6985208 8.37554,8.6930958 12.94402,20.5087688 7.17904,19.072767 24.58277,67.337762 29.69511,82.950634 l 5.32989,15.9502 -13.70543,-0.25058 -10.468161,2.57106 -8.132079,2.99946 -4.78602,5.90784 0.76141,-6.91979 c 0.65264,-6.50536 0.32632,-7.85462 -5.43866,-25.31791 C 27.822822,80.549048 20.535012,60.127019 12.703332,40.215781 5.4155222,21.730904 4.4365622,15.57249 7.8085322,10.503124 11.941922,4.43145 22.384152,2.9954505 30.107062,7.4672872 Z M 238.08162,22.742849 c 3.69828,2.110631 6.52639,6.669206 6.52639,10.379672 0,1.686578 -2.93688,12.740881 -6.63517,24.469814 -19.68797,64.138095 -30.34775,107.931245 -30.34775,124.806655 0,4.6453 -1.08775,7.68113 -18.60024,50.80931 l -4.35093,10.79409 -67.76577,0 -67.765758,0 -14.35808,-35.35063 -14.35808,-35.3603 17.62128,-20.75934 17.5125,-20.75935 29.36879,0 c 32.631998,0 5.455822,5.28877 29.390108,7.16797 -3.81133,6.98972 7.16732,11.29772 7.16732,11.29772 l 2.51778,3.43975 c -1.74038,3.20932 -4.92039,6.69891 -9.3801,9.5709 l -3.2632,2.11064 -9.78959,-2.62144 c -8.593088,-2.27446 -11.312428,-2.61179 -22.080978,-2.61179 -13.0528,-0.0964 -14.35808,0.2506 -14.35808,4.29837 0,2.70817 3.15443,3.63336 12.72648,3.63336 21.42834,0 38.723308,8.01847 47.533928,22.10863 3.58951,5.73436 7.17904,15.86345 7.17904,20.50876 0,2.86236 4.45971,5.05973 7.50536,3.79721 2.82811,-1.09868 2.93687,-4.64531 0.65264,-14.01306 -2.28424,-9.36772 -7.83169,-17.88734 -15.77214,-24.29632 -5.32988,-4.30799 -6.30884,-5.49342 -5.11233,-6.24517 1.19649,-0.76135 2.06669,-0.51077 4.0246,1.08906 6.30885,5.23321 19.03534,7.00654 27.73719,3.88395 5.87377,-2.11064 11.85631,-7.17036 15.11951,-12.74088 1.52281,-2.53468 5.98253,-16.03694 9.89835,-29.9536 10.98611,-38.396111 22.08098,-72.320389 30.13021,-92.665317 5.54744,-14.176879 12.40016,-19.737762 23.16871,-18.812555 2.93688,0.250577 6.63517,1.175785 8.15801,2.023891 z m -126.72091,50.03831 c 2.28424,0.510792 5.76499,2.11063 7.72291,3.633367 5.87375,4.558576 6.20008,7.257098 3.80705,29.278954 -1.1965,10.71701 -1.94404,26.93071 -2.27035,27.1042 -0.32632,0.25057 -8.38942,-6.50868 -17.41761,-6.25812 l -16.533538,0.42407 0.65264,-6.66922 c 0.32632,-3.62372 1.19651,-13.83956 1.84915,-22.619385 0.65264,-9.19425 1.74037,-17.125977 2.50179,-18.561977 3.2632,-5.907835 10.550998,-8.269041 19.687958,-6.331889 z m 48.5129,9.454465 c 2.06668,1.011946 4.56848,3.209314 5.54744,4.89589 1.84914,2.871998 1.84914,4.22126 -0.8702,33.750816 -1.52282,17.04886 -3.37196,32.575 -4.24216,35.02295 -3.15442,8.51961 -9.13695,13.07819 -18.16513,13.67573 -4.78601,0.25056 -6.41762,0 -9.46327,-1.69622 -5.87376,-3.12256 -6.41764,-4.29838 -2.93689,-7.42094 6.20008,-5.744 4.00097,-11.09854 1.92352,-15.89687 0,0 -0.33391,-1.79223 -2.65798,-4.24016 l -2.01123,-1.92782 3.94219,-26.79768 c 1.95792,-22.869967 2.17547,-23.795174 5.11237,-26.667174 4.89478,-4.89589 16.96861,-6.24515 23.82134,-2.698522 z" />
-								<rect style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:4.80000019;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect4169" width="68.005806" height="55.413109" x="62.964886" y="157.3824"/>
-								<rect style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.60000002;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect4170" width="39.957146" height="46.691494" x="105.05587" y="172.33051"/>
-								<rect style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect4172" width="134.35677" height="7.9790406" x="49.16119" y="238.93228"/>
-								<text xml:space="preserve" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:184.28874207px;line-height:125%;font-family:'Arial Rounded MT Bold';-inkscape-font-specification:'Arial Rounded MT Bold, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" x="6.6644416" y="260.41125" id="text4161" transform="scale(1.041834,0.95984582)"><tspan id="tspan4163" x="6.6644416" y="260.41125">C</tspan></text>
-								<text xml:space="preserve" style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:28.53204727px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" x="90" y="175.07523" id="text4165" transform="scale(0.90874022,1.1004245)"><tspan id="tspan4167" x="90" y="175.07523">opious</tspan></text>
-							</svg>
-
+						{{{svgLogo.content}}}
 					</a>
 				</td>
 				<td  style="text-align:center">
-                    <span id="header_user_name" > </span> :: <span class="dboard-title" >dashboard</span>
+                    <span id="header_user_name" >{{user_name}} </span> :: <span class="dboard-title" >$anyboard$</span>
 				</td>
 				<td>
 					&nbsp;
@@ -871,20 +863,20 @@ html {
 		<div class="items">
 			<div class="item">
 				<div style="height: fit-content;text-align: center;border-bottom: 1px solid darkslateblue;">
-					<h4 id="email"></h4>
+					<h4 id="email">{{user_name}}</h4>
 				</div>
 				<div style="border: thistle 2px solid;padding: 4px;background-color: rgb(248, 238, 220);">
 					<span id="date" style="text-decoration: underline;color: rgb(88, 13, 13);">
-						
+						{{date}}
 					</span>
 					<br>
 					<span id="tag_line">
-						
+						{{tag_line}}
 					</span>
 					<br>
 				</div>
-				<div id ='dashboard_text' style="border: thistle 2px solid;padding: 4px;background-color: rgb(247, 236, 216);" >
-					
+				<div id ='$anyboard$_text' style="border: thistle 2px solid;padding: 4px;background-color: rgb(247, 236, 216);" >
+					{{$anyboard$_text}}
 				</div>
 			</div>			
 			<!--  -->
@@ -927,33 +919,33 @@ html {
 		<div class="items">
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-blog" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Blog Drop (drag & drop)
+					$TMAP{$TYPE[0]}
 				</span><br>
-				<button onclick="show_stuff('blog')">list</button>
-				<button onclick="get_file('blog')">&plus;</button>
+				<button onclick="show_stuff('$TYPE[0]')">list</button>
+				<button onclick="get_file('$TYPE[0]')">&plus;</button>
 				<input class="no-view-file-field" type="file" name="drop-click-file_loader-blog"  id="drop-click-file_loader-blog" />
-				<div class="droppable"  ondrop="dropHandler(event,'blog');" ondragover="dragOverHandler(event,'blog');">
+				<div class="droppable"  ondrop="dropHandler(event,'$TYPE[0]');" ondragover="dragOverHandler(event,'$TYPE[0]');">
 					<br>&nbsp;<br><br>
-					<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'blog')" />
+					<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'$TYPE[0]')" />
 				</div>
 			</div>
 		<!--  -->
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-stream" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Stream Drop (drag & drop)
+					$TMAP{$TYPE[1]}
 				</span><br>
-				<button onclick="show_stuff('stream')" >list</button>
-				<button onclick="get_file('stream')">&plus;</button>
+				<button onclick="show_stuff('$TYPE[1]')" >list</button>
+				<button onclick="get_file('$TYPE[1]')">&plus;</button>
 				<input class="no-view-file-field" type="file" name="drop-click-file_loader-stream"  id="drop-click-file_loader-stream" />
-				<div class="droppable"  ondrop="dropHandler(event,'stream');" ondragover="dragOverHandler(event,'stream');">
+				<div class="droppable"  ondrop="dropHandler(event,'$TYPE[1]');" ondragover="dragOverHandler(event,'$TYPE[1]');">
 					<br>&nbsp;<br><br>
-					<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'stream')" />
+					<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'$TYPE[1]')" />
 				</div>
 			</div>
 		<!--  -->
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-demo" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Demo Drop (drag & drop)
+					$TMAP{$TYPE[2]}
 				</span><br>
 				<button onclick="show_stuff('demo')" >list</button>
 				<button onclick="get_file('demo')">&plus;</button>
@@ -966,14 +958,14 @@ html {
 		<!--  -->
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-links" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Link Package Drop (drag & drop)
+					$TMAP{$TYPE[3]}
 				</span><br>
-				<button onclick="show_stuff('links')" >list</button>
-				<button onclick="get_file('links')">&plus;</button>
+				<button onclick="show_stuff('$TYPE[3]')" >list</button>
+				<button onclick="get_file('$TYPE[3]')">&plus;</button>
 				<input class="no-view-file-field" type="file" name="drop-click-file_loader-links"  id="drop-click-file_loader-links" />
-				<div class="droppable"  ondrop="dropHandler(event,'links');" ondragover="dragOverHandler(event,'links');">
+				<div class="droppable"  ondrop="dropHandler(event,'$TYPE[3]');" ondragover="dragOverHandler(event,'$TYPE[3]');">
 					<br>&nbsp;<br><br>
-					<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'links')" />
+					<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'$TYPE[3]')" />
 				</div>
 
 			</div>
@@ -985,7 +977,7 @@ html {
 	<footer>
 		<ul class="footer-list">
 			<li>
-				<a href="http://www.copious.world">copyright &copy; 2020 copious.world</a>
+				<a href="{{canonical}}">copyright &copy; {{copyRightYear}} {{companyShortLink}}</a>
 			</li>
 		</ul>
 	</footer>
@@ -1082,230 +1074,16 @@ function store_encrypted(data) {
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-
-// Make the DIV element draggagle:
-
-function dragElement(floater_id,float_header_id) {
-
-	let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-	let floater = document.getElementById(floater_id)
-	let floater_h_bar = document.getElementById(float_header_id)
-
-	if ( floater === undefined ) return
-	if ( floater_h_bar === undefined ) return
-
-	floater_h_bar.onmousedown = (e) => {
-										e = e || window.event;
-										e.preventDefault();
-										// get the mouse cursor position at startup:
-										pos3 = e.clientX;
-										pos4 = e.clientY;
-										document.onmouseup = closeDragElement;
-										// call a function whenever the cursor moves:
-										document.onmousemove = elementDrag;
-									}
-
-	function dragMouseDown(e) {
-		e = e || window.event;
-		e.preventDefault();
-		// get the mouse cursor position at startup:
-		pos3 = e.clientX;
-		pos4 = e.clientY;
-		document.onmouseup = closeDragElement;
-		// call a function whenever the cursor moves:
-		document.onmousemove = elementDrag;
-	}
-
-	function elementDrag(e) {
-		e = e || window.event;
-		e.preventDefault();
-		// calculate the new cursor position:
-		pos1 = pos3 - e.clientX;
-		pos2 = pos4 - e.clientY;
-		pos3 = e.clientX;
-		pos4 = e.clientY;
-		// set the element's new position:
-		let newtop = (floater.offsetTop - pos2)
-		let newleft =  (floater.offsetLeft - pos1)
-		if ( newtop > 10 ) {
-			floater.style.top = newtop + "px";
-		}
-		if ( newleft > 4 ) {
-			floater.style.left = newleft + "px";
-		}
-	}
-
-	function closeDragElement() {
-		/* stop moving when mouse button is released:*/
-		document.onmouseup = null;
-		document.onmousemove = null;
-	}
-
-}
-
-
+//$?SUBST??:drag_div.js?$
 
 dragElement("floating-info","floating-info-entry-title")
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
+//$?SUBST??:common.js?$
 
-
-var g_url_match = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
-function matches_url(maybe_url) {
-	return g_url_match.test(maybe_url)
-}
-
-// not_https_switch 
-// switch to HTTPS before doing any ops that may require a data exchange
-function not_https_switch() {
-	if (location.protocol !== 'https:') {           // start from a secure page
-		alert("Switching to a secure version of this page in 1sec.")
-		setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
-		return(true)
-	}
-	return(false)
-}
-
-
-function clonify(obj) {
-	if ( typeof obj === 'string' ) return(obj)
-	try {
-		let out = JSON.parse(JSON.stringify(obj))
-		return(out)
-	} catch(e) {
-		return(null)
-	}
-}
-
-
-// attach a script to a DOM element
-function addscript(script,whereScipt) {
-	var scriptEl = document.createElement('script');
-	scriptEl.type = 'text/javascript';
-	scriptEl.text = script;
-    if ( typeof whereScipt === "string" ) {
-        whereScipt = document.getElementById(whereScipt)
-    }
-	whereScipt.appendChild(scriptEl);
-}
-
-
-// simple check on cookies, searching by ';' delimited string with the cookie name at the start of the trimmed line.
-function getCookie(cname) {  // modified from w3school
-	var name = cname + "=";
-	var ca = document.cookie.split(';');
-	for(let i = 0; i < ca.length; i++) {
-		var c = ca[i];
-		if ( typeof c === 'string' ) {
-			c = c.trim()
-			if (c.indexOf(name) == 0) {
-				return c.substring(name.length);
-			}
-		}
-	}
-	return "";
-}
-
-
-function addstyle(script) {
-    var styleEl = document.createElement('style');
-    styleEl.type = 'text/css';
-    styleEl.text = script;
-    let whereScript = document.getElementsByTagName('head')
-    if ( whereScript && whereScript.length ) {
-        whereScript[0].appendChild(styleEl);
-    }
-}
-
-
-//$$EXPORTABLE::
-/*
-matches_url
-clonify
-addscript
-addstyle
-getCookie
-*/
-
-
-
-
-
-
-//  fetchEndPoint
-// //
-// fetch with GET method
-async function fetchEndPoint(endpoint,port) {
-	port = !(port) ? '' : ( port.length ? `:${port}`   : '')
-	let myRequest = new Request(`${location.protocol}//${g_siteURL}${port}/${endpoint}`);
-	try {
-		const body = await fetch(myRequest, {
-									method: 'GET', // *GET, POST, PUT, DELETE, etc.
-									mode: 'cors', // no-cors, *cors, same-origin
-									cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-									credentials: 'omit', // include, *same-origin, omit
-									redirect: 'follow', // manual, *follow, error
-									referrerPolicy: 'no-referrer', // no-referrer, *client
-								});
-		//
-		let infoObj = await body.json();
-		return(infoObj)
-		//
-	} catch (e) {
-		console.log(e.message)
-		return(false)
-	}
-}
-
-//  postData
-// //
-//  call fetch with method POST tyr to help with parameters..  If data is FromData set do_stringify to false
-//  default content type 'application/json'
-//  User 'cors', Default cres = omit, If ctype == 'multipart/form-data' be sure to use FormData -- lets fetch set content type.
-//  RETURNS: parsed JSON object or an empty object. ... Check for fields
-//
-async function postData(url = '', data = {}, creds = 'omit', do_stringify = true,ctype) {
-	let content_type = 'application/json'
-	if ( ctype !== undefined ) {
-		content_type = ctype            // ctype is content type
-	}
-	let options = {
-		method: 'POST', // *GET, POST, PUT, DELETE, etc.
-		mode: 'cors', // no-cors, *cors, same-origin
-		cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-		credentials: creds, // include, *same-origin, omit
-		headers: {
-			'Content-Type': content_type
-		},
-		redirect: 'follow', // manual, *follow, error
-		referrerPolicy: 'no-referrer', // no-referrer, *client
-		body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
-	}
-
-	if ( ctype === 'multipart/form-data') {
-		delete options.headers['Content-Type']  // content type will be set automatically with a boundary
-	}
-
-	// Default options are marked with *
-	const response = await fetch(url, options);
-	if ( response.ok == false ) {
-		console.log(response.status + ': ' + response.statusText)
-		return {}
-	} else {
-		return await response.json(); // parses JSON response into native JavaScript objects
-	}
-}
-
-
-//$$EXPORTABLE::
-/*
-fetchEndPoint
-postData
-*/
-
+//$?SUBST??:post_fetch.js?$
 
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -1321,26 +1099,17 @@ const DELETE_COLOR = "pink"
 const PUBLISHED_COLOR = "limegreen"
 const UNPUBLISHED_COLOR = "black"
 
-var g_current_sel_display = "blog"
+var g_current_sel_display = "$TYPE[0]"
 var g_current_edit_el = null
 
 //
 var g_all_user_entries = {
-		"blog" : [],
-	"stream" : [],
-	"demo" : [],
-	"links" : []
-
+	$ENTRY_TYPES$
 }
 
 var g_current_entry_dom_map  = {}
 var g_undo_list = {
-	
-	"blog" : {},
-	"stream" : {},
-	"demo" : {},
-	"links" : {}
-
+	$UNDO_TYPES$
 }
 
 // id to item
@@ -1416,225 +1185,7 @@ let g_ext_to_media_type = {
 }
 
 
-
-
-var g_uploader_cache = {}
-
-const DEFINED_CHUNK_SIZE = 5000000
-const DEFINED_MAX_SIZE = 9000000
-
-async function finalize_small_media_storage(primary_response) {
-	if ( primary_response.transition && primary_response.transition.token ) {
-		let transaction_token = primary_response.transition.token
-		let protocol = primary_response.elements.protocol
-		let media_id = primary_response.elements.media_id
-		let url = `http://${g_siteURL}/uploaders/secondary/transition`
-		let body = {
-			"token" : transaction_token,
-			"match" : "handshake",
-		}
-		body.protocol = protocol
-		body.media_id = media_id   // maybe a checksum
-		let secondary_resp =  await postData(url,body)
-		return [protocol,media_id]
-	}
-	return [false,false]
-}
-
-//
-// finalize_media_storage
-//	There are likely faster ways of sending the data. But, this way requires some permission and safe guarding by the server sid.
-async function finalize_media_storage(primary_response,formdata,blob,obj) {
-
-	let secondary_resp = primary_response
-
-	if ( primary_response.transition && primary_response.transition.token ) {	// A token has to be associated with the transaction
-		//
-		let transaction_token = secondary_resp.transition.token		// call the transition token the transaction_token
-		let protocol = 'p2p-default'				// These fields have no real value until the end, but are always checked in case they may be used for security.
-		let media_id = ""
-		//
-		formdata.set("protocol",protocol)				// Most likely ipfs ... 
-		formdata.set("media_id",media_id)				// not set until the storage system can identify 
-		formdata.set("token",transaction_token)
-		formdata.set("match","upload-next")				// tell the server that you are sending one chunk after another
-		formdata.set("next",true)  // NEXT
-		formdata.set("_t_match_field",obj.file_name)
-		let url = `http://${g_siteURL}/uploaders/secondary/transition`		// generic seconday keyed by the token
-		//
-		let size_end = blob.size						// total length of the data in flight
-		let start = 0;
-		let span = DEFINED_CHUNK_SIZE					// application generation sets this (tuning upstream)
-		let num_sends = Math.floor(size_end/span) + 1	// size/chunk_size
-		//
-		for ( let i = 0; i < num_sends; i++ ) {			// the number of times this is called is determined by the client
-			//
-			let start = i*span
-			let end = Math.min((i+1)*span,size_end)
-			let blob_part = blob.slice(start,end)  				// next part of the blob
-			formdata.set('media_file', new Blob([blob_part]),obj.file_name)
-			secondary_resp = await postData(url,formdata, 'omit',false,'multipart/form-data')  // send it as a separate file
-			//
-			if ( (secondary_resp.OK !== "true") && (secondary_resp.OK !== true) ) {
-				break;			// This last send failed. Bailout  (If failed, the server will shutdown the communication)
-			}
-		}
-		//
-		if ( (secondary_resp.OK === "true") || (secondary_resp.OK === true) ) {						// The last send was good.
-			let body = {
-				"token" : transaction_token,
-				"match" : "complete",
-				"_t_match_field" : obj.file_name,
-				"file" : { "name" : obj.file_name },
-				"next"	: false		// NO NEXT
-			}
-			secondary_resp =  await postData(url,body)			// Tell the server that this transaction is done...
-			let elements = secondary_resp.state.elements			// The good stuff is returned in a state field 
-			protocol = elements.protocol  // final hash and provider returned in state (same as for the shor but in the state field)
-			media_id = elements.media_id
-		}
-		//
-		return [protocol,media_id]
-	}
-	return [false,false]
-}
-
-
-// data:[<MIME-type>][;charset=<encoding>][;base64],<data>
-
-async function upload_small(obj,blob_already) {			// 	obj.media_type
-	obj.email = g_dashboard_info.email
-	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
-	const mime = obj.mime
-	//
-	let blob_data = ""
-	//
-	if ( !(blob_already) )  {
-		try {
-			let res = await fetch(obj.blob)
-			blob_data = await res.blob()
-		} catch(e) {
-			return
-		}
-	} else {
-		blob_data = blob_already
-	}
-	//
-	let formdata = new FormData()
-	for ( let ky in obj ) {
-		if ( ky === 'blob' ) continue
-		formdata.append(ky, obj[ky])
-	}
-	formdata.append('protocol', 'p2p-default')
-	formdata.append('media_file', new Blob([blob_data]), obj.file_name)
-	//
-	// in the small versions, the file is sent immediately. No preamble
-	//
-	let primary_response =  await postData(url,formdata,'omit',false,'multipart/form-data')
-	if ( primary_response.OK === "true" ) {
-		let media_store_characteristics = await finalize_small_media_storage(primary_response)
-		return media_store_characteristics
-	} else {
-		return [false, false]
-	}
-}
-
-
-async function upload_big(obj,blob_already) {
-	obj.email = g_dashboard_info.email
-	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
-	const mime = obj.mime
-	let blob_data = ""
-	//
-	if ( !(blob_already) )  {
-		try {
-			let res = await fetch(obj.blob)
-			blob_data = await res.blob()
-		} catch(e) {
-			return
-		}
-	} else {
-		blob_data = blob_already
-	}
-	//
-	let formdata = new FormData()
-	for ( let ky in obj ) {
-		if ( ky === 'blob' ) continue
-		formdata.append(ky, obj[ky])
-	}
-	formdata.append('protocol', 'p2p-default')
-	formdata.append('preamble',blob_data.size)	// tell the size of data to come
-	//
-	// in the large versions, a preamble is sent with the size of the data. No data is sent in the first message
-	//
-	let primary_response =  await postData(url,formdata,'omit',false,'multipart/form-data')
-	//
-	if ( primary_response.OK === "true" ) {		// If the system can handle the request, start a cycle of sends
-		let media_store_characteristics = await finalize_media_storage(primary_response,formdata,blob_data,obj)
-		return media_store_characteristics
-	} else {
-		return [false, false]
-	}
-}
-
-// ---- ---- ---- ---- ---- ---- ----
-async function upload_audio(obj) {
-	let blob_data
-	try {
-		let res = await fetch(obj.blob)
-		blob_data = await res.blob()
-	} catch(e) {
-		return
-	}
-	if ( blob_data.size > DEFINED_MAX_SIZE ) {
-		return await upload_big(obj,blob_data)
-	} else {
-		return await upload_small(obj,blob_data)
-	}
-}
-
-// ---- ---- ---- ---- ---- ---- ----
-async function upload_image(obj) {
-	if ( !(blob_already) )  {
-		try {
-			let res = await fetch(obj.blob)
-			blob_data = await res.blob()
-		} catch(e) {
-			return
-		}
-	} else {
-		blob_data = blob_already
-	}
-}
-
-// ---- ---- ---- ---- ---- ---- ----
-async function upload_video(obj) {
-	return await upload_big(obj)
-}
-
-
-// ---- ---- ---- ---- ---- ---- ----
-function prep_upload_for(obj,uploader_fun) {
-	//
-	g_uploader_cache[obj._dash_entry_id] = async () => {
-		return await uploader_fun(obj)
-	}
-	//
-}
-
-
-// ---- ---- ---- ---- ---- ---- ----
-async function do_media_upload(obj) {		// earlier a link was made for the media, which will be uploaded if ever the user "save"s it.
-	let id = obj._dash_entry_id
-	let _uploader = g_uploader_cache[id]	// _uploader from map
-	if ( _uploader ) {
-		let [protocol,asset_id] = await _uploader()
-		return [protocol,asset_id]
-	}
-}
-
-
-
+//$?SUBST??:upload_media.js?$
 
 
 
@@ -1686,10 +1237,10 @@ function get_ext(fname) {
 
 
 function best_cat_for_ext(ext) {
-	if ( g_code_files.indexOf(ext) >= 0 ) return ("blog")
-	else if ( g_text_files.indexOf(ext) >= 0 ) return ("blog")
-	else if ( g_media_files.indexOf(ext) >= 0 ) return ("stream")
-	return("blog")
+	if ( g_code_files.indexOf(ext) >= 0 ) return ("$TYPE[0]")
+	else if ( g_text_files.indexOf(ext) >= 0 ) return ("$TYPE[0]")
+	else if ( g_media_files.indexOf(ext) >= 0 ) return ("$TYPE[1]")
+	return("$TYPE[0]")
 }
 
 
@@ -1735,12 +1286,12 @@ function add_or_use_url(url) {
 		if ( !(entry) ) return;
 		//
 		switch ( entry.asset_type ) {
-			case "links" : {
+			case "$TYPE[3]" : {
 				//
 				entry.links.push(url)
 				break;
 			}
-			case "stream" : {
+			case "$TYPE[1]" : {
 				//
 				if ( entry.media ) {
 					entry.media.source = url
@@ -1756,7 +1307,7 @@ function add_or_use_url(url) {
 
 
 function best_fit_media_type(file_name) {
-	//if ( category == 'stream' ) {
+	//if ( category == '$TYPE[1]' ) {
 		let ext =  get_ext(file_name)
 		let mtype = g_ext_to_media_type[ext]
 		if ( mtype === undefined ) {
@@ -2086,116 +1637,7 @@ async function media_startup(player,codecs,protocol,cid,src) {
 }
 
 
-var g_app_populators = 
- {
-	"blog" : (entry) => { 
-		//
-		if ( !(entry.abstract) ) {
-			let abstract_tag = document.getElementById('floating-info-entry-include-abstract')
-			abstract_tag.style.display = "none"
-			return false
-		}
-		//
-		let doc = document.getElementById('floating-info-special-type-blog')
-		doc.innerHTML = !(entry.decoded) ? decodeURIComponent(entry.txt_full) : entry.txt_full
-		//
-		return true
-	},
-	"demo" : (entry) => { return false },
-	"stream" : (entry) => { 
-		let poster = document.getElementById('asset-type-stream-poster')
-		poster.style.display = "none"
-		let sound = document.getElementById('asset-type-stream-sound')
-		sound.style.display = "none"
-		let video = document.getElementById('asset-type-stream-video')
-		video.style.display = "none"
-		//
-		let media = entry.media
-		//
-		let media_type = entry.media_type
-		if ( media_type === 'image' ) {
-			if ( poster ) {
-				if ( entry.blob ) {
-					poster.src = entry.blob
-				} else {
-					poster.src = media.poster
-				}
-				poster.style.display = "block"
-			}
-		} else if ( media_type === 'video' ) {
-			if ( video ) {
-				video.poster = media.poster
-				if ( entry.blob && !(media.protocol)) {  // testing
-					video.src = entry.blob
-				} else if ( entry.use_protocol ) {
-					let v_proto = media.protocol
-					let v_cid = media[v_proto]
-					let v_codec = {
-						"type" : "video",
-						"video" : 'video/mp4; codecs="avc1.64001e"'
-					}
-					media_startup(video,v_codec,v_proto,v_cid,media.source)
-				} else {
-					video.src = media.source
-				}
-				video.style.display = "block"
-			}
-		} else {	//  sound
-			if ( sound ) {
-				//let ext = extract_sound_media_ext(media.source)
-				let sound_player = document.getElementById(`asset-type-stream-sound`)
-				//let sound_player = document.getElementById(`asset-type-stream-sound-${ext}`)
-				if ( sound_player ) {
-					if ( entry.blob && !(media.protocol) ) {  // testing
-						sound_player.src = entry.blob
-					} else if ( entry.use_protocol ) {
-						let a_proto = media.protocol		// a is for audio
-						let a_cid = media[a_proto]
-						let a_codec = {
-							"type" : "audio",
-							"audio" : 'audio/mp4; codecs="mp4a.40.2"'
-						}
-						media_startup(sound_player,a_codec,a_proto,a_cid,media.source)
-					} else {
-						sound_player.src = media.source
-					}
-					sound_player.style.display = "block"
-				}
-				if ( poster ) {
-					poster.src = media.poster
-				}
-				sound.style.display = "block"
-				poster.style.display = "block"
-			}
-		}
-		
-		return true 
-	},
-	"links" : (entry) => {
-		let links = entry.links
-		if ( links ) {
-			let list = document.getElementById('asset-type-links-list')
-			if ( list ) {
-				list.innerHTML = ""
-				let n = links.length
-				for ( let i = 0; i < n; i++ ) {
-					link = links[i]
-					let element = document.createElement('li')
-					let anchor = document.createElement('a')
-					anchor.href = link
-					anchor.id = `links-${i}-${entry._dash_entry_id}`  
-					anchor.innerHTML = link
-					anchor.target = "copious-check-links"  // tab name
-					app_anchor_make_dragdrop_source(anchor)
-					element.appendChild(anchor)
-					list.appendChild(element)
-				}
-			}
-		}
-		return true
-	}
-}
-
+var g_app_populators = $APP_POPULATOR$
 
 
 function populate_special_fields(asset_type,id) {
@@ -2481,7 +1923,7 @@ function done_with_file(category,obj) {
 		}
 		if ( obj.media_type ) {
 			if ( (obj.media_type === 'audio') || (obj.media_type === 'video') ) {
-				category = 'stream'
+				category = '$TYPE[1]'
 			}
 		}
 		//
@@ -2510,7 +1952,7 @@ function done_with_file(category,obj) {
 			entry.decoded = true
 		}
 		//
-				// for use in the dashboard UI operations
+				// for use in the $anyboard$ UI operations
 		entry.deleted = false
 		entry.published = false
 		entry.file_name = obj.file_name			// use the one from the system if it got here from the file system
@@ -2523,7 +1965,7 @@ function done_with_file(category,obj) {
 		if ( (entry.abstract !== undefined) && (typeof entry.abstract === "string" ) ) {
 			entry.data = entry.abstract				// abstract goes on display
 		}
-		if ( entry.data === undefined ) {			// Never got a version of data this dashboard knows about. So, tell the user to make some.
+		if ( entry.data === undefined ) {			// Never got a version of data this $anyboard$ knows about. So, tell the user to make some.
 			entry.data = "Please enter a description"
 		}
 		entry.asset_type = category
@@ -2774,20 +2216,20 @@ function dragOverHandler(ev,subst_key) {
 		'owner' : user,
 		'date'  : ('' + Date.now()),
 		'panel_key' : generate_password(),
-		'dashboard_text' : 'test dashboard_text'
-		//obj.header_user_name = g_dashboard_info.header_user_name
-		//obj.dashboard_text = dashboard_text
+		'$anyboard$_text' : 'test $anyboard$_text'
+		//obj.header_user_name = g_$anyboard$_info.header_user_name
+		//obj.$anyboard$_text = $anyboard$_text
 		//obj.tag_line = obj.tag_line
 	}
 */
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-var g_dashboard_info = null
+var g_$anyboard$_info = null
 // DELETE TESTING DATA
 
 let shareable_field = document.getElementById("shareable")
-g_dashboard_info.page_host = document.location.href   //document.location.hostname
-shareable_field.value = JSON.stringify(g_dashboard_info)
+g_$anyboard$_info.page_host = document.location.href   //document.location.hostname
+shareable_field.value = JSON.stringify(g_$anyboard$_info)
 
 
 //
@@ -2796,15 +2238,15 @@ shareable_field.value = JSON.stringify(g_dashboard_info)
 // sends the data file in an identifying packet to the backend for saving to a user directory...
 async function real_save(obj) {
 	obj.saved_ever = true
-	let proxyPath = 'dashboard'
+	let proxyPath = '$anyboard$'
 	let ky = g_current_sel_display
 	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/${ky}`
-	if ( g_dashboard_info ) {		// later this will be fetched with uuid+${ky}+%{email}
-		obj.user_name = g_dashboard_info.user_name
+	if ( g_$anyboard$_info ) {		// later this will be fetched with uuid+${ky}+%{email}
+		obj.user_name = g_$anyboard$_info.user_name
 		let asset_id = `+${ky}+${obj.email}}`
-		obj.email = g_dashboard_info.email
-		obj.token = g_dashboard_info.token
-		obj._origin = "copious"
+		obj.email = g_$anyboard$_info.email
+		obj.token = g_$anyboard$_info.token
+		obj._origin = "{{origin}}"
 		let result = await postData(endpoint,obj)
 	}
 }
@@ -2819,13 +2261,13 @@ async function real_publish(obj) {
 	//
 	let send_obj = Object.assign({},obj)
 	delete send_obj.data			// for a command don't send all the data (it will be on the server)
-	let proxyPath = 'dashboard'
+	let proxyPath = '$anyboard$'
 	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/dash-commands`
 	send_obj.topic = "command-publish"
-	send_obj.user_name = g_dashboard_info.user_name
-	send_obj.email = g_dashboard_info.email
-	send_obj.token = g_dashboard_info.token
-	send_obj._origin = "copious"
+	send_obj.user_name = g_$anyboard$_info.user_name
+	send_obj.email = g_$anyboard$_info.email
+	send_obj.token = g_$anyboard$_info.token
+	send_obj._origin = "{{origin}}"
 	let result = await postData(endpoint,send_obj) 	// send everything to be stored....
 }
 
@@ -2835,30 +2277,30 @@ async function real_unpublish(obj) {
 	//
 	let send_obj = Object.assign({},obj)
 	delete send_obj.data			// for a command don't send all the data (it will be on the server)
-	let proxyPath = 'dashboard'
+	let proxyPath = '$anyboard$'
 	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/dash-commands`
 	send_obj.topic = "command-recind"
-	send_obj.user_name = g_dashboard_info.user_name
-	send_obj.email = g_dashboard_info.email
-	send_obj.token = g_dashboard_info.token
-	send_obj._origin = "copious"	
+	send_obj.user_name = g_$anyboard$_info.user_name
+	send_obj.email = g_$anyboard$_info.email
+	send_obj.token = g_$anyboard$_info.token
+	send_obj._origin = "{{origin}}"	
 	let result = await postData(endpoint,send_obj)
 }
 
 // fetch the file from the backend once again...
 async function real_reload(obj) {
 	// always keep the email inthe object
-	obj.email = g_dashboard_info.email
+	obj.email = g_$anyboard$_info.email
 	//
-	let proxyPath = 'dashboard'
+	let proxyPath = '$anyboard$'
 	let ky = g_current_sel_display
 	let asset_id = `${obj._id}+${ky}+${obj.email}}`
 	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/guarded/dynamic/${asset_id}`
 	let send_obj = Object.assign({},obj)
 	delete send_obj.data			// for a command don't send all the data (it will be on the server)
-	send_obj.user_name = g_dashboard_info.user_name
-	send_obj.token = g_dashboard_info.token
-	send_obj._origin = "copious"
+	send_obj.user_name = g_$anyboard$_info.user_name
+	send_obj.token = g_$anyboard$_info.token
+	send_obj._origin = "{{origin}}"
 	//
 	let result = await postData(endpoint,obj)			// send everything and then update it on this page.
 	if ( result.status === "OK" ) {
@@ -2895,13 +2337,13 @@ async function real_delete(obj) {
 	} else {
 		let send_obj = Object.assign({},obj)
 		delete send_obj.data			// for a command don't send all the data (it will be on the server)
-		let proxyPath = 'dashboard'
+		let proxyPath = '$anyboard$'
 		let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/dash-commands`
 		send_obj.topic = "command-delete"
-		send_obj.user_name = g_dashboard_info.user_name
-		send_obj.email = g_dashboard_info.email
-		send_obj.token = g_dashboard_info.token
-		send_obj._origin = "copious"
+		send_obj.user_name = g_$anyboard$_info.user_name
+		send_obj.email = g_$anyboard$_info.email
+		send_obj.token = g_$anyboard$_info.token
+		send_obj._origin = "{{origin}}"
 		let result = await postData(endpoint,send_obj)
 	}
 }
@@ -2957,24 +2399,24 @@ function drop_content_aware() {
 }
 
 
-function setup_user_dashboard(dashboardResponse,session_token) {
+function setup_user_$anyboard$($anyboard$Response,session_token) {
 
 	// this is a response object from the parent window....
-	g_dashboard_info = dashboardResponse		// it becomes the dashboard info
+	g_$anyboard$_info = $anyboard$Response		// it becomes the $anyboard$ info
 	if ( session_token !== undefined ) {
-		g_dashboard_info.token = session_token
+		g_$anyboard$_info.token = session_token
 	}
 	
 	// use the field in the info object to populate elements with the same names 
 	// as the object field names
-	for ( let ky in dashboardResponse ) {
+	for ( let ky in $anyboard$Response ) {
 		let el = document.getElementById(ky)
 		if ( el ) {
-			el.innerHTML = dashboardResponse[ky]
+			el.innerHTML = $anyboard$Response[ky]
 		}
 	}
 	//
-	let _entries = g_dashboard_info.entries
+	let _entries = g_$anyboard$_info.entries
 	if ( _entries ) {
 		for ( let ky in g_all_user_entries ) {
 			if ( _entries[ky] !== undefined ) {
@@ -2983,11 +2425,11 @@ function setup_user_dashboard(dashboardResponse,session_token) {
 		}
 	}
 	//
-	g_dashboard_info.page_host = document.host
+	g_$anyboard$_info.page_host = document.host
 	let shar = document.getElementById("shareable")
-	shar.value = JSON.stringify(g_dashboard_info)
+	shar.value = JSON.stringify(g_$anyboard$_info)
 
-	show_stuff('blog')
+	show_stuff('$TYPE[0]')
 	drop_content_aware()
 	//setTimeout(setup_ipfs_node,2000)
 }

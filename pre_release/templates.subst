@@ -1,0 +1,74 @@
+{
+    "businesses" : [ "copious", "popsong" ],
+    "in_dir" : "../copious-transitions/pre_release/",
+    "out_dir" : "../copious-transitions/sites/${business_key}/static/template/",
+    "index.html" : {
+        "special_items" : false,
+        "input" : "index.html",
+        "import" : {
+            "./client/common.js" : "*",
+            "./client/post_fetch.js" : "*",
+            "./client/field_checks.js" : "*",
+            "./client/uploader_class.js" : "*",
+            "./client/validation_class.js" : "*"
+        }
+    },
+    "dashboard.html" : {
+        "special_items" : false,
+        "input" : "any_board.html",
+        "import" : {
+            "./client/common.js" : "*",
+            "./client/post_fetch.js" : "*",
+            "./client/upload_media.js" : "*",
+            "./client/drag_div.js" : "*"
+        },
+        "import_app" : {
+            "$APP_POPULATOR$" : "app_populator_dashboard.js" 
+        },
+        "decode" : ["$ENTRY_TYPES$","$UNDO_TYPES$"],
+        "subst_l1" : {
+            "$anyboard$" : "dashboard",
+            "$ENTRY_TYPES$" : "%09%22blog%22%20%3A%20%5B%5D%2C%0A%09%22stream%22%20%3A%20%5B%5D%2C%0A%09%22demo%22%20%3A%20%5B%5D%2C%0A%09%22links%22%20%3A%20%5B%5D%0A",
+            "$UNDO_TYPES$" : "%0A%09%22blog%22%20%3A%20%7B%7D%2C%0A%09%22stream%22%20%3A%20%7B%7D%2C%0A%09%22demo%22%20%3A%20%7B%7D%2C%0A%09%22links%22%20%3A%20%7B%7D%0A",
+            "$TYPE[]" : ["blog", "stream", "demo", "links" ],
+            "$TMAP{$TYPE[]}" : {
+                "blog" : "Blog Drop (drag & drop)",
+                "stream" : "Stream Drop (drag & drop)",
+                "demo" : "Demo Drop (drag & drop)",
+                "links" : "Link Package Drop (drag & drop)"
+            }
+        }
+    },
+    "profile.html" : {
+        "special_items" : false,
+        "input" : "any_board.html",
+        "import" : {
+            "./client/common.js" : "*",
+            "./client/post_fetch.js" : "*",
+            "./client/drag_div.js" : "*"
+        },
+        "import_app" : {
+            "$APP_POPULATOR$" : "app_populator_profile.js" 
+        },
+        "decode" : ["$ENTRY_TYPES$","$UNDO_TYPES$"],
+        "subst_l1" : {
+            "$anyboard$" : "profile",
+            "$ENTRY_TYPES$" : "%22contacts%22%20%3A%20%5B%5D%2C%0A%09%22ownership%22%20%3A%20%5B%5D%2C%0A%09%22wallet%22%20%3A%20%5B%5D%2C%0A%09%22assets%22%20%3A%20%5B%5D",
+            "$UNDO_TYPES$" : "%22contacts%22%20%3A%20%7B%7D%2C%0A%09%22ownership%22%20%3A%20%7B%7D%2C%0A%09%22wallet%22%20%3A%20%7B%7D%2C%0A%09%22assets%22%20%3A%20%7B%7D",
+            "$TYPE[]" : ["contacts", "ownership", "wallet", "assets" ],
+            "$TMAP{$TYPE[]}" : {
+                "contacts" : "Contacts (drag & drop)",
+                "ownership" : "Ownership (drag & drop)",
+                "wallet" : "Wallet (drag & drop)",
+                "assets" : "Assets Drop (drag & drop)"
+            }
+        }
+    },
+    "decoratedLinks.html" : {
+        "special_items" : true,
+        "out_dir" : "../copious-transitions/sites/${business_key}/static/",
+        "array" : "../copious-transitions/sites/${business_key}/static/affiliates.json",
+        "input" : "link_template.html"
+    }
+}
+

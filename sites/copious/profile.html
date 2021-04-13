@@ -17,6 +17,7 @@
 
 /**
  * Extra rules that Pure adds on top of Normalize.css
+
 html {
 
 }
@@ -856,7 +857,7 @@ html {
 					</a>
 				</td>
 				<td  style="text-align:center">
-                    <span id="header_user_name" > </span> :: <span class="dboard-title" >dashboard</span>
+                    <span id="header_user_name" > </span> :: <span class="dboard-title" >profile</span>
 				</td>
 				<td>
 					&nbsp;
@@ -883,7 +884,7 @@ html {
 					</span>
 					<br>
 				</div>
-				<div id ='dashboard_text' style="border: thistle 2px solid;padding: 4px;background-color: rgb(247, 236, 216);" >
+				<div id ='profile_text' style="border: thistle 2px solid;padding: 4px;background-color: rgb(247, 236, 216);" >
 					
 				</div>
 			</div>			
@@ -927,33 +928,33 @@ html {
 		<div class="items">
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-blog" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Blog Drop (drag & drop)
+					Contacts (drag & drop)
 				</span><br>
-				<button onclick="show_stuff('blog')">list</button>
-				<button onclick="get_file('blog')">&plus;</button>
+				<button onclick="show_stuff('contacts')">list</button>
+				<button onclick="get_file('contacts')">&plus;</button>
 				<input class="no-view-file-field" type="file" name="drop-click-file_loader-blog"  id="drop-click-file_loader-blog" />
-				<div class="droppable"  ondrop="dropHandler(event,'blog');" ondragover="dragOverHandler(event,'blog');">
+				<div class="droppable"  ondrop="dropHandler(event,'contacts');" ondragover="dragOverHandler(event,'contacts');">
 					<br>&nbsp;<br><br>
-					<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'blog')" />
+					<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'contacts')" />
 				</div>
 			</div>
 		<!--  -->
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-stream" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Stream Drop (drag & drop)
+					Ownership (drag & drop)
 				</span><br>
-				<button onclick="show_stuff('stream')" >list</button>
-				<button onclick="get_file('stream')">&plus;</button>
+				<button onclick="show_stuff('ownership')" >list</button>
+				<button onclick="get_file('ownership')">&plus;</button>
 				<input class="no-view-file-field" type="file" name="drop-click-file_loader-stream"  id="drop-click-file_loader-stream" />
-				<div class="droppable"  ondrop="dropHandler(event,'stream');" ondragover="dragOverHandler(event,'stream');">
+				<div class="droppable"  ondrop="dropHandler(event,'ownership');" ondragover="dragOverHandler(event,'ownership');">
 					<br>&nbsp;<br><br>
-					<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'stream')" />
+					<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'ownership')" />
 				</div>
 			</div>
 		<!--  -->
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-demo" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Demo Drop (drag & drop)
+					Wallet (drag & drop)
 				</span><br>
 				<button onclick="show_stuff('demo')" >list</button>
 				<button onclick="get_file('demo')">&plus;</button>
@@ -966,14 +967,14 @@ html {
 		<!--  -->
 			<div class="item" style="border: rgb(173, 145, 173) 2px solid;padding: 4px;background-color: rgb(248, 246, 220);">
 				<span id="add-links" style="text-decoration: underline;color: #000;font-weight: 600;">
-					Link Package Drop (drag & drop)
+					Assets Drop (drag & drop)
 				</span><br>
-				<button onclick="show_stuff('links')" >list</button>
-				<button onclick="get_file('links')">&plus;</button>
+				<button onclick="show_stuff('assets')" >list</button>
+				<button onclick="get_file('assets')">&plus;</button>
 				<input class="no-view-file-field" type="file" name="drop-click-file_loader-links"  id="drop-click-file_loader-links" />
-				<div class="droppable"  ondrop="dropHandler(event,'links');" ondragover="dragOverHandler(event,'links');">
+				<div class="droppable"  ondrop="dropHandler(event,'assets');" ondragover="dragOverHandler(event,'assets');">
 					<br>&nbsp;<br><br>
-					<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'links')" />
+					<image class="capture_image" src="images/drop-target.png" onclick="capture_clicks(event,'assets')" />
 				</div>
 
 			</div>
@@ -1321,26 +1322,23 @@ const DELETE_COLOR = "pink"
 const PUBLISHED_COLOR = "limegreen"
 const UNPUBLISHED_COLOR = "black"
 
-var g_current_sel_display = "blog"
+var g_current_sel_display = "contacts"
 var g_current_edit_el = null
 
 //
 var g_all_user_entries = {
-		"blog" : [],
-	"stream" : [],
-	"demo" : [],
-	"links" : []
-
+	"contacts" : [],
+	"ownership" : [],
+	"wallet" : [],
+	"assets" : []
 }
 
 var g_current_entry_dom_map  = {}
 var g_undo_list = {
-	
-	"blog" : {},
-	"stream" : {},
-	"demo" : {},
-	"links" : {}
-
+	"contacts" : {},
+	"ownership" : {},
+	"wallet" : {},
+	"assets" : {}
 }
 
 // id to item
@@ -1417,223 +1415,7 @@ let g_ext_to_media_type = {
 
 
 
-
-var g_uploader_cache = {}
-
-const DEFINED_CHUNK_SIZE = 5000000
-const DEFINED_MAX_SIZE = 9000000
-
-async function finalize_small_media_storage(primary_response) {
-	if ( primary_response.transition && primary_response.transition.token ) {
-		let transaction_token = primary_response.transition.token
-		let protocol = primary_response.elements.protocol
-		let media_id = primary_response.elements.media_id
-		let url = `http://${g_siteURL}/uploaders/secondary/transition`
-		let body = {
-			"token" : transaction_token,
-			"match" : "handshake",
-		}
-		body.protocol = protocol
-		body.media_id = media_id   // maybe a checksum
-		let secondary_resp =  await postData(url,body)
-		return [protocol,media_id]
-	}
-	return [false,false]
-}
-
-//
-// finalize_media_storage
-//	There are likely faster ways of sending the data. But, this way requires some permission and safe guarding by the server sid.
-async function finalize_media_storage(primary_response,formdata,blob,obj) {
-
-	let secondary_resp = primary_response
-
-	if ( primary_response.transition && primary_response.transition.token ) {	// A token has to be associated with the transaction
-		//
-		let transaction_token = secondary_resp.transition.token		// call the transition token the transaction_token
-		let protocol = 'p2p-default'				// These fields have no real value until the end, but are always checked in case they may be used for security.
-		let media_id = ""
-		//
-		formdata.set("protocol",protocol)				// Most likely ipfs ... 
-		formdata.set("media_id",media_id)				// not set until the storage system can identify 
-		formdata.set("token",transaction_token)
-		formdata.set("match","upload-next")				// tell the server that you are sending one chunk after another
-		formdata.set("next",true)  // NEXT
-		formdata.set("_t_match_field",obj.file_name)
-		let url = `http://${g_siteURL}/uploaders/secondary/transition`		// generic seconday keyed by the token
-		//
-		let size_end = blob.size						// total length of the data in flight
-		let start = 0;
-		let span = DEFINED_CHUNK_SIZE					// application generation sets this (tuning upstream)
-		let num_sends = Math.floor(size_end/span) + 1	// size/chunk_size
-		//
-		for ( let i = 0; i < num_sends; i++ ) {			// the number of times this is called is determined by the client
-			//
-			let start = i*span
-			let end = Math.min((i+1)*span,size_end)
-			let blob_part = blob.slice(start,end)  				// next part of the blob
-			formdata.set('media_file', new Blob([blob_part]),obj.file_name)
-			secondary_resp = await postData(url,formdata, 'omit',false,'multipart/form-data')  // send it as a separate file
-			//
-			if ( (secondary_resp.OK !== "true") && (secondary_resp.OK !== true) ) {
-				break;			// This last send failed. Bailout  (If failed, the server will shutdown the communication)
-			}
-		}
-		//
-		if ( (secondary_resp.OK === "true") || (secondary_resp.OK === true) ) {						// The last send was good.
-			let body = {
-				"token" : transaction_token,
-				"match" : "complete",
-				"_t_match_field" : obj.file_name,
-				"file" : { "name" : obj.file_name },
-				"next"	: false		// NO NEXT
-			}
-			secondary_resp =  await postData(url,body)			// Tell the server that this transaction is done...
-			let elements = secondary_resp.state.elements			// The good stuff is returned in a state field 
-			protocol = elements.protocol  // final hash and provider returned in state (same as for the shor but in the state field)
-			media_id = elements.media_id
-		}
-		//
-		return [protocol,media_id]
-	}
-	return [false,false]
-}
-
-
-// data:[<MIME-type>][;charset=<encoding>][;base64],<data>
-
-async function upload_small(obj,blob_already) {			// 	obj.media_type
-	obj.email = g_dashboard_info.email
-	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
-	const mime = obj.mime
-	//
-	let blob_data = ""
-	//
-	if ( !(blob_already) )  {
-		try {
-			let res = await fetch(obj.blob)
-			blob_data = await res.blob()
-		} catch(e) {
-			return
-		}
-	} else {
-		blob_data = blob_already
-	}
-	//
-	let formdata = new FormData()
-	for ( let ky in obj ) {
-		if ( ky === 'blob' ) continue
-		formdata.append(ky, obj[ky])
-	}
-	formdata.append('protocol', 'p2p-default')
-	formdata.append('media_file', new Blob([blob_data]), obj.file_name)
-	//
-	// in the small versions, the file is sent immediately. No preamble
-	//
-	let primary_response =  await postData(url,formdata,'omit',false,'multipart/form-data')
-	if ( primary_response.OK === "true" ) {
-		let media_store_characteristics = await finalize_small_media_storage(primary_response)
-		return media_store_characteristics
-	} else {
-		return [false, false]
-	}
-}
-
-
-async function upload_big(obj,blob_already) {
-	obj.email = g_dashboard_info.email
-	let url = `http://${g_siteURL}/uploaders/transition/do_param_upload`
-	const mime = obj.mime
-	let blob_data = ""
-	//
-	if ( !(blob_already) )  {
-		try {
-			let res = await fetch(obj.blob)
-			blob_data = await res.blob()
-		} catch(e) {
-			return
-		}
-	} else {
-		blob_data = blob_already
-	}
-	//
-	let formdata = new FormData()
-	for ( let ky in obj ) {
-		if ( ky === 'blob' ) continue
-		formdata.append(ky, obj[ky])
-	}
-	formdata.append('protocol', 'p2p-default')
-	formdata.append('preamble',blob_data.size)	// tell the size of data to come
-	//
-	// in the large versions, a preamble is sent with the size of the data. No data is sent in the first message
-	//
-	let primary_response =  await postData(url,formdata,'omit',false,'multipart/form-data')
-	//
-	if ( primary_response.OK === "true" ) {		// If the system can handle the request, start a cycle of sends
-		let media_store_characteristics = await finalize_media_storage(primary_response,formdata,blob_data,obj)
-		return media_store_characteristics
-	} else {
-		return [false, false]
-	}
-}
-
-// ---- ---- ---- ---- ---- ---- ----
-async function upload_audio(obj) {
-	let blob_data
-	try {
-		let res = await fetch(obj.blob)
-		blob_data = await res.blob()
-	} catch(e) {
-		return
-	}
-	if ( blob_data.size > DEFINED_MAX_SIZE ) {
-		return await upload_big(obj,blob_data)
-	} else {
-		return await upload_small(obj,blob_data)
-	}
-}
-
-// ---- ---- ---- ---- ---- ---- ----
-async function upload_image(obj) {
-	if ( !(blob_already) )  {
-		try {
-			let res = await fetch(obj.blob)
-			blob_data = await res.blob()
-		} catch(e) {
-			return
-		}
-	} else {
-		blob_data = blob_already
-	}
-}
-
-// ---- ---- ---- ---- ---- ---- ----
-async function upload_video(obj) {
-	return await upload_big(obj)
-}
-
-
-// ---- ---- ---- ---- ---- ---- ----
-function prep_upload_for(obj,uploader_fun) {
-	//
-	g_uploader_cache[obj._dash_entry_id] = async () => {
-		return await uploader_fun(obj)
-	}
-	//
-}
-
-
-// ---- ---- ---- ---- ---- ---- ----
-async function do_media_upload(obj) {		// earlier a link was made for the media, which will be uploaded if ever the user "save"s it.
-	let id = obj._dash_entry_id
-	let _uploader = g_uploader_cache[id]	// _uploader from map
-	if ( _uploader ) {
-		let [protocol,asset_id] = await _uploader()
-		return [protocol,asset_id]
-	}
-}
-
-
+undefined
 
 
 
@@ -1686,10 +1468,10 @@ function get_ext(fname) {
 
 
 function best_cat_for_ext(ext) {
-	if ( g_code_files.indexOf(ext) >= 0 ) return ("blog")
-	else if ( g_text_files.indexOf(ext) >= 0 ) return ("blog")
-	else if ( g_media_files.indexOf(ext) >= 0 ) return ("stream")
-	return("blog")
+	if ( g_code_files.indexOf(ext) >= 0 ) return ("contacts")
+	else if ( g_text_files.indexOf(ext) >= 0 ) return ("contacts")
+	else if ( g_media_files.indexOf(ext) >= 0 ) return ("ownership")
+	return("contacts")
 }
 
 
@@ -1735,12 +1517,12 @@ function add_or_use_url(url) {
 		if ( !(entry) ) return;
 		//
 		switch ( entry.asset_type ) {
-			case "links" : {
+			case "assets" : {
 				//
 				entry.links.push(url)
 				break;
 			}
-			case "stream" : {
+			case "ownership" : {
 				//
 				if ( entry.media ) {
 					entry.media.source = url
@@ -1756,7 +1538,7 @@ function add_or_use_url(url) {
 
 
 function best_fit_media_type(file_name) {
-	//if ( category == 'stream' ) {
+	//if ( category == 'ownership' ) {
 		let ext =  get_ext(file_name)
 		let mtype = g_ext_to_media_type[ext]
 		if ( mtype === undefined ) {
@@ -2481,7 +2263,7 @@ function done_with_file(category,obj) {
 		}
 		if ( obj.media_type ) {
 			if ( (obj.media_type === 'audio') || (obj.media_type === 'video') ) {
-				category = 'stream'
+				category = 'ownership'
 			}
 		}
 		//
@@ -2510,7 +2292,7 @@ function done_with_file(category,obj) {
 			entry.decoded = true
 		}
 		//
-				// for use in the dashboard UI operations
+				// for use in the profile UI operations
 		entry.deleted = false
 		entry.published = false
 		entry.file_name = obj.file_name			// use the one from the system if it got here from the file system
@@ -2523,7 +2305,7 @@ function done_with_file(category,obj) {
 		if ( (entry.abstract !== undefined) && (typeof entry.abstract === "string" ) ) {
 			entry.data = entry.abstract				// abstract goes on display
 		}
-		if ( entry.data === undefined ) {			// Never got a version of data this dashboard knows about. So, tell the user to make some.
+		if ( entry.data === undefined ) {			// Never got a version of data this profile knows about. So, tell the user to make some.
 			entry.data = "Please enter a description"
 		}
 		entry.asset_type = category
@@ -2774,20 +2556,20 @@ function dragOverHandler(ev,subst_key) {
 		'owner' : user,
 		'date'  : ('' + Date.now()),
 		'panel_key' : generate_password(),
-		'dashboard_text' : 'test dashboard_text'
-		//obj.header_user_name = g_dashboard_info.header_user_name
-		//obj.dashboard_text = dashboard_text
+		'profile_text' : 'test profile_text'
+		//obj.header_user_name = g_profile_info.header_user_name
+		//obj.profile_text = profile_text
 		//obj.tag_line = obj.tag_line
 	}
 */
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-var g_dashboard_info = null
+var g_profile_info = null
 // DELETE TESTING DATA
 
 let shareable_field = document.getElementById("shareable")
-g_dashboard_info.page_host = document.location.href   //document.location.hostname
-shareable_field.value = JSON.stringify(g_dashboard_info)
+g_profile_info.page_host = document.location.href   //document.location.hostname
+shareable_field.value = JSON.stringify(g_profile_info)
 
 
 //
@@ -2796,14 +2578,14 @@ shareable_field.value = JSON.stringify(g_dashboard_info)
 // sends the data file in an identifying packet to the backend for saving to a user directory...
 async function real_save(obj) {
 	obj.saved_ever = true
-	let proxyPath = 'dashboard'
+	let proxyPath = 'profile'
 	let ky = g_current_sel_display
 	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/${ky}`
-	if ( g_dashboard_info ) {		// later this will be fetched with uuid+${ky}+%{email}
-		obj.user_name = g_dashboard_info.user_name
+	if ( g_profile_info ) {		// later this will be fetched with uuid+${ky}+%{email}
+		obj.user_name = g_profile_info.user_name
 		let asset_id = `+${ky}+${obj.email}}`
-		obj.email = g_dashboard_info.email
-		obj.token = g_dashboard_info.token
+		obj.email = g_profile_info.email
+		obj.token = g_profile_info.token
 		obj._origin = "copious"
 		let result = await postData(endpoint,obj)
 	}
@@ -2819,12 +2601,12 @@ async function real_publish(obj) {
 	//
 	let send_obj = Object.assign({},obj)
 	delete send_obj.data			// for a command don't send all the data (it will be on the server)
-	let proxyPath = 'dashboard'
+	let proxyPath = 'profile'
 	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/dash-commands`
 	send_obj.topic = "command-publish"
-	send_obj.user_name = g_dashboard_info.user_name
-	send_obj.email = g_dashboard_info.email
-	send_obj.token = g_dashboard_info.token
+	send_obj.user_name = g_profile_info.user_name
+	send_obj.email = g_profile_info.email
+	send_obj.token = g_profile_info.token
 	send_obj._origin = "copious"
 	let result = await postData(endpoint,send_obj) 	// send everything to be stored....
 }
@@ -2835,12 +2617,12 @@ async function real_unpublish(obj) {
 	//
 	let send_obj = Object.assign({},obj)
 	delete send_obj.data			// for a command don't send all the data (it will be on the server)
-	let proxyPath = 'dashboard'
+	let proxyPath = 'profile'
 	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/dash-commands`
 	send_obj.topic = "command-recind"
-	send_obj.user_name = g_dashboard_info.user_name
-	send_obj.email = g_dashboard_info.email
-	send_obj.token = g_dashboard_info.token
+	send_obj.user_name = g_profile_info.user_name
+	send_obj.email = g_profile_info.email
+	send_obj.token = g_profile_info.token
 	send_obj._origin = "copious"	
 	let result = await postData(endpoint,send_obj)
 }
@@ -2848,16 +2630,16 @@ async function real_unpublish(obj) {
 // fetch the file from the backend once again...
 async function real_reload(obj) {
 	// always keep the email inthe object
-	obj.email = g_dashboard_info.email
+	obj.email = g_profile_info.email
 	//
-	let proxyPath = 'dashboard'
+	let proxyPath = 'profile'
 	let ky = g_current_sel_display
 	let asset_id = `${obj._id}+${ky}+${obj.email}}`
 	let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/guarded/dynamic/${asset_id}`
 	let send_obj = Object.assign({},obj)
 	delete send_obj.data			// for a command don't send all the data (it will be on the server)
-	send_obj.user_name = g_dashboard_info.user_name
-	send_obj.token = g_dashboard_info.token
+	send_obj.user_name = g_profile_info.user_name
+	send_obj.token = g_profile_info.token
 	send_obj._origin = "copious"
 	//
 	let result = await postData(endpoint,obj)			// send everything and then update it on this page.
@@ -2895,12 +2677,12 @@ async function real_delete(obj) {
 	} else {
 		let send_obj = Object.assign({},obj)
 		delete send_obj.data			// for a command don't send all the data (it will be on the server)
-		let proxyPath = 'dashboard'
+		let proxyPath = 'profile'
 		let endpoint = `${location.protocol}//${g_siteURL}/${proxyPath}/transition/dash-commands`
 		send_obj.topic = "command-delete"
-		send_obj.user_name = g_dashboard_info.user_name
-		send_obj.email = g_dashboard_info.email
-		send_obj.token = g_dashboard_info.token
+		send_obj.user_name = g_profile_info.user_name
+		send_obj.email = g_profile_info.email
+		send_obj.token = g_profile_info.token
 		send_obj._origin = "copious"
 		let result = await postData(endpoint,send_obj)
 	}
@@ -2957,24 +2739,24 @@ function drop_content_aware() {
 }
 
 
-function setup_user_dashboard(dashboardResponse,session_token) {
+function setup_user_profile(profileResponse,session_token) {
 
 	// this is a response object from the parent window....
-	g_dashboard_info = dashboardResponse		// it becomes the dashboard info
+	g_profile_info = profileResponse		// it becomes the profile info
 	if ( session_token !== undefined ) {
-		g_dashboard_info.token = session_token
+		g_profile_info.token = session_token
 	}
 	
 	// use the field in the info object to populate elements with the same names 
 	// as the object field names
-	for ( let ky in dashboardResponse ) {
+	for ( let ky in profileResponse ) {
 		let el = document.getElementById(ky)
 		if ( el ) {
-			el.innerHTML = dashboardResponse[ky]
+			el.innerHTML = profileResponse[ky]
 		}
 	}
 	//
-	let _entries = g_dashboard_info.entries
+	let _entries = g_profile_info.entries
 	if ( _entries ) {
 		for ( let ky in g_all_user_entries ) {
 			if ( _entries[ky] !== undefined ) {
@@ -2983,11 +2765,11 @@ function setup_user_dashboard(dashboardResponse,session_token) {
 		}
 	}
 	//
-	g_dashboard_info.page_host = document.host
+	g_profile_info.page_host = document.host
 	let shar = document.getElementById("shareable")
-	shar.value = JSON.stringify(g_dashboard_info)
+	shar.value = JSON.stringify(g_profile_info)
 
-	show_stuff('blog')
+	show_stuff('contacts')
 	drop_content_aware()
 	//setTimeout(setup_ipfs_node,2000)
 }

@@ -45,665 +45,669 @@ html {
     display: block;
 }
 
-		.items {
-			display: flex;
-			flex-wrap: wrap;
-			margin-left: -10px;
-			margin-top: -10px;
-		}
-	
-		.items .item {
-			flex: 1 0 300px;
-			box-sizing: border-box;
-			background: -webkit-linear-gradient(to right, rgba(242, 242, 210, 0.3), white));
-			background: linear-gradient(to right, rgba(242, 242, 210, 0.3), white );
-			color: #171e42;
-			padding: 10px;
-			margin-left: 10px;
-			margin-top: 0px;
-		}
-	
-		.items .extra-i {
-			padding-left: 10%;
-			padding-bottom: 4px;
-			padding-right: 12px;
-			font-size: 110%;
-			font-family: sans-serif;
-		}
-	
-		.middleBanner {
-			text-align: 'center';
-			padding-left: 10%;
-			padding-right: 10%;
-			font-weight:bold;
-			color: darkgreen;
-			padding-top:4%;
-			overflow:auto;
-		}
+.items {
+	display: flex;
+	flex-wrap: wrap;
+	margin-left: -10px;
+	margin-top: -10px;
+}
 
-		.applink {
-			padding:3px;
-			background-color: cornsilk;
-			width:inherit;
-			min-height: 100%;
-			color:darkolivegreen;
-			font-weight: bolder;
+.items .item {
+	flex: 1 0 300px;
+	box-sizing: border-box;
+	background: -webkit-linear-gradient(to right, rgba(242, 242, 210, 0.3), white));
+	background: linear-gradient(to right, rgba(242, 242, 210, 0.3), white );
+	color: #171e42;
+	padding: 10px;
+	margin-left: 10px;
+	margin-top: 0px;
+}
 
-		}
-	
-		.extraBanner {
-			text-align: 'center';
-			padding-left: 10%;
-			padding-right: 10%;
-			font-weight:bold;
-			color: #FF4400;
-			padding-top:4%;
-		}
-	
-	
-		.fillLowerWrap {
-			width: 66%;
-			margin-left:0px;
-			margin-right:0px;
-			padding: 8px;
-			margin-top:8px;
-			background: -webkit-linear-gradient(to right, white, #FAFAFF);
-			background: linear-gradient(to right, white, #FAFAFF );
-			margin-left: 10px;
-			min-height: fit-content;
-		}
+.items .extra-i {
+	padding-left: 10%;
+	padding-bottom: 4px;
+	padding-right: 12px;
+	font-size: 110%;
+	font-family: sans-serif;
+}
+
+.middleBanner {
+	text-align: 'center';
+	padding-left: 10%;
+	padding-right: 10%;
+	font-weight:bold;
+	color: darkgreen;
+	padding-top:4%;
+	overflow:auto;
+}
+
+.applink {
+	padding:3px;
+	background-color: cornsilk;
+	width:inherit;
+	min-height: 100%;
+	color:darkolivegreen;
+	font-weight: bolder;
+
+}
+
+.extraBanner {
+	text-align: 'center';
+	padding-left: 10%;
+	padding-right: 10%;
+	font-weight:bold;
+	color: #FF4400;
+	padding-top:4%;
+}
 
 
-		@media (max-width: 1225px) {
-			.fillLowerWrap {
-				visibility : "none";
-				height : 0px;
-			}
-		}
+.fillLowerWrap {
+	width: 66%;
+	margin-left:0px;
+	margin-right:0px;
+	padding: 8px;
+	margin-top:8px;
+	background: -webkit-linear-gradient(to right, white, #FAFAFF);
+	background: linear-gradient(to right, white, #FAFAFF );
+	margin-left: 10px;
+	min-height: fit-content;
+	display: table-column-group;
+}
 
+
+@media (max-width: 1225px) {
+	.fillLowerWrap {
+		visibility : "none";
+		height : 0px;
+	}
+}
+
+
+.fillLower {
+	border: darkred 2px solid;
+	height: fit-content;
+	width: 96%;
+	min-height: fit-content;
+	margin-left: 10px;
+	padding:8px;
+	background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE);
+	background: linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE );
+}
+
+.fillLower-respect {
+	max-width: 30%;
+}
+
+@media (min-width: 1220px) {
+	.fillLowerWrap {
+		width: 66%;
+	}
+}
+
+@media (max-width: 1219px) {
+	.fillLowerWrap {
+		width: 100%;
+	}
+}
+
+@media (max-width: 1100px) {
+	.fillLowerWrap {
+		width: 66%;
+	}
+}
+
+.fitMenuLower {
+	width: 95%;
+	height: 50%;
+	margin-left:0px;
+	margin-right:0px;
+	padding: 8px;
+	margin-top:8px;
+	background: -webkit-linear-gradient(to right, white, #FAFAFF);
+	background: linear-gradient(to right, white, #FAFAFF );
+	margin-left: 10px;
+}
+
+#squashMenu:hover {
+	border: 1px solid rgb(230,230,240,0.4);
+	padding-top:4px;
+	background-color: #EFEFEF;
+}
+
+#squashMenuContainer {
+	position:absolute;
+	visibility:hidden;
+	top : 0; left : 0;
+	height:100%;
+	width: 55%;
+	z-index:100;
+	border: rgba(252, 190, 190, 0.4) 2px solid;
+	background-color: white;
+}
+
+.fade_able {
+	position:absolute;
+	visibility:hidden;
+	top : 10px; left : 10px;
+	height:80%;
+	width: 40%;
+	z-index:101;
+	border: rgba(252, 190, 190, 0.4) 2px solid;
+	background-color: white;
+	overflow:hidden;
+}
+
+.solid_able {
+	position:absolute;
+	visibility:hidden;
+	top : 10px; left : 10px;
+	height:80%;
+	width: 40%;
+	z-index:111;
+	border: rgba(252, 190, 190, 0.4) 2px solid;
+	background-color: white;
+	overflow: hidden;
+}
+
+@media screen and (max-width: 950px) {
+	.solid_able {
+		width: 90%;
+	}
+}
+
+#thankyou_box {
+	position:absolute;
+	visibility:hidden;
+	top : 25%; left : 25%;
+	height:50%;
+	width: 50%;
+	z-index:150;
+	border: rgba(100, 5, 5, 0.6) 2px solid;
+	background-color: lightgoldenrodyellow;
+	overflow: auto;
+}
+
+@media screen and (max-width: 1040px) {
+	.fade_able {
+		width: 60%;
+	}
+}
+
+@media screen and (max-width: 600px) {
+	.fade_able {
+		width: 90%;
+	}
+}
+
+.fade_able_content {
+	height:100%;
+	width: 100%;
+	overflow:auto;
+}
+
+.togglebar {
+	height:20px;
+	visibility:inherit;
+	background-color: navy;
+	text-align:right;
+}
+
+.closer_x {
+	padding:2px;
+	color:purple;
+	font-weight:bolder;
+	border: solid 1px red;
+	cursor:pointer;
+}
+
+.user-id {
+	font-weight: bolder;
+	color: rgb(5, 44, 5);
+}
+
+button {
+	cursor: pointer;
+	font-size: 101%;
+	font-weight: bold;
+	color: darkblue;
+	margin: 2px;
+	width:120px;
+}
+
+button:hover {
+	background-color : #CACAFF;
+	color: darkred;
+}
+
+.button-hit-once {
+	box-shadow: blanchedalmond;
+}
+
+.button-hit-once:disabled {
+	cursor:none;
+	color:lightsteelblue;
+	background-color:antiquewhite;
+}
+
+@media screen and (max-width: 390px) {
+	.items .extra-i {
+		padding-left: 1%;
+	}
+}
+
+@media screen and (max-width: 600px) {
+	.items .extra-i {
+		padding-left: 3%;
+	}
+}
+
+.longviz {
+	visibility : "visibile";
+	height: 10px;
+	background-color:inherit;
+}
+
+@media (max-width: 1040px) {
+	.longviz {
+		visibility : "none";
+		height : 0px;
+	}
+}
+
+.shortviz {
+	visibility : "none";
+	height:0px;
+	margin-top:6px;
+}
+
+@media (max-width: 620px) {
+	.shortviz {
+		visibility : "visible";
+		height:2px;
+		background-color:darkgreen;
+		margin-bottom:12px;
+	}
+}
+
+@media (min-width: 1040px) {
+	.shortviz {
+		visibility : "visible";
+		height:120px;
+		border: 2px darkblue solid;
+		background-color:#FFFFF6;
+		margin-bottom:30px;
+		margin-top:5px;
+	}
+}
+
+@media (min-width: 380px) {
+	.items .item {
+		max-width: calc(100% - 20px);
+	}
+	.items .extra-i {
+		padding-left: 3%;
+	}
+}
+@media (min-width: 410px) {
+	.items .item {
+		max-width: calc(100% - 10px);
+	}
+}
+@media (min-width: 620px) {
+	.items .item {
+		max-width: calc(50% - 10px);
+	}
+}
+@media (min-width: 830px) {
+	.items .item {
+		max-width: calc(50% - 10px);
+	}
+}
+@media (min-width: 1040px) {
+	.items .item {
+		max-width: calc(33.33333% - 10px);
+	}
+}
+@media (min-width: 1250px) {
+	.items .item {
+		max-width: calc(25%- 10px);
+	}
+}
+@media (min-width: 1460px) {
+	.items .item {
+		max-width: calc(20% - 10px);
+	}
+}
+@media (min-width: 1670px) {
+	.items .item {
+		min-width: calc(16.66667% - 10px);
+	}
+}
+
+
+body {
+	border: 1px solid black;
 	
-		.fillLower {
-			border: darkred 2px solid;
-			height: fit-content;
-			width: 96%;
-			min-height: fit-content;
-			margin-left: 10px;
-			padding:8px;
-			background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE);
-			background: linear-gradient(to right, rgba(252, 252, 240, 0.4), #FEFEFE );
-		}
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+
+@media screen and (orientation: portrait) {
+	#mainNav {
+		width: 100%;
+	}
+}
+
+@media screen and (orientation: landscape) {
+	#mainNav {
+		width: 100%;
+	}
+}
+
+main {
+	border-left: solid 3px navy;
+	border-top: solid 1px #8833BB;
+	padding : 4px;
+	height: fit-content;
+	margin-bottom: 0%;
+}
+
+@media (min-width: 1220px) {
+	main {
+		margin-bottom: 0%;
+		border: none;
+	}
+}
+
+@media (max-width: 1219px) {
+	main {
+		margin-bottom: 90px;
+	}
+}
+
+@media (max-width: 1100px) {
+	main {
+		margin-bottom: 0%;
+		border: none;
+	}
+}
+
+#mainNav {
+	font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-weight: 700;
+	text-transform: uppercase;
+	background: blue;
+	border-left: solid 3px navy;
+	border-top: solid 3px navy;
+	border-bottom: solid 3px rgba(252,252,255,0.7);
+	min-height: 90px;
+	padding: 20px
+	background: -webkit-linear-gradient(to left, rgba(242, 242, 210, 0.3), white);
+	background: linear-gradient(to left, rgba(242, 242, 210, 0.3), white );
 	
+}
 
-		@media (min-width: 1220px) {
-			.fillLowerWrap {
-				width: 66%;
-			}
-		}
+#mainNav table {
+	padding-left: 3%;
+}
 
-		@media (max-width: 1219px) {
-			.fillLowerWrap {
-				width: 100%;
-			}
-		}
 
-		@media (max-width: 1100px) {
-			.fillLowerWrap {
-				width: 66%;
-			}
-		}
+#mainNav  table  a:focus { outline: none; }
+#mainNav  table  .navbar-brand {
+	font-size: 1.1rem;
+	color: white;
+}
+
+#mainNav  table  .navbar-brand.active, #mainNav .navbar-brand:active, #mainNav .navbar-brand:focus, #mainNav .navbar-brand:hover {
+	color: white;
+}
+
+#mainNav  table  .navbar-nav {
+	letter-spacing: 1px; }
+
+#mainNav  table  .navbar-nav li.nav-item {
+	display:inline;
+}
+
+
+
+#mainNav  table  .navbar-nav li.nav-item a.nav-link {
+	color: darkgreen;
+	text-decoration: none;
+	vertical-align: top;
+	padding-right: 10px;
+}
+
+#mainNav  table  .navbar-nav li.nav-item a.nav-link:hover {
+	color: #18BC9C;
+	outline: none;
 	
-		.fitMenuLower {
-			width: 95%;
-			height: 50%;
-			margin-left:0px;
-			margin-right:0px;
-			padding: 8px;
-			margin-top:8px;
-			background: -webkit-linear-gradient(to right, white, #FAFAFF);
-			background: linear-gradient(to right, white, #FAFAFF );
-			margin-left: 10px;
-		}
-	
-		#squashMenu:hover {
-			border: 1px solid rgb(230,230,240,0.4);
-			padding-top:4px;
-			background-color: #EFEFEF;
-		}
-	
-		#squashMenuContainer {
-			position:absolute;
-			visibility:hidden;
-			top : 0; left : 0;
-			height:100%;
-			width: 55%;
-			z-index:100;
-			border: rgba(252, 190, 190, 0.4) 2px solid;
-			background-color: white;
-		}
-	
-		.fade_able {
-			position:absolute;
-			visibility:hidden;
-			top : 10px; left : 10px;
-			height:80%;
-			width: 40%;
-			z-index:101;
-			border: rgba(252, 190, 190, 0.4) 2px solid;
-			background-color: white;
-			overflow:hidden;
-		}
-
-		.solid_able {
-			position:absolute;
-			visibility:hidden;
-			top : 10px; left : 10px;
-			height:80%;
-			width: 40%;
-			z-index:111;
-			border: rgba(252, 190, 190, 0.4) 2px solid;
-			background-color: white;
-			overflow: hidden;
-		}
-
-		@media screen and (max-width: 950px) {
-			.solid_able {
-				width: 90%;
-			}
-		}
-
-		#thankyou_box {
-			position:absolute;
-			visibility:hidden;
-			top : 25%; left : 25%;
-			height:50%;
-			width: 50%;
-			z-index:150;
-			border: rgba(100, 5, 5, 0.6) 2px solid;
-			background-color: lightgoldenrodyellow;
-			overflow: auto;
-		}
-
-		@media screen and (max-width: 1040px) {
-			.fade_able {
-				width: 60%;
-			}
-		}
-
-		@media screen and (max-width: 600px) {
-			.fade_able {
-				width: 90%;
-			}
-		}
-
-		.fade_able_content {
-			height:100%;
-			width: 100%;
-			overflow:auto;
-		}
-
-		.togglebar {
-			height:20px;
-			visibility:inherit;
-			background-color: navy;
-			text-align:right;
-		}
-	
-		.closer_x {
-			padding:2px;
-			color:purple;
-			font-weight:bolder;
-			border: solid 1px red;
-			cursor:pointer;
-		}
-		
-		.user-id {
-			font-weight: bolder;
-			color: rgb(5, 44, 5);
-		}
-
-		button {
-			cursor: pointer;
-			font-size: 101%;
-			font-weight: bold;
-			color: darkblue;
-			margin: 2px;
-			width:120px;
-		}
-	
-		button:hover {
-			background-color : #CACAFF;
-			color: darkred;
-		}
-
-		.button-hit-once {
-			box-shadow: blanchedalmond;
-		}
-
-		.button-hit-once:disabled {
-			cursor:none;
-			color:lightsteelblue;
-			background-color:antiquewhite;
-		}
-	
-		@media screen and (max-width: 390px) {
-			.items .extra-i {
-				padding-left: 1%;
-			}
-		}
-	
-		@media screen and (max-width: 600px) {
-			.items .extra-i {
-				padding-left: 3%;
-			}
-		}
-	
-		.longviz {
-			visibility : "visibile";
-			height: 10px;
-			background-color:inherit;
-		}
-	
-		@media (max-width: 1040px) {
-			.longviz {
-				visibility : "none";
-				height : 0px;
-			}
-		}
-	
-		.shortviz {
-			visibility : "none";
-			height:0px;
-			margin-top:6px;
-		}
-
-		@media (max-width: 620px) {
-			.shortviz {
-				visibility : "visible";
-				height:2px;
-				background-color:darkgreen;
-				margin-bottom:12px;
-			}
-		}
-	
-		@media (min-width: 1040px) {
-			.shortviz {
-				visibility : "visible";
-				height:120px;
-				border: 2px darkblue solid;
-				background-color:#FFFFF6;
-				margin-bottom:30px;
-				margin-top:5px;
-			}
-		}
-	
-		@media (min-width: 380px) {
-			.items .item {
-				max-width: calc(100% - 20px);
-			}
-			.items .extra-i {
-				padding-left: 3%;
-			}
-		}
-		@media (min-width: 410px) {
-			.items .item {
-				max-width: calc(100% - 10px);
-			}
-		}
-		@media (min-width: 620px) {
-			.items .item {
-				max-width: calc(50% - 10px);
-			}
-		}
-		@media (min-width: 830px) {
-			.items .item {
-				max-width: calc(50% - 10px);
-			}
-		}
-		@media (min-width: 1040px) {
-			.items .item {
-				max-width: calc(33.33333% - 10px);
-			}
-		}
-		@media (min-width: 1250px) {
-			.items .item {
-				max-width: calc(25%- 10px);
-			}
-		}
-		@media (min-width: 1460px) {
-			.items .item {
-				max-width: calc(20% - 10px);
-			}
-		}
-		@media (min-width: 1670px) {
-			.items .item {
-				min-width: calc(16.66667% - 10px);
-			}
-		}
-	
-	
-		body {
-			border: 1px solid black;
-			
-			-moz-box-sizing: border-box;
-			box-sizing: border-box;
-		}
+}
 
 
-		@media screen and (orientation: portrait) {
-			#mainNav {
-				width: 100%;
-			}
-		}
-
-		@media screen and (orientation: landscape) {
-			#mainNav {
-				width: 100%;
-			}
-		}
-	
-		main {
-			border-left: solid 3px navy;
-			border-top: solid 1px #8833BB;
-			padding : 4px;
-			height: fit-content;
-			margin-bottom: 0%;
-		}
-
-		@media (min-width: 1220px) {
-			main {
-				margin-bottom: 0%;
-				border: none;
-			}
-		}
-
-		@media (max-width: 1219px) {
-			main {
-				margin-bottom: 90px;
-			}
-		}
-
-		@media (max-width: 1100px) {
-			main {
-				margin-bottom: 0%;
-				border: none;
-			}
-		}
-	
-		#mainNav {
-			font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-			font-weight: 700;
-			text-transform: uppercase;
-			background: blue;
-			border-left: solid 3px navy;
-			border-top: solid 3px navy;
-			border-bottom: solid 3px rgba(252,252,255,0.7);
-			min-height: 90px
-			padding: 20px
-			background: -webkit-linear-gradient(to left, rgba(242, 242, 210, 0.3), white);
-			background: linear-gradient(to left, rgba(242, 242, 210, 0.3), white );
-			
-		}
-	
-		#mainNav table {
-			padding-left: 3%;
-		}
-	
-	
-		#mainNav  table  a:focus { outline: none; }
-		#mainNav  table  .navbar-brand {
-			font-size: 1.1rem;
-			color: white;
-		}
-	
-		#mainNav  table  .navbar-brand.active, #mainNav .navbar-brand:active, #mainNav .navbar-brand:focus, #mainNav .navbar-brand:hover {
-			color: white;
-		}
-	
-		#mainNav  table  .navbar-nav {
-			letter-spacing: 1px; }
-	
-		#mainNav  table  .navbar-nav li.nav-item {
-			display:inline;
-		}
-	
-		
-		
-		#mainNav  table  .navbar-nav li.nav-item a.nav-link {
-			color: darkgreen;
-			text-decoration: none;
-			vertical-align: top;
-			padding-right: 10px;
-		}
-	
-		#mainNav  table  .navbar-nav li.nav-item a.nav-link:hover {
-			color: #18BC9C;
-			outline: none;
-			
-		}
-	
-	
-		#mainNav  table  .navbar-nav a.nav-text {
-			background-color : rgba(242,222,255,0.6);
-			border-radius: 25px;
-			margin-bottom: 9px;
-			margin-right: 6px;
-			white-space: nowrap;
-		}
+#mainNav  table  .navbar-nav a.nav-text {
+	background-color : rgba(242,222,255,0.6);
+	border-radius: 25px;
+	margin-bottom: 9px;
+	margin-right: 6px;
+	white-space: nowrap;
+}
 
 
-		#mainNav  table  .navbar-nav li.nav-item a.nav-link:active, #mainNav .navbar-nav li.nav-item a.nav-link:focus { color: white; }
-		
-		.footer-list li {
-			list-style-type: none;
-		}
-	
-		.footer-list li a:hover { color: gold; }
-		
-		.hover_group {
-			cursor:pointer;
-		}
-	
-		.hover_group rect {
-			fill:#e6e6e6;
-		}
-	
-		.hover_group:hover rect {
-			fill: #F6F6e6;
-		}
-	
-		footer {
-			padding:10px;
-			background: -webkit-linear-gradient(to left, rgba(252,252,255,0.5), #fffbe2 );
-			background: linear-gradient(to left, rgba(252,252,255,0.5), #fffbe2  );
-			text-align: center;
-			font-size: 0.85em;
-		}
-	
-		footer a {
-			text-decoration:none;
-			color:darkgreen;
-			font-weight:bold;
-			font-style: italic;
-		}
-	
-		.copiouslink:hover {
-			fill:navy;
-		}
-		.copiouslink {
-			fill:black;
-		}
-	
-		* {margin: 0; padding: 0; box-sizing: border-box}
-		
-		.PhIOtjDr_0 {
-			fill:none;
-			stroke:#1c1448;
-			stroke-width:4.59875107;
-			stroke-miterlimit:4;
-			stroke-dasharray: 2948 2950;
-			stroke-dashoffset: 2949;
-			animation: PhIOtjDr_draw 6666ms ease-in forwards;
-		}
+#mainNav  table  .navbar-nav li.nav-item a.nav-link:active, #mainNav .navbar-nav li.nav-item a.nav-link:focus { color: white; }
 
-		@keyframes PhIOtjDr_draw {
-			100% {stroke-dashoffset: 0}
-		}
+.footer-list li {
+	list-style-type: none;
+}
 
-		@keyframes PhIOtjDr_fade {
-			0% {stroke-opacity: 1}
-			97.1830985915493% {stroke-opacity: 1}
-			100% {stroke-opacity: 0}
-		}
-	
-		.form_el {
-			border:lightgray solid 1px;
-			padding:6px;
-			margin:2px;
-			width:80%;
-		}
+.footer-list li a:hover { color: gold; }
 
-		.form_el_inner {
-			border:lightgray solid 1px;
-			padding:6px;
-			margin:2px;
-			width:100%;
-		}
-	
-		label {
-			font-weight:bold;
-			color:darkgreen;
-			width:35%;
-		}
+.hover_group {
+	cursor:pointer;
+}
 
-		.field_el {
-			width:65%;
-		}
-	
-		@media (max-width: 1040px) {
-			.field_el {
-				width:94%;
-				margin-left:3%;
-				margin-right:3%;
-			}
-		}
+.hover_group rect {
+	fill:#e6e6e6;
+}
 
-		#contact_box {
-			background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE));
-			background: linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE );
-		}
-	
-		.textarea_field_el {
-			width: 94%;
-			margin:3%;
-		}
-	
-		.error-message {
-			visibility:hidden;
-			width:75%;
-			font-weight:bolder;
-			color:red;
-			background-color:white;
-			border: solid 1px orange;
-			padding:2px;
-			margin:3px;
-		}
+.hover_group:hover rect {
+	fill: #F6F6e6;
+}
 
-		/* The Modal (background) */
-		.modal {
-		  display: none; /* Hidden by default */
-		  position: relative; /* Stay in place */
-		  z-index: 1; /* Sit on top */
-		  left: 0;
-		  top: 0;
-		  width: 100%; /* Full width */
-		  height: 100%; /* Full height */
-		  overflow: auto; /* Enable scroll if needed */
-		  background-color: rgb(0,0,0); /* Fallback color */
-		  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-		  -webkit-animation-name: fadeIn; /* Fade in the background */
-		  -webkit-animation-duration: 0.4s;
-		  animation-name: fadeIn;
-		  animation-duration: 0.4s
-		}
+footer {
+	padding:10px;
+	background: -webkit-linear-gradient(to left, rgba(252,252,255,0.5), #fffbe2 );
+	background: linear-gradient(to left, rgba(252,252,255,0.5), #fffbe2  );
+	text-align: center;
+	font-size: 0.85em;
+}
 
-		/* Modal Content */
-		.modal-content {
-		  position: inherit;
-		  top: 0;
-		  background-color: #fefefe;
-		  width: 100%;
-		  -webkit-animation-name: slideIn;
-		  -webkit-animation-duration: 0.4s;
-		  animation-name: slideIn;
-		  animation-duration: 0.4s
-		}
+footer a {
+	text-decoration:none;
+	color:darkgreen;
+	font-weight:bold;
+	font-style: italic;
+}
 
-		/* The Close Button */
-		.close {
-		  color: white;
-		  float: right;
-		  font-size: 18px;
-		  font-weight: bold;
-		}
+.copiouslink:hover {
+	fill:navy;
+}
+.copiouslink {
+	fill:black;
+}
 
-		.close:hover,
-		.close:focus {
-		  color: #000;
-		  text-decoration: none;
-		  cursor: pointer;
-		}
+* {margin: 0; padding: 0; box-sizing: border-box}
 
-		.modal-header {
-		  padding: 2px 16px;
-		  background-color: #4ca85c;
-		  color: white;
-		}
+.PhIOtjDr_0 {
+	fill:none;
+	stroke:#1c1448;
+	stroke-width:4.59875107;
+	stroke-miterlimit:4;
+	stroke-dasharray: 2948 2950;
+	stroke-dashoffset: 2949;
+	animation: PhIOtjDr_draw 6666ms ease-in forwards;
+}
 
-		.modal-body {padding: 2px 16px;}
+@keyframes PhIOtjDr_draw {
+	100% {stroke-dashoffset: 0}
+}
 
-		.modal-footer {
-		  padding: 2px 16px;
-		  margin-bottom: 20px;
-		  background-color: darkgreen;
-		  color: white;
-		}
+@keyframes PhIOtjDr_fade {
+	0% {stroke-opacity: 1}
+	97.1830985915493% {stroke-opacity: 1}
+	100% {stroke-opacity: 0}
+}
 
-		/* Add Animation */
-		@-webkit-keyframes slideIn {
-		  from {bottom: -300px; opacity: 0}
-		  to {bottom: 0; opacity: 1}
-		}
+.form_el {
+	border:lightgray solid 1px;
+	padding:6px;
+	margin:2px;
+	width:80%;
+}
 
-		@keyframes slideIn {
-		  from {bottom: -300px; opacity: 0}
-		  to {top: 0; opacity: 1}
-		}
+.form_el_inner {
+	border:lightgray solid 1px;
+	padding:6px;
+	margin:2px;
+	width:100%;
+}
 
-		@-webkit-keyframes fadeIn {
-		  from {opacity: 0}
-		  to {opacity: 1}
-		}
+label {
+	font-weight:bold;
+	color:darkgreen;
+	width:35%;
+}
 
-		@keyframes fadeIn {
-		  from {opacity: 0}
-		  to {opacity: 1}
-		}
+.field_el {
+	width:65%;
+}
 
-		#logout-control-top {
-			visibility: hidden;
-			display: none;
-		}
+@media (max-width: 1040px) {
+	.field_el {
+		width:94%;
+		margin-left:3%;
+		margin-right:3%;
+	}
+}
 
-		a {
-			cursor: pointer;
-		}
+#contact_box {
+	background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE));
+	background: linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE );
+}
 
-		#for_testing_dialogs {
-			display: none;
-			visibility: hidden;
-		}
+.textarea_field_el {
+	width: 94%;
+	margin:3%;
+}
 
-	</style>
+.error-message {
+	visibility:hidden;
+	width:75%;
+	font-weight:bolder;
+	color:red;
+	background-color:white;
+	border: solid 1px orange;
+	padding:2px;
+	margin:3px;
+}
+
+/* The Modal (background) */
+.modal {
+	display: none; /* Hidden by default */
+	position: relative; /* Stay in place */
+	z-index: 1; /* Sit on top */
+	left: 0;
+	top: 0;
+	width: 100%; /* Full width */
+	height: 100%; /* Full height */
+	overflow: auto; /* Enable scroll if needed */
+	background-color: rgb(0,0,0); /* Fallback color */
+	background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+	-webkit-animation-name: fadeIn; /* Fade in the background */
+	-webkit-animation-duration: 0.4s;
+	animation-name: fadeIn;
+	animation-duration: 0.4s
+}
+
+/* Modal Content */
+.modal-content {
+	position: inherit;
+	top: 0;
+	background-color: #fefefe;
+	width: 100%;
+	-webkit-animation-name: slideIn;
+	-webkit-animation-duration: 0.4s;
+	animation-name: slideIn;
+	animation-duration: 0.4s
+}
+
+/* The Close Button */
+.close {
+	color: white;
+	float: right;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+	color: #000;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.modal-header {
+	padding: 2px 16px;
+	background-color: #4ca85c;
+	color: white;
+}
+
+.modal-body {padding: 2px 16px;}
+
+.modal-footer {
+	padding: 2px 16px;
+	margin-bottom: 20px;
+	background-color: darkgreen;
+	color: white;
+}
+
+/* Add Animation */
+@-webkit-keyframes slideIn {
+	from {bottom: -300px; opacity: 0}
+	to {bottom: 0; opacity: 1}
+}
+
+@keyframes slideIn {
+	from {bottom: -300px; opacity: 0}
+	to {top: 0; opacity: 1}
+}
+
+@-webkit-keyframes fadeIn {
+	from {opacity: 0}
+	to {opacity: 1}
+}
+
+@keyframes fadeIn {
+	from {opacity: 0}
+	to {opacity: 1}
+}
+
+#logout-control-top {
+	visibility: hidden;
+	display: none;
+}
+
+a {
+	cursor: pointer;
+}
+
+#for_testing_dialogs {
+	display: none;
+	visibility: hidden;
+}
+
+</style>
 </head>
 <script>
 		var g_siteURL = window.location.host;
@@ -3060,36 +3064,95 @@ viewBox="0 0 360 38">
 
 	var g_LoggedIn = false
 
+
+	const DEFAULT_ERROR_TEXT_COLOR = "red"
+	const DEFAULT_PLAIN_TEXT_COLOR = "black"
+
 	// ---- ---- ---- ---- ---- ----
 	// CONTENT EXCHANGE
 	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
 
-	function clonify(obj) {
-		if ( typeof obj === 'string' ) return(obj)
-		try {
-			let out = JSON.parse(JSON.stringify(obj))
-			return(out)
-		} catch(e) {
-			return(null)
+	
+
+var g_url_match = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+function matches_url(maybe_url) {
+	return g_url_match.test(maybe_url)
+}
+
+// not_https_switch 
+// switch to HTTPS before doing any ops that may require a data exchange
+function not_https_switch() {
+	if (location.protocol !== 'https:') {           // start from a secure page
+		alert("Switching to a secure version of this page in 1sec.")
+		setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
+		return(true)
+	}
+	return(false)
+}
+
+
+function clonify(obj) {
+	if ( typeof obj === 'string' ) return(obj)
+	try {
+		let out = JSON.parse(JSON.stringify(obj))
+		return(out)
+	} catch(e) {
+		return(null)
+	}
+}
+
+
+// attach a script to a DOM element
+function addscript(script,whereScipt) {
+	var scriptEl = document.createElement('script');
+	scriptEl.type = 'text/javascript';
+	scriptEl.text = script;
+    if ( typeof whereScipt === "string" ) {
+        whereScipt = document.getElementById(whereScipt)
+    }
+	whereScipt.appendChild(scriptEl);
+}
+
+
+// simple check on cookies, searching by ';' delimited string with the cookie name at the start of the trimmed line.
+function getCookie(cname) {  // modified from w3school
+	var name = cname + "=";
+	var ca = document.cookie.split(';');
+	for(let i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		if ( typeof c === 'string' ) {
+			c = c.trim()
+			if (c.indexOf(name) == 0) {
+				return c.substring(name.length);
+			}
 		}
 	}
+	return "";
+}
 
-	function addscript(script,whereScipt) {
-		var scriptEl = document.createElement('script');
-		scriptEl.type = 'text/javascript';
-		scriptEl.text = script;
-		whereScipt.appendChild(scriptEl);
-	}
 
-	function addstyle(script) {
-		var styleEl = document.createElement('style');
-		styleEl.type = 'text/css';
-		styleEl.text = script;
-		let whereScript = document.getElementsByTagName('head')
-		if ( whereScript && whereScript.length ) {
-			whereScript[0].appendChild(styleEl);
-		}
-	}
+function addstyle(script) {
+    var styleEl = document.createElement('style');
+    styleEl.type = 'text/css';
+    styleEl.text = script;
+    let whereScript = document.getElementsByTagName('head')
+    if ( whereScript && whereScript.length ) {
+        whereScript[0].appendChild(styleEl);
+    }
+}
+
+
+//$$EXPORTABLE::
+/*
+matches_url
+clonify
+addscript
+addstyle
+getCookie
+*/
+
+
+
 
 	async function ensure_dialog_elements() {
 		let test_dialog = document.getElementById("for_testing_dialogs")  // thought to be in the template... if not this does nothing
@@ -3118,210 +3181,205 @@ viewBox="0 0 360 38">
 	}
 
 
-    function getCookie(cname) {  // modified from w3school
-        var name = cname + "=";
-        var ca = document.cookie.split(';');
-        for(let i = 0; i < ca.length; i++) {
-            var c = ca[i];
-            if ( typeof c === 'string' ) {
-                c = c.trim()
-                if (c.indexOf(name) == 0) {
-                    return c.substring(name.length);
-                }
-            }
-        }
-        return "";
-	}
+	
 
 
-	// not_https_switch 
-	// switch to HTTPS before doing any ops that may require a data exchange
-	function not_https_switch() {
-		if (location.protocol !== 'https:') {           // start from a secure page
-			alert("Switching to a secure version of this page in 1sec.")
-			setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
-			return(true)
-		}
+//  fetchEndPoint
+// //
+// fetch with GET method
+async function fetchEndPoint(endpoint,port) {
+	port = !(port) ? '' : ( port.length ? `:${port}`   : '')
+	let myRequest = new Request(`${location.protocol}//${g_siteURL}${port}/${endpoint}`);
+	try {
+		const body = await fetch(myRequest, {
+									method: 'GET', // *GET, POST, PUT, DELETE, etc.
+									mode: 'cors', // no-cors, *cors, same-origin
+									cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+									credentials: 'omit', // include, *same-origin, omit
+									redirect: 'follow', // manual, *follow, error
+									referrerPolicy: 'no-referrer', // no-referrer, *client
+								});
+		//
+		let infoObj = await body.json();
+		return(infoObj)
+		//
+	} catch (e) {
+		console.log(e.message)
 		return(false)
 	}
+}
 
-	// streamer-scratchpad  -- in the stream app was using this.
-	// //
-	async function fetchEndPoint(endpoint,port) {
-		port = !(port) ? '' : ( port.length ? `:${port}`   : '')
-		let myRequest = new Request(`${location.protocol}//${g_siteURL}${port}/${endpoint}`);
-		try {
-			const body = await fetch(myRequest, {
-										method: 'GET', // *GET, POST, PUT, DELETE, etc.
-										mode: 'cors', // no-cors, *cors, same-origin
-										cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-										credentials: 'omit', // include, *same-origin, omit
-										redirect: 'follow', // manual, *follow, error
-										referrerPolicy: 'no-referrer', // no-referrer, *client
-									});
-			//
-			let infoObj = await body.json();
-			return(infoObj)
-			//
-		} catch (e) {
-			console.log(e.message)
-			return(false)
-		}
+//  postData
+// //
+//  call fetch with method POST tyr to help with parameters..  If data is FromData set do_stringify to false
+//  default content type 'application/json'
+//  User 'cors', Default cres = omit, If ctype == 'multipart/form-data' be sure to use FormData -- lets fetch set content type.
+//  RETURNS: parsed JSON object or an empty object. ... Check for fields
+//
+async function postData(url = '', data = {}, creds = 'omit', do_stringify = true,ctype) {
+	let content_type = 'application/json'
+	if ( ctype !== undefined ) {
+		content_type = ctype            // ctype is content type
+	}
+	let options = {
+		method: 'POST', // *GET, POST, PUT, DELETE, etc.
+		mode: 'cors', // no-cors, *cors, same-origin
+		cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+		credentials: creds, // include, *same-origin, omit
+		headers: {
+			'Content-Type': content_type
+		},
+		redirect: 'follow', // manual, *follow, error
+		referrerPolicy: 'no-referrer', // no-referrer, *client
+		body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
 	}
 
-	//
-	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true, ctype) {
-		let content_type = 'application/json'
-		if ( ctype !== undefined ) {
-			content_type = ctype
-		}
-		let options = {
-			method: 'POST', // *GET, POST, PUT, DELETE, etc.
-			mode: 'cors', // no-cors, *cors, same-origin
-			cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-			credentials: creds, // include, *same-origin, omit
-			headers: {
-				'Content-Type': content_type
-			},
-			redirect: 'follow', // manual, *follow, error
-			referrerPolicy: 'no-referrer', // no-referrer, *client
-			body: (do_stringify ? JSON.stringify(data)  : data)	// body data type must match "Content-Type" header
-		}
-
-		if ( ctype === 'multipart/form-data') {
-			delete options.headers['Content-Type']  // content type will be set automatically with a boundary
-		}
-
-		// Default options are marked with *
-		const response = await fetch(url, options);
-		if ( response.ok == false ) {
-			console.log(response.status + ': ' + response.statusText)
-			return {}
-		} else {
-			return await response.json(); // parses JSON response into native JavaScript objects
-		}
+	if ( ctype === 'multipart/form-data') {
+		delete options.headers['Content-Type']  // content type will be set automatically with a boundary
 	}
 
+	// Default options are marked with *
+	const response = await fetch(url, options);
+	if ( response.ok == false ) {
+		console.log(response.status + ': ' + response.statusText)
+		return {}
+	} else {
+		return await response.json(); // parses JSON response into native JavaScript objects
+	}
+}
 
-	// CONTENT FETCHING CLASS
-    class Uploader {
+
+//$$EXPORTABLE::
+/*
+fetchEndPoint
+postData
+*/
+
+	
+	
+
+
+// CONTENT FETCHING CLASS
+class Uploader {
+    //
+    constructor(props) {
+        this.errorDiv = props.errorDiv
+        this.fileDiv = props.fileDiv
+        this.uploadEndpoint = props.uploadEndpoint
+        this.fileType = props.fileType ? props.fileType : '.mp3'
+        this.emailField = props.emailField
+        this.positiveCompletion = props.positiveCompletion
         //
-        constructor(props) {
-            this.errorDiv = props.errorDiv
-            this.fileDiv = props.fileDiv
-			this.uploadEndpoint = props.uploadEndpoint
-			this.fileType = props.fileType ? props.fileType : '.mp3'
-			this.emailField = props.emailField
-			this.positiveCompletion = props.positiveCompletion
-			//
-			delete props.errorDiv
-			delete props.fileDiv
-			delete props.uploadEndpoint
-			delete props.fileType
-			delete props.emailField
-			delete props.positiveCompletion
-			//
-			this.extra_props = {}
-			for ( let prop in props ) {
-				this.extra_props[prop] = props[prop]
-			}
-			//
-            this._msgTimeout = null
+        delete props.errorDiv
+        delete props.fileDiv
+        delete props.uploadEndpoint
+        delete props.fileType
+        delete props.emailField
+        delete props.positiveCompletion
+        //
+        this.extra_props = {}
+        for ( let prop in props ) {
+            this.extra_props[prop] = props[prop]
         }
         //
-        errorMessage(emsg) {
-            let errDiv = document.querySelector(this.errorDiv)
-            if ( errDiv ) {
-                if ( this._msgTimeout ) {
-                    clearTimeout(this._msgTimeout)
-                }
-                errDiv.innerHTML = emsg
-                this._msgTimeout = setTimeout(() => {
-                    let errDivNxt = document.querySelector(this.errorDiv)
-					errDivNxt.innerHTML = ""
-					this._msgTimeout = false
-                },1500)
+        this._msgTimeout = null
+    }
+    //
+    errorMessage(emsg) {
+        let errDiv = document.querySelector(this.errorDiv)
+        if ( errDiv ) {
+            if ( this._msgTimeout ) {
+                clearTimeout(this._msgTimeout)
             }
+            errDiv.innerHTML = emsg
+            this._msgTimeout = setTimeout(() => {
+                let errDivNxt = document.querySelector(this.errorDiv)
+                errDivNxt.innerHTML = ""
+                this._msgTimeout = false
+            },1500)
         }
-        // 
-        checkFilesSelected(fileType) {
-            let file = document.querySelector(this.fileDiv)
-            if ( !file ) {
+    }
+    // 
+    checkFilesSelected(fileType) {
+        let file = document.querySelector(this.fileDiv)
+        if ( !file ) {
+            return(false)
+        }
+        if ( !(file.value) || (file.value.indexOf(fileType) !== (file.value.length - 4)) ) {
+            // File type is not .mp3
+            return(false)
+        }
+        return(true)
+    }
+
+    checkForm(event) {
+        let errField = document.querySelector(this.errorDiv)
+        if ( this.emailField ) {
+            let inspect_field = document.querySelector(this.emailField)
+            if ( inspect_field && !checkEmailField(inspect_field) ) {
+                inspect_field.style.borderColor="red"
+                if (errField) errField.style.color = "red"
+                this.errorMessage("unrecognized mail format")
                 return(false)
             }
-            if ( !(file.value) || (file.value.indexOf(fileType) !== (file.value.length - 4)) ) {
-                // File type is not .mp3
+            if ( inspect_field ) inspect_field.style.borderColor="black"
+        }
+        //
+        if ( this.fileDiv ) {
+            let inspect_field = document.querySelector(this.fileDiv)
+            if ( !(inspect_field) || !(this.fileType) ) {
+                this.errorMessage("This page has not specified either a file container <div> or a file type in props [fileDiv,fileType]")
                 return(false)
             }
-            return(true)
-        }
-
-        checkForm(event) {
-			let errField = document.querySelector(this.errorDiv)
-			if ( this.emailField ) {
-				let inspect_field = document.querySelector(this.emailField)
-				if ( inspect_field && !checkEmailField(inspect_field) ) {
-					inspect_field.style.borderColor="red"
-					if (errField) errField.style.color = "red"
-					this.errorMessage("unrecognized mail format")
-					return(false)
-				}
-				if ( inspect_field ) inspect_field.style.borderColor="black"
-			}
-			//
-			if ( this.fileDiv ) {
-				let inspect_field = document.querySelector(this.fileDiv)
-				if ( !(inspect_field) || !(this.fileType) ) {
-					this.errorMessage("This page has not specified either a file container <div> or a file type in props [fileDiv,fileType]")
-					return(false)
-				}
-				if ( !this.checkFilesSelected(this.fileType) ) {
-					inspect_field.style.borderColor="red"
-					if (errField) errField.style.color = "red"
-					this.errorMessage("no file selected")
-					return(false)
-				}
-				if ( inspect_field ) inspect_field.style.borderColor="black"
-			}
-            if (errField) errField.style.color = "darkgreen"
-            this.errorMessage("")
-            return(true)
-        }
-
-        async uploader() {
-            if ( this.checkForm() ) {
-                try {
-					let data = new FormData()
-					this.app_prepData(data)
-					let json =  await postData(this.uploadEndpoint,data,'omit',false,'multipart/form-data')
-					this.success_report(json)
-                    this.errorMessage(this.positiveCompletion)
-                    document.querySelector(this.errorDiv).style.color = "blue"
-                    return true
-                } catch (e) {
-                    let emsg = e.message
-                    this.errorMessage(emsg)
-                    return false
-                }
+            if ( !this.checkFilesSelected(this.fileType) ) {
+                inspect_field.style.borderColor="red"
+                if (errField) errField.style.color = "red"
+                this.errorMessage("no file selected")
+                return(false)
             }
-		}
-		
-		app_prepData(data) {		// mp3 one file as default -- subclass and override
-			let files = document.querySelector(this.fileDiv)
-			let file = files.files[0]
-			data.append('mp3file', file)
-            let email = document.querySelector(this.emailField).value;
-			data.append('email', email)
-			for ( let p in this.extra_props ) {
-				data.append(p, this.extra_props[p])
-			}
-		}
+            if ( inspect_field ) inspect_field.style.borderColor="black"
+        }
+        if (errField) errField.style.color = "darkgreen"
+        this.errorMessage("")
+        return(true)
+    }
 
-		success_report(json) {
-			if ( this.positiveCompletion ) this.errorMessage(this.positiveCompletion)
-			document.querySelector(this.errorDiv).style.color = "blue"
-		}
-	}
+    async uploader() {
+        if ( this.checkForm() ) {
+            try {
+                let data = new FormData()
+                this.app_prepData(data)
+                let json =  await postData(this.uploadEndpoint,data,'omit',false,'multipart/form-data')
+                this.success_report(json)
+                this.errorMessage(this.positiveCompletion)
+                document.querySelector(this.errorDiv).style.color = "blue"
+                return true
+            } catch (e) {
+                let emsg = e.message
+                this.errorMessage(emsg)
+                return false
+            }
+        }
+    }
+    
+    app_prepData(data) {		// mp3 one file as default -- subclass and override
+        let files = document.querySelector(this.fileDiv)
+        let file = files.files[0]
+        data.append('mp3file', file)
+        let email = document.querySelector(this.emailField).value;
+        data.append('email', email)
+        for ( let p in this.extra_props ) {
+            data.append(p, this.extra_props[p])
+        }
+    }
+
+    success_report(json) {
+        if ( this.positiveCompletion ) this.errorMessage(this.positiveCompletion)
+        document.querySelector(this.errorDiv).style.color = "blue"
+    }
+}
+
+
 	
 
 	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
@@ -3331,6 +3389,7 @@ viewBox="0 0 360 38">
 
 	var g_ComponentErrorsActivated = false
 	var g_CurContainer = null
+
 
 	//
 	var reEmail = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
@@ -3366,134 +3425,141 @@ viewBox="0 0 360 38">
 	}
 
 
-	class ValidationContainer {
-		// 
-		constructor(props) {
-			this.errline = props.errors_here
-			this.fields = props.fields
-			this.checks = props.checks
 
-			this.modal = props.modal
-			this.closer = props.closer
-			this.form = props.form
-			this.where_captcha = props.captcha
-			this.captch_input = props.captcha_field
-			this.auth_port = props.auth_port
-			this.password_rules = props.password_rules
-			this.service_url = props.service_url
 
-			this.errline.style.visibility = "hidden"
-			this.failure_msg_prefix = props.failure_msg_prefix
-			this.empty_checker = props.is_empty ? props.is_empty : is_empty
-		}
 
-		hideFormErrorMessage() {
-			let errline = this.errline
-			if ( errline ) {
-				errline.innerHTML = ""
-				errline.style.visibility = "hidden"
-			}
-		}
+class ValidationContainer {
+    // 
+    constructor(props) {
+        this.errline = props.errors_here
+        this.fields = props.fields
+        this.checks = props.checks
 
-		formErrorMessage(msg) {
-			let errline = this.errline
-			if ( errline ) {
-				errline.innerHTML = msg
-				errline.style.visibility = "visible"
-			}
-		}
+        this.modal = props.modal
+        this.closer = props.closer
+        this.form = props.form
+        this.where_captcha = props.captcha
+        this.captch_input = props.captcha_field
+        this.auth_port = props.auth_port
+        this.password_rules = props.password_rules
+        this.service_url = props.service_url
 
-	 	emptyFieldMessage(fields) { // name_empty,email_empty,commment_empty
-			let msg = "The following fields require values: "
-			//
-			let sep = ','
-			msg += fields.join(sep)
-			this.formErrorMessage(msg);
-		}
+        this.plain_text_color = (props.plain_text_color !== undefined) ? props.plain_text_color : "black"
+        this.error_text_color = (props.error_text_color !== undefined) ? props.error_text_color : "black"
 
-		emailFormatError() {
-			this.formErrorMessage("Email does not match a known email format.");
-		}
+        this.errline.style.visibility = "hidden"
+        this.failure_msg_prefix = props.failure_msg_prefix
+        this.empty_checker = props.is_empty ? props.is_empty : is_empty
+    }
 
-		passwordFieldError(whichFields) {
-			this.formErrorMessage(`${whichFields} are required to have the same value`);
-		}
+    hideFormErrorMessage() {
+        let errline = this.errline
+        if ( errline ) {
+            errline.innerHTML = ""
+            errline.style.visibility = "hidden"
+        }
+    }
 
-		//
-		checkFormValid() {
-			if ( !g_ComponentErrorsActivated ) {
-				return(true);
-			}
+    formErrorMessage(msg) {
+        let errline = this.errline
+        if ( errline ) {
+            errline.innerHTML = msg
+            errline.style.visibility = "visible"
+        }
+    }
 
-			for ( let field in this.fields ) {
-				let c = this.fields[field]
-				colorize(c,"black")
-			}
+    emptyFieldMessage(fields) { // name_empty,email_empty,commment_empty
+        let msg = "The following fields require values: "
+        //
+        let sep = ','
+        msg += fields.join(sep)
+        this.formErrorMessage(msg);
+    }
 
-			//
-			let mustHaveValue = this.checks.is_empty
-			let empty_fields = mustHaveValue.filter((field) => {
-				let c = this.fields[field]
-				//colorize(c,"black")
-				return(this.empty_checker(c))
-			})
-			//
-			if ( empty_fields.length ) {
-				this.emptyFieldMessage(empty_fields)
-				empty_fields.forEach(field => {
-					let c = this.fields[field]
-					colorize(c,"red")
-				})
-				return(false)
-			}
-			//
-			let emailFields = this.checks.email
-			emailFields.forEach(e_field => {
-				let c = this.fields[e_field]
-				if ( !checkEmailField(c) ) {
-					this.emailFormatError();
-					colorize(c,"red")
-					return(false);
-				}
-			})
-			//
-			if ( this.password_rules && (typeof this.password_rules === "function") ) {
-				if ( this.checks.passwords && (this.checks.passwords.length) ) {
-					let pvalues = this.checks.passwords.map(pfield => {
-							let c = this.fields[pfield]
-							if ( c ) {
-								return(c.value)
-							} else {
-								return(null)
-							}
-						})
-					//
-					let [check,violation] = this.password_rules(pvalues)
-					//
-					if ( !check ) {
-						let message = violation()
-						this.passwordFieldError(message)
-						return(false)
-					}
-					//
-					this.hideFormErrorMessage()
-				}
-			}
-			//
-			return(true);
-		}
-		
-		switchCaptchaDisplay(on_off) {
-			if ( on_off ) {
-				this.modal.style.display = "block";  // show captcha
-				this.form.style.display = "none"
-			} else {
-				this.modal.style.display = "none";  // show captcha
-				this.form.style.display = "block"
-			}
-		}
+    emailFormatError() {
+        this.formErrorMessage("Email does not match a known email format.");
+    }
 
-	}
+    passwordFieldError(whichFields) {
+        this.formErrorMessage(`${whichFields} are required to have the same value`);
+    }
+
+    //
+    checkFormValid() {
+        //
+        if ( !g_ComponentErrorsActivated ) {
+            return(true);
+        }
+        //
+        for ( let field in this.fields ) {
+            let c = this.fields[field]
+            colorize(c,this.plain_text_color)
+        }
+        //
+        let mustHaveValue = this.checks.is_empty
+        let empty_fields = mustHaveValue.filter((field) => {
+            let c = this.fields[field]
+            //colorize(c,"black")
+            return(this.empty_checker(c))
+        })
+        //
+        if ( empty_fields.length ) {
+            this.emptyFieldMessage(empty_fields)
+            empty_fields.forEach(field => {
+                let c = this.fields[field]
+                colorize(c,this.error_text_color)
+            })
+            return(false)
+        }
+        //
+        let emailFields = this.checks.email
+        emailFields.forEach(e_field => {
+            let c = this.fields[e_field]
+            if ( !checkEmailField(c) ) {
+                this.emailFormatError();
+                colorize(c,this.error_text_color)
+                return(false);
+            }
+        })
+        //
+        if ( this.password_rules && (typeof this.password_rules === "function") ) {
+            if ( this.checks.passwords && (this.checks.passwords.length) ) {
+                let pvalues = this.checks.passwords.map(pfield => {
+                        let c = this.fields[pfield]
+                        if ( c ) {
+                            return(c.value)
+                        } else {
+                            return(null)
+                        }
+                    })
+                //
+                let [check,violation] = this.password_rules(pvalues)
+                //
+                if ( !check ) {
+                    let message = violation()
+                    this.passwordFieldError(message)
+                    return(false)
+                }
+                //
+                this.hideFormErrorMessage()
+            }
+        }
+        //
+        return(true);
+    }
+    
+    switchCaptchaDisplay(on_off) {
+        if ( on_off ) {
+            this.modal.style.display = "block";  // show captcha
+            this.form.style.display = "none"
+        } else {
+            this.modal.style.display = "none";  // show captcha
+            this.form.style.display = "block"
+        }
+    }
+}
+
+
 
 
 	async function processUI_captchaService(handlerDefsValidator,calcAppDataDB,completionaAction,failureAction) {
@@ -3614,124 +3680,10 @@ viewBox="0 0 360 38">
 
 	// ---- ---- ---- ---- ---- ----
 	function lowerFillerText() {
+		let content = `%3Cdiv%20style%3D%22display%3A%20inline-block%3Btext-align%3A%20center%3Bvertical-align%3A%20middle%3B%22%3E%0A%20%20%20%20%3Ca%20class%3D%22nav-link%22%20href%3D%22http%3A%2F%2Fpopsongnow.com%22%3E%0A%20%20%20%20%3Csvg%0A%20%20%20%20%20%20%20%20xmlns%3Adc%3D%22http%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%22%0A%20%20%20%20%20%20%20%20xmlns%3Acc%3D%22http%3A%2F%2Fcreativecommons.org%2Fns%23%22%0A%20%20%20%20%20%20%20%20xmlns%3Ardf%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%22%0A%20%20%20%20%20%20%20%20xmlns%3Asvg%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%0A%20%20%20%20%20%20%20%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%0A%20%20%20%20%20%20%20%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%0A%20%20%20%20%20%20%20%20version%3D%221.0%22%0A%20%20%20%20%20%20%20%20width%3D%2260%22%0A%20%20%20%20%20%20%20%20height%3D%2260%22%0A%20%20%20%20%20%20%20%20viewBox%3D%220%200%20350%20350%22%0A%20%20%20%20%20%20%20%20preserveAspectRatio%3D%22xMidYMid%20meet%22%0A%20%20%20%20%20%20%20%20id%3D%22svg2%22%3E%0A%20%20%20%20%20%20%20%20%3Cdefs%20id%3D%22defs16%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22linearGradient1115%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cstop%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20style%3D%22stop-color%3A%23e9ff00%3Bstop-opacity%3A1%3B%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20offset%3D%220%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22stop1111%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cstop%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20style%3D%22stop-color%3A%23e9ff00%3Bstop-opacity%3A0%3B%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20offset%3D%221%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22stop1113%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cfilter%0A%20%20%20%20%20%20%20%20%20%20%20%20style%3D%22color-interpolation-filters%3AsRGB%22%0A%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22filter1107%22%0A%20%20%20%20%20%20%20%20%20%20%20%20x%3D%22-0.02418653%22%0A%20%20%20%20%20%20%20%20%20%20%20%20width%3D%221.0483731%22%0A%20%20%20%20%20%20%20%20%20%20%20%20y%3D%22-0.023816325%22%0A%20%20%20%20%20%20%20%20%20%20%20%20height%3D%221.0476327%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3CfeGaussianBlur%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20stdDeviation%3D%222.8845338%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22feGaussianBlur1109%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3C%2Ffilter%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3CradialGradient%0A%20%20%20%20%20%20%20%20%20%20%20%20xlink%3Ahref%3D%22%23linearGradient1115%22%0A%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22radialGradient1117%22%0A%20%20%20%20%20%20%20%20%20%20%20%20cx%3D%22162.94153%22%0A%20%20%20%20%20%20%20%20%20%20%20%20cy%3D%22166.10171%22%0A%20%20%20%20%20%20%20%20%20%20%20%20fx%3D%22162.94153%22%0A%20%20%20%20%20%20%20%20%20%20%20%20fy%3D%22166.10171%22%0A%20%20%20%20%20%20%20%20%20%20%20%20r%3D%22150.03728%22%0A%20%20%20%20%20%20%20%20%20%20%20%20gradientTransform%3D%22matrix(1%2C0%2C0%2C1.0148269%2C0%2C-2.4627807)%22%0A%20%20%20%20%20%20%20%20%20%20%20%20gradientUnits%3D%22userSpaceOnUse%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%3Cg%0A%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22g4232%22%0A%20%20%20%20%20%20%20%20%20%20%20%20transform%3D%22translate(12.8%2C0)%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cellipse%0A%20%20%20%20%20%20%20%20%20%20%20%20style%3D%22opacity%3A0.98000004%3Bfill%3Aurl(%23radialGradient1117)%3Bfill-opacity%3A1%3Bstroke%3Anone%3Bstroke-width%3A33.07086563%3Bstroke-linejoin%3Around%3Bstroke-miterlimit%3A4%3Bstroke-dasharray%3Anone%3Bstroke-dashoffset%3A0%3Bstroke-opacity%3A1%3Bpaint-order%3Amarkers%20stroke%20fill%3Bfilter%3Aurl(%23filter1107)%22%0A%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22path833%22%0A%20%20%20%20%20%20%20%20%20%20%20%20cx%3D%22162.94153%22%0A%20%20%20%20%20%20%20%20%20%20%20%20cy%3D%22166.1017%22%0A%20%20%20%20%20%20%20%20%20%20%20%20rx%3D%22143.1144%22%0A%20%20%20%20%20%20%20%20%20%20%20%20ry%3D%22145.33899%22%0A%20%20%20%20%20%20%20%20%20%20%20%20transform%3D%22matrix(1.153994%2C0%2C0%2C1.1209987%2C-27.316594%2C-14.907414)%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Ctext%0A%20%20%20%20%20%20%20%20%20%20%20%20transform%3D%22scale(1.0420353%2C0.95966038)%22%0A%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22text4170%22%0A%20%20%20%20%20%20%20%20%20%20%20%20y%3D%22109.06458%22%0A%20%20%20%20%20%20%20%20%20%20%20%20x%3D%22144.01936%22%0A%20%20%20%20%20%20%20%20%20%20%20%20style%3D%22font-style%3Anormal%3Bfont-variant%3Anormal%3Bfont-weight%3Abold%3Bfont-stretch%3Anormal%3Bfont-size%3A95.65157318px%3Bline-height%3A125%25%3Bfont-family%3Asans-serif%3Btext-align%3Astart%3Bletter-spacing%3A0px%3Bword-spacing%3A0px%3Bwriting-mode%3Alr-tb%3Btext-anchor%3Astart%3Bfill%3A%23ff0080%3Bfill-opacity%3A1%3Bstroke%3Anone%3Bstroke-width%3A1px%3Bstroke-linecap%3Abutt%3Bstroke-linejoin%3Amiter%3Bstroke-opacity%3A1%22%0A%20%20%20%20%20%20%20%20%20%20%20%20xml%3Aspace%3D%22preserve%22%3E%3Ctspan%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20y%3D%22109.06458%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20x%3D%22144.01936%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22tspan4172%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20style%3D%22fill%3A%23ff0080%3Bfill-opacity%3A1%22%3EO%3C%2Ftspan%3E%3C%2Ftext%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Ctext%0A%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22text4195%22%0A%20%20%20%20%20%20%20%20%20%20%20%20y%3D%22243.96106%22%0A%20%20%20%20%20%20%20%20%20%20%20%20x%3D%22183.45763%22%0A%20%20%20%20%20%20%20%20%20%20%20%20style%3D%22font-style%3Anormal%3Bfont-variant%3Anormal%3Bfont-weight%3Abold%3Bfont-stretch%3Anormal%3Bfont-size%3A64px%3Bline-height%3A125%25%3Bfont-family%3Asans-serif%3Btext-align%3Astart%3Bletter-spacing%3A0px%3Bword-spacing%3A0px%3Bwriting-mode%3Alr-tb%3Btext-anchor%3Astart%3Bfill%3A%23000000%3Bfill-opacity%3A1%3Bstroke%3Anone%3Bstroke-width%3A1px%3Bstroke-linecap%3Abutt%3Bstroke-linejoin%3Amiter%3Bstroke-opacity%3A1%22%0A%20%20%20%20%20%20%20%20%20%20%20%20xml%3Aspace%3D%22preserve%22%3E%3Ctspan%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20y%3D%22243.96106%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20x%3D%22183.45763%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22tspan4197%22%3Eong%3C%2Ftspan%3E%3C%2Ftext%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cg%0A%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22g831%22%0A%20%20%20%20%20%20%20%20%20%20%20%20transform%3D%22translate(23.333334%2C11.666667)%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cpath%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20style%3D%22fill%3A%230000ff%3Bstroke%3Anone%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22path12%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20d%3D%22m%2065.085952%2C145.23192%20c%203.26895%2C0.045%206.29859%2C-0.22234%206.72969%2C-0.55143%200.56359%2C-0.36425%200.98273%2C-2.72972%201.12104%2C-5.34268%200.13832%2C-2.61297%200.64228%2C-9.56307%201.1107%2C-15.43029%201.75701%2C-23.11592%202.87369%2C-37.52803%204.261%2C-58.18425%20l%201.48023%2C-21.485981%2011.992232%2C3.58025%20c%2010.950016%2C3.32009%2012.621086%2C3.62804%2018.522196%2C3.51118%2014.2188%2C-0.23097%2026.09194%2C-6.22644%2032.52851%2C-16.25373%202.4006%2C-3.91106%202.85933%2C-5.48194%202.68708%2C-9.83735%20-0.37617%2C-9.346466%20-7.6659%2C-17.341296%20-18.99565%2C-21.097346%20-5.54917%2C-1.80138%20-7.57621%2C-2.06853%20-15.22352%2C-1.97132%20-6.88593%2C0.10985%20-10.92611%2C0.75264%20-18.875886%2C2.86232%20-13.283252%2C3.73975%20-20.815682%2C7.93923%20-25.381632%2C14.196096%20-3.51988%2C4.79849%20-3.5614%2C4.86318%20-3.8692%2C20.24142%20-0.38487%2C16.525811%20-3.04833%2C67.255061%20-3.6297%2C68.160751%20-0.37373%2C0.58223%20-7.0047%2C-2.27387%20-12.57569%2C-5.41127%20-8.70357%2C-4.93602%20-17.27674%2C-12.64393%20-20.88808%2C-18.66294%20-7.03283%2C-11.82005%20-7.01766%2C-25.88617%200.16639%2C-37.077941%202.45005%2C-3.81684%202.84156%2C-4.9405%201.77561%2C-5.6774%20-1.85899%2C-1.38519%20-5.75277%2C0.39953%20-10.36429%2C4.84365%20C%201.9240117%2C60.39223%20-2.0878686%2C74.17718%204.8798417%2C89.18116%20c%204.3155099%2C9.37451%207.2958803%2C12.609%2021.4717203%2C24.08997%2017.57938%2C14.22745%2025.23493%2C21.48113%2028.18573%2C26.81668%201.37651%2C2.47933%203.09315%2C4.60004%203.548%2C4.74769%200.58735%2C0.1125%203.77324%2C0.28681%207.00066%2C0.39642%20z%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cellipse%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20style%3D%22fill%3A%23ffffff%3Bfill-opacity%3A1%3Bstroke%3Anone%3Bstroke-width%3A2.25200582%3Bstroke-miterlimit%3A4%3Bstroke-dasharray%3Anone%3Bstroke-opacity%3A1%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22path4199%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cx%3D%22110.36122%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cy%3D%2226.560381%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20rx%3D%2221.172937%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20ry%3D%2211.617853%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cpath%0A%20%20%20%20%20%20%20%20%20%20%20%20d%3D%22m%20124.58334%2C69.729014%20c%20-7.68174%2C3.748996%20-12.93255%2C7.75361%20-18.37783%2C14.229149%20-6.612125%2C7.92402%20-11.279516%2C16.444467%20-13.418726%2C24.538887%20-2.528168%2C9.3725%20-2.333698%2C25.56135%200.38894%2C34.84864%20l%201.94475%2C6.64594%20-10.598858%2C8.94648%20c%20-19.8364%2C16.78527%20-31.21315%2C31.01442%20-37.6308%2C46.69205%20-3.50054%2C8.77605%20-4.08397%2C23.60164%20-1.26409%2C33.99658%202.72264%2C10.13934%208.65411%2C19.76744%2016.04414%2C26.41339%207.48727%2C6.64595%2015.26625%2C10.73577%2026.93472%2C14.31436%208.654109%2C2.55613%209.918189%2C2.72654%2022.947974%2C2.81174%20l%2013.80768%2C0%201.06961%2C4.26022%20c%206.12594%2C24.53889%206.32042%2C27.09503%202.6254%2C33.31496%20-1.94474%2C3.32297%20-9.82095%2C8.00922%20-13.51597%2C8.00922%20-2.72264%2C0%20-3.59777%2C-1.10766%20-1.65303%2C-2.21532%202.23646%2C-1.19286%204.76462%2C-7.6684%204.76462%2C-12.52506%200%2C-13.97353%20-15.46071%2C-22.57918%20-30.143524%2C-16.70007%20-15.36349%2C6.04951%20-19.25298%2C21.72714%20-8.65411%2C35.27464%2013.807678%2C17.80774%2037.047364%2C20.27867%2055.230724%2C5.87912%2012.34912%2C-9.71331%2016.04414%2C-27.18023%2010.40438%2C-48.82216%20-1.36132%2C-5.28269%20-2.52817%2C-9.96893%20-2.52817%2C-10.39496%200%2C-0.34082%201.65304%2C-1.53368%203.59778%2C-2.55613%2010.30714%2C-5.6235%2020.71152%2C-15.3368%2025.8651%2C-24.19807%204.66738%2C-8.09443%205.93147%2C-13.63272%205.93147%2C-25.13532%20-0.0972%2C-9.79852%20-0.29172%2C-11.16179%20-3.01436%2C-17.29651%20-5.34804%2C-11.67301%20-13.22426%2C-18.74499%20-25.96233%2C-23.17562%20-7.39003%2C-2.55613%20-15.46072%2C-3.749%20-24.40654%2C-3.8342%20l%20-5.93147%2C0%20-2.33369%2C-10.13933%20-2.33369%2C-10.13934%204.37567%2C-4.60104%20c%2012.25189%2C-12.69547%2023.5314%2C-27.86186%2027.12918%2C-36.29711%201.16685%2C-2.55613%202.72264%2C-8.43523%203.59778%2C-12.95108%201.55579%2C-7.6684%201.55579%2C-8.69085%200%2C-15.422007%20C%20146.75342%2C81.40203%20137.32142%2C67.17288%20132.07061%2C67.17288%20c%20-1.26409%2C0%20-4.57015%2C1.192862%20-7.48727%2C2.556134%20z%20m%204.66739%2C19.937843%20c%201.16684%2C1.53369%202.52817%2C5.027068%203.11159%2C7.668411%202.52817%2C10.735762%20-5.34805%2C26.328182%20-19.35021%2C38.597622%20-1.75027%2C1.53368%20-3.59777%2C2.81176%20-3.98672%2C2.81176%20-2.52817%2C0%20-2.91712%2C-21.55674%20-0.58342%2C-28.79912%202.43093%2C-7.24239%206.90384%2C-13.973533%2012.44636%2C-18.830192%202.72264%2C-2.385725%205.25081%2C-4.345432%205.63976%2C-4.345432%200.38894%2C0%201.65303%2C1.278071%202.72264%2C2.896951%20z%20m%20-26.643%2C94.406573%201.26409%2C4.85665%20-4.764625%2C2.72654%20c%20-5.639751%2C3.15257%20-12.543599%2C9.62811%20-15.071759%2C14.14395%20-1.45856%2C2.55613%20-1.84751%2C5.11227%20-1.84751%2C11.75821%200%2C10.30975%201.94474%2C14.48476%2010.015428%2C21.64194%205.737001%2C5.11226%207.681741%2C4.94186%205.542521%2C-0.34082%20-1.847501%2C-4.43063%20-1.750271%2C-4.68624%200.58343%2C-10.13933%202.041975%2C-4.85666%208.751345%2C-12.86587%2010.793325%2C-12.86587%200.68066%2C0%203.20882%2C9.4577%206.51489%2C24.02765%204.37567%2C19.25622%205.25081%2C24.19808%204.1812%2C24.5389%20-2.62541%2C0.85204%20-15.46072%2C0.34081%20-21.392185%2C-0.85205%20-13.029779%2C-2.72654%20-22.850739%2C-9.20208%20-28.490509%2C-18.9154%20-3.20882%2C-5.53828%20-3.30606%2C-5.96431%20-3.20882%2C-16.01844%200%2C-9.37249%200.29171%2C-10.82097%203.11159%2C-17.29651%201.75027%2C-3.9194%204.47291%2C-8.86126%206.22319%2C-11.07658%204.86186%2C-6.30513%2015.07176%2C-16.87048%2020.030858%2C-20.70468%203.889491%2C-2.98217%204.667386%2C-3.23777%204.861856%2C-1.95971%200.19448%2C0.93725%200.97237%2C3.8342%201.65303%2C6.47555%20z%20m%2039.67278%2C26.24297%20c%2010.01544%2C3.32298%2015.26624%2C10.99138%2015.26624%2C22.57919%200%2C11.07658%20-5.63975%2C20.10826%20-15.46071%2C24.96491%20l%20-3.88949%2C1.95971%20-0.58342%2C-1.95971%20c%20-0.29171%2C-1.10765%20-2.43093%2C-10.22454%20-4.86186%2C-20.27866%20-2.52817%2C-10.05413%20-4.86186%2C-19.68224%20-5.25081%2C-21.30113%20-0.48619%2C-1.61888%20-1.16685%2C-4.0046%20-1.45856%2C-5.36787%20l%20-0.58342%2C-2.30053%205.73699%2C0%20c%203.50054%2C0%207.97345%2C0.68164%2011.08504%2C1.70409%20z%22%0A%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22path8%22%0A%20%20%20%20%20%20%20%20%20%20%20%20style%3D%22fill%3A%23ff0000%3Bstroke%3Anone%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cg%0A%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22g827%22%0A%20%20%20%20%20%20%20%20%20%20%20%20transform%3D%22translate(-11.864407%2C57.641243)%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cpath%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20d%3D%22m%20234.35149%2C146.71497%20c%203.26895%2C0.045%206.29859%2C-0.22234%206.72969%2C-0.55143%200.56359%2C-0.36425%200.98273%2C-2.72972%201.12104%2C-5.34268%200.13832%2C-2.61297%200.64228%2C-9.56307%201.1107%2C-15.43029%201.75701%2C-23.11592%202.87369%2C-37.528029%204.261%2C-58.184249%20l%201.48023%2C-21.485981%2011.99223%2C3.58025%20c%2010.95001%2C3.32009%2012.62108%2C3.62804%2018.52219%2C3.51118%2014.2188%2C-0.23097%2026.09194%2C-6.22644%2032.52851%2C-16.25373%202.4006%2C-3.91106%202.85933%2C-5.48194%202.68708%2C-9.83735%20-0.37617%2C-9.346466%20-7.6659%2C-17.3412962%20-18.99565%2C-21.0973462%20-5.54917%2C-1.80138%20-7.57621%2C-2.06853%20-15.22352%2C-1.97132%20-6.88593%2C0.10985%20-10.92611%2C0.75264%20-18.87588%2C2.86232%20-13.28325%2C3.7397502%20-20.81568%2C7.9392302%20-25.38163%2C14.1960962%20-3.51988%2C4.79849%20-3.5614%2C4.86318%20-3.8692%2C20.24142%20-0.38487%2C16.525811%20-3.04833%2C67.25506%20-3.6297%2C68.16075%20-0.37373%2C0.58223%20-7.0047%2C-2.27387%20-12.57569%2C-5.41127%20-8.70357%2C-4.936019%20-17.27674%2C-12.643929%20-20.88808%2C-18.662939%20-7.03283%2C-11.82005%20-7.01766%2C-25.88617%200.16639%2C-37.077941%202.45005%2C-3.81684%202.84156%2C-4.9405%201.77561%2C-5.6774%20-1.85899%2C-1.38519%20-5.75277%2C0.39953%20-10.36429%2C4.84365%20-15.73297%2C14.748571%20-19.74486%2C28.533521%20-12.77714%2C43.537501%204.3155%2C9.374509%207.29588%2C12.608999%2021.47172%2C24.089969%2017.57938%2C14.22745%2025.23493%2C21.48113%2028.18573%2C26.81668%201.37651%2C2.47933%203.09315%2C4.60004%203.548%2C4.74769%200.58735%2C0.1125%203.77324%2C0.28681%207.00066%2C0.39642%20z%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22path823%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20style%3D%22fill%3A%23176431%3Bfill-opacity%3A1%3Bstroke%3Anone%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cellipse%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20ry%3D%2211.617853%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20rx%3D%2221.172937%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cy%3D%2226.560381%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20cx%3D%22278.33157%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20id%3D%22ellipse4230%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20style%3D%22fill%3A%23ffffff%3Bfill-opacity%3A1%3Bstroke%3Anone%3Bstroke-width%3A2.25200582%3Bstroke-miterlimit%3A4%3Bstroke-dasharray%3Anone%3Bstroke-opacity%3A1%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%3C%2Fsvg%3E%0A%3C%2Fa%3E%0A%3C%2Fdiv%3E%0A%3Cdiv%20style%3D%22display%3A%20inline-block%3Btext-align%3A%20center%3Bvertical-align%3A%20middle%3B%22%3E%0A%20%20%20%20%3Ca%20href%3D%22https%3A%2F%2Fwww.skyroam.com%2F%3Frfsn%3D5177821.fea20e%22%20target%3D%22_blank%22%3E%3Cimage%20src%3D%22.%2Fimages%2Fsolis.png%22%20width%3D%2260%25%22%20%2F%3E%3C%2Fa%3E%0A%3C%2Fdiv%3E%0A%3Cdiv%20style%3D%22display%3A%20inline-block%3Btext-align%3A%20center%3Bvertical-align%3A%20middle%3B%22%3E%0A%20%20%20%20%3Ca%20href%3D%22https%3A%2F%2Fwww.vultr.com%2F%3Fref%3D8315818%22%20target%3D%22_blank%22%3E%3Cimg%20src%3D%22https%3A%2F%2Fwww.vultr.com%2Fmedia%2Fbanners%2Fbanner_468x60.png%22%20width%3D%2260%25%22%20height%3D%2260%22%3E%3C%2Fa%3E%0A%3C%2Fdiv%3E%0A`
+		content = decodeURIComponent(content)
 		return `<div class="fillLower">
-			<a class="nav-link" href="http://popsongnow.com">
-    <svg
-        xmlns:dc="http://purl.org/dc/elements/1.1/"
-        xmlns:cc="http://creativecommons.org/ns#"
-        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-        xmlns:svg="http://www.w3.org/2000/svg"
-        xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
-        version="1.0"
-        width="60"
-        height="60"
-        viewBox="0 0 350 350"
-        preserveAspectRatio="xMidYMid meet"
-        id="svg2">
-        <defs id="defs16">
-            <linearGradient id="linearGradient1115">
-            <stop
-                style="stop-color:#e9ff00;stop-opacity:1;"
-                offset="0"
-                id="stop1111" />
-            <stop
-                style="stop-color:#e9ff00;stop-opacity:0;"
-                offset="1"
-                id="stop1113" />
-            </linearGradient>
-            <filter
-            style="color-interpolation-filters:sRGB"
-            id="filter1107"
-            x="-0.02418653"
-            width="1.0483731"
-            y="-0.023816325"
-            height="1.0476327">
-            <feGaussianBlur
-                stdDeviation="2.8845338"
-                id="feGaussianBlur1109" />
-            </filter>
-            <radialGradient
-            xlink:href="#linearGradient1115"
-            id="radialGradient1117"
-            cx="162.94153"
-            cy="166.10171"
-            fx="162.94153"
-            fy="166.10171"
-            r="150.03728"
-            gradientTransform="matrix(1,0,0,1.0148269,0,-2.4627807)"
-            gradientUnits="userSpaceOnUse" />
-        </defs>
-        <g
-            id="g4232"
-            transform="translate(12.8,0)">
-            <ellipse
-            style="opacity:0.98000004;fill:url(#radialGradient1117);fill-opacity:1;stroke:none;stroke-width:33.07086563;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill;filter:url(#filter1107)"
-            id="path833"
-            cx="162.94153"
-            cy="166.1017"
-            rx="143.1144"
-            ry="145.33899"
-            transform="matrix(1.153994,0,0,1.1209987,-27.316594,-14.907414)" />
-            <text
-            transform="scale(1.0420353,0.95966038)"
-            id="text4170"
-            y="109.06458"
-            x="144.01936"
-            style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:95.65157318px;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff0080;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-            xml:space="preserve"><tspan
-                y="109.06458"
-                x="144.01936"
-                id="tspan4172"
-                style="fill:#ff0080;fill-opacity:1">O</tspan></text>
-            <text
-            id="text4195"
-            y="243.96106"
-            x="183.45763"
-            style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:64px;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-            xml:space="preserve"><tspan
-                y="243.96106"
-                x="183.45763"
-                id="tspan4197">ong</tspan></text>
-            <g
-            id="g831"
-            transform="translate(23.333334,11.666667)">
-            <path
-                style="fill:#0000ff;stroke:none"
-                id="path12"
-                d="m 65.085952,145.23192 c 3.26895,0.045 6.29859,-0.22234 6.72969,-0.55143 0.56359,-0.36425 0.98273,-2.72972 1.12104,-5.34268 0.13832,-2.61297 0.64228,-9.56307 1.1107,-15.43029 1.75701,-23.11592 2.87369,-37.52803 4.261,-58.18425 l 1.48023,-21.485981 11.992232,3.58025 c 10.950016,3.32009 12.621086,3.62804 18.522196,3.51118 14.2188,-0.23097 26.09194,-6.22644 32.52851,-16.25373 2.4006,-3.91106 2.85933,-5.48194 2.68708,-9.83735 -0.37617,-9.346466 -7.6659,-17.341296 -18.99565,-21.097346 -5.54917,-1.80138 -7.57621,-2.06853 -15.22352,-1.97132 -6.88593,0.10985 -10.92611,0.75264 -18.875886,2.86232 -13.283252,3.73975 -20.815682,7.93923 -25.381632,14.196096 -3.51988,4.79849 -3.5614,4.86318 -3.8692,20.24142 -0.38487,16.525811 -3.04833,67.255061 -3.6297,68.160751 -0.37373,0.58223 -7.0047,-2.27387 -12.57569,-5.41127 -8.70357,-4.93602 -17.27674,-12.64393 -20.88808,-18.66294 -7.03283,-11.82005 -7.01766,-25.88617 0.16639,-37.077941 2.45005,-3.81684 2.84156,-4.9405 1.77561,-5.6774 -1.85899,-1.38519 -5.75277,0.39953 -10.36429,4.84365 C 1.9240117,60.39223 -2.0878686,74.17718 4.8798417,89.18116 c 4.3155099,9.37451 7.2958803,12.609 21.4717203,24.08997 17.57938,14.22745 25.23493,21.48113 28.18573,26.81668 1.37651,2.47933 3.09315,4.60004 3.548,4.74769 0.58735,0.1125 3.77324,0.28681 7.00066,0.39642 z"
-                />
-            <ellipse
-                style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:2.25200582;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-                id="path4199"
-                cx="110.36122"
-                cy="26.560381"
-                rx="21.172937"
-                ry="11.617853" />
-            </g>
-            <path
-            d="m 124.58334,69.729014 c -7.68174,3.748996 -12.93255,7.75361 -18.37783,14.229149 -6.612125,7.92402 -11.279516,16.444467 -13.418726,24.538887 -2.528168,9.3725 -2.333698,25.56135 0.38894,34.84864 l 1.94475,6.64594 -10.598858,8.94648 c -19.8364,16.78527 -31.21315,31.01442 -37.6308,46.69205 -3.50054,8.77605 -4.08397,23.60164 -1.26409,33.99658 2.72264,10.13934 8.65411,19.76744 16.04414,26.41339 7.48727,6.64595 15.26625,10.73577 26.93472,14.31436 8.654109,2.55613 9.918189,2.72654 22.947974,2.81174 l 13.80768,0 1.06961,4.26022 c 6.12594,24.53889 6.32042,27.09503 2.6254,33.31496 -1.94474,3.32297 -9.82095,8.00922 -13.51597,8.00922 -2.72264,0 -3.59777,-1.10766 -1.65303,-2.21532 2.23646,-1.19286 4.76462,-7.6684 4.76462,-12.52506 0,-13.97353 -15.46071,-22.57918 -30.143524,-16.70007 -15.36349,6.04951 -19.25298,21.72714 -8.65411,35.27464 13.807678,17.80774 37.047364,20.27867 55.230724,5.87912 12.34912,-9.71331 16.04414,-27.18023 10.40438,-48.82216 -1.36132,-5.28269 -2.52817,-9.96893 -2.52817,-10.39496 0,-0.34082 1.65304,-1.53368 3.59778,-2.55613 10.30714,-5.6235 20.71152,-15.3368 25.8651,-24.19807 4.66738,-8.09443 5.93147,-13.63272 5.93147,-25.13532 -0.0972,-9.79852 -0.29172,-11.16179 -3.01436,-17.29651 -5.34804,-11.67301 -13.22426,-18.74499 -25.96233,-23.17562 -7.39003,-2.55613 -15.46072,-3.749 -24.40654,-3.8342 l -5.93147,0 -2.33369,-10.13933 -2.33369,-10.13934 4.37567,-4.60104 c 12.25189,-12.69547 23.5314,-27.86186 27.12918,-36.29711 1.16685,-2.55613 2.72264,-8.43523 3.59778,-12.95108 1.55579,-7.6684 1.55579,-8.69085 0,-15.422007 C 146.75342,81.40203 137.32142,67.17288 132.07061,67.17288 c -1.26409,0 -4.57015,1.192862 -7.48727,2.556134 z m 4.66739,19.937843 c 1.16684,1.53369 2.52817,5.027068 3.11159,7.668411 2.52817,10.735762 -5.34805,26.328182 -19.35021,38.597622 -1.75027,1.53368 -3.59777,2.81176 -3.98672,2.81176 -2.52817,0 -2.91712,-21.55674 -0.58342,-28.79912 2.43093,-7.24239 6.90384,-13.973533 12.44636,-18.830192 2.72264,-2.385725 5.25081,-4.345432 5.63976,-4.345432 0.38894,0 1.65303,1.278071 2.72264,2.896951 z m -26.643,94.406573 1.26409,4.85665 -4.764625,2.72654 c -5.639751,3.15257 -12.543599,9.62811 -15.071759,14.14395 -1.45856,2.55613 -1.84751,5.11227 -1.84751,11.75821 0,10.30975 1.94474,14.48476 10.015428,21.64194 5.737001,5.11226 7.681741,4.94186 5.542521,-0.34082 -1.847501,-4.43063 -1.750271,-4.68624 0.58343,-10.13933 2.041975,-4.85666 8.751345,-12.86587 10.793325,-12.86587 0.68066,0 3.20882,9.4577 6.51489,24.02765 4.37567,19.25622 5.25081,24.19808 4.1812,24.5389 -2.62541,0.85204 -15.46072,0.34081 -21.392185,-0.85205 -13.029779,-2.72654 -22.850739,-9.20208 -28.490509,-18.9154 -3.20882,-5.53828 -3.30606,-5.96431 -3.20882,-16.01844 0,-9.37249 0.29171,-10.82097 3.11159,-17.29651 1.75027,-3.9194 4.47291,-8.86126 6.22319,-11.07658 4.86186,-6.30513 15.07176,-16.87048 20.030858,-20.70468 3.889491,-2.98217 4.667386,-3.23777 4.861856,-1.95971 0.19448,0.93725 0.97237,3.8342 1.65303,6.47555 z m 39.67278,26.24297 c 10.01544,3.32298 15.26624,10.99138 15.26624,22.57919 0,11.07658 -5.63975,20.10826 -15.46071,24.96491 l -3.88949,1.95971 -0.58342,-1.95971 c -0.29171,-1.10765 -2.43093,-10.22454 -4.86186,-20.27866 -2.52817,-10.05413 -4.86186,-19.68224 -5.25081,-21.30113 -0.48619,-1.61888 -1.16685,-4.0046 -1.45856,-5.36787 l -0.58342,-2.30053 5.73699,0 c 3.50054,0 7.97345,0.68164 11.08504,1.70409 z"
-            id="path8"
-            style="fill:#ff0000;stroke:none" />
-            <g
-            id="g827"
-            transform="translate(-11.864407,57.641243)">
-            <path
-                d="m 234.35149,146.71497 c 3.26895,0.045 6.29859,-0.22234 6.72969,-0.55143 0.56359,-0.36425 0.98273,-2.72972 1.12104,-5.34268 0.13832,-2.61297 0.64228,-9.56307 1.1107,-15.43029 1.75701,-23.11592 2.87369,-37.528029 4.261,-58.184249 l 1.48023,-21.485981 11.99223,3.58025 c 10.95001,3.32009 12.62108,3.62804 18.52219,3.51118 14.2188,-0.23097 26.09194,-6.22644 32.52851,-16.25373 2.4006,-3.91106 2.85933,-5.48194 2.68708,-9.83735 -0.37617,-9.346466 -7.6659,-17.3412962 -18.99565,-21.0973462 -5.54917,-1.80138 -7.57621,-2.06853 -15.22352,-1.97132 -6.88593,0.10985 -10.92611,0.75264 -18.87588,2.86232 -13.28325,3.7397502 -20.81568,7.9392302 -25.38163,14.1960962 -3.51988,4.79849 -3.5614,4.86318 -3.8692,20.24142 -0.38487,16.525811 -3.04833,67.25506 -3.6297,68.16075 -0.37373,0.58223 -7.0047,-2.27387 -12.57569,-5.41127 -8.70357,-4.936019 -17.27674,-12.643929 -20.88808,-18.662939 -7.03283,-11.82005 -7.01766,-25.88617 0.16639,-37.077941 2.45005,-3.81684 2.84156,-4.9405 1.77561,-5.6774 -1.85899,-1.38519 -5.75277,0.39953 -10.36429,4.84365 -15.73297,14.748571 -19.74486,28.533521 -12.77714,43.537501 4.3155,9.374509 7.29588,12.608999 21.47172,24.089969 17.57938,14.22745 25.23493,21.48113 28.18573,26.81668 1.37651,2.47933 3.09315,4.60004 3.548,4.74769 0.58735,0.1125 3.77324,0.28681 7.00066,0.39642 z"
-                id="path823"
-                style="fill:#176431;fill-opacity:1;stroke:none" />
-            <ellipse
-                ry="11.617853"
-                rx="21.172937"
-                cy="26.560381"
-                cx="278.33157"
-                id="ellipse4230"
-                style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:2.25200582;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-            </g>
-        </g>
-    </svg>
-</a>
-
+			${content}
 		</div>`;
 	}
 	
@@ -4096,7 +4048,9 @@ viewBox="0 0 360 38">
 			"closer" : document.querySelector('#contactModalCloser'),
 			"form" : document.querySelector('#myContactForm'),
 			"captcha" : document.querySelector('#captcha-goes-here'),
-			"captcha_field" : document.querySelector("#captcha-field")
+			"captcha_field" : document.querySelector("#captcha-field"),
+			"plain_text_color" : DEFAULT_PLAIN_TEXT_COLOR,
+			"error_text_color" : DEFAULT_ERROR_TEXT_COLOR
 		})
 		g_CurContainer = g_contact_Handling; // has to be initlialized in the function
 	}
