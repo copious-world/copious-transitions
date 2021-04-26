@@ -96,6 +96,10 @@
         "name" : "",
         "file" : "./decoratedLinks.html"
     },
+    "advertPopups" : {
+        "name" : "",
+        "file" : "./advertPopups.html"
+    },
     "yourProileLinks" : {
          "name" : "profile-links",
          "instantiate" : "profile_view",

@@ -68,7 +68,12 @@
         "special_items" : true,
         "out_dir" : "../copious-transitions/sites/${business_key}/static/",
         "array" : "../copious-transitions/sites/${business_key}/static/affiliates.json",
-        "input" : "link_template.html"
+        "input" : ["advert-popup-tmplt.html", "advert-logo-roll-tmplt.html"],
+        "no_subst" : {  "wrapper" : "link_template.html" },
+        "output" : {
+            "advert-popup-tmplt.html" : { "file" : "advertPopups.html", "encoded" : false, "reject" : "no_subst" },
+            "advert-logo-roll-tmplt.html" : { "file" : "decoratedLinks.html", "encoded" : true }
+        }
     }
 }
 
