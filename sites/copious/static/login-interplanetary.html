@@ -1,0 +1,544 @@
+    <style>
+        .login-menu-horizontal {
+            width: inherit;
+            white-space: nowrap;
+        }
+
+        .login-strat-choice {
+            font-weight: bold;
+            cursor: pointer;
+            font-size:medium;
+        }
+
+        .login-strat-choice:hover {
+            color:teal;
+            background-color: wheat;
+        }
+        .login-labeler {
+            font-weight: bold;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+        }
+
+        .button1 {border-radius: 2px;}
+        .button2 {border-radius: 4px;}
+        .button3 {border-radius: 8px;}
+        .button4 {border-radius: 12px;}
+        .button5 {border-radius: 90%;}
+</style>
+<div id="myLoginModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="myLoginModalCloser" class="close">&times;</span>
+            <h3><i>Captcha</i> : I am not a robot</h3>
+        </div>
+        <div class="modal-body">
+            <div id="captcha-goes-here-login" style="border:1px solid lime;margin:2px;" >
+                ------
+            </div>
+            <div id="captcha-entry-login" >
+                Type in the text that you see above:
+                <input type="text" id="captcha-field-login" class="svgFormTextField" style="font-size:14px;margin-top:1px;margin-left:2px;border:1px solid black;"/>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="captchaCheck('login')">submit</button>
+        </div>
+    </div>
+</div>
+
+<div id="myLoginForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
+    <div class="error-message" id="login-errors_here" >no error</div>
+
+    <div id="the-login-form-secure" style="color:darkorange;background-color: palegreen;visibility:hidden;display:none;">
+        switching to a secure version of this page
+    </div>
+
+    <div class="form_el" style="padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style:initial;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+		<div style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
+			Login to: {{companyShortLink}}. 
+            <span style="font-weight: 500;color:#3b9468">If your identity is already uploaded by the registration process, then simply verify your presence.</span>
+		</div>
+	</div>
+
+    <div id='login-strategy' class="form_el" style="border:solid 1px darkmagenta;margin: 3px;width: fit-content;">
+        <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;font-weight: bold;overflow-x: scroll;height:fit-content;" >
+            Login method: <span id="login-method-banner">{{companyShortLink}} IPFS</span>
+        </div>
+        <input type="hidden" id="login-strategy-value" name="strategy" value="ipfs">
+        <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
+            <label for='login-email' class='login-labeler '>CID:</label>
+            <span id="login-cid-show" >Register to use an Interplanetary Identifier</span>
+            <input type='hidden' name='login-cid' id='login-cid' value=''class='field_el email'  />
+        </div>
+        <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;text-align: center;color:green;font-weight: 600;" >
+        Select your identity from these stored in the browser:
+        </div>
+        <div id="identities-present" class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;text-align: center;" >
+            You are the first one here. <span style="font-weight:bold;color:rgb(255, 123, 0);">Join Us!</span>
+        </div>
+    </div>
+
+
+    <iframe id="loginframe" name="loginframe" style="visibility:hidden;" src="about:blank" style="width:0;height:0;border:0px solid #fff;" >
+	</iframe>
+    <div style="height:0px;width:0px;display: none;visibility: hidden;">
+        <form id="the-login-form" method="POST" action="/webcit/ajax_login_username_password" target="loginframe" onsubmit="login_viewchanges()">
+                <input type='hidden' name='name' id='login-cit-name' value='' />
+                <input type='hidden' name='pass' id='login-cit-password' value='' />
+        </form>
+    </div>
+</div>
+
+<noscript><div id="noscript_warning">
+	WARNING: You have JavaScript disabled in your web browser.  Many functions of this system will not work properly.
+</div></noscript>
+
+<script>
+
+	// Get the modal
+    var g_login_port = "2101"
+
+    var g_loginStrategyField = document.getElementById("login-strategy-value")
+    var g_backup_local_strategy_check = null
+    var g_backup_ipfs_strategy_check = null
+    function login_strategy(strategy) {
+        strategy = strategy.toLowerCase()
+        hide_password_verify_container()
+        show_login_submitter()
+        g_loginStrategyField.value = strategy
+        //
+        switch (strategy) {
+            case "local" : {
+                g_login_Handling.checks = g_backup_local_strategy_check
+                break
+            }
+            case "ipfs" : {
+                g_login_Handling.checks = g_backup_ipfs_strategy_check
+                break
+            }
+            default : {
+                g_login_Handling.checks = g_backup_ipfs_strategy_check
+                break
+            }
+        }
+    }
+    //
+    var g_passwordContainer = document.getElementById("password-container")
+    var g_OpenIDContainer = document.getElementById("openID-container")
+    var g_passwordVerifyContainer = document.getElementById("password-verify-container")
+    var g_forgotSubmitContainer = document.getElementById("forgot-container-submit")
+    var g_fergit = document.getElementById('forgot-container')
+    var g_login_submitter = document.getElementById('login-submitter')
+    //
+    //
+    function show_password_container() {
+        if ( g_passwordContainer ) {
+            g_passwordContainer.style.visibility = "visible"
+            g_passwordContainer.style.display = "block"
+        }
+    }
+    function hide_password_container() {
+        if ( g_passwordContainer ) {
+            g_passwordContainer.style.visibility = "hidden"
+            g_passwordContainer.style.display = "none"
+        }
+    }
+    function show_fergit_container() {
+        if ( g_fergit ) {
+            g_fergit.style.visibility = "visible"
+            g_fergit.style.display = "block"
+        }
+        hide_forgot_submit_container()
+    }
+    function hide_fergit_container() {
+        if ( g_fergit ) {
+            g_fergit.style.visibility = "hidden"
+            g_fergit.style.display = "none"
+        }
+    }
+    function show_password_verify_container() {
+        if ( g_passwordVerifyContainer ) {
+            g_passwordVerifyContainer.style.visibility = "visible"
+            g_passwordVerifyContainer.style.display = "block"
+        }
+    }
+    function hide_password_verify_container() {
+        if ( g_passwordVerifyContainer ) {
+            g_passwordVerifyContainer.style.visibility = "hidden"
+            g_passwordVerifyContainer.style.display = "none"
+        }
+    }
+    function show_forgot_submit_container() {
+        hide_fergit_container()
+        if ( g_forgotSubmitContainer ) {
+            g_forgotSubmitContainer.style.visibility = "visible"
+            g_forgotSubmitContainer.style.display = "block"
+        }
+    }
+    function hide_forgot_submit_container() {
+        if ( g_forgotSubmitContainer ) {
+            g_forgotSubmitContainer.style.visibility = "hidden"
+            g_forgotSubmitContainer.style.display = "none"
+        }
+    }
+    function show_openID_container() {
+        if ( g_OpenIDContainer ) {
+            g_OpenIDContainer.style.visibility = "visible"
+            g_OpenIDContainer.style.display = "block"
+        }
+    }
+    function hide_openID_container() {
+        if ( g_OpenIDContainer ) {
+            g_OpenIDContainer.style.visibility = "hidden"
+            g_OpenIDContainer.style.display = "none"
+        }
+    }
+    function show_login_submitter() {
+        if ( g_login_submitter ) {
+            g_login_submitter.style.visibility = "visible"
+            g_login_submitter.style.display = "block"
+        }
+    }
+    function hide_login_submitter() {
+        if ( g_login_submitter ) {
+            g_login_submitter.style.visibility = "hidden"
+            g_login_submitter.style.display = "none"
+        }
+    }
+    //
+    // 
+    function loginFailed() {
+        // display reason, etc.
+        g_login_Handling.switchCaptchaDisplay(false)
+        g_login_Handling.formErrorMessage("Could not login with the information provided. Please try again.")
+    }
+    function registrationFailMessage() {
+        g_login_Handling.switchCaptchaDisplay(false)
+        g_login_Handling.formErrorMessage("It appears you already have an account. Please try logging in.")
+    }
+    function already_logged_in() {
+        g_login_Handling.switchCaptchaDisplay(false)
+        g_login_Handling.formErrorMessage("You are already logged in.")
+        loginView()
+    }
+    function login_retry_password() {
+        g_login_Handling.switchCaptchaDisplay(false)
+        g_login_Handling.formErrorMessage("Did you forget your password?")
+    }
+    //
+    function login_opening_view() {
+        login_strategy('ipfs');
+        return;
+        if (location.protocol !== 'https:') {           // start from a secure page
+            let lform = document.getElementById('the-login-form')
+            lform.style.visibility = "hidden"
+            lform.style.display = "none"
+            let lformMSG = document.getElementById('the-login-form-secure')
+            lformMSG.style.visibility = "visible"
+            lformMSG.style.display = "block"
+            setTimeout(()=> {location.replace(`https:${location.href.substring(location.protocol.length)}`)},1000)
+        }
+    }
+
+    function app_tandem_login(tandems) {       // get cookie for webcit -- specific to this application
+        if ( tandems ) {
+            let loginForm = document.getElementById('the-login-form')
+            let lname = document.getElementById('login-cit-name')
+            let pname = document.getElementById('login-cit-password')
+            if ( loginForm && lname && pname ) {
+                lname.value = tandems.name.replace('@','')  // testing.... this should be removed from here on out
+                pname.value = tandems.pass
+                loginForm.submit()
+            }
+        }
+    }
+
+
+    function token_from_cookie() {
+        return(getCookie('webCit'))
+    }
+
+    var g_sitewide_socket = null
+    function setup_sitewide(token) {
+        try {
+            // setup a webSocket connection to get finalization data on logging in. -- 
+            g_sitewide_socket = new WebSocket(`wss://${g_siteURL}/auth_ws/site_wide`);
+            g_sitewide_socket.onmessage = (event) => {	// handle the finalization through the websocket
+                                    try {
+                                        let handler = JSON.parse(event.data)
+                                        if ( handler.token === token ) {
+                                            if ( handler.action === "logout" ) {
+                                                logout(false)
+                                            } else {
+                                                eval(handler.action)
+                                            }
+                                        }
+                                    } catch (e) {
+                                    }
+                                }
+            //
+            setTimeout(() => {
+                let msg = {
+                    'token' : token,
+                    'action' : 'setup'
+                }
+                g_sitewide_socket.send(JSON.stringify(msg))
+            },500)
+            //
+            return(true)       // prevent display of logout, etc until finalized
+        } catch(e) {
+            return(false)       // prevent display of logout, etc until finalized
+        }
+        
+    }
+
+
+    function site_wide_logout(token,req_logout = true) {
+        if ( req_logout ) {
+            let msg = {
+                'action' : 'logout',
+                'token' : token
+            }
+            g_sitewide_socket.send(JSON.stringify(msg))
+            //window.close()  // not for the main page
+        }
+    }
+
+
+    async function app_process_logout(site_wide = true) {
+        try {
+            let url = `${location.protocol}//${g_siteURL}/{{auth_path}}/users/logout`
+            let data = { 'action' : 'logout', 'token' : g_Loggedin_session_token }
+            let resp = await postData(url, data)
+            site_wide_logout(g_Loggedin_session_token,site_wide)
+            if ( resp.OK === "true" ) {
+                return false    // no longer logged in
+            } else {
+                // error message
+                return true     // still logged in
+            }
+        } catch (e) {
+            console.log(e)
+        }
+	}
+
+
+    var g_Loggedin_session_token = ''
+    async function secondary_actions(resp) {
+        try {
+            let trans_obj = resp.data  // transition object
+            let identity = ipfs_logged_in_id
+            let wkey = transtion_object.wrapped_key
+            let ctext = transtion_object.ctext
+            let aes_key = await unwrap_key(wkey,identity.priv_key)
+            let signable = await decipher(ctext,aes_key)
+            let signature = await sign_data(signable,identity.signer_public_key)
+
+            let url = `${location.protocol}//${g_siteURL}/{{auth_path}}/secondary/users/${trans_obj.user_op}`
+            let data = { 'token' : trans_obj.token, "signature" : signature }
+            let scnd_resp = await postData(url, data)
+            if ( scnd_resp.OK === "true" ) {
+                g_Loggedin_session_token = scnd_resp.token  // should be in COOKIE
+                setup_sitewide(g_Loggedin_session_token)
+                let elements = scnd_resp.elements
+                app_tandem_login(elements.tandems)
+                return(true)
+            } else {
+                g_Loggedin_session_token = '' 
+                return(false)
+            }
+        } catch (e) {
+            console.log(e.message)
+            return(false)
+        }
+    }
+
+    function login_password_rules(fld_name,ptext) {
+        return([true,()=>{return ""}])
+    }
+
+    function presentLogout(accountData) {
+        loginView(accountData)
+    }
+
+    var g_foreign_login_window = null
+    var g_foreign_login_socket = null
+    async function secondaryVerify(resp) {
+        // e.g auto login to another service this uses simultaneously
+        if (  resp && resp.OK ) {
+            if ( resp.data ) {
+                let datum = resp.data
+                if ( datum.amelioritive_action ) {
+                    try {
+                        eval(datum.amelioritive_action)
+                    } catch (e) {
+                        loginFailed(resp)
+                    }
+                    return(false)
+                }
+                // else :: now do an app based login for tandem service, etc.
+                // If this application needs to work with another resource -- and all other auths have passed.
+                let bval = await secondary_actions(rsp)
+                if (!bval) loginFailed(resp)
+                return(bval)  // accept less defind behavior as a pass (this is basically local login)
+            } else {
+                loginFailed(resp)
+                return(false)
+            }
+        }
+        //
+        loginFailed(resp)
+        return(false) 
+    }
+
+
+    function finalize_foreign_login(resp,cmds) {
+        if ( g_foreign_login_window && !(g_foreign_login_window.closed) ) {
+            g_foreign_login_window.close()
+            presentLogout(resp)
+            window.focus()
+            g_Loggedin_session_token = cmds.token  // should be in COOKIE
+            let elements = cmds.elements
+            app_tandem_login(elements.tandems)
+        }
+    }
+
+    // LOGIN APPLICATION
+
+
+	function login_calcAppDataDB() {
+		//
+        let c_cid =  g_login_Handling.fields["email"]
+        let c_strategy = g_login_Handling.fields["strategy"]
+		//
+        let data = {
+            "cid" : getVal(c_cid),
+            "strategy" : getVal(c_strategy),
+            'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
+            'action' : 'login',
+            'form_key' : 'login'
+        }
+		//
+		return(data)
+	}
+
+	async function login_completionaAction(resp) {
+        let verify = await secondaryVerify(resp)
+        if ( verify ) {
+            presentLogout(resp)
+        }
+    }
+    
+	function processAuthEndpoint(endpoint,handler,calcAppDataDB,completionaAction,failedAction) {
+        let url = `${location.protocol}//${g_siteURL}/{{auth_path}}/${endpoint}`
+        handler.service_url = url
+		processUI_captchaService(handler, calcAppDataDB, completionaAction, failedAction)
+	}
+    
+    // send users throught the captcha interface
+    function processLogin() {
+        processAuthEndpoint("users/login", g_login_Handling, login_calcAppDataDB, login_completionaAction, loginFailed)
+    }
+
+
+
+	function onkey_checkLoginError(srcField) {
+	   if ( g_login_Handling.checkFormValid() ) {
+		   let focusEl = document.getElementById(srcField);
+		   focusEl.style.borderColor = 'black'
+		   g_login_Handling.hideFormErrorMessage()
+	   }
+	}
+
+
+    var ipfs_logged_in_id = false
+
+    function set_logged_in_identity(active_id) {
+        ipfs_logged_in_id = active_id
+        let cid = active_id.cid
+        let el = document.getElementById('login-cid-show')   // set on upload or when a user clicks on an idenity button
+        if ( el ) {
+            el.innerHTML = cid
+        }
+    }
+
+    function login_setup_local_user_list(id_u_info_pair) {
+        //
+        let all_identities = id_u_info_pair[0]
+        let all_user_infos = id_u_info_pair[1]
+// login-cid-show
+        let identity_container = document.getElementById("identities-present")
+        if ( identity_container ) {
+            identity_container.innerHTML = ""
+            let n = all_identities.length
+            for ( let i = 0; i < n; i++ ) {
+                let ident = all_identities[i]
+                if ( ident ) {
+                    let child_button = document.createElement("button")
+                    child_button.className = "user-select-buttons"
+                    child_button.addEventListener('click',(ev) => {
+                        let cid = ident.cid
+                        let cid_el = document.getElementById('login-cid')
+                        if ( cid_el ) {
+                            cid_el.value = cid_el
+                        }
+                        let cid_display = document.getElementById('login-cid-show')
+                        if ( cid_display ) {
+                            cid_display.innerHTML = cid
+                        }
+                        processLogin()
+                    })
+                }
+            }
+
+        }
+        //
+    }
+
+
+    var g_login_Handling = null
+    
+    function initLogin() {
+        g_login_Handling = new ValidationContainer({
+            "service_url" : `/captcha/`,
+            "errors_here" : document.getElementById('login-errors_here'),
+            "failure_msg_prefix" : "Login Failed",
+            "password_rules" : false,
+			"fields" : {
+				"cid" : document.getElementById('login-cid'),
+                "strategy" : document.getElementById('login-strategy-value')
+			},
+			"checks" : {
+				"is_empty" : ["cid"],  // ref into fields above...
+			},
+            "modal" : document.getElementById("myLoginModal"),
+            "closer" : document.getElementById('myLoginModalCloser'),
+			"form" : document.getElementById('myLoginForm'),
+			"captcha" : document.getElementById('captcha-goes-here-login'),
+			"captcha_field" : document.getElementById("captcha-field-login")
+        });
+
+        g_backup_local_strategy_check = clonify(g_login_Handling.checks)
+        g_backup_ipfs_strategy_check = clonify(g_login_Handling.checks)
+
+        if ( g_login_failure === null ) g_login_failure = loginFailed
+        if ( g_registration_failure === null ) g_registration_failure = registrationFailMessage  // display on login screen
+    }
+
+    g_finalizers.push(initLogin)
+
+
+</script>
+

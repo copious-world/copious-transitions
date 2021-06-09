@@ -309,7 +309,8 @@ g_app.post('/secondary/users/:action', async (req, res) => {
         if ( (cached_transition !== undefined) && (action == cached_transition.action) ) {      // the action must match (artifac of use an array of paths)
             cached_transition.action += '-secondary'  // this is a key for the second part of an ongoing transition...
             // this is the asset needed by the client to turn on personlization and key access (aside from sessions and cookies)
-            if ( g_session_manager.match(body,cached_transition)  ) {   // check the tokens and any other application specific information required
+            let ok_match = await g_session_manager.match(body,cached_transition)
+            if ( ok_match ) {   // check the tokens and any other application specific information required
                 let transitionObj = cached_transition.tobj
                 let session_token = g_session_manager.unstash_session_token(cached_transition)  // gets info from the object
                 if ( session_token ) {  // assuming the token is there...

@@ -48,19 +48,20 @@ html {
 .items {
 	display: flex;
 	flex-wrap: wrap;
-	margin-left: -10px;
-	margin-top: -10px;
+	margin-left: 2px;
+	margin-top: 2px;
+	border: #000 2px solid;
 }
 
 .items .item {
-	flex: 1 0 300px;
 	box-sizing: border-box;
-	background: -webkit-linear-gradient(to right, rgba(242, 242, 210, 0.3), white));
+	background: -webkit-linear-gradient(to right, rgba(242, 242, 210, 0.3), white);
 	background: linear-gradient(to right, rgba(242, 242, 210, 0.3), white );
 	color: #171e42;
-	padding: 10px;
-	margin-left: 10px;
+	padding: 4px;
+	margin-left: 5px;
 	margin-top: 0px;
+	height: 80%;
 }
 
 .items .extra-i {
@@ -186,11 +187,11 @@ html {
 }
 
 .fade_able {
-	position:absolute;
-	visibility:hidden;
+	position:relative;
+	visibility:visible;
 	top : 10px; left : 10px;
 	height:80%;
-	width: 40%;
+	width: fit-content;
 	z-index:101;
 	border: rgba(252, 190, 190, 0.4) 2px solid;
 	background-color: white;
@@ -387,7 +388,7 @@ button:hover {
 
 body {
 	border: 1px solid black;
-	
+	padding:0px;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
@@ -395,22 +396,22 @@ body {
 
 @media screen and (orientation: portrait) {
 	#mainNav {
-		width: 100%;
+		width: 98%;
 	}
 }
 
 @media screen and (orientation: landscape) {
 	#mainNav {
-		width: 100%;
+		width: 98%;
 	}
 }
 
 main {
 	border-left: solid 3px navy;
-	border-top: solid 1px #8833BB;
-	padding : 4px;
 	height: fit-content;
 	margin-bottom: 0%;
+	border-left: solid 3px navy;
+	margin: 0%;
 }
 
 @media (min-width: 1220px) {
@@ -563,14 +564,16 @@ footer a {
 	border:lightgray solid 1px;
 	padding:6px;
 	margin:2px;
-	width:80%;
+	min-width:80%;
+	width: fit-content;
 }
 
 .form_el_inner {
 	border:lightgray solid 1px;
 	padding:6px;
 	margin:2px;
-	width:100%;
+	min-width:100%;
+	width: fit-content;
 }
 
 label {
@@ -592,13 +595,15 @@ label {
 }
 
 #contact_box {
-	background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE));
+	background: -webkit-linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE);
 	background: linear-gradient(to right, rgba(252, 252, 240, 1.0), #FEFEFE );
 }
 
 .textarea_field_el {
 	width: 94%;
-	margin:3%;
+	margin:4px;
+	margin-right: 6%;
+	max-height: 200px;
 }
 
 .error-message {
@@ -707,15 +712,32 @@ a {
 	visibility: hidden;
 }
 
-.no-view-file-field {
-	display: none;
-	visibility: hidden;
+.infolink:before
+{
+    content: '?';
+    display: inline-block;
+    font-family: sans-serif;
+    font-weight: bold;
+    text-align: center;
+    width: 1.8ex;
+    height: 1.8ex;
+    font-size: 1.4ex;
+    line-height: 1.8ex;
+    border-radius: 1.2ex;
+    margin-right: 4px;
+    padding: 1px;
+    color: blue;
+    background: white;
+    border: 1px solid blue;
+    text-decoration: none;
 }
 
-.user-select-buttons {
-	font-size:75%;
-	width:40%;
-	font-weight: 600;
+.infolink:hover:before
+{
+    color: white;
+    background: blue;
+    border-color: white;
+    text-decoration: none;
 }
 
 </style>
@@ -756,47 +778,67 @@ a {
 	<main>
 
 	<div class="items">
-		
-		<div class="item">
-			{{{svgBannerFrame.content}}}
+		<div class="item" >
+			<div id="contact_box" style="z-index:102" >
+				<!-- The Modal -->
+				<div class="fade_able_content">
+					<div id="contactModal" class="modal">
+						<!-- Modal content -->
+						<div class="modal-content">
+							<div class="modal-header">
+								<span id="contactModalCloser" class="close">&times;</span>
+								<h3><i>Captcha</i> : I am not a robot</h3>
+							</div>
+							<div class="modal-body">
+								<div id="captcha-goes-here" style="border:1px solid lime;margin:2px;" >
+									------
+								</div>
+								<div id="captcha-entry" >
+									Type in the text that you see above:
+									<input type="text" id="captcha-field" class="svgFormTextField" style="font-size:14px;margin-top:1px;margin-left:2px;border:1px solid black;"/>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button onclick="captchaCheck()">submit</button>
+							</div>
+						</div>
+					</div>
+					
+					<div id="myContactForm" style="padding-left:4%;padding-right:4%;padding-top:8px;padding-bottom:8px;height: inherit;" >
+						<div class="error-message" id="contact-errors_here" >no error</div>
+						<div class="form_el" >
+							<label for='contact-name' class='name'>Name<span> (required) </span></label>
+							<input type='text' name='contact-name' id='contact-name' value='' class='field_el name' required onkeyup="onkey_checkContactError('contact-name')" />
+						</div>
+						
+						<div class="form_el" >
+							<label for='contact-p_contact' class='p_contact'>Personal Identity<span> (required) </span></label>
+							<input type='p_contact' name='contact-p_contact' id='contact-p_contact' value=''class='field_el p_contact'  required onkeyup="onkey_checkContactError('contact-p_contact')"  />
+							<a class="infolink" href="#">id (not email)</a>
+						</div>
+						
+						<div class="form_el" >
+							<label for='contact-website' class='url'>Website<span> (optional)</span></label>
+							<input type='text' name='contact-website' id='contact-website' value='' class='field_el url' onkeyup="onkey_checkContactError('contact-website')"  />
+						</div>
+						
+						<div class="form_el" style="vertical-align:top">
+							<label for='contact-comment' class='grunion-field-label textarea'>Comment<span>(required)</span></label><br>
+							<textarea name='contact-comment' id='contact-comment' rows='20' class='textarea_field_el'  required onkeyup="onkey_checkContactError('contact-comment')"  ></textarea>
+						</div>
+						<p class='contact-submit'>
+						<button onclick="processContact()" >Submit</button>
+						</p>
+						<div class="form_el" style="height:20px;background-color:rgb(230,230,240,0.4);font-style: oblique;font-weight: bold;color:rgba(242, 242, 210, 0.3);">
+							copious contact (thank you for your interest and concerns)
+						</div>
+					</div>
+				</div>
+			</div>	
 		</div>
-		<div id="greet_and_meet_1" class="item">
-			<div id="desktopCenter" class="shortviz" ></div>
-			<p class="extra-i" style="color:navy">
-			Join in the <span style="font-weight:bold;">{{conversation}}</span> conversation.
-			</p>
-			<br>
-			<a id="a4179" href="javascript:join_process()" style="cursor:pointer" >
-			<p class="extra-i" style="text-align:center" >
-			{{{join.button.content}}}
-			</p>
-			</a>
-		</div>
-		<div class="item">
-			<div class="longviz"  >&nbsp;</div>
-			<p class="extra-i" style="color:darkred">
-			Browse the blog or check out some demonstrations.
-			</p>
-			<br>
-			<p class="extra-i" style="text-align:center">
-				{{{public_content_access.content}}}
-			</p>
-			<div id="desktopRight" class="shortviz" ></div>
-		</div>
-		<div id="greet_and_meet_2" class="item">
-			<p class="extra-i" style="color:darkgreen;font-weight:bold;">
-			Already a member?
-			</p>
-			<hr><br>
-			<a id="a4199" href="javascript:login_process()"   style="cursor:pointer">
-			<p class="extra-i" >
-				{{{login.button.content}}}
-			</p>
-			</a>
-		</div>
-		<div id="lowerFiller" class="fillLowerWrap">
-			<div class="fillLower">
-				alpha test
+		<div class="item" style="text-align: center;vertical-align: middle;" >
+			<div class="art_container" >
+				{{user_image_or_art}}
 			</div>
 		</div>
 	</div>
@@ -811,84 +853,6 @@ a {
 	</ul>
 </footer>
 
-<div id="squashMenuContainer" >
-	this is a test;
-</div>
-
-<div id="contact_box" class="fade_able" style="z-index:116" >
-	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('contact_box')">x</span></div>
-	<div class="fade_able_content" >
-		{{{contactBox.content}}}
-	</div>
-</div>
-
-<div id="topicBox_1" class="fade_able" style="z-index:103" >
-	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('topicBox_1')">x</span></div>
-	<div class="fade_able_content" >
-		<div style="min-width: 400px;min-height: 300px;">
-			{{{topicBox_1.content}}}
-		</div>
-	</div>
-</div>
-<div id="about_box" class="fade_able" style="z-index:104" >
-	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('about_box')">x</span></div>
-	<div class="fade_able_content" >
-		<div style="min-width: 400px;min-height: 300px;overflow: auto;">
-			{{{aboutBox.content}}}
-		</div>
-	</div>
-</div>
-<div id="topicBox_2" class="fade_able" style="z-index:105" >
-	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('topicBox_2')">x</span></div>
-	<div class="fade_able_content" >
-		<div style="min-width: 400px;min-height: 300px;">
-			{{{topicBox_2.content}}}
-		</div>
-	</div>
-</div>
-
-<div id="topicBox_3" class="fade_able" style="z-index:106" >
-	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('topicBox_3')">x</span></div>
-	<div class="fade_able_content" >
-		<div style="min-width: 400px;min-height: 300px;">
-			{{{topicBox_3.content}}}
-		</div>
-	</div>
-</div>
-
-<div id="thankyou_box" class="fade_able" onclick="hide_thankyou_box(this)">
-	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('thankyou_box')">x</span></div>
-	<div class="fade_able_content" >
-		<span id="thankyou_box-message" style="color:coral;font-weight: 900;font-size:xx-large;">Thank you for your message.</span>
-	</div>
-</div>
-
-<div id="register" class="solid_able" style="z-index:116" >
-	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closesolid('register')">x</span></div>
-	<div class="fade_able_content" >
-		<div style="min-width: 400px;min-height: 300px;">
-			{{{registerBox.content}}}
-		</div>
-	</div>
-</div>
-
-<div id="login" class="solid_able" style="z-index:117" >
-	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closesolid('login')">x</span></div>
-	<div class="fade_able_content" >
-		<div style="min-width: 400px;min-height: 300px;">
-			{{{loginBox.content}}}
-		</div>
-	</div>
-</div>
-
-{{{advertPopups.content}}}
-
-{{{yourProileLinks.content}}}
-{{{yourDashboardLinks.content}}}
-
-<dialog id="for_testing_dialogs">
-	<span>This is a dialog test</span>
-</dialog>
 
 </body>
 </html>
@@ -988,48 +952,6 @@ function addstyle(script) {
     }
 }
 
-function gen_nonce() {
-	return btoa(window.crypto.getRandomValues(new Uint8Array(16)))
-}
-
-//$$EXPORTABLE::
-/*
-matches_url
-clonify
-addscript
-addstyle
-getCookie
-*/
-
-
-
-	async function ensure_dialog_elements() {
-		let test_dialog = document.getElementById("for_testing_dialogs")  // thought to be in the template... if not this does nothing
-		if ( test_dialog ) {
-			if ( typeof test_dialog.showModal !== "function" ) {
-				let element_supportJson =  await wv_fetchEndPoint('uploaders/static/dialogs')
-				if ( element_supportJson ) {
-					let css_support = decodeURIComponent(element_supportJson.html)
-					addstyle(css_support)
-					let html_els = document.getElementsByTagName('html')
-					let html = null
-					if ( html_els && html_els.length ) {
-					html = html_els[0]
-					addscript(decodeURIComponent(element_supportJson.script),html)
-					// register the dialogs
-					let dialogs = document.getElementsByTagName('dialog')
-					let n = dialogs.length
-					for ( let i = 0; i < n; i++ ) {
-						let dial = dialogs[i]
-						dialogPolyfill.registerDialog(dial);
-					}
-					}
-				}
-			}
-		}
-	}
-
-
 	
 
 
@@ -1105,8 +1027,6 @@ postData
 */
 
 	
-	
-
 
 // CONTENT FETCHING CLASS
 class Uploader {
@@ -1116,14 +1036,14 @@ class Uploader {
         this.fileDiv = props.fileDiv
         this.uploadEndpoint = props.uploadEndpoint
         this.fileType = props.fileType ? props.fileType : '.mp3'
-        this.emailField = props.emailField
+        this.p_contactField = props.p_contactField
         this.positiveCompletion = props.positiveCompletion
         //
         delete props.errorDiv
         delete props.fileDiv
         delete props.uploadEndpoint
         delete props.fileType
-        delete props.emailField
+        delete props.p_contactField
         delete props.positiveCompletion
         //
         this.extra_props = {}
@@ -1163,9 +1083,9 @@ class Uploader {
 
     checkForm(event) {
         let errField = document.querySelector(this.errorDiv)
-        if ( this.emailField ) {
-            let inspect_field = document.querySelector(this.emailField)
-            if ( inspect_field && !checkEmailField(inspect_field) ) {
+        if ( this.p_contactField ) {
+            let inspect_field = document.querySelector(this.p_contactField)
+            if ( inspect_field && !checkp_contactField(inspect_field) ) {
                 inspect_field.style.borderColor="red"
                 if (errField) errField.style.color = "red"
                 this.errorMessage("unrecognized mail format")
@@ -1215,8 +1135,8 @@ class Uploader {
         let files = document.querySelector(this.fileDiv)
         let file = files.files[0]
         data.append('mp3file', file)
-        let email = document.querySelector(this.emailField).value;
-        data.append('email', email)
+        let p_contact = document.querySelector(this.p_contactField).value;
+        data.append('p_contact', p_contact)
         for ( let p in this.extra_props ) {
             data.append(p, this.extra_props[p])
         }
@@ -1241,12 +1161,9 @@ class Uploader {
 
 
 	//
-	var reEmail = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-	function checkEmailField(efield) {
-		let email = efield.value
-		if ( !(reEmail.test(email)) ) {
-		  return(false)
-		}
+	async function checkp_contactField(efield) {
+		let p_contact = efield.value
+								/// check for to see if this a profile use anywhere...
 		return(true)
 	}
 
@@ -1274,79 +1191,75 @@ class Uploader {
 	}
 
 
+	class ValidationContainer {
+		// 
+		constructor(props) {
+			this.errline = props.errors_here
+			this.fields = props.fields
+			this.checks = props.checks
 
+			this.modal = props.modal
+			this.closer = props.closer
+			this.form = props.form
+			this.where_captcha = props.captcha
+			this.captch_input = props.captcha_field
+			this.auth_port = props.auth_port
+			this.password_rules = props.password_rules
+			this.service_url = props.service_url
 
+			this.plain_text_color = (props.plain_text_color !== undefined) ? props.plain_text_color : "black"
+			this.error_text_color = (props.error_text_color !== undefined) ? props.error_text_color : "black"
 
-class ValidationContainer {
-    // 
-    constructor(props) {
-        this.errline = props.errors_here
-        this.fields = props.fields
-        this.checks = props.checks
+			this.errline.style.visibility = "hidden"
+			this.failure_msg_prefix = props.failure_msg_prefix
+			this.empty_checker = props.is_empty ? props.is_empty : is_empty
+		}
 
-        this.modal = props.modal
-        this.closer = props.closer
-        this.form = props.form
-        this.where_captcha = props.captcha
-        this.captch_input = props.captcha_field
-        this.auth_port = props.auth_port
-        this.password_rules = props.password_rules
-        this.service_url = props.service_url
+		hideFormErrorMessage() {
+			let errline = this.errline
+			if ( errline ) {
+				errline.innerHTML = ""
+				errline.style.visibility = "hidden"
+			}
+		}
 
-        this.plain_text_color = (props.plain_text_color !== undefined) ? props.plain_text_color : "black"
-        this.error_text_color = (props.error_text_color !== undefined) ? props.error_text_color : "black"
+		formErrorMessage(msg) {
+			let errline = this.errline
+			if ( errline ) {
+				errline.innerHTML = msg
+				errline.style.visibility = "visible"
+			}
+		}
 
-        this.errline.style.visibility = "hidden"
-        this.failure_msg_prefix = props.failure_msg_prefix
-        this.empty_checker = props.is_empty ? props.is_empty : is_empty
-    }
+		emptyFieldMessage(fields) { // name_empty,p_contact_empty,commment_empty
+			let msg = "The following fields require values: "
+			//
+			let sep = ','
+			msg += fields.join(sep)
+			this.formErrorMessage(msg);
+		}
 
-    hideFormErrorMessage() {
-        let errline = this.errline
-        if ( errline ) {
-            errline.innerHTML = ""
-            errline.style.visibility = "hidden"
-        }
-    }
+		p_contactFormatError() {
+			this.formErrorMessage("p_contact does not match a known p_contact format.");
+		}
 
-    formErrorMessage(msg) {
-        let errline = this.errline
-        if ( errline ) {
-            errline.innerHTML = msg
-            errline.style.visibility = "visible"
-        }
-    }
+		passwordFieldError(whichFields) {
+			this.formErrorMessage(`${whichFields} are required to have the same value`);
+		}
 
-    emptyFieldMessage(fields) { // name_empty,email_empty,commment_empty
-        let msg = "The following fields require values: "
-        //
-        let sep = ','
-        msg += fields.join(sep)
-        this.formErrorMessage(msg);
-    }
-
-    emailFormatError() {
-        this.formErrorMessage("Email does not match a known email format.");
-    }
-
-    passwordFieldError(whichFields) {
-        this.formErrorMessage(`${whichFields} are required to have the same value`);
-    }
-
-    //
-    checkFormValid() {
-        //
-        if ( !g_ComponentErrorsActivated ) {
-            return(true);
-        }
-        //
-        for ( let field in this.fields ) {
-            let c = this.fields[field]
-            colorize(c,this.plain_text_color)
-        }
-        //
-        let mustHaveValue = this.checks.is_empty
-		if ( mustHaveValue ) {
+		//
+		async checkFormValid() {
+			//
+			if ( !g_ComponentErrorsActivated ) {
+				return(true);
+			}
+			//
+			for ( let field in this.fields ) {
+				let c = this.fields[field]
+				colorize(c,this.plain_text_color)
+			}
+			//
+			let mustHaveValue = this.checks.is_empty
 			let empty_fields = mustHaveValue.filter((field) => {
 				let c = this.fields[field]
 				//colorize(c,"black")
@@ -1361,58 +1274,54 @@ class ValidationContainer {
 				})
 				return(false)
 			}
-		}
-        //
-        let emailFields = this.checks.email
-		if ( emailFields ) {
-			emailFields.forEach(e_field => {
+			//
+			let p_contactFields = this.checks.p_contact
+			p_contactFields.forEach(e_field => {
 				let c = this.fields[e_field]
-				if ( !checkEmailField(c) ) {
-					this.emailFormatError();
+				let contactable = await checkp_contactField(c);
+				if ( !contactable ) {
+					this.p_contactFormatError();
 					colorize(c,this.error_text_color)
 					return(false);
 				}
 			})
+			//
+			if ( this.password_rules && (typeof this.password_rules === "function") ) {
+				if ( this.checks.passwords && (this.checks.passwords.length) ) {
+					let pvalues = this.checks.passwords.map(pfield => {
+							let c = this.fields[pfield]
+							if ( c ) {
+								return(c.value)
+							} else {
+								return(null)
+							}
+						})
+					//
+					let [check,violation] = this.password_rules(pvalues)
+					//
+					if ( !check ) {
+						let message = violation()
+						this.passwordFieldError(message)
+						return(false)
+					}
+					//
+					this.hideFormErrorMessage()
+				}
+			}
+			//
+			return(true);
 		}
-        //
-        if ( this.password_rules && (typeof this.password_rules === "function") ) {
-            if ( this.checks.passwords && (this.checks.passwords.length) ) {
-                let pvalues = this.checks.passwords.map(pfield => {
-                        let c = this.fields[pfield]
-                        if ( c ) {
-                            return(c.value)
-                        } else {
-                            return(null)
-                        }
-                    })
-                //
-                let [check,violation] = this.password_rules(pvalues)
-                //
-                if ( !check ) {
-                    let message = violation()
-                    this.passwordFieldError(message)
-                    return(false)
-                }
-                //
-                this.hideFormErrorMessage()
-            }
-        }
-        //
-        return(true);
-    }
-    
-    switchCaptchaDisplay(on_off) {
-        if ( on_off ) {
-            this.modal.style.display = "block";  // show captcha
-            this.form.style.display = "none"
-        } else {
-            this.modal.style.display = "none";  // show captcha
-            this.form.style.display = "block"
-        }
-    }
-}
-
-
+		
+		switchCaptchaDisplay(on_off) {
+			if ( on_off ) {
+				this.modal.style.display = "block";  // show captcha
+				this.form.style.display = "none"
+			} else {
+				this.modal.style.display = "none";  // show captcha
+				this.form.style.display = "block"
+			}
+		}
+	}
 
 
 	async function processUI_captchaService(handlerDefsValidator,calcAppDataDB,completionaAction,failureAction) {
@@ -1420,29 +1329,25 @@ class ValidationContainer {
 		g_ComponentErrorsActivated = true	// will be processing errors, etc. some selective behavior permitted
 		g_CurContainer = handlerDefsValidator
 		//
-		if ( g_CurContainer && g_CurContainer.checkFormValid() ) {
+		let form_valid = await g_CurContainer.checkFormValid()
+		if ( g_CurContainer && form_valid ) {
 			try {
 				// CAPTCH PROCESSING 
 				let captchaResult = await doCaptcha('','{{auth_path}}')   // the captcha has to be processed first.
 				// CAPTCH RESULT 
 				if ( captchaResult === true ) {
 					if ( g_currenCaptchaTOKEN ) {
-						let data = await calcAppDataDB()		// calcAppDataDB
-						if ( data ) {
-							try {
-								let resp = await postData(g_CurContainer.service_url, data,'include')
-								if ( resp.OK === "true" ) {
-									g_currenCaptchaTOKEN = null;     // check for duplicates
-									if ( completionaAction ) completionaAction(resp);
-								} else {
-									g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${resp.reason}`)
-									if ( failureAction ) failureAction(resp)
-								}
-							} catch (e) {
-								g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${e.message}`)
+						let data = calcAppDataDB()		// calcAppDataDB
+						try {
+							let resp = await postData(g_CurContainer.service_url, data,'include')
+							if ( resp.OK === "true" ) {
+								g_currenCaptchaTOKEN = null;     // check for duplicates
+                                if ( completionaAction ) completionaAction(resp);
+							} else {
+								g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${resp.reason}`)
 								if ( failureAction ) failureAction(resp)
-							}
-						} else {
+                            }
+						} catch (e) {
 							g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${e.message}`)
 							if ( failureAction ) failureAction(resp)
 						}
@@ -1461,60 +1366,10 @@ class ValidationContainer {
 				console.log(e.message)
 			}
 		} else {
-			if ( g_CurContainer === undefined ) {
-				throw new Error("The current container is not defined in processUI_captchaService.")
-			}
+			throw new Error("The current container is not defined in processUI_captchaService.")
 		}
 	}
 
-
-
-	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
-	// CONTENT GENERATION
-	// ---- ---- ---- ---- ---- ----
-	function centerBoxText(tightpace) {
-		if ( !tightpace ) {
-			return `<div class="middleBanner">
-			<p style="text-align:center">{{middleBoxHook}}</p>
-			<blockquote style="text-align:center;padding-bottom:4px;">
-			<button id="contact-btn"	onmouseup="pinBox('#contact_box')" onmouseover="defadeBox('#contact_box')" onmouseleave="fade_apparition(this,event)" >contact</button>
-			<button id="topicBox_1-btn"	onmouseup="pinBox('#topicBox_1')" onmouseover="defadeBox('#topicBox_1')" onmouseleave="fade_apparition(this,event)" >{{topicBox_1.name}}</button>
-			<button id="about-btn"		onmouseup="pinBox('#about_box')" onmouseover="defadeBox('#about_box')" onmouseleave="fade_apparition(this,event)" >about</button>
-			</blockquote>
-			</div>`;
-		} else {
-			return `<div class="middleBanner">
-			<p style="text-align:center">{{middleBoxHook}}</p>
-			<blockquote style="text-align:center;padding-bottom:4px;">
-			<button id="contact-btn"	onmouseup="pinBox('#contact_box')" onmouseover="defadeBox('#contact_box')" onmouseleave="fade_apparition(this,event)" >contact</button>
-			<button id="about-btn"		onmouseup="pinBox('#about_box')" onmouseover="defadeBox('#about_box')" onmouseleave="fade_apparition(this,event)" >about</button>
-			</blockquote>
-			</div>`;
-		}
-	}
-
-	function rightBoxText() {
-		return `<div class="extraBanner">
-		<p style="text-align:center">{{rightBoxHook}}</p>
-		<br>
-		<blockquote style="text-align:center;padding-bottom:4px">
-		<button id="topicBox_2-btn"	onmouseup="pinBox('#topicBox_2')" onmouseover="defadeBox('#topicBox_2')" onmouseleave="fade_apparition(this,event)" >{{topicBox_2.name}}</button>
-		<button id="topicBox_3-btn"	onmouseup="pinBox('#topicBox_3')" onmouseover="defadeBox('#topicBox_3')" onmouseleave="fade_apparition(this,event)" >{{topicBox_3.name}}</button>
-		</blockquote>
-		</div>`;
-	}
-
-	function logoutForDropdown() {
-		if ( g_LoggedIn ) {
-			return `
-		<div style='text-align:center' >
-			<button class='logout' onclick='logout()'>logout</button>
-		</div>
-		`
-		} else {
-			return ""
-		}
-	}
 
 	// independent floating box..
 
@@ -1547,51 +1402,6 @@ class ValidationContainer {
 		</div>`;
 	}
 	
-
-	function setupLogoutRestoration() {
-		let g_originalGreetAndMeet1 = greetAndMeetContainer1.innerHTML
-		let g_originalGreetAndMeet2 = greetAndMeetContainer2.innerHTML
-		let profileHTML = document.getElementById('profile-line-container').innerHTML
-		let dashboardHTML = document.getElementById('dashboard-line-container').innerHTML
-		g_loginStateViewHolders["gAndM1"] = {
-			'element' : greetAndMeetContainer1,
-			'unauthed' : g_originalGreetAndMeet1,
-			'authed' : profileHTML,
-			'action' : `{{yourProileLinks.instantiate}}`
-		}
-		g_loginStateViewHolders["gAndM2"] = {
-			'element' : greetAndMeetContainer2,
-			'unauthed' : g_originalGreetAndMeet2,
-			'authed' : dashboardHTML,
-			'action' : `{{yourDashboardLinks.instantiate}}`
-		}
-		profileHTML.textContent = '';
-		dashboardHTML.textContent = '';
-	}
-
-
-	function menuHandler(mHandle) {
-		if ( squashMenuContainer.style.visibility !== "visible" && (mHandle !== null) ) {
-			squashMenuContainer.style.visibility = "visible"
-			squashMenuContainer.style.top = "60px";
-			squashMenuContainer.style.left = (Math.floor(window.innerWidth/2) - 40) + "px";
-			squashMenuContainer.style.height = (window.innerHeight - 64) + "px";
-			squashMenuContainer.style.width = (Math.floor(window.innerWidth/2) + 34) + "px";
-			//
-			let lowerText = lowerFillerText();
-			let menuLower = `<div class="fitMenuLower">
-			${lowerText}
-			</div>`
-			squashMenuContainer.innerHTML = logoutForDropdown() + centerBoxText(false) + rightBoxText() + menuLower;
-			//
-		} else {
-			squashMenuContainer.style.visibility = "hidden"
-		}
-	}
-
-	function releaseMenu(mHandle) {
-		
-	}
 
 
 	// === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
@@ -1744,6 +1554,7 @@ class ValidationContainer {
 				centerBox.style.visibility = "visible";
 				centerBox.style.display = "block";
 			}
+			if ( )
 			rightBox.innerHTML = rightBoxText();
 			squashMenu.style.visibility = "hidden";
 			squashMenuContainer.style.visibility = "hidden";
@@ -1767,31 +1578,37 @@ class ValidationContainer {
 				centerBox.style.visibility = "hidden";
 				centerBox.style.display = "none";
 			}
-			rightBox.textContent = "";
-			rightBox.style.visibility = "hidden";
-			rightBox.style.display = "none";
-			squashMenu.style.visibility = "visible";
+			if ( rightBox ) {
+				rightBox.textContent = "";
+				rightBox.style.visibility = "hidden";
+				rightBox.style.display = "none";
+			}
+			if ( squashMenu )  squashMenu.style.visibility = "visible";
 			//
-			logoutCtrl.style.visibility = "hidden";
-			logoutCtrl.style.display = "none";
-			if ( g_LoggedIn ) {
-				let logoutCtrlInDropdown = document.getElementById('logout-control-dropdown')
-				if ( logoutCtrlInDropdown ) {
-					logoutCtrlInDropdown.style.visibility = "visible";
-					logoutCtrlInDropdown.style.display = "block";
-				}
-			} else {
-				let logoutCtrlInDropdown = document.getElementById('logout-control-dropdown')
-				if ( logoutCtrlInDropdown ) {
-					logoutCtrlInDropdown.style.visibility = "hidden";
-					logoutCtrlInDropdown.style.display = "none";
+			if ( logoutCtrl ) {
+				logoutCtrl.style.visibility = "hidden";
+				logoutCtrl.style.display = "none";
+				if ( g_LoggedIn ) {
+					let logoutCtrlInDropdown = document.getElementById('logout-control-dropdown')
+					if ( logoutCtrlInDropdown ) {
+						logoutCtrlInDropdown.style.visibility = "visible";
+						logoutCtrlInDropdown.style.display = "block";
+					}
+				} else {
+					let logoutCtrlInDropdown = document.getElementById('logout-control-dropdown')
+					if ( logoutCtrlInDropdown ) {
+						logoutCtrlInDropdown.style.visibility = "hidden";
+						logoutCtrlInDropdown.style.display = "none";
+					}
 				}
 			}
 		}
-		if ( window.innerWidth >= 1100 ) {
-			lowerFiller.innerHTML = lowerFillerText();
-		} else {
-			lowerFiller.textContent = "";
+		if ( lowerFiller ){
+			if ( window.innerWidth >= 1100 ) {
+				lowerFiller.innerHTML = lowerFillerText();
+			} else {
+				lowerFiller.textContent = "";
+			}
 		}
 	}
 
@@ -1886,125 +1703,79 @@ class ValidationContainer {
 	// APPLICATIONS
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- 
 
-
-	// --------- LOGIN // REGISTER
-	// links on this page...
- 
-	var g_login_Handling = null
-	function login_process() {
-		let login = document.querySelector("#login")
-		if ( login ) {
-			login.style.visibility = "visible"
-			login.style.display = "block";
-			//
-			unpin_current();
-			g_CurContainer = g_login_Handling
-			//
-			//hide other things
-			let register = document.querySelector("#register")
-			if ( register ) {
-				register.style.visibility = "hidden"
-				register.style.display = "none";
-			}
-		}
-		login_opening_view()	// app implements
+	// CONTACT APPLICATION
+	var g_contact_Handling = null
+	function initContact() {
+		g_contact_Handling = new ValidationContainer({
+			"auth_port" : "",
+            "service_url" : `${location.protocol}//${g_siteURL}/{{auth_path}}/transition/contact`,
+            "errors_here" : document.getElementById('contact-errors_here'),
+            "failure_msg_prefix" : "Cannot Process Captcha",
+			"fields" : {
+				"name" : document.querySelector('#contact-name'),
+				"p_contact" : document.querySelector('#contact-p_contact'),
+				"website" : document.querySelector('#contact-website'),
+				"comment" : document.querySelector('#contact-comment')
+			},
+			"checks" : {
+				"is_empty" : ["name","comment","p_contact"],  // ref into fields above...
+				"p_contact" : ["p_contact"]
+			},
+			"modal" : document.querySelector('#contactModal'),
+			"closer" : document.querySelector('#contactModalCloser'),
+			"form" : document.querySelector('#myContactForm'),
+			"captcha" : document.querySelector('#captcha-goes-here'),
+			"captcha_field" : document.querySelector("#captcha-field"),
+			"plain_text_color" : DEFAULT_PLAIN_TEXT_COLOR,
+			"error_text_color" : DEFAULT_ERROR_TEXT_COLOR
+		})
+		g_CurContainer = g_contact_Handling; // has to be initlialized in the function
 	}
 
-	// 
-	var g_register_Handling = null
-	function join_process() {
-		let register = document.querySelector("#register")
-		if ( register ) {
-			register.style.visibility = "visible"
-			register.style.display = "block";
-			//
-			unpin_current();
-			g_CurContainer = g_register_Handling
-			g_ComponentErrorsActivated = true
-			//
-			//hide other things
-			let login = document.querySelector("#login")
-			if ( login ) {
-				login.style.visibility = "hidden"
-				login.style.display = "none";
-			}
+
+	function contact_calcAppDataDB() {
+		//
+		let c_name = g_contact_Handling.fields["name"]
+		let c_p_contact =  g_contact_Handling.fields["p_contact"]
+		let c_website = g_contact_Handling.fields["website"]
+		let c_comment = g_contact_Handling.fields["comment"]
+		//
+		let data = {
+			"name" : getVal(c_name),
+			"website" : getVal(c_website),
+			"p_contact" : getVal(c_p_contact),
+			"comment" : getVal(c_comment),
+			'token' : g_currenCaptchaTOKEN
 		}
-		register_opening_view()
+		//
+		return(data)
 	}
 
-	function hide_join_process() {
-		if ( g_register_Handling ) {
-			g_register_Handling.switchCaptchaDisplay(false)
-		}
-
-		let register = document.querySelector("#register")
-		if ( register ) {
-			register.style.visibility = "hidden"
-			register.style.display = "none";
-		}
+	function contact_completionaAction() {
+		unpin_current();
+		show_thankyou_box("Thank you for your message");
+	}
+	
+	function processContact() {
+		processUI_captchaService( g_contact_Handling,
+									contact_calcAppDataDB,
+									contact_completionaAction )
 	}
 
-	function hide_login_process() {
-		if ( g_login_Handling ) {
-			g_login_Handling.switchCaptchaDisplay(false)
-		}
-		//hide other things
-		let login = document.querySelector("#login")
-		if ( login ) {
-			login.style.visibility = "hidden"
-			login.style.display = "none";
-		}
+	function onkey_checkContactError(srcField) {
+	   if ( g_contact_Handling.checkFormValid() ) {
+		   let focusFld = '#' + srcField;
+		   let focusEl = document.querySelector(focusFld);
+		   focusEl.style.borderColor = 'black'
+		   g_contact_Handling.hideFormErrorMessage()
+	   }
 	}
 
-	var g_login_failure = null
-	function retry_password() {
-		login_process()
-		if ( g_login_failure ) g_login_failure()
-	}
-	var g_registration_failure = null
-	function already_registered() {
-		login_process()
-		if ( g_registration_failure ) g_registration_failure()
-	}
+	g_finalizers.push(initContact)
+
 
 
 	//  === ---------------------------------------  === ---------------------------------------  === --------------------------------------- 
-
-	async function logout(originator = true) {
-		// send synch message
-		g_LoggedIn = await app_process_logout(originator)
-		// then
-		if ( !g_LoggedIn ) {
-			for ( let key in g_loginStateViewHolders ) {
-				let stateHolder = g_loginStateViewHolders[key]
-				if ( stateHolder ) {
-					let element = stateHolder.element
-					element.innerHTML = stateHolder.unauthed
-					element.style.visibility = true
-					element.style.display = "block"
-				}
-			}
-		}
-		//
-		resize()
-	}
-
-	function loginView(accountData) {
-		hide_login_process()
-		g_LoggedIn = true
-		for ( let key in g_loginStateViewHolders ) {
-			let stateHolder = g_loginStateViewHolders[key]
-			let element = stateHolder.element
-			if ( stateHolder.authed ) {
-				if ( stateHolder.action ) {
-					element.innerHTML = g_loginValueViews[stateHolder.action](accountData,stateHolder.authed)
-				} else {
-					element.innerHTML = stateHolder.authed
-				}
-			}
-		}
-		resize()
-	}
 
 	// // // ----------------- // // // ----------------- // // // -----------------
 	// // // ----------------- // // // ----------------- // // // -----------------
@@ -2039,14 +1810,7 @@ class ValidationContainer {
 
 	setupCaptchaClose()
 
-	// ---- run_finalizers
-    async function run_finalizers() {
-        for ( let fn of g_finalizers ) {
-            await fn()
-        }
-    }
-    //
-    run_finalizers()
+	g_finalizers.forEach(fn => { fn()})
 
 
 	/*
@@ -2065,5 +1829,6 @@ class ValidationContainer {
 	resize()
 	setupLogoutRestoration()
 
+	not_https_switch()
 
 </script>

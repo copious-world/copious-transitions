@@ -1,0 +1,46 @@
+<div id='dashboard-line-container' >
+
+   I am <span id='who-am-i'></span>
+   <button onclick="project_dashboards()">
+      projects dashboard
+   </button>
+
+</div>
+
+<script>
+
+   var g_dashboard_url = ''
+   var g_app_dashboard = null
+
+   async function project_dashboards() {
+      if ( g_dashboard_url.length ) {
+         let dashboardResponse = postData(g_dashboard_url)
+         if ( dashboardResponse.OK ) {
+            if ( !g_app_dashboard ){
+               var windowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
+               let dashboard = window.open(`${location.protocol}//${g_siteURL}/dashboard/${dashboardResponse.which_dashboard}`,
+                                             `${dashboardResponse.which_dashboard}`,windowFeatures)
+               g_app_dashboard = dashboard
+               if ( dashboard ) {
+                  dashboard.onload = (ev) => {
+                     try {
+                        dashboard.setup_user_dashboard(dashboardResponse)
+                     } catch (e) {
+                     }
+                  }
+               }
+            } else {
+               g_app_dashboard.focus()
+            }
+            
+         }
+      }
+   }
+
+   g_loginValueViews[`{{yourDashboardLinks.instantiate}}`] = (acctData) => {
+      g_dashboard_url = `${location.protocol}//${g_siteURL}/guarded/static/dashboard+${acctData.email}`
+   }
+
+
+</script>
+

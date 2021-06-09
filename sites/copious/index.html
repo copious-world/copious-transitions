@@ -707,6 +707,17 @@ a {
 	visibility: hidden;
 }
 
+.no-view-file-field {
+	display: none;
+	visibility: hidden;
+}
+
+.user-select-buttons {
+	font-size:75%;
+	width:40%;
+	font-weight: 600;
+}
+
 </style>
 </head>
 <script>
@@ -1022,62 +1033,130 @@ viewBox="0 0 360 38">
 <div id="squashMenuContainer" >
 	this is a test;
 </div>
-<div id="contact_box" class="fade_able" style="z-index:102" >
+
+<div id="contact_box" class="fade_able" style="z-index:116" >
 	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('contact_box')">x</span></div>
-	<!-- The Modal -->
-	<div class="fade_able_content">
+	<div class="fade_able_content" >
 		<div id="contactModal" class="modal">
-			<!-- Modal content -->
-			<div class="modal-content">
-				<div class="modal-header">
-					<span id="contactModalCloser" class="close">&times;</span>
-					<h3><i>Captcha</i> : I am not a robot</h3>
-				</div>
-				<div class="modal-body">
-					<div id="captcha-goes-here" style="border:1px solid lime;margin:2px;" >
-						------
-					</div>
-					<div id="captcha-entry" >
-						Type in the text that you see above:
-						<input type="text" id="captcha-field" class="svgFormTextField" style="font-size:14px;margin-top:1px;margin-left:2px;border:1px solid black;"/>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button onclick="captchaCheck()">submit</button>
-				</div>
+	<!-- Modal content -->
+	<div class="modal-content">
+		<div class="modal-header">
+			<span id="contactModalCloser" class="close">&times;</span>
+			<h3><i>Captcha</i> : I am not a robot</h3>
+		</div>
+		<div class="modal-body">
+			<div id="captcha-goes-here" style="border:1px solid lime;margin:2px;" >
+				------
+			</div>
+			<div id="captcha-entry" >
+				Type in the text that you see above:
+				<input type="text" id="captcha-field" class="svgFormTextField" style="font-size:14px;margin-top:1px;margin-left:2px;border:1px solid black;"/>
 			</div>
 		</div>
-		
-		<div id="myContactForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
-			<div class="error-message" id="contact-errors_here" >no error</div>
-			<div class="form_el" >
-				<label for='contact-name' class='name'>Name<span> (required) </span></label>
-				<input type='text' name='contact-name' id='contact-name' value='' class='field_el name' required onkeyup="onkey_checkContactError('contact-name')" />
-			</div>
-			
-			<div class="form_el" >
-				<label for='contact-email' class='email'>Email<span> (required) </span></label>
-				<input type='email' name='contact-email' id='contact-email' value=''class='field_el email'  required onkeyup="onkey_checkContactError('contact-email')"  />
-			</div>
-			
-			<div class="form_el" >
-				<label for='contact-website' class='url'>Website<span> (optional)</span></label>
-				<input type='text' name='contact-website' id='contact-website' value='' class='field_el url' onkeyup="onkey_checkContactError('contact-website')"  />
-			</div>
-			
-			<div class="form_el" style="vertical-align:top">
-				<label for='contact-comment' class='grunion-field-label textarea'>Comment<span>(required)</span></label><br>
-				<textarea name='contact-comment' id='contact-comment' rows='20' class='textarea_field_el'  required onkeyup="onkey_checkContactError('contact-comment')"  ></textarea>
-			</div>
-			<p class='contact-submit'>
-			<button onclick="processContact()" >Submit</button>
-			</p>
-			<div class="form_el" style="height:20px;background-color:rgb(230,230,240,0.4);font-style: oblique;font-weight: bold;color:rgba(242, 242, 210, 0.3);">
-				copious contact (thank you for your interest and concerns)
-			</div>
+		<div class="modal-footer">
+			<button onclick="captchaCheck()">submit</button>
 		</div>
 	</div>
 </div>
+
+<div id="myContactForm" style="padding-left:10%;padding-top:8px;padding-bottom:8px" >
+	<div class="error-message" id="contact-errors_here" >no error</div>
+	<div class="form_el" >
+		<label for='contact-cid' class='name'>Interplanetary Contact CID<span> (required)</span></label>
+		<input type='text' name='contact-cid' id='contact-cid' value='' class='field_el name' style="width: 100%;" required onkeyup="onkey_checkContactError('contact-cid')" />
+		<div class="form_el"  style="width: 100%;"  >
+			Don't have an Interplanetary Contact identity?
+			<br>
+			<a href="https://www.copious.world/interplanetary-contact" target="_blank">Follow this link and make one.</a>
+		</div>
+	</div>
+	<div class="form_el" >
+		<label for='contact-website' class='url'>Website<span> (optional)</span></label>
+		<input type='text' name='contact-website' id='contact-website' value='' class='field_el url' onkeyup="onkey_checkContactError('contact-website')"  />
+	</div>
+	<div class="form_el" style="vertical-align:top">
+		<label for='contact-comment' class='grunion-field-label textarea'>Comment<span>(required)</span></label><br>
+		<textarea name='contact-comment' id='contact-comment' rows='10' class='textarea_field_el'  required onkeyup="onkey_checkContactError('contact-comment')"  ></textarea>
+	</div>
+	<p class='contact-submit'>
+	<button onclick="processContact()" >Submit</button>
+	</p>
+	<div class="form_el" style="height:20px;background-color:rgb(230,230,240,0.4);font-style: oblique;font-weight: bold;color:rgba(242, 242, 210, 0.3);">
+		copious contact (thank you for your interest and concerns)
+	</div>
+</div>
+
+<script>
+
+	// CONTACT APPLICATION
+	var g_contact_Handling = null
+	function initContact() {
+		g_contact_Handling = new ValidationContainer({
+			"auth_port" : "",
+            "service_url" : `${location.protocol}//${g_siteURL}/captcha/transition/contact`,
+            "errors_here" : document.getElementById('contact-errors_here'),
+            "failure_msg_prefix" : "Cannot Process Captcha",
+			"fields" : {
+				"cid" : document.getElementById('contact-cid'),
+				"website" : document.querySelector('#contact-website'),
+				"comment" : document.querySelector('#contact-comment')
+			},
+			"checks" : {
+				"is_empty" : ["cid","comment"]
+			},
+			"modal" : document.querySelector('#contactModal'),
+			"closer" : document.querySelector('#contactModalCloser'),
+			"form" : document.querySelector('#myContactForm'),
+			"captcha" : document.querySelector('#captcha-goes-here'),
+			"captcha_field" : document.querySelector("#captcha-field"),
+			"plain_text_color" : DEFAULT_PLAIN_TEXT_COLOR,
+			"error_text_color" : DEFAULT_ERROR_TEXT_COLOR
+		})
+		g_CurContainer = g_contact_Handling; // has to be initlialized in the function
+	}
+
+	function contact_calcAppDataDB() {
+		//
+		let c_cid = g_contact_Handling.fields["cid"]
+		let c_website = g_contact_Handling.fields["website"]
+		let c_comment = g_contact_Handling.fields["comment"]
+		//
+		let data = {
+			"cid" : getVal(c_cid),
+			"website" : getVal(c_website),
+			"comment" : getVal(c_comment),
+			'token' : g_currenCaptchaTOKEN
+		}
+		//
+		return(data)
+	}
+
+	function contact_completionaAction() {
+		unpin_current();
+		show_thankyou_box("Thank you for your message");
+	}
+	
+	function processContact() {
+		processUI_captchaService( g_contact_Handling,
+									contact_calcAppDataDB,
+									contact_completionaAction )
+	}
+
+	function onkey_checkContactError(srcField) {
+	   if ( g_contact_Handling.checkFormValid() ) {
+		   let focusFld = '#' + srcField;
+		   let focusEl = document.querySelector(focusFld);
+		   focusEl.style.borderColor = 'black'
+		   g_contact_Handling.hideFormErrorMessage()
+	   }
+	}
+
+	g_finalizers.push(initContact)
+
+</script>
+	</div>
+</div>
+
 <div id="topicBox_1" class="fade_able" style="z-index:103" >
 	<div class="togglebar" onmouseenter="togglebar(this,1)" onmouseleave="togglebar(this,0)"><span class="closer_x" onmousedown="closefader('topicBox_1')">x</span></div>
 	<div class="fade_able_content" >
@@ -1985,9 +2064,6 @@ viewBox="0 0 360 38">
 		<div style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
 			Please join our community at copious.world. 
 			Take part in our conversation, and make use of the tools we provide.
-			<blockquote style="border-top: 1px dotted darkmagenta;background-color:beige;padding:3px;font-size: 0.8em;font-weight:normal;color:slategray;font-style:italic;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
-				You may use social login on this site with e-mails matching the one you provide here. 
-			</blockquote>
 		</div>
 	</div>
 
@@ -1996,29 +2072,21 @@ viewBox="0 0 360 38">
         switching to a secure version of this page
     </div>
 
-
     <div class="form_el" >
-        <label for='register-name' class='email'>Name:</span></label>
-        <input type='text' name='register-name' id='register-name' value=''class='field_el name'  required onkeyup="onkey_checkRegisterError(this)"  />
+		Upload your identity from Interplanetary Contact
+		<button onclick="app_upload_identity(event)" >▲ identity</button>
     </div>
- 
+	<input type="hidden" id="register-cid" value="" />
+	<input class="no-view-file-field" type="file" id="drop-click-file_loader" />
     <div class="form_el" >
-        <label for='register-email' class='email'>Email:</span></label>
-        <input type='email' name='register-email' id='register-email' value=''class='field_el email'  required onkeyup="onkey_checkRegisterError(this)"  />
+		Don't have an Interplanetary Contact identity?
+		<br>
+		<a href="https://www.copious.world/interplanetary-contact" target="_blank">Follow this link and make one.</a> <br>
+		It's very easy and safe. You can then download your idetity from the contact page and upload it here.
+		Or, if this is the same domain, you can just login.
     </div>
-    
-    <div class="form_el" >
-        <label for='register-password' class='url'>Password:</span></label>
-        <input type='password' name='register-password' id='register-password' value='' class='field_el password' onkeyup="onkey_checkRegisterError(this)"  />
-    </div>
-        
-    <div class="form_el" >
-        <label for='register-password-match' class='url'>Validate Password:</span></label>
-        <input type='password' name='register-password-match' id='register-password-match' value='' class='field_el password' onkeyup="onkey_checkRegisterError(this)"  />
-    </div>
-
     <p class='register-submit'>
-    <button onclick="processRegister()" >Submit</button>
+		The captcha will get you a session id: <button onclick="processRegister()" >Captcha</button>
     </p>
 </div>
 
@@ -2028,9 +2096,159 @@ viewBox="0 0 360 38">
 
 <script>
 
+
+	const CONTACT_DB_NAME = "promail_contacts"
+	const PROMAIL_USERID_STORE = 'promail_users'
+	const DB_VERSION = 1
+	//
+	var g_promail_db = null
+
+
+	// DATABASE
+	async function pc_init_database() {
+		// request an open of DB
+		let p = new Promise((resolve,reject) => {
+			//
+			let request = window.indexedDB.open(CONTACT_DB_NAME, DB_VERSION);
+			//
+			request.onerror = (event) => {
+				alert("This web app will not store recorded audio without the use of computer storage.")
+			};
+			request.onsuccess = (event) => {
+				//
+				let db = event.target.result;
+				db.onerror = (event) => {
+					console.log("Database error: " + event.target.error);
+					reject(event.target.error)
+				};
+				//
+				g_promail_db = db;
+				resolve(db)
+			}
+
+			request.onupgradeneeded = (event) => {
+				let db = event.target.result;
+				//
+				try {
+					let userStore = db.createObjectStore(PROMAIL_USERID_STORE, { autoIncrement : false, keyPath: 'name_key' });  // supposed to be just one
+					userStore.createIndex("name_key", "name_key", { unique: true });
+				} catch (e) {
+				}
+				//
+			};
+		})
+		//
+		return p
+	};
+
+
+	async function upload_identity() {
+		let identity_str = await get_file()
+		let identity = JSON.parse(identity_str)
+		await restore_identity(identity)
+		return identity
+	}
+
+
+	// called in response to a file selection through the system file browser
+	//
+	function get_file() {
+		let p = new Promise((resolve,reject) => {
+			let file_el = document.getElementById(`drop-click-file_loader`)
+			file_el.addEventListener('change',(ev) => {
+				//
+				let file = file_el.files[0]
+				let mtype = file.type
+				if ( ext_of_file(file.name) === 'json' ) {
+					let reader = new FileReader();
+					if ( mtype === 'application/json' ) {
+						reader.onload = (e) => {
+							resolve(e.target.result)
+						};
+						reader.readAsText(file);
+					}
+				}
+				//
+			})
+			file_el.click()
+		})
+		//
+		return p
+	}
+
+
+	async function restore_identity(identity) {
+		try {
+			let transaction = g_promail_db.transaction(PROMAIL_USERID_STORE, "readwrite");
+			let userStore = transaction.objectStore(PROMAIL_USERID_STORE);
+			//
+			let p = new Promise((resolve,reject) => {
+				const updateUserRequest =  userStore.put(identity)           // information create by 
+				updateUserRequest.onsuccess = () => {
+					resolve(true)
+				};
+			})
+			return p
+		} catch (e) {
+		}
+	}
+
+	function identity_from_user(user_info) {
+		let name_key = name_key_of(user_info)
+		if ( !name_key ) return(false)
+		//
+		let transaction = g_promail_db.transaction(PROMAIL_USERID_STORE, "readwrite");
+		let userStore = transaction.objectStore(PROMAIL_USERID_STORE);
+		//
+		let p = new Promise((resolve,reject) => {
+			let nameIndex = userStore.index('name_key');
+			nameIndex.openCursor().onsuccess = (event) => {
+				let keyRangeValue = IDBKeyRange.only(name_key);
+				nameIndex.openCursor(keyRangeValue).onsuccess = (event) => {
+					var cursor = event.target.result;
+					if ( cursor ) {
+						resolve(cursor.value)
+					}
+				}
+			}
+		})
+		//
+		return p
+	}
+
+
+
+
+	// // // 
+	function get_known_users() {
+		//
+		let transaction = g_promail_db.transaction(PROMAIL_USERID_STORE, "readwrite");
+		let userStore = transaction.objectStore(PROMAIL_USERID_STORE);
+		let user_list = []
+		let identity_list = []
+		let p = new Promise((resolve,reject) => {
+			let nameIndex = userStore.index('name_key');
+			nameIndex.openCursor().onsuccess = (event) => {
+				let cursor = event.target.result;
+				if ( cursor ) {
+					let identity = cursor.value
+					identity_list.push(identity)
+					user_list.push(identity.user_info)
+					cursor.continue();
+				} else {
+					resolve([user_list,identity_list])
+				}
+			};
+		})
+		//
+		return p
+	}
+
+
 	// Get the modal
 	
 	function register_opening_view() {
+		return
 		if (location.protocol !== 'https:') {           // start from a secure page
             let lformMSG = document.getElementById('the-register-form-secure')
             lformMSG.style.visibility = "visible"
@@ -2059,53 +2277,31 @@ viewBox="0 0 360 38">
     }
 	// REGISTRATION APPLICATION
 	//
-	var g_register_Handling = null
-	function initRegistration() {
-		g_register_Handling = new ValidationContainer({
-				"auth_port" : "",
-				"service_url" : `https://${g_siteURL}/captcha/users/register`,
-				"errors_here" : document.getElementById('register-errors_here'),
-				"failure_msg_prefix" : "Registration failed",
-				"password_rules" : register_password_rules,
-				"fields" : {
-					"name" : document.getElementById('register-name'),
-					"email" : document.getElementById('register-email'),
-					"password" : document.getElementById('register-password'),
-					"password-match" : document.getElementById('register-password-match'),
-				},
-				"checks" : {
-					"is_empty" : ["password","email"],  // ref into fields above...
-					"email" : ["email"],
-					"passwords" : ["password","password-match"]
-				},
-				"modal" : document.getElementById("myRegisterModal"),
-				"closer" : document.getElementById('myRegisterModalCloser'),
-				"form" : document.getElementById('myRegisterForm'),
-				"captcha" : document.getElementById('captcha-goes-here-register'),
-				"captcha_field" : document.getElementById("captcha-field-register")
-		});
+
+
+	async function app_upload_identity(ev) {
+		let active_id = await upload_identity()
+		set_logged_in_identity(active_id)
+		let c_cid =  g_register_Handling.fields["cid"]
+		if ( c_cid ) {
+			c_cid.value = active_id.cid
+		}
 	}
 
 	function register_calcAppDataDB() {
 		//
-		let c_name =  g_register_Handling.fields["name"]
-		let c_email =  g_register_Handling.fields["email"]
-		let c_password = g_register_Handling.fields["password"]
-		let c_password_verify = g_register_Handling.fields["password-match"]
+		let c_cid =  g_register_Handling.fields["cid"]
 		//
 		let data = {
-			"name" : getVal(c_name),
-			"email" : getVal(c_email),
-			"password" : getVal(c_password),
-			"verify_password" : getVal(c_password_verify),
+			"cid" : getVal(c_cid),
 			'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
 			'action' : 'register',
             'form_key' : 'register'
 		}
-		// register application
-		data.name = data.name.length === 0 ? "anonymous" : data.name
-		//
-		return(data)
+		if ( data.cid.length === 0 ) {
+			return false
+		}
+		return true
 	}
 
 	function registration_completionaAction(resp) {
@@ -2141,6 +2337,41 @@ viewBox="0 0 360 38">
 	   }
 	}
 
+	async function init_identity_db() {
+		await pc_init_database()
+		let local_ipfs_users = await get_known_users()
+		if ( local_ipfs_users[0].length ) {
+			hide_registration()
+			login_setup_local_user_list(local_ipfs_users)
+		}
+	}
+
+	var g_register_Handling = null
+	async function initRegistration() {
+		//
+		g_register_Handling = new ValidationContainer({
+				"auth_port" : "",
+				"service_url" : `https://${g_siteURL}/captcha/users/register`,
+				"errors_here" : document.getElementById('register-errors_here'),
+				"failure_msg_prefix" : "Registration failed",
+				"password_rules" : register_password_rules,
+				"fields" : {
+					"cid" : document.getElementById('register-cid')
+				},
+				"checks" : {
+					"is_empty" : ["cid"],  // ref into fields above...
+				},
+				"modal" : document.getElementById("myRegisterModal"),
+				"closer" : document.getElementById('myRegisterModalCloser'),
+				"form" : document.getElementById('myRegisterForm'),
+				"captcha" : document.getElementById('captcha-goes-here-register'),
+				"captcha_field" : document.getElementById("captcha-field-register")
+		});
+		//
+	}
+
+
+	g_finalizers.unshift(init_identity_db)
 	g_finalizers.push(initRegistration)
 	
 </script>
@@ -2224,67 +2455,28 @@ viewBox="0 0 360 38">
     <div class="form_el" style="padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style:initial;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
 		<div style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
 			Login to: copious.world. 
-			If you have already provided us with an e-mail, you may login using your prefered method.
+            <span style="font-weight: 500;color:#3b9468">If your identity is already uploaded by the registration process, then simply verify your presence.</span>
 		</div>
 	</div>
 
-     
     <div id='login-strategy' class="form_el" style="border:solid 1px darkmagenta;margin: 3px;width: fit-content;">
         <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;font-weight: bold;overflow-x: scroll;height:fit-content;" >
-            Current login method: <span id="login-method-banner">copious.world</span>
+            Login method: <span id="login-method-banner">copious.world IPFS</span>
         </div>
-        <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;font-weight: bold;overflow-x: scroll;height:fit-content;" >
-            <span class="form_el_inner login-menu-horizontal" > Login Methods: 
-            <span class="form_el_inner login-menu-horizontal" style="height:fit-content;">
-                <button class="login-strat-choice button5" onclick="login_strategy('local');show_password_container();hide_openID_container()" >
-                    <svg version="1.0" width="30" height="30" viewBox="0 0 250 250" preserveAspectRatio="xMidYMid meet" id="login-local" >
-                        <title>Local</title>
-                        <path fill="navy" id="path6" d="m 30.107062,7.4672872 c 4.67725,2.6985208 8.37554,8.6930958 12.94402,20.5087688 7.17904,19.072767 24.58277,67.337762 29.69511,82.950634 l 5.32989,15.9502 -13.70543,-0.25058 -10.468161,2.57106 -8.132079,2.99946 -4.78602,5.90784 0.76141,-6.91979 c 0.65264,-6.50536 0.32632,-7.85462 -5.43866,-25.31791 C 27.822822,80.549048 20.535012,60.127019 12.703332,40.215781 5.4155222,21.730904 4.4365622,15.57249 7.8085322,10.503124 11.941922,4.43145 22.384152,2.9954505 30.107062,7.4672872 Z M 238.08162,22.742849 c 3.69828,2.110631 6.52639,6.669206 6.52639,10.379672 0,1.686578 -2.93688,12.740881 -6.63517,24.469814 -19.68797,64.138095 -30.34775,107.931245 -30.34775,124.806655 0,4.6453 -1.08775,7.68113 -18.60024,50.80931 l -4.35093,10.79409 -67.76577,0 -67.765758,0 -14.35808,-35.35063 -14.35808,-35.3603 17.62128,-20.75934 17.5125,-20.75935 29.36879,0 c 32.631998,0 5.455822,5.28877 29.390108,7.16797 -3.81133,6.98972 7.16732,11.29772 7.16732,11.29772 l 2.51778,3.43975 c -1.74038,3.20932 -4.92039,6.69891 -9.3801,9.5709 l -3.2632,2.11064 -9.78959,-2.62144 c -8.593088,-2.27446 -11.312428,-2.61179 -22.080978,-2.61179 -13.0528,-0.0964 -14.35808,0.2506 -14.35808,4.29837 0,2.70817 3.15443,3.63336 12.72648,3.63336 21.42834,0 38.723308,8.01847 47.533928,22.10863 3.58951,5.73436 7.17904,15.86345 7.17904,20.50876 0,2.86236 4.45971,5.05973 7.50536,3.79721 2.82811,-1.09868 2.93687,-4.64531 0.65264,-14.01306 -2.28424,-9.36772 -7.83169,-17.88734 -15.77214,-24.29632 -5.32988,-4.30799 -6.30884,-5.49342 -5.11233,-6.24517 1.19649,-0.76135 2.06669,-0.51077 4.0246,1.08906 6.30885,5.23321 19.03534,7.00654 27.73719,3.88395 5.87377,-2.11064 11.85631,-7.17036 15.11951,-12.74088 1.52281,-2.53468 5.98253,-16.03694 9.89835,-29.9536 10.98611,-38.396111 22.08098,-72.320389 30.13021,-92.665317 5.54744,-14.176879 12.40016,-19.737762 23.16871,-18.812555 2.93688,0.250577 6.63517,1.175785 8.15801,2.023891 z m -126.72091,50.03831 c 2.28424,0.510792 5.76499,2.11063 7.72291,3.633367 5.87375,4.558576 6.20008,7.257098 3.80705,29.278954 -1.1965,10.71701 -1.94404,26.93071 -2.27035,27.1042 -0.32632,0.25057 -8.38942,-6.50868 -17.41761,-6.25812 l -16.533538,0.42407 0.65264,-6.66922 c 0.32632,-3.62372 1.19651,-13.83956 1.84915,-22.619385 0.65264,-9.19425 1.74037,-17.125977 2.50179,-18.561977 3.2632,-5.907835 10.550998,-8.269041 19.687958,-6.331889 z m 48.5129,9.454465 c 2.06668,1.011946 4.56848,3.209314 5.54744,4.89589 1.84914,2.871998 1.84914,4.22126 -0.8702,33.750816 -1.52282,17.04886 -3.37196,32.575 -4.24216,35.02295 -3.15442,8.51961 -9.13695,13.07819 -18.16513,13.67573 -4.78601,0.25056 -6.41762,0 -9.46327,-1.69622 -5.87376,-3.12256 -6.41764,-4.29838 -2.93689,-7.42094 6.20008,-5.744 4.00097,-11.09854 1.92352,-15.89687 0,0 -0.33391,-1.79223 -2.65798,-4.24016 l -2.01123,-1.92782 3.94219,-26.79768 c 1.95792,-22.869967 2.17547,-23.795174 5.11237,-26.667174 4.89478,-4.89589 16.96861,-6.24515 23.82134,-2.698522 z" />
-                    </svg>
-                </button>
-                    <button class="login-strat-choice button5" onclick="login_strategy('GitGHub');hide_password_container();hide_openID_container()" >
-                        <svg role="img" width="30" height="30"  preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                    </button>
-            </span></span>
-        </div>
-        <input type="hidden" id="login-strategy-value" name="strategy" value="local">
+        <input type="hidden" id="login-strategy-value" name="strategy" value="ipfs">
         <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
-            <label for='login-email' class='login-labeler '>Email:</span></label>
-            <input type='email' name='login-email' id='login-email' value=''class='field_el email'  required onkeyup="onkey_checkLoginError('login-email')"  />
+            <label for='login-email' class='login-labeler '>CID:</label>
+            <span id="login-cid-show" >Register to use an Interplanetary Identifier</span>
+            <input type='hidden' name='login-cid' id='login-cid' value=''class='field_el email'  />
         </div>
-        
-        <div id="password-container" class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
-            <label for='login-password' class='login-labeler'>Password:</span></label>
-            <input type='password' name='login-password' id='login-password' value='' class='field_el password' onkeyup="onkey_checkLoginError('login-password')"  />
+        <div class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;text-align: center;color:green;font-weight: 600;" >
+        Select your identity from these stored in the browser:
         </div>
-
-        <div id="password-verify-container" class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
-            <label for='login-password-match' class='login-labeler'>Password Verify:</span></label>
-            <input type='password' name='login-password-match' id='login-password-match' value='' class='field_el password' onkeyup="onkey_checkLoginError('login-password-match')"  />
-        </div>
-
-        <div id="openID-container" class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;" >
-            <label for='login-openID' class='login-labeler'>OpenID:</span></label>
-            <input type='text' name='login-openID' id='login-openID' value='' class='field_el'  />
+        <div id="identities-present" class="form_el_inner" style="padding: 0.5em;border:solid 1px darkmagenta;text-align: center;" >
+            You are the first one here. <span style="font-weight:bold;color:rgb(255, 123, 0);">Join Us!</span>
         </div>
     </div>
 
-    <p id="login-submitter" class='login-submit' >
-    <button onclick="processLogin()" >Submit</button>
-    </p>
-
-    <div id="forgot-container" class="form_el" style="padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style:initial;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;" >
-    <p class='login-submit' style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
-        Did you forget your password?<br>
-        <button onclick="presentForgotPassword()" style="width:80%;" >Forgot Password</button>
-    </p>
-    </div>
-
-    <div id="forgot-container-submit" class="form_el" style="visibility:hidden;display:none;padding:1px;font-weight: bold;color:rgb(1, 51, 20);font-style:initial;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;" >
-    <p class='login-submit' style="padding:8px;border-top:1px solid teal;border-left:1px solid plum;background-color: rgba( 244, 244, 244, 0.2);" >
-        <button onclick="processForgotPassword()" style="width:80%;" >Submit Password Update</button>
-    </p>
-    </div>
 
     <iframe id="loginframe" name="loginframe" style="visibility:hidden;" src="about:blank" style="width:0;height:0;border:0px solid #fff;" >
 	</iframe>
@@ -2307,36 +2499,24 @@ viewBox="0 0 360 38">
 
     var g_loginStrategyField = document.getElementById("login-strategy-value")
     var g_backup_local_strategy_check = null
-    var g_backup_openID_strategy_check = null
-    var g_backup_OAuth_strategy_check = null
+    var g_backup_ipfs_strategy_check = null
     function login_strategy(strategy) {
         strategy = strategy.toLowerCase()
         hide_password_verify_container()
         show_login_submitter()
         g_loginStrategyField.value = strategy
-        let fergit = document.getElementById('forgot-container')
-        let methodSign = document.getElementById('login-method-banner')
-        if ( fergit ) {
-            if ( strategy === 'local' ) {
-                show_fergit_container()
-                if ( methodSign ) methodSign.innerHTML = 'copious.world'
-            } else {
-                hide_fergit_container()
-                if ( methodSign ) methodSign.innerHTML = strategy
-            }
-        }
         //
         switch (strategy) {
             case "local" : {
-                g_login_Handling.check = g_backup_local_strategy_check
+                g_login_Handling.checks = g_backup_local_strategy_check
                 break
             }
-            case "openID" : {
-                g_login_Handling.checks = g_backup_openID_strategy_check
+            case "ipfs" : {
+                g_login_Handling.checks = g_backup_ipfs_strategy_check
                 break
             }
             default : {
-                g_login_Handling.checks = g_backup_OAuth_strategy_check
+                g_login_Handling.checks = g_backup_ipfs_strategy_check
                 break
             }
         }
@@ -2446,7 +2626,8 @@ viewBox="0 0 360 38">
     }
     //
     function login_opening_view() {
-        login_strategy('local');show_password_container();hide_openID_container()
+        login_strategy('ipfs');
+        return;
         if (location.protocol !== 'https:') {           // start from a secure page
             let lform = document.getElementById('the-login-form')
             lform.style.visibility = "hidden"
@@ -2565,9 +2746,7 @@ viewBox="0 0 360 38">
     }
 
     function login_password_rules(fld_name,ptext) {
-        let violation_msg = "Passwords must be at eight seven"
-        violation_msg = "Passwords should have at least one number, at least one alphabetic character, and at least on punctuation character"
-        return([true,()=>{return violation_msg}])
+        return([true,()=>{return ""}])
     }
 
     function presentLogout(accountData) {
@@ -2651,100 +2830,20 @@ viewBox="0 0 360 38">
     }
 
     // LOGIN APPLICATION
-    var g_login_Handling = null
-    var g_forgot_Handling = null
-    
-    function initLogin() {
-        g_login_Handling = new ValidationContainer({
-            "service_url" : `/captcha/`,
-            "errors_here" : document.getElementById('login-errors_here'),
-            "failure_msg_prefix" : "Login Failed",
-            "password_rules" : login_password_rules,
-			"fields" : {
-				"email" : document.getElementById('login-email'),
-                "password" : document.getElementById('login-password'),
-                "openID" : document.getElementById('login-openID'),
-                "strategy" : document.getElementById('login-strategy-value')
-			},
-			"checks" : {
-				"is_empty" : ["password","email"],  // ref into fields above...
-				"email" : ["email"],
-                "passwords" : ["password"]
-			},
-            "modal" : document.getElementById("myLoginModal"),
-            "closer" : document.getElementById('myLoginModalCloser'),
-			"form" : document.getElementById('myLoginForm'),
-			"captcha" : document.getElementById('captcha-goes-here-login'),
-			"captcha_field" : document.getElementById("captcha-field-login")
-        });
-        g_forgot_Handling = new ValidationContainer({  // basically uses the login form
-            "service_url" : `/captcha/`,
-            "errors_here" : document.getElementById('login-errors_here'),
-            "failure_msg_prefix" : "Password Reset Failed",
-            "password_rules" : register_password_rules,         // this application knows that the registration password rules are available.
-			"fields" : {
-				"email" : document.getElementById('login-email'),
-                "password" : document.getElementById('login-password'),
-                "password-match" : document.getElementById('login-password-match'),
-			},
-			"checks" : {
-				"is_empty" : ["password","email"],  // ref into fields above...
-				"email" : ["email"],
-                "passwords" : ["password","password-match"]
-			},
-            "modal" : document.getElementById("myLoginModal"),
-            "closer" : document.getElementById('myLoginModalCloser'),
-			"form" : document.getElementById('myLoginForm'),
-			"captcha" : document.getElementById('captcha-goes-here-login'),
-			"captcha_field" : document.getElementById("captcha-field-login")
-        });
-        g_backup_local_strategy_check = clonify(g_login_Handling.checks)
-        g_backup_openID_strategy_check = {
-				"is_empty" : ["openID","email"],  // ref into fields above...
-				"email" : ["email"],
-                "passwords" : ["openID"]
-			}
-        g_backup_OAuth_strategy_check = {
-				"is_empty" : ["email"],  // ref into fields above...
-				"email" : ["email"]
-			}
-
-
-        if ( g_login_failure === null ) g_login_failure = loginFailed
-        if ( g_registration_failure === null ) g_registration_failure = registrationFailMessage  // display on login screen
-    }
 
 
 	function login_calcAppDataDB() {
 		//
-        let c_email =  g_login_Handling.fields["email"]
-        let c_password = g_login_Handling.fields["password"]
-        let c_openID = g_login_Handling.fields["openID"]
+        let c_cid =  g_login_Handling.fields["email"]
         let c_strategy = g_login_Handling.fields["strategy"]
 		//
         let data = {
-            "email" : getVal(c_email),
-            "password" : getVal(c_password),
+            "cid" : getVal(c_cid),
             "strategy" : getVal(c_strategy),
             "openID" : getVal(c_openID),
             'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
             'action' : 'login',
             'form_key' : 'login'
-        }
-        //
-        switch (data.strategy) {         // perhaps more customization on the server side.
-            case "local" : {
-                break
-            }
-            case "openID" : {
-                data.password = "NONE"
-                break
-            }
-            default : {
-                data.password = "NONE"
-                data.openID = "NONE"
-                break
-            }
         }
 		//
 		return(data)
@@ -2757,41 +2856,6 @@ viewBox="0 0 360 38">
         }
     }
     
-    function forgot_calcAppDataDB() {
-        let c_email =  g_forgot_Handling.fields["email"]
-        let c_password = g_forgot_Handling.fields["password"]
-        let c_password_verify = g_forgot_Handling.fields["password-match"]
-		//
-        let data = {
-            "email" : getVal(c_email),
-            "password" : getVal(c_password),
-			"verify_password" : getVal(c_password_verify),
-            'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
-            'action' : 'forgot',
-            'form_key' : 'forgot'
-        }
-		//
-		return(data)
-    }
-    
-    function forgot_completionaAction(resp) {
-        if ( resp && resp.data ) {
-            let data = resp.data
-            let message = "Please try again later"
-            if ( data.forgetfulness_proceed ) {
-                message = "You will receive an email with a link to a password restoration page"
-            }
-            if ( g_forgot_Handling ) {
-                g_forgot_Handling.switchCaptchaDisplay(false)
-            }
-            hide_login_process()
-            show_thankyou_box(message)
-            login_strategy('local');show_password_container();hide_openID_container()
-            hide_password_verify_container()
-            hide_forgot_submit_container()
-        }
-    }
-
 	function processAuthEndpoint(endpoint,handler,calcAppDataDB,completionaAction,failedAction) {
         let url = `${location.protocol}//${g_siteURL}/captcha/${endpoint}`
         handler.service_url = url
@@ -2803,20 +2867,7 @@ viewBox="0 0 360 38">
         processAuthEndpoint("users/login", g_login_Handling, login_calcAppDataDB, login_completionaAction, loginFailed)
     }
 
-    // send users throught the captcha interface
-    function processForgotPassword() {
-        processAuthEndpoint("users/forgot", g_forgot_Handling, forgot_calcAppDataDB, forgot_completionaAction, () => {})
-    }
 
-    function presentForgotPassword() {
-        login_strategy('local');show_password_container();hide_openID_container()
-        show_password_verify_container()
-        show_forgot_submit_container()
-        hide_login_submitter()
-        if ( g_forgot_Handling ) {
-            g_forgot_Handling.formErrorMessage("Please enter your password twice (just like registration). Later, you will receive an email with a link for activating this change.")
-        }
-    }
 
 	function onkey_checkLoginError(srcField) {
 	   if ( g_login_Handling.checkFormValid() ) {
@@ -2825,6 +2876,81 @@ viewBox="0 0 360 38">
 		   g_login_Handling.hideFormErrorMessage()
 	   }
 	}
+
+
+    var ipfs_logged_in_id = false
+
+    function set_logged_in_identity(active_id) {
+        ipfs_logged_in_id = active_id
+        let cid = active_id.cid
+        let el = document.getElementById('login-cid-show')   // set on upload or when a user clicks on an idenity button
+        if ( el ) {
+            el.innerHTML = cid
+        }
+    }
+
+    function login_setup_local_user_list(id_u_info_pair) {
+        //
+        let all_identities = id_u_info_pair[0]
+        let all_user_infos = id_u_info_pair[1]
+// login-cid-show
+        let identity_container = document.getElementById("identities-present")
+        if ( identity_container ) {
+            identity_container.innerHTML = ""
+            let n = all_identities.length
+            for ( let i = 0; i < n; i++ ) {
+                let ident = all_identities[i]
+                if ( ident ) {
+                    let child_button = document.createElement("button")
+                    child_button.className = "user-select-buttons"
+                    child_button.addEventListener('click',(ev) => {
+                        let cid = ident.cid
+                        let cid_el = document.getElementById('login-cid')
+                        if ( cid_el ) {
+                            cid_el.value = cid_el
+                        }
+                        let cid_display = document.getElementById('login-cid-show')
+                        if ( cid_display ) {
+                            cid_display.innerHTML = cid
+                        }
+                        processLogin()
+                    })
+                }
+            }
+
+        }
+        //
+    }
+
+
+    var g_login_Handling = null
+    
+    function initLogin() {
+        g_login_Handling = new ValidationContainer({
+            "service_url" : `/captcha/`,
+            "errors_here" : document.getElementById('login-errors_here'),
+            "failure_msg_prefix" : "Login Failed",
+            "password_rules" : false,
+			"fields" : {
+				"cid" : document.getElementById('login-cid'),
+                "strategy" : document.getElementById('login-strategy-value')
+			},
+			"checks" : {
+				"is_empty" : ["cid"],  // ref into fields above...
+			},
+            "modal" : document.getElementById("myLoginModal"),
+            "closer" : document.getElementById('myLoginModalCloser'),
+			"form" : document.getElementById('myLoginForm'),
+			"captcha" : document.getElementById('captcha-goes-here-login'),
+			"captcha_field" : document.getElementById("captcha-field-login")
+        });
+
+        g_backup_local_strategy_check = clonify(g_login_Handling.checks)
+        g_backup_ipfs_strategy_check = clonify(g_login_Handling.checks)
+
+        if ( g_login_failure === null ) g_login_failure = loginFailed
+        if ( g_registration_failure === null ) g_registration_failure = registrationFailMessage  // display on login screen
+    }
 
     g_finalizers.push(initLogin)
 
@@ -3516,30 +3642,34 @@ class ValidationContainer {
         }
         //
         let mustHaveValue = this.checks.is_empty
-        let empty_fields = mustHaveValue.filter((field) => {
-            let c = this.fields[field]
-            //colorize(c,"black")
-            return(this.empty_checker(c))
-        })
-        //
-        if ( empty_fields.length ) {
-            this.emptyFieldMessage(empty_fields)
-            empty_fields.forEach(field => {
-                let c = this.fields[field]
-                colorize(c,this.error_text_color)
-            })
-            return(false)
-        }
+		if ( mustHaveValue ) {
+			let empty_fields = mustHaveValue.filter((field) => {
+				let c = this.fields[field]
+				//colorize(c,"black")
+				return(this.empty_checker(c))
+			})
+			//
+			if ( empty_fields.length ) {
+				this.emptyFieldMessage(empty_fields)
+				empty_fields.forEach(field => {
+					let c = this.fields[field]
+					colorize(c,this.error_text_color)
+				})
+				return(false)
+			}
+		}
         //
         let emailFields = this.checks.email
-        emailFields.forEach(e_field => {
-            let c = this.fields[e_field]
-            if ( !checkEmailField(c) ) {
-                this.emailFormatError();
-                colorize(c,this.error_text_color)
-                return(false);
-            }
-        })
+		if ( emailFields ) {
+			emailFields.forEach(e_field => {
+				let c = this.fields[e_field]
+				if ( !checkEmailField(c) ) {
+					this.emailFormatError();
+					colorize(c,this.error_text_color)
+					return(false);
+				}
+			})
+		}
         //
         if ( this.password_rules && (typeof this.password_rules === "function") ) {
             if ( this.checks.passwords && (this.checks.passwords.length) ) {
@@ -3593,17 +3723,22 @@ class ValidationContainer {
 				// CAPTCH RESULT 
 				if ( captchaResult === true ) {
 					if ( g_currenCaptchaTOKEN ) {
-						let data = calcAppDataDB()		// calcAppDataDB
-						try {
-							let resp = await postData(g_CurContainer.service_url, data,'include')
-							if ( resp.OK === "true" ) {
-								g_currenCaptchaTOKEN = null;     // check for duplicates
-                                if ( completionaAction ) completionaAction(resp);
-							} else {
-								g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${resp.reason}`)
+						let data = await calcAppDataDB()		// calcAppDataDB
+						if ( data ) {
+							try {
+								let resp = await postData(g_CurContainer.service_url, data,'include')
+								if ( resp.OK === "true" ) {
+									g_currenCaptchaTOKEN = null;     // check for duplicates
+									if ( completionaAction ) completionaAction(resp);
+								} else {
+									g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${resp.reason}`)
+									if ( failureAction ) failureAction(resp)
+								}
+							} catch (e) {
+								g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${e.message}`)
 								if ( failureAction ) failureAction(resp)
-                            }
-						} catch (e) {
+							}
+						} else {
 							g_CurContainer.formErrorMessage(`${g_CurContainer.failure_msg_prefix}: ${e.message}`)
 							if ( failureAction ) failureAction(resp)
 						}
@@ -3622,7 +3757,9 @@ class ValidationContainer {
 				console.log(e.message)
 			}
 		} else {
-			throw new Error("The current container is not defined in processUI_captchaService.")
+			if ( g_CurContainer === undefined ) {
+				throw new Error("The current container is not defined in processUI_captchaService.")
+			}
 		}
 	}
 
@@ -4045,76 +4182,6 @@ class ValidationContainer {
 	// APPLICATIONS
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- 
 
-	// CONTACT APPLICATION
-	var g_contact_Handling = null
-	function initContact() {
-		g_contact_Handling = new ValidationContainer({
-			"auth_port" : "",
-            "service_url" : `${location.protocol}//${g_siteURL}/captcha/transition/contact`,
-            "errors_here" : document.getElementById('contact-errors_here'),
-            "failure_msg_prefix" : "Cannot Process Captcha",
-			"fields" : {
-				"name" : document.querySelector('#contact-name'),
-				"email" : document.querySelector('#contact-email'),
-				"website" : document.querySelector('#contact-website'),
-				"comment" : document.querySelector('#contact-comment')
-			},
-			"checks" : {
-				"is_empty" : ["name","comment","email"],  // ref into fields above...
-				"email" : ["email"]
-			},
-			"modal" : document.querySelector('#contactModal'),
-			"closer" : document.querySelector('#contactModalCloser'),
-			"form" : document.querySelector('#myContactForm'),
-			"captcha" : document.querySelector('#captcha-goes-here'),
-			"captcha_field" : document.querySelector("#captcha-field"),
-			"plain_text_color" : DEFAULT_PLAIN_TEXT_COLOR,
-			"error_text_color" : DEFAULT_ERROR_TEXT_COLOR
-		})
-		g_CurContainer = g_contact_Handling; // has to be initlialized in the function
-	}
-
-
-	function contact_calcAppDataDB() {
-		//
-		let c_name = g_contact_Handling.fields["name"]
-		let c_email =  g_contact_Handling.fields["email"]
-		let c_website = g_contact_Handling.fields["website"]
-		let c_comment = g_contact_Handling.fields["comment"]
-		//
-		let data = {
-			"name" : getVal(c_name),
-			"website" : getVal(c_website),
-			"email" : getVal(c_email),
-			"comment" : getVal(c_comment),
-			'token' : g_currenCaptchaTOKEN
-		}
-		//
-		return(data)
-	}
-
-	function contact_completionaAction() {
-		unpin_current();
-		show_thankyou_box("Thank you for your message");
-	}
-	
-	function processContact() {
-		processUI_captchaService( g_contact_Handling,
-									contact_calcAppDataDB,
-									contact_completionaAction )
-	}
-
-	function onkey_checkContactError(srcField) {
-	   if ( g_contact_Handling.checkFormValid() ) {
-		   let focusFld = '#' + srcField;
-		   let focusEl = document.querySelector(focusFld);
-		   focusEl.style.borderColor = 'black'
-		   g_contact_Handling.hideFormErrorMessage()
-	   }
-	}
-
-	g_finalizers.push(initContact)
-
 
 	// --------- LOGIN // REGISTER
 	// links on this page...
@@ -4268,7 +4335,14 @@ class ValidationContainer {
 
 	setupCaptchaClose()
 
-	g_finalizers.forEach(fn => { fn()})
+	// ---- run_finalizers
+    async function run_finalizers() {
+        for ( let fn of g_finalizers ) {
+            await fn()
+        }
+    }
+    //
+    run_finalizers()
 
 
 	/*

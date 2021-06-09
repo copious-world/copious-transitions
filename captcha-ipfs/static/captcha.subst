@@ -7,7 +7,6 @@
     "site_url" : "localhost",
     "canonical" : "http://www.copious.world",
     "companyShortLink" : "copious.world",
-    "origin" : "copious",
     "copyRightYear" : "2020",
     "auth_path" : "captcha",
     "auth_websocket" : "auth_ws",
@@ -64,22 +63,16 @@
         "output_height" : "inherit",
         "output_width" : "inherit"
     },
-    "contactBox" : {
-        "name" : "contact",
-        "content" : {
-            "file" : "./contact-interplanetary.html"
-        }
-    },
     "registerBox" : {
-        "name" : "register",
+         "name" : "register",
         "content" : {
-            "file" : "./register-interplanetary.html"
+            "file" : "./register.html"
         }
     },
     "loginBox" : {
-        "name" : "login",
+         "name" : "login",
         "content" : {
-            "file" : "./login-interplanetary.html"
+            "file" : "./login.html"
         }
     },
     "join" : {
@@ -102,39 +95,35 @@
         "name" : "",
         "file" : "./decoratedLinks.html"
     },
-    "advertPopups" : {
-        "name" : "",
-        "file" : "./advertPopups.html"
-    },
     "yourProileLinks" : {
          "name" : "profile-links",
          "instantiate" : "profile_view",
          "file" : "./profile_access.html"
     },
     "yourDashboardLinks" : {
-         "name" : "dashboard-links",
+         "name" : "profile-links",
          "instantiate" : "dashboard_view",
          "file" : "./dashboard_access.html"
     },
     "foreign_login" : [
         {
-            "supported" : true,
-            "service" : "GitGHub",
+            "supported" : false,
+            "service" : "GitGHub"
             "file" : "./foreign_auth/github.html"
         },
         {
             "supported" : false,
-            "service" : "Twitter",
+            "service" : "Twitter"
             "file" : "./foreign_auth/twitter.html"
         },
         {
             "supported" : false,
-            "service" : "Google",
-            "file" : "./foreign_auth/google.html"
+            "service" : "Google"
+            "file" : "./foreign_auth/goolge.html"
         },
         {
             "supported" : false,
-            "service" : "OpenId",
+            "service" : "OpenId"
             "file" : "./foreign_auth/openid.html"
         }
     ]
