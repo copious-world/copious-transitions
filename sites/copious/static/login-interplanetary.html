@@ -335,6 +335,91 @@
 	}
 
 
+
+    //>--
+    // wv_unwrapped_key
+    // --
+    async function unwrapped_aes_key(wrapped_aes,unwrapper_key) {
+        let unwrapped_aes = await g_crypto.unwrapKey(
+            "jwk", // same as wrapped
+            wrapped_aes, //the key you want to unwrap
+            unwrapper_key, //the private key with "unwrapKey" usage flag
+            {   //these are the wrapping key's algorithm options
+            name: "RSA-OAEP",
+                modulusLength: 4096, //can be 1024, 2048, or 4096
+                publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+                hash: { name: "SHA-256" }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
+            },
+            {   //this what you want the wrapped key to become (same as when wrapping)
+                name: "AES-CBC",
+                length: 256
+            },
+            true, //whether the key is extractable (i.e. can be used in exportKey)
+            ["encrypt", "decrypt"] //the usages you want the unwrapped key to have
+        )
+        //
+        return unwrapped_aes
+    }
+    //--<
+
+    async function key_unwrapper(wrapped_key,piv_wrapper_key) {
+        let wrapper_jwk = JSON.parse(piv_wrapper_key)
+        let unwrapper = await g_crypto.importKey(
+                "jwk",
+                wrapper_jwk,
+                {   //these are the wrapping key's algorithm options
+                    name: "RSA-OAEP",
+                    modulusLength: 4096, //can be 1024, 2048, or 4096
+                    publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+                    hash: { name: "SHA-256" }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
+                },
+                true,
+                ["unwrapKey"]
+        );
+        
+        // wrapped_key
+        let wrapped_aes =  hex_toByteArray(wrapped_key)
+
+        let aes_key = await unwrapped_aes_key(wrapped_aes,unwrapper)
+
+        return aes_key
+    }
+
+
+    async function key_signer(data_to_sign,priv_signer_key) {
+        try {
+            let signer_jwk = JSON.parse(priv_signer_key)
+            let signer = await g_crypto.importKey(
+                    "jwk",
+                    signer_jwk,
+                    {
+                        'name': "ECDSA",
+                        'namedCurve': "P-384"
+                    },
+                    true,
+                    ["sign"]
+            );
+
+            let enc = new TextEncoder();
+            let signable = enc.encode(data_to_sign);
+            let signature = await g_crypto.sign({
+                                                    name: "ECDSA",
+                                                    hash: {name: "SHA-384"},
+                                                },
+                                                signer,
+                                                signable
+                                            );
+
+            let type8 = new Uint8Array(signature)
+            let tranportable = hex_fromTypedArray(type8)
+            return tranportable
+        } catch(e) {
+            console.log(e)
+        }
+        return false
+    }
+
+
     var g_Loggedin_session_token = ''
     async function secondary_actions(resp) {
         try {
@@ -342,10 +427,15 @@
             let identity = ipfs_logged_in_id
             let wkey = transtion_object.wrapped_key
             let ctext = transtion_object.ctext
-            let aes_key = await unwrap_key(wkey,identity.priv_key)
-            let signable = await decipher(ctext,aes_key)
-            let signature = await sign_data(signable,identity.signer_public_key)
-
+            let iv_nonce = transtion_object.iv_nonce
+            //
+            let aes_key = await key_unwrapper(wkey,identity.priv_key)
+            //
+            let buffer = buffer_from_cvs_array(ctext)
+            iv_nonce = buffer_from_b64_csv(iv_nonce)
+            let signable = await aes_decipher_message(buffer,aes_key,iv_nonce)
+            let signature = await key_signer(signable,identity.signer_priv_key)
+            //
             let url = `${location.protocol}//${g_siteURL}/{{auth_path}}/secondary/users/${trans_obj.user_op}`
             let data = { 'token' : trans_obj.token, "signature" : signature }
             let scnd_resp = await postData(url, data)
