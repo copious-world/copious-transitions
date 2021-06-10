@@ -1,3 +1,5 @@
+const IPFS = require('ipfs')            // using the IPFS protocol to store data via the local gateway
+
 const { DBClass } = require.main.require('./lib/general_db')
 const PersistenceManager = require.main.require('./lib/global_persistence')
 const CustomPersistenceDB = require.main.require('./custom_storage/persistent_db')
@@ -82,6 +84,40 @@ class CaptchaDBClass extends DBClass {
     // // // 
     initialize(conf) {
         super.initialize(conf)
+        this.init_ipfs(conf.ipfs)
+    }
+
+    //  init_ipfs
+    async init_ipfs(cnfg) {
+        //
+        let container_dir = cnfg.ipfs.repo_location
+        if ( container_dir == undefined ) {
+            let repo_container = require.main.path
+            container_dir =  repo_container + "/repos"
+        }
+        //
+        let subdir = cnfg.ipfs.dir
+        if ( subdir[0] != '/' ) subdir = ('/' + subdir)
+        let repo_dir = container_dir + subdir
+        console.log(repo_dir)
+        let node = await IPFS.create({
+            repo: repo_dir,
+            config: {
+                Addresses: {
+                    Swarm: [
+                    `/ip4/0.0.0.0/tcp/${cnfg.ipfs.swarm_tcp}`,
+                    `/ip4/127.0.0.1/tcp/${cnfg.ipfs.swarm_ws}/ws`
+                    ],
+                    API: `/ip4/127.0.0.1/tcp/${cnfg.ipfs.api_port}`,
+                    Gateway: `/ip4/127.0.0.1/tcp/${cnfg.ipfs.tcp_gateway}`
+                }
+            }
+        })
+
+        const version = await node.version()
+        console.log('Version:', version.version)
+
+        this.ipfs = node
     }
 
     // // // 
@@ -136,6 +172,35 @@ class CaptchaDBClass extends DBClass {
         }
       }
       return(false)     // never saw this user
+    }
+
+    // ---- ---- ---- ---- ---- ---- ----
+    async get_complete_file_from_cid(cid) {
+      let ipfs = this.ipfs
+      let chunks = []
+      for await ( const chunk of ipfs.cat(cid) ) {
+          chunks.push(chunk)
+      }
+      let buff = Buffer.concat(chunks)
+      let data = buff.toString()
+      return data
+    }
+
+    // ---- ---- ---- ---- ---- ---- ----
+    async get_json_from_cid(a_cid) {
+        let data = await this.get_complete_file_from_cid(a_cid)
+        try {
+            let obj = JSON.parse(data)
+            return obj
+        } catch (e) {
+        }
+        return false
+    }
+
+    // ---- ---- ---- ---- ---- ---- ----
+    async fetch_user_ipfs(fdata) {
+      let a_cid = fdata.cid
+      return await get_json_from_cid(a_cid)
     }
 
     update_user(udata) {
