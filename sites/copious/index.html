@@ -1072,7 +1072,7 @@ viewBox="0 0 360 38">
 	</div>
 	<div class="form_el" >
 		<label for='contact-website' class='url'>Website<span> (optional)</span></label>
-		<input type='text' name='contact-website' id='contact-website' value='' class='field_el url' onkeyup="onkey_checkContactError('contact-website')"  />
+		<input type='text' name='contact-website' id='contact-website' value='' class='field_el url' style="width: 100%;" onkeyup="onkey_checkContactError('contact-website')"  />
 	</div>
 	<div class="form_el" style="vertical-align:top">
 		<label for='contact-comment' class='grunion-field-label textarea'>Comment<span>(required)</span></label><br>
@@ -2294,6 +2294,7 @@ viewBox="0 0 360 38">
 		//
 		let data = {
 			"cid" : getVal(c_cid),
+			"nonce" : get_nonce(),
 			'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
 			'action' : 'register',
             'form_key' : 'register'
@@ -2722,12 +2723,109 @@ viewBox="0 0 360 38">
 	}
 
 
+
+    //>--
+    // wv_unwrapped_key
+    // --
+    async function unwrapped_aes_key(wrapped_aes,unwrapper_key) {
+        let unwrapped_aes = await g_crypto.unwrapKey(
+            "jwk", // same as wrapped
+            wrapped_aes, //the key you want to unwrap
+            unwrapper_key, //the private key with "unwrapKey" usage flag
+            {   //these are the wrapping key's algorithm options
+            name: "RSA-OAEP",
+                modulusLength: 4096, //can be 1024, 2048, or 4096
+                publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+                hash: { name: "SHA-256" }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
+            },
+            {   //this what you want the wrapped key to become (same as when wrapping)
+                name: "AES-CBC",
+                length: 256
+            },
+            true, //whether the key is extractable (i.e. can be used in exportKey)
+            ["encrypt", "decrypt"] //the usages you want the unwrapped key to have
+        )
+        //
+        return unwrapped_aes
+    }
+    //--<
+
+    async function key_unwrapper(wrapped_key,piv_wrapper_key) {
+        let wrapper_jwk = JSON.parse(piv_wrapper_key)
+        let unwrapper = await g_crypto.importKey(
+                "jwk",
+                wrapper_jwk,
+                {   //these are the wrapping key's algorithm options
+                    name: "RSA-OAEP",
+                    modulusLength: 4096, //can be 1024, 2048, or 4096
+                    publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+                    hash: { name: "SHA-256" }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
+                },
+                true,
+                ["unwrapKey"]
+        );
+        
+        // wrapped_key
+        let wrapped_aes =  hex_toByteArray(wrapped_key)
+
+        let aes_key = await unwrapped_aes_key(wrapped_aes,unwrapper)
+
+        return aes_key
+    }
+
+
+    async function key_signer(data_to_sign,priv_signer_key) {
+        try {
+            let signer_jwk = JSON.parse(priv_signer_key)
+            let signer = await g_crypto.importKey(
+                    "jwk",
+                    signer_jwk,
+                    {
+                        'name': "ECDSA",
+                        'namedCurve': "P-384"
+                    },
+                    true,
+                    ["sign"]
+            );
+
+            let enc = new TextEncoder();
+            let signable = enc.encode(data_to_sign);
+            let signature = await g_crypto.sign({
+                                                    name: "ECDSA",
+                                                    hash: {name: "SHA-384"},
+                                                },
+                                                signer,
+                                                signable
+                                            );
+
+            let type8 = new Uint8Array(signature)
+            let tranportable = hex_fromTypedArray(type8)
+            return tranportable
+        } catch(e) {
+            console.log(e)
+        }
+        return false
+    }
+
+
     var g_Loggedin_session_token = ''
     async function secondary_actions(resp) {
         try {
             let trans_obj = resp.data  // transition object
+            let identity = ipfs_logged_in_id
+            let wkey = transtion_object.wrapped_key
+            let ctext = transtion_object.ctext
+            let iv_nonce = transtion_object.iv_nonce
+            //
+            let aes_key = await key_unwrapper(wkey,identity.priv_key)
+            //
+            let buffer = buffer_from_cvs_array(ctext)
+            iv_nonce = buffer_from_b64_csv(iv_nonce)
+            let signable = await aes_decipher_message(buffer,aes_key,iv_nonce)
+            let signature = await key_signer(signable,identity.signer_priv_key)
+            //
             let url = `${location.protocol}//${g_siteURL}/captcha/secondary/users/${trans_obj.user_op}`
-            let data = { 'token' : trans_obj.token }
+            let data = { 'token' : trans_obj.token, "signature" : signature }
             let scnd_resp = await postData(url, data)
             if ( scnd_resp.OK === "true" ) {
                 g_Loggedin_session_token = scnd_resp.token  // should be in COOKIE
@@ -2755,45 +2853,12 @@ viewBox="0 0 360 38">
 
     var g_foreign_login_window = null
     var g_foreign_login_socket = null
-    function secondaryVerify(resp) {
+    async function secondaryVerify(resp) {
         // e.g auto login to another service this uses simultaneously
         if (  resp && resp.OK ) {
             if ( resp.data ) {
                 let datum = resp.data
-                if ( datum.windowize ) {
-                    //
-                    try {
-                        // setup a webSocket connection to get finalization data on logging in. -- 
-                        g_foreign_login_socket = new WebSocket(`wss://${g_siteURL}/auth_ws/foreign_auth`);
-                        g_foreign_login_socket.onmessage = (
-                            (rsp) => { 
-                                        return (event) => {     // handle the finalization through the websocket
-                                                try {
-                                                    let login_instructions = JSON.parse(event.data)
-                                                    if ( login_instructions.OK ) {      // happens after the windowized redirects.
-                                                        finalize_foreign_login(rsp,login_instructions)
-                                                    }
-                                                } catch (e) {
-                                                }
-                                            }
-                            })(resp)
-                        let msg = {
-                            'token' : datum.token
-                        }
-                        setTimeout(() => {
-                            g_foreign_login_socket.send(JSON.stringify(msg))
-                            //
-                            // The URL is the first URL addressed by the foreign authorizor.
-                            g_foreign_login_window = window.open(datum.windowize, '_blank', 'height=300,width=300,menubar=0,status=0,toolbar=0', false);  // resp.windowize = location  + 'start/' + <strategy> + '/' + <email> + '/' + token
-                            //g_foreign_login_window.location;
-                            g_foreign_login_window.focus()
-                        },500)
-                        return(false)       // prevent display of logout, etc until finalized
-                    } catch(e) {
-                        loginFailed(resp)
-                        return(false)       // prevent display of logout, etc until finalized
-                    }
-                } else if ( datum.amelioritive_action ) {
+                if ( datum.amelioritive_action ) {
                     try {
                         eval(datum.amelioritive_action)
                     } catch (e) {
@@ -2803,8 +2868,7 @@ viewBox="0 0 360 38">
                 }
                 // else :: now do an app based login for tandem service, etc.
                 // If this application needs to work with another resource -- and all other auths have passed.
-                let caller = async (rsp) => { return (await secondary_actions(rsp)) }
-                let bval = caller(resp)
+                let bval = await secondary_actions(rsp)
                 if (!bval) loginFailed(resp)
                 return(bval)  // accept less defind behavior as a pass (this is basically local login)
             } else {
@@ -2840,7 +2904,6 @@ viewBox="0 0 360 38">
         let data = {
             "cid" : getVal(c_cid),
             "strategy" : getVal(c_strategy),
-            "openID" : getVal(c_openID),
             'uuid' : (g_currenCaptchaTOKEN ? g_currenCaptchaTOKEN : ''),
             'action' : 'login',
             'form_key' : 'login'
@@ -2850,7 +2913,7 @@ viewBox="0 0 360 38">
 	}
 
 	async function login_completionaAction(resp) {
-        let verify = secondaryVerify(resp)
+        let verify = await secondaryVerify(resp)
         if ( verify ) {
             presentLogout(resp)
         }
@@ -3286,6 +3349,9 @@ function addstyle(script) {
     }
 }
 
+function gen_nonce() {
+	return btoa(window.crypto.getRandomValues(new Uint8Array(16)))
+}
 
 //$$EXPORTABLE::
 /*
@@ -3295,7 +3361,6 @@ addscript
 addstyle
 getCookie
 */
-
 
 
 
