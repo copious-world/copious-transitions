@@ -19,7 +19,7 @@ const WRITE_OBJECT_MAP_EVERY_INTERVAL = 1000*60*15  // 15 minutes
 const WRITE_UNUSED_LARGE_ENTRIES_EVERY_INTERVAL = 1000*60*60  // ones an hour
 //
 const g_keyValueDB = g_persistence.get_LRUManager(); // leave it to the module to figure out how to connect
-const g_keyValueSessions =  g_ephemeral.get_LRUManager();
+const g_keyValueSessions = g_ephemeral.get_LRUManager();
 //
 //
 async function run_persistence() {   // describe the entry point to super storage
@@ -47,7 +47,7 @@ async function run_persistence() {   // describe the entry point to super storag
           'anonymous' : false, 
           'type' : false,
           'subject' : decodeURIComponent(i_obj.name),
-          'author' : decodeURIComponent(i_obj.email),
+          'author' : i_obj.cid,
           'references' : decodeURIComponent(i_obj.website),
           'text' : decodeURIComponent(i_obj.comment)
         }

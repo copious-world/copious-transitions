@@ -208,7 +208,7 @@ class CaptchaSessionManager extends SessionManager {
             if ( this.business ) this.business.process('new-user',post_body)
             transtion_object.secondary_action = false
             transtion_object.token = 'user+' + uuid()   // transaction token
-            // sha255 hash - unless application override of hashable field from config. (example uses email and password)
+            // sha255 hash - unless application override of hashable field from config. (example uses cid and nonce)
             let registration_token = this.do_hash(post_body[this.hashables.field1] + post_body[this.hashables.field2])
             transtion_object.session_token = 'sess+' + registration_token
             transtion_object.elements = { "match" : 'sess+' + registration_token }  // will look for this...
@@ -340,7 +340,7 @@ class CaptchaSessionManager extends SessionManager {
     //
     update_session_state(transition,session_token,req) {    // req for session cookies if any
         if (  G_users_trns.action_selector(body.action) ) {
-            this.addSession(req.body.email,session_token)
+            this.addSession(req.body.cid,session_token)
             res.cookie(this.user_cookie, session_token, { maxAge: 900000, httpOnly: true });
         } else {
             return super.update_session_state(transition,session_token,req)

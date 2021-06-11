@@ -82,6 +82,8 @@ class StaticContracts extends FilesAndRelays {
         super.initialize(conf.static_db)
         if ( conf.static_db ) {
             //
+            this._whokey_field = conf.static_db.index_key ? conf.static_db.index_key :  this._whokey_field
+            //
             this.blob_dir = conf.static_db.blob_dir
             let freeloading_timeout = conf.static_db.freeloading_timeout
             this.max_freeloading_time =  freeloading_timeout ? freeloading_timeout : MAX_LAX_CACHE_TIME

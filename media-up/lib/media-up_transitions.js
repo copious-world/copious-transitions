@@ -28,6 +28,11 @@ class MediaSubmitTransition extends TaggedTransition {
         super(trans)
         this.protocol_select = false
     }
+
+    initialize(conf) {
+        this.primary_key = conf.index_keys.media_submit
+    }
+
     //
     transform_file_name(proto_file_name) {
         let extendable_file = proto_file_name.replace('.','_')
@@ -35,7 +40,7 @@ class MediaSubmitTransition extends TaggedTransition {
         return(extendable_file)
     }
     primary_key() {
-        return('email')
+        return(this.primary_key)
     }
 
     file_entry_id(file_key) {
