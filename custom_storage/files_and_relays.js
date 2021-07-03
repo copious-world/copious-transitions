@@ -34,7 +34,7 @@ class FilesAndRelays extends AppLifeCycle {
         }
         //
         if ( conf === undefined ) {
-            console.log("files and relays: initialize: no configuration parameter ... shutting donnw")
+            console.log("files and relays: initialize: no configuration parameter ... shutting down")
             process.exit(0)
         }
         //

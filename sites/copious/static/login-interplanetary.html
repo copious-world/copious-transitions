@@ -90,7 +90,6 @@
         </div>
     </div>
 
-
     <iframe id="loginframe" name="loginframe" style="visibility:hidden;" src="about:blank" style="width:0;height:0;border:0px solid #fff;" >
 	</iframe>
     <div style="height:0px;width:0px;display: none;visibility: hidden;">
@@ -115,7 +114,6 @@
     var g_backup_ipfs_strategy_check = null
     function login_strategy(strategy) {
         strategy = strategy.toLowerCase()
-        hide_password_verify_container()
         show_login_submitter()
         g_loginStrategyField.value = strategy
         //
@@ -135,76 +133,10 @@
         }
     }
     //
-    var g_passwordContainer = document.getElementById("password-container")
-    var g_OpenIDContainer = document.getElementById("openID-container")
-    var g_passwordVerifyContainer = document.getElementById("password-verify-container")
-    var g_forgotSubmitContainer = document.getElementById("forgot-container-submit")
-    var g_fergit = document.getElementById('forgot-container')
+
     var g_login_submitter = document.getElementById('login-submitter')
     //
     //
-    function show_password_container() {
-        if ( g_passwordContainer ) {
-            g_passwordContainer.style.visibility = "visible"
-            g_passwordContainer.style.display = "block"
-        }
-    }
-    function hide_password_container() {
-        if ( g_passwordContainer ) {
-            g_passwordContainer.style.visibility = "hidden"
-            g_passwordContainer.style.display = "none"
-        }
-    }
-    function show_fergit_container() {
-        if ( g_fergit ) {
-            g_fergit.style.visibility = "visible"
-            g_fergit.style.display = "block"
-        }
-        hide_forgot_submit_container()
-    }
-    function hide_fergit_container() {
-        if ( g_fergit ) {
-            g_fergit.style.visibility = "hidden"
-            g_fergit.style.display = "none"
-        }
-    }
-    function show_password_verify_container() {
-        if ( g_passwordVerifyContainer ) {
-            g_passwordVerifyContainer.style.visibility = "visible"
-            g_passwordVerifyContainer.style.display = "block"
-        }
-    }
-    function hide_password_verify_container() {
-        if ( g_passwordVerifyContainer ) {
-            g_passwordVerifyContainer.style.visibility = "hidden"
-            g_passwordVerifyContainer.style.display = "none"
-        }
-    }
-    function show_forgot_submit_container() {
-        hide_fergit_container()
-        if ( g_forgotSubmitContainer ) {
-            g_forgotSubmitContainer.style.visibility = "visible"
-            g_forgotSubmitContainer.style.display = "block"
-        }
-    }
-    function hide_forgot_submit_container() {
-        if ( g_forgotSubmitContainer ) {
-            g_forgotSubmitContainer.style.visibility = "hidden"
-            g_forgotSubmitContainer.style.display = "none"
-        }
-    }
-    function show_openID_container() {
-        if ( g_OpenIDContainer ) {
-            g_OpenIDContainer.style.visibility = "visible"
-            g_OpenIDContainer.style.display = "block"
-        }
-    }
-    function hide_openID_container() {
-        if ( g_OpenIDContainer ) {
-            g_OpenIDContainer.style.visibility = "hidden"
-            g_OpenIDContainer.style.display = "none"
-        }
-    }
     function show_login_submitter() {
         if ( g_login_submitter ) {
             g_login_submitter.style.visibility = "visible"

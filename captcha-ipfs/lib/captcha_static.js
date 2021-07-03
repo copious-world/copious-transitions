@@ -8,14 +8,12 @@ class CaptchaStatic extends GeneralStatic {
         super(myStorageClass)
         //
         this.preloaded = {
-            "login" : { "fname" : '/login.html', "ftype" : "html" },
-            "register" : { "fname" : '/register.html', "ftype" : "html" },
-            "forgetful" : { "fname" : '/forgot.html', "ftype" : "html" }
+            "login" : { "fname" : '/login-interplanetary.html', "ftype" : "html" },
+            "register" : { "fname" : '/register-interplanetary.html', "ftype" : "html" }
         }
         //
         this.login_asset_media_object = null
         this.register_asset_media_object = null
-        this.forgetful_asset_media_object = null
     }
 
     preload_all(conf) {

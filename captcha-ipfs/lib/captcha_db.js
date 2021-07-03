@@ -55,7 +55,6 @@ async function run_persistence() {   // describe the entry point to super storag
     }
     //  ADD PARAMETERS TO THE NEW SENDER
     g_persistence.add_message_handler(contact_m_handler,contact_q_holder,contact_slow,contact_fast)
-
   }
 }
 
@@ -84,7 +83,7 @@ class CaptchaDBClass extends DBClass {
     // // // 
     initialize(conf) {
         super.initialize(conf)
-        this.init_ipfs(conf.ipfs)
+        this.init_ipfs(conf)
     }
 
     //  init_ipfs
@@ -200,7 +199,7 @@ class CaptchaDBClass extends DBClass {
     // ---- ---- ---- ---- ---- ---- ----
     async fetch_user_ipfs(fdata) {
       let a_cid = fdata.cid
-      return await get_json_from_cid(a_cid)
+      return await this.get_json_from_cid(a_cid)
     }
 
     update_user(udata) {

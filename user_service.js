@@ -13,6 +13,12 @@ const passwordGenerator = require('generate-password');
 const ShutdownManager = require('./lib/shutdown-manager')
 const shutdown_server_helper_factory = require('http-shutdown')
 
+const UserHandling = require('./contractual/user_processing')
+const MimeHandling = require('./contractual/mime_processing')
+const TranstionHandling = require('./contractual/transition_processing')
+
+
+
 // https://github.com/fastify/fastify
 
 let g_expected_modules = [
@@ -27,6 +33,7 @@ let g_expected_modules = [
                             "business",
                             "transition_engine"
                         ]
+
 
 //
 //
@@ -49,6 +56,10 @@ var g_session_manager = null
 
 var g_max_cache_time = 3600000*2  // once every two hours
 //
+
+var g_user_handler = false
+var g_mime_handler = false
+var g_transition_processing = false
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
 // INITIALIZE
@@ -64,6 +75,12 @@ async function initialize_all() {
     g_statics.initialize(g_db,conf_obj)                         // Static assets may be taken out of DB storage or from disk, etc.
     await g_dynamics.initialize(g_db,conf_obj)                        // Dynamichk assets may be taken out of DB storage or from disk, etc.
     g_transition_engine.install(g_statics,g_dynamics,g_session_manager)
+
+    //  --- contractual logic ---
+    g_user_handler = new UserHandling(g_session_manager,g_validator,g_statics,g_dynamics,g_max_cache_time)
+    g_mime_handler = new MimeHandling(g_session_manager,g_validator,g_statics,g_dynamics,g_max_cache_time)
+    g_transition_processing = new TranstionHandling(g_session_manager,g_validator,g_dynamics,g_max_cache_time)
+    //
 }
 
 initialize_all()
@@ -97,27 +114,12 @@ g_app.get('/', (req, res) => {
 g_app.get('/static/:asset', async (req, res) => {
     let asset = req.params['asset']
     let body = {}
-    let proceed = await g_session_manager.guard_static(asset,body,req)
-    if ( proceed ) {     // returns a true value by default, but may guard some assets
-        var asset_obj = await g_statics.fetch(asset);     // returns an object with fields mime_type, and string e.g. text/html with uriEncoded html
-        if ( typeof asset_obj !== 'object' || asset_obj.mime_type == undefined ) {
-            let hypothetical = asset_obj
-            asset_obj = {}
-            asset_obj.mime_type = "text/html"
-            try {
-                asset_obj.string = hypothetical.toString()
-            } catch(e) {
-                try {
-                    asset_obj.string = JSON.stringify(hypothetical)
-                } catch(e) {
-                    asset_obj.string = "could not convert"
-                }
-            }
-        }
-        res.writeHead(200, { 'Content-Type': asset_obj.mime_type });
-        res.end(asset_obj.string);    
+    let [code,header,data] = await g_mime_handler.static_asset_handler(asset,body,req.headers) 
+    if ( data !== false ) {
+        res.writeHead(code,header);
+        res.end(data);    
     } else {
-        res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : 'unavailable' }));
+        res.status(code).send(JSON.stringify(header))
     }
 });
 
@@ -129,130 +131,57 @@ let g_secondary_mime_actions = {}
 g_app.post('/guarded/static/:asset', async (req, res) => {
     let asset = req.params['asset']
     let body = req.body
-    let proceed = await g_session_manager.guard(asset,body,req)
-    if ( proceed ) {             // asset exits, permission granted, etc.
-        let transitionObj = await g_session_manager.process_asset(asset,body)  // not checking sesssion, key the asset and use any search refinement in the body.
-        if ( transitionObj ) {
-            if ( transitionObj.secondary_action ) {                          // return a transition object to go to the client. 
-                let asset_obj = await g_statics.fetch(asset);                     // get the asset for later
-                let tObjCached = { 'tobj' : transitionObj, 'asset' : asset_obj } 
-                add_local_cache_transition(g_secondary_mime_actions,transitionObj.token,tObjCached)
-                return(res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));    // transition object has token
-            } else {
-                let asset_obj = await g_statics.fetch(asset);     // no checks being done, just send the asset. No token field included
-                if ( (asset_obj !== false)  && ( asset_obj.mime_type !== undefined )) {
-                    res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
-                    return(res.end(asset_obj.string));
-                }
-            }
-        }
+    let [code,header,data] = await g_mime_handler.guarded_static_asset_handler(asset,body,req.headers) 
+    if ( typeof data === 'boolean' ) {
+        res.status(code).send(JSON.stringify(header))
+    } else {
+        res.writeHead(code,header);
+        res.end(data);    
     }
-    res.status(200).send(JSON.stringify({ 'type' : 'mime', 'OK' : 'false', 'reason' : 'unavailable' }));
 });
 
 g_app.post('/guarded/dynamic/:asset', async (req, res) => {
     let asset = req.params['asset']
     let body = req.body
-    let proceed = await g_session_manager.guard(asset,body,req)
-    if ( proceed ) {             // asset exits, permission granted, etc.
-        let transitionObj = await g_session_manager.process_asset(asset,body)  // not checking sesion, key the asset and use any search refinement in the body.
-        if ( transitionObj ) {
-            if ( transitionObj.secondary_action ) {                          // return a transition object to go to the client. 
-                let asset_obj = await g_dynamics.fetch(asset,transitionObj);                     // get the asset for later
-                let tObjCached = { 'tobj' : transitionObj, 'asset' : asset_obj } 
-                add_local_cache_transition(g_secondary_mime_actions,transitionObj.token,tObjCached)
-                return(res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));    // transition object has token
-            } else {
-                let asset_obj = await g_dynamics.fetch(asset,transitionObj);     // no checks being done, just send the asset. No token field included
-                if ( (asset_obj !== false)  && ( asset_obj.mime_type !== undefined )) {
-                    res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
-                    return(res.end(asset_obj.string));
-                }
-            }
-        }
+    let [code,header,data] = await g_mime_handler.guarded_dynamic_asset_handler(asset,body,req.headers)
+    if ( typeof data === 'boolean' ) {
+        res.status(code).send(JSON.stringify(header))
+    } else {
+        res.writeHead(code,header);
+        res.end(data);    
     }
-    res.status(200).send(JSON.stringify({ 'type' : 'mime', 'OK' : 'false', 'reason' : 'unavailable' }));
 });
 
 // KEYED MIME_TYPES  - TRANSITION ACCEPTED  -- the body should send back the token it got with the asset.
 g_app.post('/secondary/guarded', async (req,res) => {
     let body = req.body
-    if ( body.token !== undefined ) {
-        let cached_transition = fetch_local_cache_transition(g_secondary_mime_actions,body.token)
-        if ( cached_transition !== undefined ) {
-            if ( g_session_manager.match(body,cached_transition)  ) {                // check on matching tokens and possibly other things
-                if ( g_session_manager.key_mime_type_transition(req) ) {
-                    let asset_obj = cached_transition.data                          // Finally, send the asset 
-                    if ( (asset_obj !== false)  && ( asset_obj.mime_type !== undefined )) {
-                        res.writeHead(200, { 'Content-Type': asset_obj.mime_type } );
-                        return(res.end(asset_obj.string));
-                    }
-                }
-            }
-        }
+    let [code,header,data] = await g_mime_handler.guarded_secondary_asset_handler(body) 
+    if ( typeof data === 'boolean' ) {
+        res.status(code).send(JSON.stringify(header))
+    } else {
+        res.writeHead(code,header);
+        res.end(data);    
     }
-    res.status(200).send(JSON.stringify( { 'type' : 'secondary/action', 'OK' : 'false', 'reason' : 'missing data' }));
 })
 
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
 // TRANSITIONS - pure state transition dynamics for sessions
-let g_finalize_transitions = {}
+
 g_app.post('/transition/:transition', async (req, res) => {           // the transition is a name or key
     let body = req.body
     let transition = req.params.transition
-    //
-    let proceed = await g_session_manager.guard(transition,body,req)
-    if ( !proceed ) {             // asset exits, permission granted, etc.  (check fail)
-        return res.status(200).send(JSON.stringify({ 'type' : 'user', 'OK' : 'false', 'reason' : 'unavailable' }));
-    }
-    //
-    if ( g_validator.valid(body,g_validator.field_set[transition]) ) {         // A field set may be in the configuration for named transitions - true by default
-        let is_feasible = await g_session_manager.feasible(transition,body,req)
-        if ( is_feasible  ) {                        // can this session actually make the transition?
-            let transitionObj = await g_session_manager.process_transition(transition,body,req)            // either fetch or produced transition data
-            if ( transitionObj ) {
-                if ( transitionObj.secondary_action ) {                                      // Require a seconday action as part of the transition for finalization
-                    let [send_elements, store_elements] = g_dynamics.fetch_elements(transition,transitionObj);      // elements is purposely vague and may be application sepecific
-                    let tObjCached = { 'tobj' : transitionObj, 'elements' : store_elements, 'transition' : transition }
-                    add_local_cache_transition(g_finalize_transitions,transitionObj.token,tObjCached)
-                    return(res.status(200).send(JSON.stringify({ 'type' : 'transition', 'OK' : 'true', 'transition' : transitionObj, 'elements' : send_elements })));
-                } else {
-                    body.token = transitionObj.token
-                    let finalization_state = await g_session_manager.finalize_transition(transition,body,{},req)      // FINALIZE (not a final state)
-                    if ( finalization_state ) {     // relay the finalized transition and go on with business. 
-                        let state = finalization_state.state
-                        let OK = finalization_state.OK
-                        return(res.status(200).send(JSON.stringify({ 'type' : 'finalize', 'OK' : OK, 'state' : state, 'reason' : 'matched' })));
-                    }
-                }
-            }
-        }
-    }
-    res.status(200).send(JSON.stringify({ 'type' : 'transition', 'OK' : 'false', 'reason' : 'unavailable' }));
+    let [code,data] = await g_transition_processing.transition_handler(transition,body,req.headers)
+    res.status(code).send(JSON.stringify(data))
 });
 
 // TRANSITIONS  - TRANSITION ACCEPTED  -- the body should send back the token it got with the asset.
 g_app.post('/secondary/transition',async (req, res) => {
     let body = req.body
-    if ( body.token !== undefined ) {
-        let cached_transition = fetch_local_cache_transition(g_finalize_transitions,body.token,body.next)
-        if ( cached_transition !== undefined ) {
-            if ( g_session_manager.match(body,cached_transition)  ) {        // check on matching tokens and possibly other things 
-                // some kind of transition takes place and becomes the state of the session. It may not be the same as the one
-                // specified in the cached transition, but may be similar depending on how types (categories) are regulated 
-                let elements = cached_transition.elements
-                let finalization_state = await g_session_manager.finalize_transition(cached_transition.transition,body,elements,req)      // FINALIZE (not a final state)
-                if ( finalization_state ) {     // relay the finalized transition and go on with business. 
-                    let state = finalization_state.state
-                    let OK = finalization_state.OK
-                    return(res.status(200).send(JSON.stringify({ 'type' : 'finalize', 'OK' : OK, 'state' : state, 'reason' : 'matched' })));
-                } // else nothing worked 
-            }
-        }
-    }
-    res.status(200).send(JSON.stringify({ 'type' : 'secondary/action', 'OK' : 'false', 'reason' : 'no transition' }));
+    //
+    let [code,data] = await g_transition_processing.secondary_transition_handler(body) 
+    res.status(code).send(JSON.stringify(data))
 })
 
 
@@ -260,43 +189,26 @@ var setup_foreign_auth = () => {}
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 if ( conf_obj.login_app ) {   // LOGIN APPS OPTION (START)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+
+
+
 // USER MANAGEMENT - handle authorization and user presence.
-let g_secondary_user_actions = {}
-g_app.post(['/users/login','/users/logout','/users/register','/users/forgot'], async (req,res) => {
-    let body = req.body
-    let user_op = body['action']
-    if ( g_validator.valid(body,g_validator.field_set[user_op]) ) {        // every post that comes through will have validation from configuration
-        try {
-            let transitionObj = await g_session_manager.process_user(user_op,body,req,res)       // most paths require secondation action (perhaps logout doesn't) (Captch as model)
-            if ( transitionObj.secondary_action || transitionObj.foreign_authorizer_endpoint ) {
-                let tObjCached = { 'tobj' : transitionObj, 'elements' : transitionObj.elements, 'action' : user_op }
-                add_local_cache_transition(g_secondary_user_actions,transitionObj.token,tObjCached)
-                delete transitionObj.elements
-                if ( transitionObj.secondary_action ) {     // tell the application what it needs to know so that it can respond to completion..
-                    return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));
-                } else if ( transitionObj.foreign_authorizer_endpoint ) {
-                    if ( g_going_ws_session[transitionObj.token] ) {
-                        try {
-                            g_going_ws_session[transitionObj.token].close()
-                        } catch(e) {
-                            //
-                        }
-                    }
-                    g_going_ws_session[transitionObj.token] = null
-                    transitionObj.windowize = transitionObj.foreign_authorizer_endpoint
-                    return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));
-                }
-            } else {
-                return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'true', 'data' : transitionObj })));
-            }
-        } catch (e) {
-            return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : e.message })));
+for ( let path of ['/users/login','/users/logout','/users/register','/users/forgot'] ) {
+    g_app.post(path, async (req,res) => {
+        //
+        let body = req.body
+        let user_op = body['action']
+        //
+        let [code,result] = await g_user_handler.user_sessions_process(user_op,body)
+        if ( result.OK === 'true' ) {
+            g_session_manager.handle_cookies(result,res,transitionObj)
         }
-    }
-    //
-    return(res.status(200).send(JSON.stringify( { 'type' : 'user', 'OK' : 'false', 'reason' : 'bad form' })));
-    //
-})
+        return(res.status(code).send(JSON.stringify( result )));
+        //
+    })
+}
+
+
 
 
  
@@ -304,86 +216,21 @@ g_app.post(['/users/login','/users/logout','/users/register','/users/forgot'], a
 g_app.post('/secondary/users/:action', async (req, res) => {
     let body = req.body
     let action = req.params['action']
-    if ( body.token !== undefined ) {               // the token must be present -------->>
-        let cached_transition = fetch_local_cache_transition(g_secondary_user_actions,body.token)
-        if ( (cached_transition !== undefined) && (action == cached_transition.action) ) {      // the action must match (artifac of use an array of paths)
-            cached_transition.action += '-secondary'  // this is a key for the second part of an ongoing transition...
-            // this is the asset needed by the client to turn on personlization and key access (aside from sessions and cookies)
-            let ok_match = await g_session_manager.match(body,cached_transition)
-            if ( ok_match ) {   // check the tokens and any other application specific information required
-                let transitionObj = cached_transition.tobj
-                let session_token = g_session_manager.unstash_session_token(cached_transition)  // gets info from the object
-                if ( session_token ) {  // assuming the token is there...
-                    let elements = await g_session_manager.initialize_session_state('user',session_token,transitionObj,res)
-                    res.status(200).send(JSON.stringify({ 'type' : transitionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token, 'elements' : elements  }));
-                    return;
-                }
-            }
-        }
+    let [code,result] = await g_user_handler.secondary_processing(action,body)
+    if ( result.OK === 'true' ) {
+        g_session_manager.handle_cookies(result,res,transitionObj)
     }
-    res.status(200).send(JSON.stringify( { 'type' : 'secondary/action', 'OK' : 'false', 'reason' : 'missing data' }));
+    return(res.status(code).send(JSON.stringify( result )));
 })
 
 
 g_app.post('/foreign_login/:token', async (req, foreign_res) => {  // or use the websockets publication of state....
     let body = req.body
     let token = req.params.token
-    let OK = body.success
-    if ( OK ) {                                   // the token must be present
-        let cached_transition = fetch_local_cache_transition(g_secondary_user_actions,token)
-        if ( cached_transition !== undefined ) {      // the action must match (artifac of use an array of paths)
-            // this is the asset needed by the client to turn on personlization and key access (aside from sessions and cookies)
-            if ( g_session_manager.match(body,cached_transition)  ) {        // check the tokens and any other application specific information required
-                cached_transition.action += '-secondary'
-                let transitionObj = cached_transition.tobj
-                let session_token = g_session_manager.unstash_session_token(cached_transition)
-                if ( session_token ) {
-                    let elements = await g_session_manager.initialize_session_state('user',session_token,transitionObj,null)
-                    send_ws_outofband(token,{ 'type' : transitionObj.type, 'OK' : 'true', 'reason' : 'match', 'token' : session_token, 'elements' : elements })
-                    return foreign_res.status(200).end("OK")
-                }
-            }
-        }
-    }
-    foreign_res.status(514).end("FAILED LOGIN")
-    send_ws_outofband(token,{ 'type' : 'secondary/action', 'OK' : 'false', 'reason' : 'missing data', 'action' : 'login', 'path' : 'user' })
+    let [code,report,response] = await g_user_handler.foreign_authorizer(body,token)
+    foreign_res.status(code).end(report)
+    g_user_handler.send_ws_outofband(token,response)
 })
-
-
-var g_going_ws_session = {}
-
-setup_foreign_auth = (ws) => {
-    //
-    ws.on("message",  (data, flags) => {
-        let clientIdenifier = JSON.parse(data.toString());
-        console.log(clientIdenifier.token)
-        g_going_ws_session[clientIdenifier.token] = ws    // associate the client with the DB
-    });
-
-    ws.on("close", () => {
-        let token = null
-        for ( let tk in g_going_ws_session ) {
-            if ( g_going_ws_session[tk] === ws ) {
-                token = tk
-                break
-            }
-        }
-        if ( token ) {
-            delete g_going_ws_session[token]
-        }
-    });
-    //
-}
-
-
-function send_ws_outofband(token_key,data) {
-    if ( g_auth_wss && token_key ) {
-        let ws = g_going_ws_session[token_key]
-        if ( ws ) {
-            ws.send(JSON.stringify(data));
-        }
-    }
-}
 
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
@@ -400,7 +247,8 @@ g_db.last_step_initalization()
 var g_exp_server = g_app.listen(conf_obj.port,() => {
     console.log(`listening on ${conf_obj.port}`)
 });
-var g_shutdown_server_helper = shutdown_server_helper_factory(g_exp_server)
+
+//var g_shutdown_server_helper = shutdown_server_helper_factory(g_exp_server)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
@@ -622,55 +470,6 @@ g_app_wss.on("connection", (ws,req) => {
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
     
 
-// keep basic transition information around between calls for certain flow processes.
-// this is not shared with other system processes, so just use local data structures. 
-// (this could be modularized with C++ or other..)
-
-// more than one use of caches is expected.  (just these two methods ... using a class seems too much
-
-function fetch_local_cache_transition(cache_map,token,next) {
-    if ( cache_map ) {
-        let transObject = cache_map[token]
-        if ( !(next) ) delete cache_map[token]
-        return transObject
-    }
-    return undefined
-}
-
-
-
-function add_local_cache_transition(cache_map,token,tobject) {
-    if ( cache_map ) {
-        cache_map[token] = tobject
-        if (  tobject.tobj.session_token ) {
-            delete tobject.tobj.session_token
-        }
-        if ( tobject.tobj && tobject.tobj.entry_time ) {
-            tobject.entry_time = tobject.tobj.entry_time
-        }
-    }
-}
-
-
-function timeout_transition_cache(cache_map) {
-    if ( cache_map ) {
-        let now_time = Date.now()
-        let delete_these = []
-        for ( let token in cache_map ) {
-            let tobj = cache_map[token]
-            if ( tobj.entry_time ) {
-                if ( (now_time - tobj.entry_time) > g_max_cache_time ) {
-                    delete_these.push(token)
-                }
-            }
-        }
-        for ( let token of delete_these ) {
-            delete cache_map[token]
-        }
-    }
-}
-
-
 function generate_password_block() {
     //
     var passwords = passwordGenerator.generateMultiple(PASSWORD_BLOCKSIZE, {
@@ -781,9 +580,12 @@ process.on('SIGINT', async () => {
     try {
         await g_db.disconnect()
         global_shutdown_manager.shutdown_all()
+        process.exit(0)
+        /*
         g_shutdown_server_helper.shutdown(async (err) => {
             process.exit(0)
-        })    
+        })   
+        */
     } catch (e) {
         console.log(e)
         process.exit(0)

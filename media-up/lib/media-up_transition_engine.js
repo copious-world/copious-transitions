@@ -102,7 +102,7 @@ async function main () {
     
             console.log(`${__filename}::file_mover : ${cid}`)
     
-            return file.cid.toString()    
+            return cid    
         } else {
             return super.file_mover(file_descriptor,target_path,ttrans,cb)
         }
