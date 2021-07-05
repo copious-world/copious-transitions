@@ -34,7 +34,6 @@ let g_expected_modules = [
                             "transition_engine"
                         ]
 
-
 //
 //
 const conf_obj = load_parameters()                  // configuration parameters to select modules, etc.
@@ -77,9 +76,11 @@ async function initialize_all() {
     g_transition_engine.install(g_statics,g_dynamics,g_session_manager)
 
     //  --- contractual logic ---
-    g_user_handler = new UserHandling(g_session_manager,g_validator,g_statics,g_dynamics,g_max_cache_time)
+    let use_foreign = conf_obj.foreign_auth.allowed
+    g_user_handler = new UserHandling(g_session_manager,g_validator,g_statics,g_dynamics,g_transition_engine,use_foreign,g_max_cache_time)
     g_mime_handler = new MimeHandling(g_session_manager,g_validator,g_statics,g_dynamics,g_max_cache_time)
     g_transition_processing = new TranstionHandling(g_session_manager,g_validator,g_dynamics,g_max_cache_time)
+    g_transition_engine.set_contractual_filters(g_transition_processing,g_user_handler)
     //
 }
 
@@ -185,21 +186,25 @@ g_app.post('/secondary/transition',async (req, res) => {
 })
 
 
-var setup_foreign_auth = () => {}
+var setup_foreign_auth = conf_obj.foreign_auth.allowed
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-if ( conf_obj.login_app ) {   // LOGIN APPS OPTION (START)
+if ( conf_obj.login_app  && Array.isArray(conf_obj.login_app) ) {   // LOGIN APPS OPTION (START)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
+if ( setup_foreign_auth ) {
+    setup_foreign_auth = (ws) => { g_user_handler.foreign_auth_initializer(ws) }
+}
 
-
+//
 // USER MANAGEMENT - handle authorization and user presence.
-for ( let path of ['/users/login','/users/logout','/users/register','/users/forgot'] ) {
+for ( let path of conf_obj.login_app ) {
+    //
     g_app.post(path, async (req,res) => {
         //
         let body = req.body
         let user_op = body['action']
         //
-        let [code,result] = await g_user_handler.user_sessions_process(user_op,body)
+        let [code,result] = await g_user_handler.user_sessions_processing(user_op,body)
         if ( result.OK === 'true' ) {
             g_session_manager.handle_cookies(result,res,transitionObj)
         }
@@ -209,9 +214,6 @@ for ( let path of ['/users/login','/users/logout','/users/register','/users/forg
 }
 
 
-
-
- 
 // USER MANAGEMENT - finalize the user action.
 g_app.post('/secondary/users/:action', async (req, res) => {
     let body = req.body
@@ -237,100 +239,54 @@ g_app.post('/foreign_login/:token', async (req, foreign_res) => {  // or use the
 }       // LOGIN APPS OPTION (END)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
-
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
 // APPLICATION STARTUP
 //
 g_db.last_step_initalization()
-var g_exp_server = g_app.listen(conf_obj.port,() => {
+g_app.listen(conf_obj.port,() => {
     console.log(`listening on ${conf_obj.port}`)
 });
 
-//var g_shutdown_server_helper = shutdown_server_helper_factory(g_exp_server)
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-if ( conf_obj.ws_port ) {   // WEB SCOCKETS OPTION (START)
+if ( conf_obj.ws_port ) {   // WEB SCOCKETS OPTION (START)    Web Socket Server
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
 let server = http.createServer(g_app);
 server.listen(conf_obj.ws_port);
+
+
 var g_auth_wss = new WebSocketServer({server: server});
 
-console.log(`web socket listening: ${conf_obj.ws_port}`)
-
-var g_going_sitewide_ws_session = {}
-
 g_auth_wss.on("connection", (ws,req) => {
-    //
-    if ( req.path === "foreign_auth" ) {
 
-        if ( setup_foreign_auth ) setup_foreign_auth(ws)
-
-    } else if (  req.path === "site_wide"  ) {
-
-        function send_to_ws(ws,data) {
-            if ( g_auth_wss && token_key ) {
-                if ( ws ) {
-                    ws.send(JSON.stringify(data));
-                }
-            }
-        }
-
-        ws.on("message",  async (data, flags) => {
-            
-            let body = JSON.parse(data.toString());
-            let ping_id = body.ping_id
-            if ( ping_id ) {
-                if ( g_transition_engine ) {
-                    g_transition_engine.ponged(ws)
-                }
-            } else {
-                let token = body.token
-                if ( token ) {
-                    if ( body.action === 'setup' ) {
-                        let ws_data = g_going_sitewide_ws_session[token]
-                        if ( ws_data === undefined ) {
-                            g_going_sitewide_ws_session[token] = [ ws ]
-                        } else {
-                            let ws_list = g_going_sitewide_ws_session[token]
-                            if ( ws_list.indexOf(ws) < 0 ) {
-                                ws_list.push(ws)
-                            }
-                        }    
-                    } else if ( body.action === "logout" ) {
-                        let ws_list = g_going_sitewide_ws_session[token]
-                        let command = {
-                            'action' : 'logout',
-                            'token' : token
-                        }
-                        ws_list.forEach(ws => {
-                            send_to_ws(ws,command)
-                        })
-                    }
-                }    
-            }
-        });
-
-        ws.on("close", () => {
-            let token = null
-            for ( let tk in g_going_ws_session ) {
-                let ws_dex = g_going_ws_session[tk].indexOf(ws)
-                if ( ws_dex >= 0 ) {
-                    token = tk
-                    g_going_ws_session[token].splice(ws_dex,1)
-                    break
-                }
-            }
-            if ( token && (g_going_ws_session[token].length == 0) ) {
-                delete g_going_ws_session[token]
-            }
-        });
+    if ( !g_auth_wss ) {
+        console.log("ws connection attempt after shutdown")
+        return
     }
+    //
+    //
+    let path_on_connect = req.path      // MESSAGE PATHWAYS
+    //
+    switch ( path_on_connect ) {
+        //
+        case "foreign_auth" : {
+            if ( setup_foreign_auth ) setup_foreign_auth(ws)
+            break
+        }
+        //
+        case "site_wide" : {
+            ws.on("message",g_transition_engine.ws_message_handler)  // data parameter implicit
+            ws.on("close",() => { g_transition_engine.ws_shutdown(ws) })
+            break;
+        }
+    }
+    //
 });
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
@@ -339,68 +295,12 @@ g_auth_wss.on("connection", (ws,req) => {
 
 var g_proc_ws_token = ''
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-if ( conf_obj.ws_client_port && !(g_debug) ) {   // SUPPORT SERVICE WEB SCOCKETS OPTION (START)
+if ( conf_obj.ws_client_port && !(g_debug) ) {   // SUPPORT SERVICE WEB SCOCKETS OPTION (START)  Web Socket Client
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-    var g_ws_client_attempt_timeout = null
-    function ws_connection_attempt() {
-        try {
-            // setup a webSocket connection to get finalization data on logging in. -- 
-            let socket_host =  conf_obj.ws_client_server
-            //
-            g_sitewide_socket = new WebSocket(`ws://${socket_host}/auth_ws/site_wide`);
-            g_sitewide_socket.on('error',(e) => {
-                g_sitewide_socket = null
-                console.log(e.message)
-                if (  e.code == 'ECONNREFUSED'|| e.message.indexOf('502') > 0 ) {
-                    console.log("try again in 1 seconds")
-                    g_ws_client_attempt_timeout = setTimeout(ws_connection_attempt,1000)
-                } else {
-                    console.dir(e)
-                }
-            })
-            g_sitewide_socket.on('open', () => {
-                //
-                console.log("web sockets connected")
-                if ( g_ws_client_attempt_timeout != g_ws_client_attempt_timeout ) clearTimeout(g_ws_client_attempt_timeout)
-                //
-                let msg = {
-                    'token' : g_proc_ws_token,
-                    'action' : 'setup'
-                }
-                g_sitewide_socket.send(JSON.stringify(msg))
-                //
-            })
-            g_sitewide_socket.onmessage = async (event) => {	// handle the finalization through the websocket
-                                    try {
-                                        let handler = JSON.parse(event.data)
-                                        if ( handler.data && (handler.data.type === 'ping') ) {
-                                            if ( g_sitewide_socket ) {
-                                                let ponger = {
-                                                    "ping_id" : msg.data.ping_id,
-                                                    "time" : Date.now()
-                                                }
-                                                g_sitewide_socket.send(JSON.stringify(ponger))
-                                            }
-                                        } else {
-                                            if ( handler.token === token ) {
-                                                if ( handler.action === "logout" ) {
-                                                    await g_session_manager.process_user('logout',handler,null,null)
-                                                } else {
-                                                    eval(handler.action)
-                                                }
-                                            }
-                                        }
-                                    } catch (e) {
-                                    }
-                                }
-        } catch(e) {
-            console.log(e.message)
-            console.dir(e)
-            process.exit(1)
-        }
-    }
 
-    ws_connection_attempt()
+let socket_host =  conf_obj.ws_client_server
+g_sitewide_socket = new WebSocket(`ws://${socket_host}/auth_ws/site_wide`);
+g_transition_engine.ws_connection_attempt(g_proc_ws_token,g_sitewide_socket)
 
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 }       // SUPPORT SERVICE WEB SCOCKETS OPTION (END)
@@ -415,52 +315,9 @@ let app_server = http.createServer(g_app);
 app_server.listen(conf_obj.wss_app_port);
 var g_app_wss = new WebSocketServer({server: app_server});
 
-console.log(`web app socket listening: ${conf_obj.wss_app_port}`)
-
 g_app_wss.on("connection", (ws,req) => {
-    //
-    if (  req.url.indexOf("/transitional") > 0  ) {
-
-        if ( g_transition_engine ) {
-            g_transition_engine.set_wss_sender((ws,data) => {
-                if ( g_app_wss ) {
-                    if ( ws ) {
-                        ws.send(JSON.stringify(data));
-                    }
-                }
-            })
-            g_transition_engine.add_ws_session(ws)
-        }
-
-        ws.on("message",  async (data, flags) => {
-            //
-            let body = JSON.parse(data.toString());
-            //
-            let server_id = body.message ? body.message.server_id : false
-            if ( server_id ) {
-                 // transitional
-                let transition = body.transition
-                let message = body.message
-                let is_feasible = await g_session_manager.feasible(transition,message,null)
-                if ( is_feasible ) {
-                    let finalization_state = await g_session_manager.finalize_transition(transition,message,{},null)      // FINALIZE (not a final state)
-                    if ( finalization_state ) {
-                        ws.send(JSON.stringify(finalization_state));
-                    }
-                }
-            } else {
-                let ping_id = body.ping_id
-                if ( ping_id ) {
-                    if ( g_transition_engine ) {
-                        g_transition_engine.ponged(ws)
-                    }
-                }
-            }
-        });
-
-        ws.on("close", () => {
-            g_transition_engine.close_wss_session(ws)
-        });
+    if ( req.url.indexOf("/transitional") > 0  ) {
+        g_transition_engine.setup_app_ws(ws,g_app_wss)
     }
 });
 
@@ -518,7 +375,7 @@ function load_parameters() {
         return(password)
     }
 
-    global.global_hasher = (str) => {
+    global.global_hasher = (str,specials) => {               // global_hasher(user_str,ipfs) // can ask to store the record on chain...
         if ( str ) {
             const hash = crypto.createHash('sha256');
             hash.update(str);

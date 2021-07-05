@@ -248,43 +248,46 @@ class StaticContracts extends FilesAndRelays {
         return(obj)
     }
 
+    async load_missing_or_update(id,obj,data) {
+        if ( data._id ) delete data._id
+        let up_obj = Object.assign(obj,data)
+        if ( super.missing(up_obj) ) {         // this means that the general mesh never saw it either (as far as local queries can make out)
+            // so ask the mesh to find it (if at all possible)
+            let remote_obj = await this.findOne(id,true)   /// tells it not to create, see next step
+            // so it showed up (but it's more up to data than the one stored here)
+            if ( this.newer(remote_obj,up_obj) ) {
+                up_obj = Object.assign(up_obj,remote_obj)           // let this be the one we know
+            }
+            // make a space for it in local storage
+            this.create(up_obj)  // use the current object -- this call will make use of this static's application stashing  
+        } else {
+            // so we have a copy.. but it is being set (so, update this and tell everyone in the mesh that it changed)
+            // sending to fixed endpoints that can then broadcast by publishing...
+            this.update(up_obj)   // having found it still have to send new data back....
+        }
+    }
+
     // // 
     async set_key_value(whokey,data) {
         let id = this.has(whokey)
-        if ( id !== false ) {
-            let obj = await this.get_key_value(whokey)
-            if ( !(obj) ) { obj = await this.findOne(id) }
-            if ( obj ) {
+        if ( id !== false ) {           // we think we know about this object, but do we? Try to go from the key to having the object
+            // look in all possible places to find this object
+            let obj = await this.get_key_value(whokey)          // maybe it's stored locally (or it can be found with get)
+            if ( !(obj) ) { obj = await this.findOne(id) }      // so just try to find it somewhere on the mesh 
+            if ( obj ) {            // can't be found at all
                 // set .. in this case is update
-                obj._whokey = whokey
-                if ( data._id ) delete data._id
-                let up_obj = Object.assign(obj,data)
-                if ( super.missing(obj) ) {
-                    let remote_obj = await this.findOne(id,true)   /// tells it not to create, see next step
-                    if ( this.newer(remote_obj,up_obj) ) {
-                        up_obj = Object.assign(up_obj,remote_obj)
-                    }
-                    this.create(up_obj)  // use the current object
-                } else {
-                    this.update(up_obj)   // having found it still have to send new data back....
-                }
+                obj._whokey = whokey                // make records that this chunk of code can track
+                await this.load_missing_or_update(id,obj,data)
             }
-        } else {  // never saw this
+        } else {  // never saw this (this node -- plugged into the copious-transitions relationship management)
+            // so we go looking for it on the mesh
             let obj = await this.search_one(whokey,this._whokey_field)
-            if ( obj ) {
+            if ( obj ) {        // there it is
                 obj._whokey = whokey
-                if ( data._id ) delete data._id
-                let up_obj = Object.assign(obj,data)
-                if ( super.missing(obj) ) {     // see if persistence knows about this object...
-                    await this.findOne(data._id,true)     // let remote_obj = if this returns a remote object, it could be checked
-                    if ( this.newer(remote_obj,up_obj) ) {
-                        up_obj = Object.assign(up_obj,remote_obj)
-                    }
-                    this.create(up_obj)  // use the current object, keep a copy in the persistence side of things...
-                } else {
-                    this.update(up_obj)   // having found it still have to send new data back.... (if no_remote, then update just stores the local copy)
-                }
-            } else {
+                id =  delete data._id
+                await this.load_missing_or_update(id,obj,data)
+                //
+            } else {        // OK -- don't have local record -- can't find it (very likey this node is the creator)
                 obj = {
                     "key_field" : "file",
                     "file"  : uuid()
@@ -292,7 +295,8 @@ class StaticContracts extends FilesAndRelays {
                 obj._whokey = whokey
                 obj = Object.assign(obj,data)                
                 // CREATE
-                this.create(obj)    // store a persistence representation, but send any amount of data to the backend    
+                this.create(obj)    // store a persistence representation, but send any amount of data to the backend 
+                                    //  -- this call will make use of this static's application stashing    
             }
             this._whokey_to_ids[whokey] = obj._id  // by not setting the id, the parent class is allowed to set it
             this._whokey_to_hash[whokey] = obj._key
@@ -304,7 +308,7 @@ class StaticContracts extends FilesAndRelays {
     async get_key_value(whokey) {
         let id = this._whokey_to_ids[whokey]
         let obj = null
-        if ( id === undefined ) {
+        if ( id === undefined ) {       // ever saw this object (but someone seems to know its key)
             obj = await this.search_one(whokey,this._whokey_field)
         } else {
             let hh = this._whokey_to_hash[whokey]
@@ -321,8 +325,10 @@ class StaticContracts extends FilesAndRelays {
             }
             obj = await this.findOne(id)
         }
-        this._whokey_to_ids[whokey] = obj._id  // by not setting the id, the parent class is allowed to set it
-        this._whokey_to_hash[whokey] = obj._key
+        if ( obj !== false ) {
+            this._whokey_to_ids[whokey] = obj._id  // by not setting the id, the parent class is allowed to set it
+            this._whokey_to_hash[whokey] = obj._key    
+        }
         return obj
     }
 

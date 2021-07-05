@@ -5,57 +5,32 @@ const LocalTObjectCache = require('../custom_storage/local_object_cache')
 class UserHandling extends LocalTObjectCache {
     //
     //
-    constructor(sess_manager,validator,cache_time) {
+    constructor(sess_manager,validator,transition_engine,use_foreign,cache_time) {
         //
         super(cache_time)
-
-        this.going_ws_session = {}
         //
-        this.setup_foreign_auth = this.foreign_auth_initializer
+        this.use_foreign = false
         //
         this.session_manager = sess_manager
         this.validator = validator
-    }
-
-    foreign_auth_initializer(ws) {
+        this.transition_engine = transition_engine
+        this.use_foreign = use_foreign
+        this.transition_engine = transition_engine
         //
-        ws.on("message",  (data, flags) => {
-            let clientIdenifier = JSON.parse(data.toString());
-            console.log(clientIdenifier.token)
-            this.going_ws_session[clientIdenifier.token] = ws    // associate the client with the DB
-        });
-    
-        ws.on("close", () => {
-            let token = null
-            for ( let tk in this.going_ws_session ) {
-                if ( this.going_ws_session[tk] === ws ) {
-                    token = tk
-                    break
-                }
-            }
-            if ( token ) {
-                delete this.going_ws_session[token]
-            }
-        });
-        //
-    }
-
-    send_ws_outofband(token_key,data) {
-        if ( g_auth_wss && token_key ) {
-            let ws = this.going_ws_session[token_key]
-            if ( ws ) {
-                ws.send(JSON.stringify(data));
-            }
-        }
     }
 
     //
-    async user_sessions_process(user_op,body) {
+    async user_sessions_processing(user_op,body) {
         if ( this.validator.valid(body,this.validator.field_set[user_op]) ) {
             try {
                 let transitionObj = await this.session_manager.process_user(user_op,body)
+                //
                 // most paths require secondation action (perhaps logout doesn't) (Captch as model)
-                if ( transitionObj.secondary_action || transitionObj.foreign_authorizer_endpoint ) {
+                let secondary = transitionObj.secondary_action      // will be true for ops doing a handshake
+                let foreign =  this.use_foreign ? transitionObj.foreign_authorizer_endpoint : false
+                //
+                if ( secondary || foreign ) {   // configured (selected by the web page)
+                    //
                     // store elements for later matching...
                     let tObjCached = { 'tobj' : transitionObj, 'elements' : transitionObj.elements, 'action' : user_op }
                     this.add_local_cache_transition(transitionObj.token,tObjCached)
@@ -64,19 +39,15 @@ class UserHandling extends LocalTObjectCache {
                     delete transitionObj.elements
                     //
                     // tell the application what it needs to know so that it can respond to completion..
-                    if ( transitionObj.secondary_action ) {
+                    if ( secondary ) {
+                        //
                         return ([200,{ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj }])
-                    } else if ( transitionObj.foreign_authorizer_endpoint )  {
-                        if ( this.going_ws_session[transitionObj.token] ) {  // shut down a ws session if there is one
-                            try {
-                                this.going_ws_session[transitionObj.token].close()
-                            } catch(e) {
-                                //
-                            }
-                        }
-                        this.going_ws_session[transitionObj.token] = null
-                        transitionObj.windowize = transitionObj.foreign_authorizer_endpoint
+                        //
+                    } else if ( foreign )  {  // provides details for web page action only
+                        //
+                        this.manage_foreign_auth_session(transitionObj,foreign)
                         return ([200,{ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj }])
+                        //
                     }
                 } else {
                     return ([200,{ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj }])
@@ -108,6 +79,7 @@ class UserHandling extends LocalTObjectCache {
         return false
     }
 
+    // If the current stack accepts foreign auth, then process it here...
     async foreign_authorizer(body,token) {
         let OK = body.success
         if ( OK ) {                                   // the token must be present
@@ -129,7 +101,19 @@ class UserHandling extends LocalTObjectCache {
         }
         return [514,"FAILED LOGIN",{ 'type' : 'secondary/action', 'OK' : 'false', 'reason' : 'missing data', 'action' : 'login', 'path' : 'user' }]
     }
-    
+
+
+    manage_foreign_auth_session(transitionObj,foreign) {
+        if ( this.transition_engine && this.transition_engine.foreign_auth_prep ) {
+            this.transition_engine.foreign_auth_prep(transitionObj.token)
+            transitionObj.windowize = foreign       // provide the url for the page to use for auth    
+        }
+    }
+
+    async sitewide_logout(handler) {
+        await this.session_manager.process_user('logout',handler,null,null)
+    }
+
 }
 
 

@@ -179,6 +179,32 @@ class CaptchaSessionManager extends SessionManager {
         return( false )
     }
 
+
+    // consult ORACLE and add this to something like a tangle...
+    async loginTransitionFields(transtion_object,post_body,user) {
+        transtion_object.token = 'user+' + uuid()   // this token identifies this transition object
+        let nonce = '' + uuid()
+        // // consult an ORACLE  (hold onto it until after handshake)
+        let sess_tok = this.do_hash(post_body[this.hashables.field1] + post_body[this.hashables.field2] + nonce) // this is the session identifier just getting started.
+        transtion_object.session_token = sess_tok
+        transtion_object.strategy = post_body.strategy
+        //
+        transtion_object.elements = { "match" :  transtion_object.token }
+        //
+        this.stash_session_token(user,transtion_object,sess_tok)
+    }
+
+    //
+    addSession(key,session_token) {
+        // tell the ORACLE that this is OK 
+        // after the ORACLE and service have talked....
+        super.addSession(key,session_token)
+        //
+        // publish this session to maps outside this machine (if the db customization does not)
+        // ref (see) this.db.set_session_key_value(session_token,key)
+        //
+    }
+
     // // 
     async login_transition(user,transtion_object,post_body) {
         if ( user.cid === post_body.cid ) {
@@ -188,13 +214,18 @@ class CaptchaSessionManager extends SessionManager {
             transtion_object._t_u_key = key_key
             transtion_object.user_key = user[key_key]
             this.loginTransitionFields(transtion_object,post_body,user)
+            // user sends public wrapper key (or is from CID) ... user retains private unwrapper
             let [wkey,aes_key] = await this.gen_wrapped_key(user.public_key)
-            transtion_object.wrapped_key = wkey
+            transtion_object.wrapped_key = wkey // the key that will wrap the challenge
+            //
             let challenge = gen_nonce()
             let iv_nonce = gen_nonce()
+            // // ---- encipher the challenge
             transtion_object.ctext = await this.cipher(challenge,aes_key,iv_nonce)
-            transtion_object.iv_nonce = iv_nonce
-            transtion_object.elements["clear"] = challenge
+            transtion_object.iv_nonce = iv_nonce        // send the nonce
+            //
+            // save clear for handshake ... the user should have sent a signer public key  (match)
+            transtion_object.elements["clear"] = challenge  // save the challenge fro later
             transtion_object.elements["verify_key"] = user.signer_public_key
             //
         }
@@ -203,13 +234,15 @@ class CaptchaSessionManager extends SessionManager {
     // // 
     async registration_transition(post_body,transtion_object) {
         if ( post_body.cid ) {
-            let user_ipfs = await this.db.fetch_user_ipfs(post_body)
-            await this.db.store_user(user_ipfs)         /// CREATE USER ENTRY IN DB
+            let user_ipfs = await this.db.fetch_user_ipfs(post_body)  // given an IPFS CID, get the full user representation
+            if ( user_ipfs === false ) return false
+            let relationship_CID = await this.db.store_user(user_ipfs)         /// CREATE USER ENTRY IN DB
             if ( this.business ) this.business.process('new-user',post_body)
             transtion_object.secondary_action = false
-            transtion_object.token = 'user+' + uuid()   // transaction token
+            transtion_object.token = 'user+' + uuid()   // transaction token  (about between here and the page)
             // sha255 hash - unless application override of hashable field from config. (example uses cid and nonce)
             let registration_token = this.do_hash(post_body[this.hashables.field1] + post_body[this.hashables.field2])
+            transtion_object.reg_CID = relationship_CID
             transtion_object.session_token = 'sess+' + registration_token
             transtion_object.elements = { "match" : 'sess+' + registration_token }  // will look for this...
             return true;
@@ -274,11 +307,11 @@ class CaptchaSessionManager extends SessionManager {
         } else if ( G_users_trns.action_selector(transtion_object.action) ) {
             post_body._t_match_field = post_body[G_users_trns.match_key()]
         } else if ( G_users_trns.secondary_action_selector(transtion_object.action) ) {
-            if ( user_op === 'login' ) {    // ----
-                let signature = post_body.signature
+            if ( user_op === 'login' ) {    // ----  USE VERIFICATION OF SIGNATURE
+                let signature = post_body.signature     // the user has signed the clear challenge
                 let clear_data = transtion_object.elements["clear"]
-                let verify_key = transtion_object.elements["verify_key"]
-                let OK = await this.verifier(clear_data,signature,verify_key)
+                let verify_key = transtion_object.elements["verify_key"]        // verify key from primary action...
+                let OK = await this.verifier(clear_data,signature,verify_key)   // use the pulic verification key from the user identity
                 return OK
             } else {
                 post_body._t_match_field = post_body[G_users_trns.secondary_match_key()]
@@ -306,17 +339,6 @@ class CaptchaSessionManager extends SessionManager {
             let finalization_state = {
                 "state" : "stored",
                 "OK" : "true"
-            }
-            return(finalization_state)
-        } else if ( G_password_reset_trns.tagged(transition) ) {
-            post_body._t_u_key = G_password_reset_trns.primary_key()
-            let pkey = await this.update_user_password(post_body)
-            if ( pkey ) {
-                this.business.cleanup(transition,pkey,post_body)
-            }
-            let finalization_state = {
-                "state" : "stored",
-                "OK" : pkey ? "true" : "false"
             }
             return(finalization_state)
         }

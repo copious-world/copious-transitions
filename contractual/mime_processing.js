@@ -19,7 +19,6 @@ class MimeHandling extends LocalTObjectCache {
         this.dynamics = dynamics
     }
 
-
     async static_asset_handler(asset,body,transmision_headers) {
         let proceed = await this.session_manager.guard_static(asset,body,transmision_headers)
         if ( proceed ) {     // returns a true value by default, but may guard some assets

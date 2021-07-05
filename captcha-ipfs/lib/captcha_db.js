@@ -2,6 +2,7 @@ const IPFS = require('ipfs')            // using the IPFS protocol to store data
 
 const { DBClass } = require.main.require('./lib/general_db')
 const PersistenceManager = require.main.require('./lib/global_persistence')
+const InterPlanetaryContactServices = require('interplanetary_contact_services')
 const CustomPersistenceDB = require.main.require('./custom_storage/persistent_db')
 const CustomStaticDB = require.main.require('./custom_storage/static_db')
 //
@@ -10,7 +11,13 @@ const apiKeys = require.main.require('./local/api_keys')
 //  We may allow the persitence manager to choose the message relay, 
 //  or override with the one chosen by the application...
 //
-const g_persistence = new PersistenceManager(apiKeys.persistence,apiKeys.message_relays)
+// these are memory based regions accessible by other procs on the same machine.
+// persistence for these keys are keys lasting between sesssions.
+// originally persistence had to do with forwarding messages that the system cares about.
+// contacts will be hanlded differently (using interplanetary contact)
+// these now have to do with a larger map for a mesh of session awareness
+const g_persistence = new InterPlanetaryContactServices(PersistenceManager,apiKeys.persistence,apiKeys.message_relays)
+// these keys live as long as a session and no longer..
 const g_ephemeral = new PersistenceManager(apiKeys.session)
 
 const SLOW_MESSAGE_QUERY_INTERVAL = 5000
@@ -24,18 +31,6 @@ const g_keyValueSessions = g_ephemeral.get_LRUManager();
 //
 async function run_persistence() {   // describe the entry point to super storage
   if ( g_persistence ) {
-    let user_slow = SLOW_MESSAGE_QUERY_INTERVAL
-    let user_fast = FAST_MESSAGE_QUERY_INTERVAL
-    let user_q_holder = G_users_trns
-    //
-    let user_m_handler = (i_obj) => {
-        let o_obj = i_obj
-        i_obj.m_path = "user"
-        return(o_obj)
-      }
-      //  ADD PARAMETERS TO THE NEW SENDER
-    g_persistence.add_message_handler(user_m_handler,user_q_holder,user_slow,user_fast)
-
     let contact_slow = SLOW_MESSAGE_QUERY_INTERVAL
     let contact_fast = FAST_MESSAGE_QUERY_INTERVAL
     let contact_q_holder = G_contact_trns
@@ -53,9 +48,10 @@ async function run_persistence() {   // describe the entry point to super storag
         }
         return(o_obj)
     }
-    //  ADD PARAMETERS TO THE NEW SENDER
+    //  ADD PARAMETERS TO THE NEW SENDER  (this takes care of interval services and safety checkmarks)
     g_persistence.add_message_handler(contact_m_handler,contact_q_holder,contact_slow,contact_fast)
   }
+
 }
 
 
@@ -77,6 +73,7 @@ class CaptchaDBClass extends DBClass {
       let persistenceDB = new CustomPersistenceDB(g_persistence.message_fowarding,stash_interval,'user')
       stash_interval = WRITE_UNUSED_LARGE_ENTRIES_EVERY_INTERVAL
       let staticDB = new CustomStaticDB(g_persistence.message_fowarding,stash_interval,'user','email')
+      //
       super(g_keyValueDB,g_keyValueSessions,persistenceDB,staticDB)
     }
 
@@ -119,9 +116,29 @@ class CaptchaDBClass extends DBClass {
         this.ipfs = node
     }
 
-    // // // 
-    drop() {
-        dropConnections()
+
+    // ---- ---- ---- ---- ---- ---- ----
+    async get_json_from_cid(a_cid) {
+      let data = await this.get_complete_file_from_cid(a_cid)
+      try {
+          let obj = JSON.parse(data)
+          return obj
+      } catch (e) {
+      }
+      return false
+    }
+
+    // ---- ---- ---- ---- ---- ---- ----
+    // get a user from IPFS based on CID id... (this should be the crypto path CID ... the keys are needed for contact)
+    // the user is not yet known to service claimed DBs...
+    async fetch_user_ipfs(fdata) {
+      let a_cid = fdata.cid
+      return await this.get_json_from_cid(a_cid)
+    }
+
+    async id_hashing(user_txt) {
+      let id = await this.ipfs_hasher(user_txt)  // or this.oracular_storage()
+      return id
     }
 
     //  custom: contacts, ...
@@ -141,20 +158,24 @@ class CaptchaDBClass extends DBClass {
     // // the end points are categorical handlers that are tied to message pathways... in this case a 'user' pathway.. 
     // // (see path_handlers.js)
 
+ 
+
     // // // 
     store_user(fdata) {
         if ( G_users_trns.tagged('user') ) {
           let [udata,tandems] = G_users_trns.update(fdata)          // custom user storage (seconday service) clean up fields
-          //G_users_trns.enqueue(tandems)
           //
           let key_key = G_users_trns.kv_store_key() // application key for key-value store from data object
           let key = udata[key_key]
+          let relationship_id = await super.store_user(udata,key_key)                       // use persitent storage
+          udata.relationship_id = relationship_id
           // store the user object in two place (faster == cache and slower == persistence)
           this.store_cache(key,udata,G_users_trns.back_ref());  // this app will use cache to echo persitent storage
-          super.store_user(udata,key_key)                       // use persitent storage
+          return relationship_id
         }
     }
 
+    // // // 
     async fetch_user(fdata) {
       if ( G_users_trns.from_cache() ) {
         let udata = await this.fetch_user_from_key_value_store(fdata[G_users_trns.kv_store_key()])
@@ -185,37 +206,23 @@ class CaptchaDBClass extends DBClass {
       return data
     }
 
-    // ---- ---- ---- ---- ---- ---- ----
-    async get_json_from_cid(a_cid) {
-        let data = await this.get_complete_file_from_cid(a_cid)
-        try {
-            let obj = JSON.parse(data)
-            return obj
-        } catch (e) {
-        }
-        return false
-    }
-
-    // ---- ---- ---- ---- ---- ---- ----
-    async fetch_user_ipfs(fdata) {
-      let a_cid = fdata.cid
-      return await this.get_json_from_cid(a_cid)
-    }
-
+ 
     update_user(udata) {
       //
       let key_key = G_users_trns.kv_store_key()
       let key = udata[key_key]
       //
       this.store_cache(key,udata,G_users_trns.back_ref());  // this app will use cache to echo persitent storage
-      super.update_user(udata,key_key)                      // use persitent storage
+      super.update_user(udata,key_key)                      // use persitent storage (change the remotely stored disk record + local cache (static))
     }
 
-
-    async exists(collection,post_body) {
+    // exists
+    // // a bit more severe than fetch... will fail by default when going to persistent storage
+    async exists(collection,post_body) {  
         let query = post_body
         if ( G_users_trns.tagged(collection) ) {
             if ( G_users_trns.from_cache() ) {
+              // try to find the user in value storage (local LRU or in-house horizontally scaled LRU)
                 let udata = await this.fetch_user_from_key_value_store(post_body[G_users_trns.kv_store_key()])
                 if ( udata ) {
                     return(true)
@@ -223,6 +230,7 @@ class CaptchaDBClass extends DBClass {
             }
             query = G_users_trns.existence_query(post_body)
         }
+        // failing a local lookup go to the persistant big database in the sky or nothing
         return(super.exists(collection,query))
     }
 
@@ -231,6 +239,11 @@ class CaptchaDBClass extends DBClass {
       run_persistence()
     }
 
+
+    // // // 
+    drop() {
+      dropConnections()
+    }
 
      //
     disconnect() {
