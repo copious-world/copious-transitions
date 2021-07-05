@@ -1,8 +1,7 @@
 const IPFS = require('ipfs')            // using the IPFS protocol to store data via the local gateway
 
 const { DBClass } = require.main.require('./lib/general_db')
-const PersistenceManager = require.main.require('./lib/global_persistence')
-const InterPlanetaryContactServices = require('interplanetary_contact_services')
+const {PersistenceManager,InterPlanetaryContactServices} = require('global_persistence')
 const CustomPersistenceDB = require.main.require('./custom_storage/persistent_db')
 const CustomStaticDB = require.main.require('./custom_storage/static_db')
 //
@@ -16,7 +15,7 @@ const apiKeys = require.main.require('./local/api_keys')
 // originally persistence had to do with forwarding messages that the system cares about.
 // contacts will be hanlded differently (using interplanetary contact)
 // these now have to do with a larger map for a mesh of session awareness
-const g_persistence = new InterPlanetaryContactServices(PersistenceManager,apiKeys.persistence,apiKeys.message_relays)
+const g_persistence = new InterPlanetaryContactServices(apiKeys.ipfs,apiKeys.persistence,apiKeys.message_relays)
 // these keys live as long as a session and no longer..
 const g_ephemeral = new PersistenceManager(apiKeys.session)
 
@@ -29,6 +28,8 @@ const g_keyValueDB = g_persistence.get_LRUManager(); // leave it to the module t
 const g_keyValueSessions = g_ephemeral.get_LRUManager();
 //
 //
+
+
 async function run_persistence() {   // describe the entry point to super storage
   if ( g_persistence ) {
     let contact_slow = SLOW_MESSAGE_QUERY_INTERVAL
@@ -37,14 +38,19 @@ async function run_persistence() {   // describe the entry point to super storag
     //
     let contact_m_handler = (i_obj) => {
         let o_obj = {
-          'm_path' : "contact",
-          'recipient' : "admin",
-          'anonymous' : false, 
-          'type' : false,
-          'subject' : decodeURIComponent(i_obj.name),
-          'author' : i_obj.cid,
-          'references' : decodeURIComponent(i_obj.website),
-          'text' : decodeURIComponent(i_obj.comment)
+          "name" : i_obj.name,
+          "user_cid" : i_obj.cid,  // not the clear cid ... from user requesting contact
+          "date" : Date.now(),
+          "recipient" : apiKeys.ipfs.cid,
+          "readers" : false,
+          "business" : i_obj.business,
+          "attachments" : false,
+          "subject" : decodeURIComponent(i_obj.name),
+          "message" : decodeURIComponent(i_obj.comment),
+          "reply_with" : "default",
+          "public_key" : i_obj.public_key,
+          "signer_public_key" : i_obj.signer_public_key,
+          "nonce"  : gen_nonce()
         }
         return(o_obj)
     }
@@ -80,52 +86,13 @@ class CaptchaDBClass extends DBClass {
     // // // 
     initialize(conf) {
         super.initialize(conf)
-        this.init_ipfs(conf)
+        this.init_ipfs(g_persistence)
     }
 
     //  init_ipfs
-    async init_ipfs(cnfg) {
-        //
-        let container_dir = cnfg.ipfs.repo_location
-        if ( container_dir == undefined ) {
-            let repo_container = require.main.path
-            container_dir =  repo_container + "/repos"
-        }
-        //
-        let subdir = cnfg.ipfs.dir
-        if ( subdir[0] != '/' ) subdir = ('/' + subdir)
-        let repo_dir = container_dir + subdir
-        console.log(repo_dir)
-        let node = await IPFS.create({
-            repo: repo_dir,
-            config: {
-                Addresses: {
-                    Swarm: [
-                    `/ip4/0.0.0.0/tcp/${cnfg.ipfs.swarm_tcp}`,
-                    `/ip4/127.0.0.1/tcp/${cnfg.ipfs.swarm_ws}/ws`
-                    ],
-                    API: `/ip4/127.0.0.1/tcp/${cnfg.ipfs.api_port}`,
-                    Gateway: `/ip4/127.0.0.1/tcp/${cnfg.ipfs.tcp_gateway}`
-                }
-            }
-        })
-
-        const version = await node.version()
-        console.log('Version:', version.version)
-
-        this.ipfs = node
-    }
-
-
-    // ---- ---- ---- ---- ---- ---- ----
-    async get_json_from_cid(a_cid) {
-      let data = await this.get_complete_file_from_cid(a_cid)
-      try {
-          let obj = JSON.parse(data)
-          return obj
-      } catch (e) {
-      }
-      return false
+    async init_ipfs(ipfs_node_src) {
+      this.ipfs_ref = ipfs_node_src
+      this.ipfs = ipfs_node_src.ipfs
     }
 
     // ---- ---- ---- ---- ---- ---- ----
@@ -133,7 +100,7 @@ class CaptchaDBClass extends DBClass {
     // the user is not yet known to service claimed DBs...
     async fetch_user_ipfs(fdata) {
       let a_cid = fdata.cid
-      return await this.get_json_from_cid(a_cid)
+      return await this.ipfs_ref.get_json_from_cid(a_cid)
     }
 
     async id_hashing(user_txt) {
@@ -142,10 +109,17 @@ class CaptchaDBClass extends DBClass {
     }
 
     //  custom: contacts, ...
-    store(collection,data) {
+    async store(collection,data) {
         if ( G_contact_trns.tagged(collection) ) {
           let udata = G_contact_trns.update(data)
-          G_contact_trns.enqueue(udata)
+          let user_identity = this.fetch_user_ipfs(udata)
+          if ( user_identity ) {
+            for ( let ky in user_identity ) {
+              let val = user_identity[ky]
+              udata[ky] = val     // override keys not related to the message
+            }
+            G_contact_trns.enqueue(udata)  
+          }
         } else {
           super.store(collection,data)
         }
@@ -192,18 +166,6 @@ class CaptchaDBClass extends DBClass {
         }
       }
       return(false)     // never saw this user
-    }
-
-    // ---- ---- ---- ---- ---- ---- ----
-    async get_complete_file_from_cid(cid) {
-      let ipfs = this.ipfs
-      let chunks = []
-      for await ( const chunk of ipfs.cat(cid) ) {
-          chunks.push(chunk)
-      }
-      let buff = Buffer.concat(chunks)
-      let data = buff.toString()
-      return data
     }
 
  
