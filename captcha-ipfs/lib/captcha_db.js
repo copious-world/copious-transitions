@@ -1,4 +1,3 @@
-const IPFS = require('ipfs')            // using the IPFS protocol to store data via the local gateway
 
 const { DBClass } = require.main.require('./lib/general_db')
 const {PersistenceManager,InterPlanetaryContactServices} = require('global_persistence')
@@ -6,6 +5,11 @@ const CustomPersistenceDB = require.main.require('./custom_storage/persistent_db
 const CustomStaticDB = require.main.require('./custom_storage/static_db')
 //
 const apiKeys = require.main.require('./local/api_keys')
+//
+//
+
+// CONFIGURE THE RELAY message_fowarding IN ORDER TO DETERMINE THE OWNERSHIP OF DATA PATHWAYS
+
 //
 //  We may allow the persitence manager to choose the message relay, 
 //  or override with the one chosen by the application...
@@ -125,14 +129,11 @@ class CaptchaDBClass extends DBClass {
         }
     }
 
-
     // // FileAndRelays will use the MessageRelayer from global_persistence to send the user data to the backend...
     // // apiKeys = require.main.require('./local/api_keys') configures it...
     // // The relayer may talk to a relay service or an endpoint.... (for captcha, it will be user endpoint...)
     // // the end points are categorical handlers that are tied to message pathways... in this case a 'user' pathway.. 
     // // (see path_handlers.js)
-
- 
 
     // // // 
     store_user(fdata) {

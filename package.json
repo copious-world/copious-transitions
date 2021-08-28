@@ -33,6 +33,7 @@
     "body-parser": "^1.19.0",
     "cached": "^5.0.2",
     "caseless": "^0.12.0",
+    "cids": "^1.1.7",
     "clone": "^2.1.2",
     "connect-memcached": "^1.0.0",
     "cookie-parser": "^1.4.5",

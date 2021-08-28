@@ -166,7 +166,7 @@ class FilesAndRelays extends AppLifeCycle {
     async remote_fetch_message(id,field) {
         let m_path = this.default_m_path
         let msg = {
-            "m_path" : m_path,
+            "_m_path" : m_path,
             "_id"  : id,
             "_tx_op"     : "G"
         }
@@ -199,9 +199,9 @@ class FilesAndRelays extends AppLifeCycle {
 
     remote_store_message(obj) {
         if ( obj === undefined ) return
-        let m_path = obj.m_path ? obj.m_path : this.default_m_path
+        let _m_path = obj._m_path ? obj._m_path : this.default_m_path
         let msg = Object.assign({},obj)
-        msg.m_path = m_path
+        msg._m_path = m_path
         msg._tx_op = "S"
         this.messenger.send(msg)
     }
@@ -209,7 +209,7 @@ class FilesAndRelays extends AppLifeCycle {
     remote_store_dereference(id) {
         let m_path = this.default_m_path
         let msg = {
-            "m_path" : m_path,
+            "_m_path" : m_path,
             "_id"  : id,
             "_tx_op"     : "D"
         }
@@ -254,7 +254,7 @@ class FilesAndRelays extends AppLifeCycle {
             // the data is assumed to be in a remote machine (e.g. db server or other...)
             let sender = this.application_stash_large_data(obj)     // so make the app responsible for managing the large data
             if ( !(obj._tx_no_remote) ) {      // in cases where it is known that the object was published from the same remote store.
-                sender.user_op = 'create'
+                sender._user_op = 'create'
                 this.remote_store_message(sender)             // send it away, large data and all....    
             }
             if ( obj._tx_no_remote ) delete sender._tx_no_remote
@@ -305,7 +305,7 @@ class FilesAndRelays extends AppLifeCycle {
         obj._tstamp = this.update_stamp(obj._tstamp,obj._id)
         if ( !(dont_remote) && !(obj._tx_no_remote) ) {
             let sender = await this.application_unstash_large_data(obj)
-            sender.user_op = 'update'
+            sender._user_op = 'update'
             this.remote_store_message(sender)
         }
         if ( obj._tx_no_remote ) delete sender._tx_no_remote
