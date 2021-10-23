@@ -1401,7 +1401,7 @@ function update_audio_data(section_id,data_list,op_parameters) {
 }
 
 
-function add_new_audio_session_to_db(audioStore,application_op) {
+function add_new_audio_session_to_db(audioStore,application_op,section_id) {
   let sess_loc_str = JSON.stringify(g_wv_current_locaion)
   //
   let sessionObj = {
@@ -1414,6 +1414,7 @@ function add_new_audio_session_to_db(audioStore,application_op) {
       'edit_order' : [],            // a list of id's
       'locations' : [sess_loc_str]
     }
+    if ( section_id ) sessionObj.edit_order.push(section_id)
     //
     if ( (application_op !== undefined) && (typeof application_op === 'function') ) {
       application_op(sessionObj)
@@ -1520,12 +1521,11 @@ function add_audio_data(audioBlob,section_id) {
           sessionObj.hashes[section_id] = {}
       }
       sessionObj.hashes[section_id].op_history = []
-    } 
+    }
     //
-    let request = add_new_audio_session_to_db(audioStore,application_op)
+    let request = add_new_audio_session_to_db(audioStore,application_op,section_id)
     if ( request ) {
       request.onsuccess = function(event) {
-        sessionObj.edit_order.push(section_id)
         add_audio_element(blob_url,section_id,audioBlob)  // visual rep
       };
     }
