@@ -73,13 +73,13 @@
     "registerBox" : {
         "name" : "register",
         "content" : {
-            "file" : "./register-interplanetary.html"
+            "file" : "./register-launcher.html"
         }
     },
     "loginBox" : {
         "name" : "login",
         "content" : {
-            "file" : "./login-interplanetary.html"
+            "file" : "./login-launcher.html"
         }
     },
     "join" : {
