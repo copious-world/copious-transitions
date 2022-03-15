@@ -1,9 +1,0 @@
-{
-    "email" : "user@email.org",
-    "color":"grey",
-    "title" : "testing with a title entry",
-    "subject" : "subject stuff",
-    "txt_full"  : "this has a bunch of stuff that people like to read or maybe not. This is usually longer...",
-    "keys":  ["interesting","boring"],
-    "t_type":"html"
-}
