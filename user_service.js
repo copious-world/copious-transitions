@@ -11,7 +11,7 @@ const WebSocketServer = WebSocket.Server;
 const http = require("http");
 const passwordGenerator = require('generate-password');
 const ShutdownManager = require('./lib/shutdown-manager')
-const shutdown_server_helper_factory = require('http-shutdown')
+//const shutdown_server_helper_factory = require('http-shutdown')
 
 const UserHandling = require('./contractual/user_processing')
 const MimeHandling = require('./contractual/mime_processing')
@@ -206,6 +206,7 @@ for ( let path of conf_obj.login_app ) {
         //
         let [code,result] = await g_user_handler.user_sessions_processing(user_op,body)
         if ( result.OK === 'true' ) {
+            let transitionObj = result.data
             g_session_manager.handle_cookies(result,res,transitionObj)
         }
         return(res.status(code).send(JSON.stringify( result )));
@@ -220,6 +221,7 @@ g_app.post('/secondary/users/:action', async (req, res) => {
     let action = req.params['action']
     let [code,result] = await g_user_handler.secondary_processing(action,body)
     if ( result.OK === 'true' ) {
+        let transitionObj = result.data
         g_session_manager.handle_cookies(result,res,transitionObj)
     }
     return(res.status(code).send(JSON.stringify( result )));

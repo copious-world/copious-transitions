@@ -88,22 +88,21 @@ class CaptchaSessionManager extends SessionManager {
             transtion_object.secondary_action = true
             let key_key = this.key_for_user()
             transtion_object._t_u_key = key_key
-            transtion_object.user_key = user[key_key]
+            transtion_object.user_key = user[key_key]   // database key (not a crypto key)
             this.loginTransitionFields(transtion_object,post_body,user)
             //
+            let public_key = await this.fetch_user_public_key(user)
             // user sends public derivation key (or is from UCWID) ... user retains private side elliptical
             //
-            let local_private = this.private_derivation
-            let aes_key = await g_crypto.derive_aes_key(user.public_key,local_private)
+            let local_priv_ky = this.private_derivation     // private part of derivation key
             //
             transtion_object.public_derivation = this.public_derivation // the key that will wrap the challenge
             //
             let challenge = g_crypto.gen_nonce()
             let iv_nonce = g_crypto.gen_nonce()
             // // ---- encipher the challenge
-            transtion_object.ctext = await g_crypto.encipher_message(challenge,aes_key,iv_nonce)
+            transtion_object.ctext = await g_crypto.derived_encipher_message(challenge,public_key,local_priv_ky,iv_nonce)
             transtion_object.iv_nonce = iv_nonce        // send the nonce
-            //
             // save clear for handshake ... the user should have sent a signer public key  (match)
             transtion_object.elements["clear"] = challenge  // save the challenge fro later
             transtion_object.elements["verify_key"] = user.signer_public_key
@@ -113,8 +112,31 @@ class CaptchaSessionManager extends SessionManager {
 
     // // 
     async registration_transition(post_body,transtion_object) {
+        try {
+            if ( post_body.public_derivation ) {
+                let all = true
+                await this.db.store_user(post_body,all)   // only store in the LRU and keep a derivation key handy
+            }
+        } catch (e) {
+            return false
+        }
         return true
     }
+
+    // //
+    async fetch_user_public_key(user) {
+        try {
+            let all = true
+            let user_data = await this.db.fetch_user(user,all)   // only store in the LRU and keep a derivation key handy
+            if ( user_data ) {
+                return user_data.public_derivation
+            }
+        } catch (e) {
+            console.log(e)
+        }
+        return false
+    }
+
 
     // //
     async process_user(user_op,body,res) {

@@ -136,34 +136,33 @@ class CaptchaDBClass extends DBClass {
     // // (see path_handlers.js)
 
     // // // 
-    store_user(fdata) {
+    store_user(fdata,all) {
         if ( G_users_trns.tagged('user') ) {
           let [udata,tandems] = G_users_trns.update(fdata)          // custom user storage (seconday service) clean up fields
           //
           let key_key = G_users_trns.kv_store_key() // application key for key-value store from data object
           let key = udata[key_key]
-          let relationship_id = await super.store_user(udata,key_key)                       // use persitent storage
-          udata.relationship_id = relationship_id
-          // store the user object in two place (faster == cache and slower == persistence)
+          if ( all ) {
+            let axiom = fdata.public_derivation
+            let ucwid = fdata.ucwid
+            this.derivation_keys[ucwid] = axiom
+          }
+          if ( fdata.public_derivation ) delete fdata.public_derivation  // reclaim this space... do no put it in the LRU storage
+          // store the user in just the LRU
           this.store_cache(key,udata,G_users_trns.back_ref());  // this app will use cache to echo persitent storage
           return relationship_id
         }
     }
 
     // // // 
-    async fetch_user(fdata) {
+    async fetch_user(fdata,all) {
       if ( G_users_trns.from_cache() ) {
         let udata = await this.fetch_user_from_key_value_store(fdata[G_users_trns.kv_store_key()])
         if ( udata ) {
-          return(udata)
-        } else {
-          let key_key = G_users_trns.kv_store_key()  // more persistent than the cache
-          let key = fdata[key_key]
-          udata = await super.fetch_user(key)  // no callback, just get value -- means the user has been entered into storage somewhere...
-          if ( udata ) {
-            this.store_cache(key,udata,G_users_trns.back_ref());    // from persitence to local cache
-            return(udata)
+          if ( all ) {
+            udata.public_derivation = this.derivation_keys[udata.ucwid]
           }
+          return(udata)
         }
       }
       return(false)     // never saw this user
