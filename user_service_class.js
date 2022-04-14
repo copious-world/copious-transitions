@@ -11,7 +11,8 @@ const ShutdownManager = require('./lib/shutdown-manager')
 
 const UserHandling = require('./contractual/user_processing')
 const MimeHandling = require('./contractual/mime_processing')
-const TranstionHandling = require('./contractual/transition_processing')
+const TranstionHandling = require('./contractual/transition_processing');
+const { EventEmitter } = require('events');
 
 // https://github.com/fastify/fastify
 
@@ -37,7 +38,7 @@ let g_proc_ws_token = ''
 const g_hex_re = /^[0-9a-fA-F]+$/;
 //
 
-class CopiousTransitions {
+class CopiousTransitions extends EventEmitter {
     //
     constructor(config,debug) {
         this.debug = debug
@@ -70,6 +71,7 @@ class CopiousTransitions {
         (async () => {
             await this.initialize_all(conf_obj)
             this.setup_paths(conf_obj)
+            this.emit('ready')
         })()
         
     }
@@ -330,12 +332,23 @@ class CopiousTransitions {
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
     }
 
+
+
+    
+
+    // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+    //       // RUN AND STOP
+    // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+
     run() {
         // APPLICATION STARTUP
         this.db.last_step_initalization()
         this.app.listen(this.port,() => {
             console.log(`listening on ${this.port}`)
         });
+        //
+        this.setup_ws(this.conf_obj)
+        this.setup_app_ws(this.conf_obj)
         //
     }
 
