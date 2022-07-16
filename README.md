@@ -24,3 +24,34 @@ The copious-transitions package makes it easy to decide that one server may hand
 session inforamtion within a local cluster. A process can be configured to include or omit user management API pathways. While all servers will include token
 authorized media pathways. 
 
+
+## What's in Certain Directories
+
+
+### 1. <u>lib</u>
+
+
+### 2. <u>contractual</u>
+
+
+### 3. <u>custom storage</u>
+
+
+### 4. <u>captcha</u>
+
+
+### 5. <u>captcha-ipfs</u>
+
+
+### 6. <u>defaults</u>
+
+
+### 7. <u>local</u>
+
+
+
+
+## Setting up a web service
+
+
+

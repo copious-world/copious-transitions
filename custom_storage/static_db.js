@@ -82,7 +82,7 @@ class StaticContracts extends FilesAndRelays {
         super.initialize(conf.static_db)
         if ( conf.static_db ) {
             //
-            this._whokey_field = conf.static_db.index_key ? conf.static_db.index_key :  this._whokey_field
+            this._whokey_field = conf.static_db.index_key ? conf.static_db.index_key : this._whokey_field
             //
             this.blob_dir = conf.static_db.blob_dir
             let freeloading_timeout = conf.static_db.freeloading_timeout
@@ -223,7 +223,7 @@ class StaticContracts extends FilesAndRelays {
     }
 
     // // 
-    async application_unstash_large_data(obj) {
+    async application_large_data_from_stash(obj) {
         let hh = obj._key
         if ( hh !== undefined ) {  // in data reps table, _ids_to_data_rep
             let pmse = this._ids_to_data_rep[hh]
@@ -248,23 +248,20 @@ class StaticContracts extends FilesAndRelays {
         return(obj)
     }
 
+    // the id should only be available if the object is known to the uniers...
     async load_missing_or_update(id,obj,data) {
-        if ( data._id ) delete data._id
+        if ( data._id ) delete data._id     // remove the data id so as not to overwrite the object id
         let up_obj = Object.assign(obj,data)
         if ( super.missing(up_obj) ) {         // this means that the general mesh never saw it either (as far as local queries can make out)
             // so ask the mesh to find it (if at all possible)
-            let remote_obj = await this.findOne(id,true)   /// tells it not to create, see next step
-            // so it showed up (but it's more up to data than the one stored here)
+            let remote_obj = await this.findOne(id,true) // if we get a copy from the universe don't tell the universe that id never existed
+            // so it showed up (but it's more up to date than the one stored here)
             if ( this.newer(remote_obj,up_obj) ) {
                 up_obj = Object.assign(up_obj,remote_obj)           // let this be the one we know
             }
-            // make a space for it in local storage
-            this.create(up_obj)  // use the current object -- this call will make use of this static's application stashing  
-        } else {
-            // so we have a copy.. but it is being set (so, update this and tell everyone in the mesh that it changed)
-            // sending to fixed endpoints that can then broadcast by publishing...
-            this.update(up_obj)   // having found it still have to send new data back....
         }
+            // make a space for it in local storage -- if there are changes the universe will be told
+        this.update(up_obj)  // use the current object -- this call will make use of this static's application stashing 
     }
 
     // // 
@@ -273,7 +270,7 @@ class StaticContracts extends FilesAndRelays {
         if ( id !== false ) {           // we think we know about this object, but do we? Try to go from the key to having the object
             // look in all possible places to find this object
             let obj = await this.get_key_value(whokey)          // maybe it's stored locally (or it can be found with get)
-            if ( !(obj) ) { obj = await this.findOne(id) }      // so just try to find it somewhere on the mesh 
+            if ( !(obj) ) { obj = await this.findOne(id) }      // so just try to find it somewhere on the mesh (should be known to the universe)
             if ( obj ) {            // can't be found at all
                 // set .. in this case is update
                 obj._whokey = whokey                // make records that this chunk of code can track
@@ -282,9 +279,9 @@ class StaticContracts extends FilesAndRelays {
         } else {  // never saw this (this node -- plugged into the copious-transitions relationship management)
             // so we go looking for it on the mesh
             let obj = await this.search_one(whokey,this._whokey_field)
-            if ( obj ) {        // there it is
+            if ( obj ) {        // there it is from the universe
                 obj._whokey = whokey
-                id =  delete data._id
+                id = delete data._id
                 await this.load_missing_or_update(id,obj,data)
                 //
             } else {        // OK -- don't have local record -- can't find it (very likey this node is the creator)
@@ -295,7 +292,7 @@ class StaticContracts extends FilesAndRelays {
                 obj._whokey = whokey
                 obj = Object.assign(obj,data)                
                 // CREATE
-                this.create(obj)    // store a persistence representation, but send any amount of data to the backend 
+                this.update(obj,false,'create')    // store a persistence representation, but send any amount of data to the backend 
                                     //  -- this call will make use of this static's application stashing    
             }
             this._whokey_to_ids[whokey] = obj._id  // by not setting the id, the parent class is allowed to set it
