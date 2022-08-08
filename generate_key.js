@@ -1,4 +1,4 @@
-const { Crypto } = require('node-webcrypto-ossl')
+const { Crypto } = require('web-crypto')
 let fs = require('fs')
 
 const crypto = new Crypto()

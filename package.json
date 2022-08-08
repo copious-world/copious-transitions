@@ -30,27 +30,24 @@
     "clone": "^2.1.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "extend": "^3.0.2",
     "generate-password": "^1.5.1",
-    "message-relay-services": "https://github.com/copious-world/message-relay-services.git",
-    "mime-db": "^1.44.0",
-    "mime-types": "^2.1.27",
-    "node-fetch": "^2.6.0",
-    "node-scp": "0.0.3",
-    "node-webcrypto-ossl": "^2.1.2",
+    "mime-db": "^1.52.0",
+    "mime-types": "^2.1.35",
+    "node-fetch": "^3.2.10",
     "nodemailer": "^6.4.11",
     "polka": "^0.5.2",
     "process-exists": "^4.0.0",
     "ps-list": "^7.2.0",
     "quick-format-unescaped": "^4.0.1",
-    "safe-buffer": "^5.2.1",
-    "shm-lru-cache": "https://github.com/copious-world/shm-lru-cache.git",
-    "shm-typed-array": "0.0.12",
-    "shm-typed-lru": "^0.0.4",
+    "message-relay-services": "^0.9.0",
+    "shm-lru-cache": "^0.1.7",
     "svg-captcha": "^1.4.0",
+    "ws": "^8.8.1"
+  },
+  "devDependencies" : {
+    "node-scp": "0.0.18",
     "tape": "^5.0.1",
     "tar": "^6.0.2",
-    "terser": "^5.3.8",
-    "ws": "^7.3.1"
+    "terser": "^5.3.8"
   }
 }
