@@ -1,4 +1,4 @@
-const GeneralMiddleWare = require.main.require('./lib/general_mware')
+const {GeneralMiddleWare} = require('../../index')
 
 class DefaultMiddleWare extends GeneralMiddleWare {
     constructor() {

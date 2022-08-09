@@ -1,4 +1,4 @@
-const { GeneralTransitionEngine } = require.main.require('./lib/general_transition_engine')
+const { GeneralTransitionEngine } = require('../../index')
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //

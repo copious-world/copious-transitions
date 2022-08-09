@@ -1,4 +1,4 @@
-const { DBClass } = require.main.require('./lib/general_db')
+const { DBClass } = require('../../index')
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //

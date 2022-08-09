@@ -1,5 +1,5 @@
 //
-const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth_session_lite')
+const { GeneralAuth, SessionManager } = require('../../index')
 
 
 class DefaultSessionManager extends SessionManager {

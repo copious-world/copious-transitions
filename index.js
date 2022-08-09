@@ -6,11 +6,11 @@ module.exports = CopiousTransitions
 
 // AUTH ----
 
+// will expose {GeneralAuth,SessionManager,SessionManager_Lite}
 let { GeneralAuth, SessionManager } = require('./lib/general_auth')
 module.exports.GeneralAuth = GeneralAuth
 module.exports.SessionManager = SessionManager
-// will expose {GeneralAuth,SessionManager,SessionManager_Lite}
-module.exports.auth_session_lite = require('./lib/general_auth_session_lite')
+module.exports.SessionManager_Lite = require('./lib/general_auth_session_lite')
 //
 module.exports.GeneralMiddleWare = require('./lib/general_mware')
 module.exports._set_conf_and_return = require('./lib/general_express')

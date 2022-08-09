@@ -1,5 +1,5 @@
 
-const GeneralValidator = require.main.require('./lib/general_validator')
+const {GeneralValidator} = require('../../index')
 
 
 class DefaultValidator extends GeneralValidator {

@@ -41,6 +41,7 @@ const g_hex_re = /^[0-9a-fA-F]+$/;
 class CopiousTransitions extends EventEmitter {
     //
     constructor(config,debug) {
+        super()
         this.debug = debug
         const conf_obj = load_parameters(config)                  // configuration parameters to select modules, etc.
         this.conf_obj = conf_obj
@@ -68,12 +69,13 @@ class CopiousTransitions extends EventEmitter {
         this.mime_handler = false
         this.transition_processing = false
         //
-        (async () => {
+        let b = (async () => {
             await this.initialize_all(conf_obj)
             this.setup_paths(conf_obj)
             this.emit('ready')
-        })()
-        
+        })
+
+        b()
     }
 
     // INITIALIZE
@@ -92,7 +94,7 @@ class CopiousTransitions extends EventEmitter {
         this.transition_engine.install(this.statics,this.dynamics,this.session_manager)
 
         //  --- contractual logic ---
-        let use_foreign = conf_obj.foreign_auth.allowed
+        let use_foreign = false // conf_obj.foreign_auth.allowed
         this.user_handler = new UserHandling(this.session_manager,this.validator,this.statics,this.dynamics,this.transition_engine,use_foreign,this.max_cache_time)
         this.mime_handler = new MimeHandling(this.session_manager,this.validator,this.statics,this.dynamics,this.max_cache_time)
         this.transition_processing = new TranstionHandling(this.session_manager,this.validator,this.dynamics,this.max_cache_time)
@@ -201,14 +203,16 @@ class CopiousTransitions extends EventEmitter {
         })
 
 
-        let setup_foreign_auth = conf_obj.foreign_auth.allowed
+        let setup_foreign_auth = false /// conf_obj.foreign_auth.allowed
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
         if ( conf_obj.login_app  && Array.isArray(conf_obj.login_app) ) {   // LOGIN APPS OPTION (START)
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
+        /*
             if ( setup_foreign_auth ) {
                 setup_foreign_auth = (ws) => { this.user_handler.foreign_auth_initializer(ws) }
             }
+        */
 
             //
             // USER MANAGEMENT - handle authorization and user presence.
@@ -242,7 +246,7 @@ class CopiousTransitions extends EventEmitter {
                 return(res.status(code).send(JSON.stringify( result )));
             })
 
-
+/*
             this.app.post('/foreign_login/:token', async (req, foreign_res) => {  // or use the websockets publication of state....
                 let body = req.body
                 let token = req.params.token
@@ -250,7 +254,7 @@ class CopiousTransitions extends EventEmitter {
                 foreign_res.status(code).end(report)
                 this.user_handler.send_ws_outofband(token,response)
             })
-
+*/
 
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
         }       // LOGIN APPS OPTION (END)
@@ -281,10 +285,12 @@ class CopiousTransitions extends EventEmitter {
                 //
                 switch ( path_on_connect ) {
                     //
+                    /*
                     case "foreign_auth" : {
                         if ( setup_foreign_auth ) setup_foreign_auth(ws)
                         break
                     }
+                    */
                     //
                     case "site_wide" : {
                         ws.on("message",this.transition_engine.ws_message_handler)  // data parameter implicit
@@ -451,14 +457,14 @@ function load_parameters(config) {
             let modName = confJSON.modules[mname]
             if ( (typeof modName === 'string') || ( modName === undefined )  ) {
                 if ( modName ) {
-                    confJSON.mod_path[mname] = __dirname + `/${module_path}/${modName}`
+                    confJSON.mod_path[mname] = process.cwd() + `/${module_path}/${modName}`
                 } else {
                     confJSON.mod_path[mname] = __dirname + `/defaults/lib/default_${mname}`
                 }
             } else if ( typeof modName === 'object' ) {  // allow for modules from other locations
                 modName = modName.module
                 let alternate_mod_path = modName.mod_path   // perhaps filter this in the future to attain some standard in locations..
-                confJSON.mod_path[mname] = __dirname + `/${alternate_mod_path}/${modName}`
+                confJSON.mod_path[mname] = process.cwd() + `/${alternate_mod_path}/${modName}`
             } else {
                 console.log(mname,modName)
                 throw new Error("ill formed module name in config file")

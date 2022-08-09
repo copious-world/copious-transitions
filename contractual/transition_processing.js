@@ -85,7 +85,7 @@ class TransitionHandling extends LocalTObjectCache {
         return [200,{ 'type' : 'user', 'OK' : 'false', 'reason' : 'unavailable' } ]
     }
 
-    ws_transition(transition,body) {
+    async ws_transition(transition,body) {
         let is_feasible = await this.session_manager.feasible(transition,body,null)
         if ( is_feasible ) {
             let finalization_state = await this.session_manager.finalize_transition(transition,body,{},null)      // FINALIZE (not a final state)

@@ -13,6 +13,7 @@ const AGED_OUT_DELTA = (1000*60*30)
 class RemoteMessaging extends AppLifeCycle {
     //
     constructor(persistence_messenger,default_m_path) {
+        super()
         this.default_m_path = default_m_path ? default_m_path : 'persistence'
         this.messenger = persistence_messenger
         if ( this.messenger === undefined ) {
