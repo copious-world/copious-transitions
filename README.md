@@ -4,7 +4,7 @@ This is a library that supports building and running web services applications. 
 
 The applications may be separate processes, each with their own TCP port. They will share information with each other via shared memory for such requirements as access control. Some of the applications may run on different nodes in a cluster. Information sharing will be controlled by the use of certain libraries providing shared memory management and pub/sub processes.
 
-How big or small the footprint of the service will be will depend mostly on configuration. Each application will read in a configuration file and marshal parts of it to subprocesses and library class instances. Some aspects of configuration will direct the subprocesses to connect on pub/sub pathways on predetermined addresses and ports. Some application will want to automate high level configuration of nodes in their own way. This module provides configuration mostly at the process level, but provides pathwasy to open up configuration at a higher level.
+How big or small the footprint of the service will be will depend mostly on configuration. Each application will read in a configuration file and marshal parts of it to subprocesses and library class instances. Some aspects of configuration will direct the subprocesses to connect on pub/sub pathways on predetermined addresses and ports. Some application will want to automate high level configuration of nodes in their own way. This module provides configuration mostly at the process level, but provides pathways to open up configuration at a higher level.
 
 ## Installation
 
@@ -85,14 +85,15 @@ The API paths are written with variable expressions in a manner defined by **exp
 
 Here is a list of common pathways that are defined in the **CopiousTransitions** class definition found in the file **user\_services\_class.js**:
 
-* / :: GET :: returns a local index.js for default behavior
-* /static/:asset :: GET :: returns an asset keyed in a static db 
-* /guarded/static/:asset :: POST :: returns an asset after authorization checks
-* /guarded/dynamic/:asset :: POST :: authorized and optionally confirmed asset generation
-* /secondary/guarded :: POST :: a transition keyed on a token from guarded paths
-* /transition/:transition :: POST :: start of a process and guarded
-* /secondary/transition :: POST :: continuation of a process and guarded
-* /user/:operation :: POST :: configurable list of paths offering the following:
+* *path :: HTTP METHOD :: description*
+* **/ :: GET ::** returns a local index.js for default behavior
+* **/static/:asset :: GET ::** returns an asset keyed in a static db 
+* **/guarded/static/:asset :: POST ::** returns an asset after authorization checks
+* **/guarded/dynamic/:asset :: POST ::** authorized and optionally confirmed asset generation
+* **/secondary/guarded :: POST ::** a transition keyed on a token from guarded paths
+* **/transition/:transition :: POST ::** start of a process and guarded
+* **/secondary/transition :: POST ::** continuation of a process and guarded
+* **/user/:operation :: POST ::** configurable list of paths offering the following:
 
 > * login
 > * logout
@@ -136,18 +137,37 @@ authorized media pathways.
 
 ### 3. <u>custom storage</u>
 
+The **custom\_storage** directory contains some default key-value store operations for static (local) assets and for persistent data, which may be stored both locally and remotely.
+
+This section refers to persistent and static storage. The terms are common among storage schemes. For example, the copious-world repositories (to be found on github) includes global-persitence and copious-endpoints, which has a persistence endpoint. The terms related to this particular directory refer more to an interface to persistent storage services with some local buffering and aging requirements.
+
+* **static storage**
+
+> The one requirement static storage is supposed to fulfill is that particular files (data) will be gauranteed to be quickly accessible. If the files are being used regularly, they will be maintained in processes memory. If they age out of storage, then static storage will have a local file reference to the local data. If requested file is not on local drives, then static storage may refer to persistent storage to obtain a copy from remote caches. Static storage fails to deliver only if the file cannot be found in any storage the configured instance of a copious-transisions implementation ever knows about.
+
+* **persistent storage**
+
+> Data and files are considered to be persistent if there is some representation of the data somewhere in repositories that the copious-transisions implementation knows about and if the data can be retrieved. Persistent storage may store some data in memory (in the LRU sense) for a short period of time. It may be assumed that data will age out faster than static data. Persistent storage is not required to always keep a copy of data locally if it can be guaranteed to obtain it from some cache. 
+> 
+> Persistent storage may take in new data from the client facing processes and store it locally and in remote repositories. When a copious-transisions implementation takes in new data it can use persistent storage key-value APIs to proxy sending data to endpoints that curate the data and make it available to other services such as link services and counting services.
+
+A copious-transisions implementation accesses the static and persistent storage code via the **generalized\_db** class and its descendant implementations.
+
+Persistent storage acts as a proxy to upstream repositories only as a user of communication class instances, those most likely provided by the **message-relay-services** module. The persistent storage class provided by **custom\_storage** does not create the connection to endpoint services, but will be constructed with an instance of the communication class which must have been created by the **generalized\_db** class descendant. (Note: **generalized\_db** does not create default class instances and just provides a calling framework.)
+
+> Persistent storage in  **custom\_storage** communicates with data repositories providing some business transactions only because its communication class instance is configured to talk to those services. Persistent storage has no concept of what upstream services do. It just manages the lifecycle of data on the local machine and sends messages.
+
+*Refer to descendants of* **generalized\_db** *in order to determine the business logic of the database interface instance*.
 
 ### 4. <u>captcha</u>
 
+This is an example web application that provides common web page login with an SVG captcha. 
 
-### 5. <u>captcha-ipfs</u>
+### 5. <u>defaults</u>
 
+These are default instance classes each of which descends from a generalized class from the **lib** directory. If a configuration fails to introduce a class for a particular role, a default class will be used instead. The default classes do next to nothing but they are not necessarily noops.
 
-### 6. <u>defaults</u>
-
-
-### 7. <u>local</u>
-
+### 6. <u>local</u>
 
 
 

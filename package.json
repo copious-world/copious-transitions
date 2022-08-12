@@ -1,6 +1,6 @@
 {
   "name": "copious-transitions",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Framework for working with frameworks",
   "main": "user_services.js",
   "directories": {
