@@ -174,15 +174,15 @@ g_app.post('/transition/:transition', async (req, res) => {           // the tra
     let body = req.body
     let transition = req.params.transition
     let [code,data] = await g_transition_processing.transition_handler(transition,body,req.headers)
-    res.status(code).send(JSON.stringify(data))
+    this.app.responder(res).status(code).send(data)
 });
 
 // TRANSITIONS  - TRANSITION ACCEPTED  -- the body should send back the token it got with the asset.
 g_app.post('/secondary/transition',async (req, res) => {
     let body = req.body
     //
-    let [code,data] = await g_transition_processing.secondary_transition_handler(body) 
-    res.status(code).send(JSON.stringify(data))
+    let [code,data] = await g_transition_processing.secondary_transition_handler(body)
+    this.app.responder(res).status(code).send(data)
 })
 
 
@@ -209,7 +209,7 @@ for ( let path of conf_obj.login_app ) {
             let transitionObj = result.data
             g_session_manager.handle_cookies(result,res,transitionObj)
         }
-        return(res.status(code).send(JSON.stringify( result )));
+        this.app.responder(res).status(code).send(result)
         //
     })
 }
@@ -224,7 +224,7 @@ g_app.post('/secondary/users/:action', async (req, res) => {
         let transitionObj = result.data
         g_session_manager.handle_cookies(result,res,transitionObj)
     }
-    return(res.status(code).send(JSON.stringify( result )));
+    this.app.responder(res).status(code).send(result)
 })
 
 

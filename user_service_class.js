@@ -191,7 +191,7 @@ class CopiousTransitions extends EventEmitter {
             let body = req.body
             let transition = req.params.transition
             let [code,data] = await this.transition_processing.transition_handler(transition,body,req.headers)
-            res.status(code).send(JSON.stringify(data))
+            this.app.responder(res).status(code).send(data)
         });
 
         // TRANSITIONS  - TRANSITION ACCEPTED  -- the body should send back the token it got with the asset.
@@ -199,11 +199,11 @@ class CopiousTransitions extends EventEmitter {
             let body = req.body
             //
             let [code,data] = await this.transition_processing.secondary_transition_handler(body) 
-            res.status(code).send(JSON.stringify(data))
+            this.app.responder(res).status(code).send(data)
         })
 
 
-        let setup_foreign_auth = false /// conf_obj.foreign_auth.allowed
+        // let setup_foreign_auth = false /// conf_obj.foreign_auth.allowed
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
         if ( conf_obj.login_app  && Array.isArray(conf_obj.login_app) ) {   // LOGIN APPS OPTION (START)
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
@@ -228,7 +228,7 @@ class CopiousTransitions extends EventEmitter {
                         let transitionObj = result.data
                         this.session_manager.handle_cookies(result,res,transitionObj)
                     }
-                    return(res.status(code).send(JSON.stringify( result )));
+                    this.app.responder(res).status(code).send(result)
                     //
                 })
             }
@@ -243,7 +243,7 @@ class CopiousTransitions extends EventEmitter {
                     let transitionObj = result.data
                     this.session_manager.handle_cookies(result,res,transitionObj)
                 }
-                return(res.status(code).send(JSON.stringify( result )));
+                this.app.responder(res).status(code).send(result)
             })
 
 /*

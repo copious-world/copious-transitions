@@ -1,6 +1,6 @@
 {
   "name": "copious-transitions",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "Framework for working with frameworks",
   "main": "user_services.js",
   "directories": {
@@ -31,20 +31,21 @@
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "generate-password": "^1.5.1",
+    "message-relay-services": "^0.9.0",
     "mime-db": "^1.52.0",
     "mime-types": "^2.1.35",
     "node-fetch": "^3.2.10",
     "nodemailer": "^6.4.11",
     "polka": "^0.5.2",
+    "@polka/send-type": "^0.5.2",
     "process-exists": "^4.0.0",
     "ps-list": "^7.2.0",
     "quick-format-unescaped": "^4.0.1",
-    "message-relay-services": "^0.9.0",
     "shm-lru-cache": "^0.1.7",
     "svg-captcha": "^1.4.0",
     "ws": "^8.8.1"
   },
-  "devDependencies" : {
+  "devDependencies": {
     "node-scp": "0.0.18",
     "tape": "^5.0.1",
     "tar": "^6.0.2",
