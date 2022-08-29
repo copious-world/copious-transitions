@@ -33,3 +33,5 @@ module.exports.ShutdownManager = require('./lib/shutdown-manager')
 // ---- ----  ----  ----  ---- 
 module.exports.CustomPersistenceDB = require('./custom_storage/persistent_db')
 module.exports.CustomStaticDB = require('./custom_storage/static_db')
+
+module.exports.GeneralLifeCycleManager = require('./lib/general_lifecyle')
