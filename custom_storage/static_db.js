@@ -1,7 +1,7 @@
 let FilesAndRelays = require('./files_and_relays')
 let fsPromises = require('fs/promises')
 let fs = require('fs')
-const uuid = require('uuid/v4')
+const uuid = require('../lib/uuid')
 //
 
 const MAX_LAX_CACHE_TIME = 1000*3600*4

@@ -1,7 +1,7 @@
 //
 const AppLifeCycle = require('../lib/general_lifecyle')
 const fs = require('fs')
-const uuid = require('uuid/v4')
+const uuid = require('../lib/uuid')
 
 const DB_STASH_INTERVAL = 10000
 const AGED_OUT_DELTA = (1000*60*30)
