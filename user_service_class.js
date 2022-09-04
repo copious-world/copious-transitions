@@ -40,7 +40,7 @@ const g_hex_re = /^[0-9a-fA-F]+$/;
 
 class CopiousTransitions extends EventEmitter {
     //
-    constructor(config,debug) {
+    constructor(config,debug,caller_dir) {
         super()
         this.debug = debug
         const conf_obj = load_parameters(config)                  // configuration parameters to select modules, etc.
@@ -69,6 +69,8 @@ class CopiousTransitions extends EventEmitter {
         this.mime_handler = false
         this.transition_processing = false
         //
+        this.caller_dir = caller_dir
+        //
         let b = (async () => {
             await this.initialize_all(conf_obj)
             this.setup_paths(conf_obj)
@@ -76,6 +78,14 @@ class CopiousTransitions extends EventEmitter {
         })
 
         b()
+    }
+
+
+    module_top() {
+        if ( this.caller_dir ) {
+            return this.caller_dir
+        }
+        return process.cwd()
     }
 
     // INITIALIZE
@@ -457,14 +467,14 @@ function load_parameters(config) {
             let modName = confJSON.modules[mname]
             if ( (typeof modName === 'string') || ( modName === undefined )  ) {
                 if ( modName ) {
-                    confJSON.mod_path[mname] = process.cwd() + `/${module_path}/${modName}`
+                    confJSON.mod_path[mname] =  this.module_top() + `/${module_path}/${modName}`
                 } else {
                     confJSON.mod_path[mname] = __dirname + `/defaults/lib/default_${mname}`
                 }
             } else if ( typeof modName === 'object' ) {  // allow for modules from other locations
                 modName = modName.module
                 let alternate_mod_path = modName.mod_path   // perhaps filter this in the future to attain some standard in locations..
-                confJSON.mod_path[mname] = process.cwd() + `/${alternate_mod_path}/${modName}`
+                confJSON.mod_path[mname] = this.module_top() + `/${alternate_mod_path}/${modName}`
             } else {
                 console.log(mname,modName)
                 throw new Error("ill formed module name in config file")
