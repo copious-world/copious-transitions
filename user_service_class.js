@@ -43,7 +43,7 @@ class CopiousTransitions extends EventEmitter {
     constructor(config,debug,caller_dir) {
         super()
         this.debug = debug
-        const conf_obj = load_parameters(config)                  // configuration parameters to select modules, etc.
+        const conf_obj = load_parameters(config,caller_dir)                  // configuration parameters to select modules, etc.
         this.conf_obj = conf_obj
         this.port = conf_obj.port
         //
@@ -80,13 +80,6 @@ class CopiousTransitions extends EventEmitter {
         b()
     }
 
-
-    module_top() {
-        if ( this.caller_dir ) {
-            return this.caller_dir
-        }
-        return process.cwd()
-    }
 
     // INITIALIZE
     async initialize_all(conf_obj) {
@@ -403,7 +396,15 @@ function generate_password_block() {
     g_password_store = g_password_store.concat(passwords)
 }
 
-function load_parameters(config) {
+
+function module_top(caller_dir) {
+    if ( typeof caller_dir === "string" ) {
+        return caller_dir
+    }
+    return process.cwd()
+}
+
+function load_parameters(config,if_module_top) {
     //
     global.g_debug = false
     //
@@ -467,14 +468,14 @@ function load_parameters(config) {
             let modName = confJSON.modules[mname]
             if ( (typeof modName === 'string') || ( modName === undefined )  ) {
                 if ( modName ) {
-                    confJSON.mod_path[mname] =  this.module_top() + `/${module_path}/${modName}`
+                    confJSON.mod_path[mname] =  module_top(if_module_top) + `/${module_path}/${modName}`
                 } else {
                     confJSON.mod_path[mname] = __dirname + `/defaults/lib/default_${mname}`
                 }
             } else if ( typeof modName === 'object' ) {  // allow for modules from other locations
                 modName = modName.module
                 let alternate_mod_path = modName.mod_path   // perhaps filter this in the future to attain some standard in locations..
-                confJSON.mod_path[mname] = this.module_top() + `/${alternate_mod_path}/${modName}`
+                confJSON.mod_path[mname] = module_top(if_module_top) + `/${alternate_mod_path}/${modName}`
             } else {
                 console.log(mname,modName)
                 throw new Error("ill formed module name in config file")
