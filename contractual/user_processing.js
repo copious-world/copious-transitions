@@ -76,7 +76,7 @@ class UserHandling extends LocalTObjectCache {
                 }
             }
         }
-        return false
+        return([514,{ 'type' : 'user', 'OK' : 'false', 'reason' : 'failed' }])
     }
 
     // If the current stack accepts foreign auth, then process it here...
