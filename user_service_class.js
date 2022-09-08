@@ -404,6 +404,40 @@ function module_top(caller_dir) {
     return process.cwd()
 }
 
+
+function load_configuration(cpath,if_module_top) {
+    cpath = cpath.trim()
+    try {
+        let conf = fs.readFileSync(cpath,'ascii').toString()
+        return conf
+    } catch (e) {
+        console.log(`Error loading configuration ${cpath}... trying another candidate path`)
+        console.log(e)
+        let cpath2 = '' + cpath
+        while ( cpath2[0] === '.' ) {
+            cpath2 = cpath2.substring(1)
+        }
+        cpath2 = process.cwd() + '/' + cpath2
+        try {
+            let conf = fs.readFileSync(cpath2,'ascii').toString()
+            return conf    
+        } catch (e2) {
+            if ( if_module_top ) {
+                console.log(`Error loading configuration ${cpath2}... trying another candidate path`)
+                let cpath3 = module_top(if_module_top) + '/' + cpath
+                try {
+                    let conf = fs.readFileSync(cpath3,'ascii').toString()
+                    return conf    
+                } catch (e3) {
+                    console.log(`Error loading configuration ${cpath3}... failing`)
+                    console.log(e)            
+                }        
+            }
+        }
+    }
+    throw new Error(`could not find the file ${cpath}`)
+}
+
 function load_parameters(config,if_module_top) {
     //
     global.g_debug = false
@@ -456,7 +490,7 @@ function load_parameters(config,if_module_top) {
     g_proc_ws_token = do_hash('' + config + '+=+' + Date.now())
 
     try {
-        let data = fs.readFileSync(config,'ascii').toString()
+        let data = load_configuration(config,if_module_top)
         //
         //console.log(data[p] + " --- " + data.substr(p,40))
         //
