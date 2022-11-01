@@ -1,5 +1,7 @@
 
 
+const bodyParser = require('body-parser')
+const e = require('cors')
 const LocalTObjectCache = require('../custom_storage/local_object_cache')
 
 
@@ -21,7 +23,7 @@ class TransitionHandling extends LocalTObjectCache {
 
         let proceed = await this.session_manager.guard(transition,body,transmision_headers)
         if ( !proceed ) {             // asset exits, permission granted, etc.  (check fail)
-            return [200,{ 'type' : 'user', 'OK' : 'false', 'reason' : 'unavailable' },false ]
+            return [200,{ 'type' : 'transition', 'OK' : 'false', 'reason' : 'unavailable' },false ]
         }
             //
         if ( this.validator.valid(body,this.validator.field_set[transition]) ) {         // A field set may be in the configuration for named transitions - true by default
@@ -60,7 +62,7 @@ class TransitionHandling extends LocalTObjectCache {
                 //
             }
         }
-        return [200,{ 'type' : 'user', 'OK' : 'false', 'reason' : 'unavailable' }]
+        return [200,{ 'type' : 'transition', 'OK' : 'false', 'reason' : 'unavailable' }]
     }
 
 
@@ -82,7 +84,7 @@ class TransitionHandling extends LocalTObjectCache {
                 }
             }
         }
-        return [200,{ 'type' : 'user', 'OK' : 'false', 'reason' : 'unavailable' } ]
+        return [200,{ 'type' : 'transition', 'OK' : 'false', 'reason' : 'unavailable' } ]
     }
 
     async ws_transition(transition,body) {
@@ -93,6 +95,20 @@ class TransitionHandling extends LocalTObjectCache {
                 return finalization_state
             }
         }    
+        return false
+    }
+
+
+    async endpoint_transition(transition,body) {
+        try {
+            if ( !(body.token) ) {  // no transition token ... so treat this as primary
+                return this.transition_handler(transition,body,{})
+            } else {
+                return this.secondary_transition_handler(body,{})
+            }    
+        } catch (e) {
+            return [200,{ 'type' : 'transition', 'OK' : 'false', 'reason' : 'unavailable' } ]
+        }
     }
 
 }
