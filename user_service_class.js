@@ -314,6 +314,9 @@ class CopiousTransitions extends EventEmitter {
             
             let socket_host =  conf_obj.ws_client_server
             let sitewide_socket = new WebSocket(`ws://${socket_host}/auth_ws/site_wide`);
+            if ( !sitewide_socket ) {
+                console.log(new Error("Failed to connect to the sitewide server"))
+            }
             this.transition_engine.ws_connection_attempt(g_proc_ws_token,sitewide_socket)
         
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
