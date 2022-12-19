@@ -43,6 +43,7 @@ class TransitionHandling extends LocalTObjectCache {
                             let t_state = { 'type' : 'transition', 'OK' : 'true', 'transition' : transitionObj, 'elements' : send_elements }
                             return [200,t_state]    
                         } catch(e) {
+                            console.log(e)
                             // nothing really... just report that you can't
                         }
                     } else {

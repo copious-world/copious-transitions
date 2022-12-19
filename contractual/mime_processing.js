@@ -51,10 +51,15 @@ class MimeHandling extends LocalTObjectCache {
             let transitionObj = await this.session_manager.process_asset(asset,body)  // not checking sesssion, key the asset and use any search refinement in the body.
             if ( transitionObj ) {
                 if ( transitionObj.secondary_action ) {                          // return a transition object to go to the client. 
-                    let asset_obj = await fetcher(asset,transitionObj);                     // get the asset for later
-                    let tObjCached = { 'tobj' : transitionObj, 'asset' : asset_obj } 
-                    this.add_local_cache_transition(transitionObj.token,tObjCached)
-                    return [200,{ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj },true]
+                    try {
+                        let asset_obj = await fetcher(asset,transitionObj);                     // get the asset for later
+                        let tObjCached = { 'tobj' : transitionObj, 'asset' : asset_obj } 
+                        this.add_local_cache_transition(transitionObj.token,tObjCached)
+                        return [200,{ 'type' : 'user', 'OK' : 'true', 'data' : transitionObj },true]    
+                    } catch (e) {
+                        console.log(e)
+                        // allow report of unavailable
+                    }
                 } else {
                     let asset_obj = await fetcher(asset,transitionObj);     // no checks being done, just send the asset. No token field included
                     if ( (asset_obj !== false)  && ( asset_obj.mime_type !== undefined )) {
