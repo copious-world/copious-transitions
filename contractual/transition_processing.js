@@ -35,7 +35,7 @@ class TransitionHandling extends LocalTObjectCache {
                     if ( transitionObj.secondary_action ) {
                         // elements is purposely vague and may be application sepecific
                         try {
-                            let [send_elements, store_elements] = this.dynamics.fetch_elements(transition,transitionObj);
+                            let [send_elements, store_elements] = await this.dynamics.fetch_elements(transition,transitionObj);
                             //
                             let tObjCached = { 'tobj' : transitionObj, 'elements' : store_elements, 'transition' : transition }
                             this.add_local_cache_transition(transitionObj.token,tObjCached)
