@@ -1,7 +1,4 @@
-
-
-const bodyParser = require('body-parser')
-const e = require('cors')
+//
 const LocalTObjectCache = require('../custom_storage/local_object_cache')
 
 
@@ -36,15 +33,18 @@ class TransitionHandling extends LocalTObjectCache {
                     //
                     // Require a seconday action as part of the transition for finalization
                     if ( transitionObj.secondary_action ) {
-                        //
                         // elements is purposely vague and may be application sepecific
-                        let [send_elements, store_elements] = this.dynamics.fetch_elements(transition,transitionObj);
-                        //
-                        let tObjCached = { 'tobj' : transitionObj, 'elements' : store_elements, 'transition' : transition }
-                        this.add_local_cache_transition(transitionObj.token,tObjCached)
-                        //
-                        let t_state = { 'type' : 'transition', 'OK' : 'true', 'transition' : transitionObj, 'elements' : send_elements }
-                        return [200,t_state]
+                        try {
+                            let [send_elements, store_elements] = this.dynamics.fetch_elements(transition,transitionObj);
+                            //
+                            let tObjCached = { 'tobj' : transitionObj, 'elements' : store_elements, 'transition' : transition }
+                            this.add_local_cache_transition(transitionObj.token,tObjCached)
+                            //
+                            let t_state = { 'type' : 'transition', 'OK' : 'true', 'transition' : transitionObj, 'elements' : send_elements }
+                            return [200,t_state]    
+                        } catch(e) {
+                            // nothing really... just report that you can't
+                        }
                     } else {
                         // Send back a finalization of transition right away.
                         body.token = transitionObj.token
