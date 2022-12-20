@@ -103,9 +103,9 @@ class TransitionHandling extends LocalTObjectCache {
     async endpoint_transition(transition,body) {
         try {
             if ( !(body.token) ) {  // no transition token ... so treat this as primary
-                return this.transition_handler(transition,body,{})
+                return await this.transition_handler(transition,body,{})
             } else {
-                return this.secondary_transition_handler(body,{})
+                return await this.secondary_transition_handler(body,{})
             }    
         } catch (e) {
             return [200,{ 'type' : 'transition', 'OK' : 'false', 'reason' : 'unavailable' } ]
