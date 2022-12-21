@@ -1,6 +1,6 @@
 {
   "name": "copious-transitions",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Framework for working with frameworks",
   "directories": {
     "lib": "lib"
@@ -25,16 +25,16 @@
   },
   "homepage": "https://github.com/rleddy/copious-transitions#readme",
   "dependencies": {
-    "body-parser": "^1.20.0",
+    "body-parser": "^1.20.1",
     "clone": "^2.1.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "generate-password": "^1.7.0",
-    "message-relay-services": "^0.9.6",
+    "message-relay-services": "^0.9.14",
     "mime-db": "^1.52.0",
     "mime-types": "^2.1.35",
-    "node-fetch": "^3.2.10",
-    "nodemailer": "^6.7.8",
+    "node-fetch": "^3.3.0",
+    "nodemailer": "^6.8.0",
     "polka": "^0.5.2",
     "@polka/send-type": "^0.5.2",
     "process-exists": "^5.0.0",
@@ -42,12 +42,12 @@
     "quick-format-unescaped": "^4.0.4",
     "shm-lru-cache": "^0.1.8",
     "svg-captcha": "^1.4.0",
-    "ws": "^8.8.1"
+    "ws": "^8.11.0"
   },
   "devDependencies": {
-    "node-scp": "0.0.18",
-    "tape": "^5.6.0",
-    "tar": "^6.1.11",
-    "terser": "^5.15.0"
+    "node-scp": "0.0.22",
+    "tape": "^5.6.1",
+    "tar": "^6.1.13",
+    "terser": "^5.16.1"
   }
 }
