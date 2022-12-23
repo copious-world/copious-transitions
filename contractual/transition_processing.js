@@ -78,7 +78,7 @@ class TransitionHandling extends LocalTObjectCache {
                     let finalization_state = await this.session_manager.finalize_transition(cached_transition.transition,body,elements,transmision_headers)      // FINALIZE (not a final state)
                     if ( finalization_state ) {     // relay the finalized transition and go on with business. 
                         let state = finalization_state.state
-                        let OK = finalization_state.OK
+                        let OK = finalization_state.OK  // as a string
                         let t_state = { 'type' : 'finalize', 'OK' : OK, 'state' : state, 'reason' : 'matched' }
                         return [200,t_state]
                     } // else nothing worked 
