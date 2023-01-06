@@ -22,7 +22,7 @@ class MimeHandling extends LocalTObjectCache {
     async static_asset_handler(asset,body,transmision_headers) {
         let proceed = await this.session_manager.guard_static(asset,body,transmision_headers)
         if ( proceed ) {     // returns a true value by default, but may guard some assets
-            var asset_obj = await this.statics.fetch(asset);     // returns an object with fields mime_type, and string e.g. text/html with uriEncoded html
+            var asset_obj = await this.statics.fetch(asset,body);     // returns an object with fields mime_type, and string e.g. text/html with uriEncoded html
             if ( typeof asset_obj !== 'object' || asset_obj.mime_type == undefined ) {
                 let hypothetical = asset_obj
                 asset_obj = {}

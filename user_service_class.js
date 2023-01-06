@@ -101,7 +101,7 @@ class CopiousTransitions extends EventEmitter {
         this.user_handler = new UserHandling(this.session_manager,this.validator,this.statics,this.dynamics,this.transition_engine,use_foreign,this.max_cache_time)
         this.mime_handler = new MimeHandling(this.session_manager,this.validator,this.statics,this.dynamics,this.max_cache_time)
         this.transition_processing = new TranstionHandling(this.session_manager,this.validator,this.dynamics,this.max_cache_time)
-        this.transition_engine.set_contractual_filters(this.transition_processing,this.user_handler)
+        this.transition_engine.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
         //
     }
 
