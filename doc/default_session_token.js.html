@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: default_session_token.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: default_session_token.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
+
+const uuid = require('./uuid')
+
+
+
+
+/**
+ * @callback token_lambda
+ * @param {string} [prefix] - optionally prefix the token whith an application specfic string
+ * @returns {string} -- a unique identifier relative to the running application scope (defind by the application)
+ */
+
+
+function default_token_maker(prefix) {
+    let suuid = '' + uuid()
+    let token = (prefix ? prefix : '') + suuid
+    return token
+}
+
+
+/**
+ * A local manager of session and their state transition tokens.
+ * 
+ * 
+ * The session should always be recoverable from a token specifically designed for keying the state transions of the session.
+ * Other transition tokens should also identify the session, but will have no key into session state transitions, 
+ * instead they will key into the state transitions of media, stream, or processes. 
+ *
+ * Tokens can be lent by a proactive lender for the lifetime of the owner session (requires reference count)
+ * Tokens can be given by a proactive seller/giver in order to hand off state transitions to a seconday micro service
+ *
+ */
+
+class LocalSessionTokens {
+
+   /**
+    * @constructor
+    * @param {Object} db_obj - A database reference which supports get, set, del for ephemeral and long timed LRU.
+    * @param {token_lambda} [token_creator] - A method for making a token which will be used as a unique key into the database.
+    */
+    constructor(db_obj,token_creator) {
+        this.db = db_obj
+        this.goingSessions = {};        // map to owner
+        this.goingTokens = {};          // map to owner -- token belongs to owner (ucwid)
+        this.token_to_session = {};     // token belons to session
+        this._token_creator = token_creator ? token_creator : default_token_maker
+    }
+
+
+   /**
+    * Fetch the ownership key belonging to a token
+    * @param {string} token - An ephemeral token for transitions sequences.
+    * @returns {string} - the ownership key of the token e.g. a ucwid
+    */
+   from_token(token) {
+        let key = this.goingTokens[token]
+        return key
+    }
+
+    /**
+     *  Calls upon the instance lambda in order to create a token for whatever use is intended.
+     * @param {string} [prefix] - optionally put prefix the token whith an applicatino specfic string
+     * @returns {string} -- a unique identifier relative to the running application scope (defind by the application)
+     */
+    create_token(prefix) {
+        return this._token_creator(prefix)
+    }
+
+    /**
+     * Given a session_token, adds it to the local tables plus the session database. Stores the database hash in maps indexed by
+     * the session_token and by the ownership_key.
+     * @param {string} session_token - a token identifiying a session typically returned by a login process
+     * @param {string} ownership_key - a string representation of an ownership ID such as a did.
+     */
+    async add(session_token,ownership_key) {
+        // src_key e.g. augmented hash token  OR hh unidentified (an intermediate hash)
+        let src_key = await this.db.set_session_key_value(session_token,ownership_key)
+        this.goingSessions[ownership_key] = session_token
+        this.goingTokens[session_token] = ownership_key
+    }
+
+ 
+    /**
+     *  Removes a sessions from the general discourse of all micro services given the state transition token that that keys the session
+     *  @param {string} token - a token that keys the state transitions of a session and can map to the session
+     */
+    destroy_session(token) {
+        let src_key = this.goingTokens[token];
+        if ( src_key != undefined ) {
+            try {
+                delete this.goingSessions[src_key]
+                delete this.goingTokens[token]
+                this.db.del_session_key_value(token)
+            } catch (e) {
+                //
+            }
+        }
+    }
+
+    /**
+     * Returns the ownsership key associated with either a session token or a session id.
+     * @param {string} token - a token that keys the state transitions of a session and can map to the session
+     * @param {boolean} is_sess_req - select the type of token being passed
+     */
+    async current_active(token,is_sess_req) {
+        let key = this.goingTokens[token]  // local not shared ... session may be going and recorded in shared stored but not yet here
+        if ( (key !== undefined) ) {
+            return key
+        } else {
+            try {
+                if ( is_sess_req ) {
+                    key = await this.db.get_session_key_value(token)
+                } else {
+                    key = await this.db.get_key_value(token)
+                    if ( key == null || (key === false) ) {
+                        return (false)
+                    } else {
+                        this.goingTokens[token] = key;
+                        return (key)
+                    }
+                }
+            } catch (e) {
+                return (false)
+            }
+        }
+    }
+ 
+
+
+
+/*
+addToken(value,token) {
+    if ( (value !== undefined) &amp;&amp; (token !== undefined) ) {
+        this.db.set_key_value(token,value)
+        this.goingTokens[token] = value
+    }
+}
+
+destroyToken(token) {
+    let src_key = this.goingTokens[token];
+    if ( src_key != undefined ) {
+        try {
+            delete this.goingTokens[token]
+            this.db.del_key_value(token)
+        } catch (e) {
+            //
+        }
+    }
+}
+*/
+
+}
+
+
+
+module.exports.LocalSessionTokens = LocalSessionTokens
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DataLookupField.html">DataLookupField</a></li><li><a href="EmailField.html">EmailField</a></li><li><a href="EmailVerifyField.html">EmailVerifyField</a></li><li><a href="EndpointManager.html">EndpointManager</a></li><li><a href="FieldTest.html">FieldTest</a></li><li><a href="FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="FileMapper.html">FileMapper</a></li><li><a href="ForeignAuth.html">ForeignAuth</a></li><li><a href="GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="GeneralAuth.html">GeneralAuth</a></li><li><a href="GeneralBusiness.html">GeneralBusiness</a></li><li><a href="GeneralDBWrapperImpl.html">GeneralDBWrapperImpl</a></li><li><a href="GeneralDynamic.html">GeneralDynamic</a></li><li><a href="GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="GeneralStatic.html">GeneralStatic</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralValidator.html">GeneralValidator</a></li><li><a href="LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="LengthyField.html">LengthyField</a></li><li><a href="LengthyStringField.html">LengthyStringField</a></li><li><a href="LocalSessionTokens.html">LocalSessionTokens</a></li><li><a href="PasswordField.html">PasswordField</a></li><li><a href="PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="PersistenceManager.html">PersistenceManager</a></li><li><a href="ReMailer.html">ReMailer</a></li><li><a href="SessionManager.html">SessionManager</a></li><li><a href="SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="TaggedTransition.html">TaggedTransition</a></li><li><a href="TokenTables.html">TokenTables</a></li><li><a href="TypeCheckField.html">TypeCheckField</a></li><li><a href="UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sun Jun 25 2023 15:23:42 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

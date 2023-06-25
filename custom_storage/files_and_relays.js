@@ -124,6 +124,21 @@ class LocalStorageLifeCycle extends RemoteMessaging {
         this.add_interval(extant_interval)  // from App Life Cycle ----
     }
 
+    // local_db_store_map  -- a chrono method callback
+    async local_db_store_map(storage_map) {
+        try {
+            fs.writeFile(this.db_file,JSON.stringify(storage_map),() => { this.dirty = false })
+        } catch(e) {
+        }
+    }
+
+    async local_db_load_map() {
+        try {
+            let store_map = JSON.parse(fs.readFileSync(this.db_file,'ascii').toString())
+            return store_map
+        } catch (e) {}
+        return {}
+    }
 
     // add_t_stamp -- for aging out data
     //
@@ -264,27 +279,9 @@ class FilesAndRelays_base extends LocalStorageLifeCycle {
         }
         // Read previously locally stored records (default is users..) Build the storage map
         this.db_file = this.root_path + '/' + (conf.db_file ? conf.db_file : 'userdata.db')
-        //
         // 
         super.initialize(conf)
     }
-
-
-    // local_db_store_map  -- a chrono method callback
-    async local_db_store_map(storage_map) {
-        try {
-            fs.writeFile(this.db_file,JSON.stringify(storage_map),() => { this.dirty = false })
-        } catch(e) {
-        }
-    }
-
-   async local_db_load_map() {
-       try {
-           let store_map = JSON.parse(fs.readFileSync(this.db_file,'ascii').toString())
-           return store_map
-       } catch (e) {}
-       return {}
-   }
 
 
     // remote_store - synchronizing the storage map with the remote DB interface
@@ -335,7 +332,7 @@ class FilesAndRelays_base extends LocalStorageLifeCycle {
         let app_version = await this.application_large_data_from_stash(obj)
         return(app_version)
     }
-    
+
     // like findOne, but will return false if the remote object cannot be found
     async search_one(key,field) {
         // don't check the stash

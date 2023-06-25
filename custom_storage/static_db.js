@@ -54,14 +54,80 @@ class PageableMemStoreElement {
 }
 
 
-function mime_to_file_type(mime_type) {
-    return("json") // etc
+class LocalStorageSerialization extends FilesAndRelays {
+
+
+    constructor(messenger,stash_interval,default_m_path) {
+        super(messenger,stash_interval,default_m_path)
+        //
+        this.blob_dir = false
+    }
+
+    initialize(conf) {
+        super.initialize(conf.static_db)
+        this.blob_dir = conf.static_db.blob_dir
+        //
+        if ( this.blob_dir ) {
+            this.load_dir(this.blob_dir)
+        }
+    }
+
+    load_file(file) {
+        if ( !(this.blob_dir) ) return;
+        if ( file !== undefined ) {
+            try {
+                let fpath = this.blob_dir + '/' + file
+                let data = fs.readFileSync(fpath)
+                let str = data.toString()
+                return str
+            } catch (e) {}
+        }
+        return false
+    }
+
+    // //
+    load_dir(blob_dir) {
+        if ( !(this.blob_dir) ) return;
+        try {
+            fs.mkdirSync(blob_dir)
+        } catch (e) {
+        }
+        try {
+            let files = fs.readdirSync(blob_dir)
+            files.forEach(async file => {
+                if ( file === '.DS_Store' ) return
+                try {
+                    let datstr = this.load_file(file)
+                    if ( datstr ) {
+                        let obj = JSON.parse(datstr)
+                        this.application_stash_large_data(obj,true)
+                        // can't do this:: this.set_key_value(whokey,datum)    
+                    }
+                } catch (e) {
+                }
+            });            
+        } catch (e) {
+        }
+    }
+
+    // 
+    async remove_file(file) {
+        if ( !(this.blob_dir) ) return;
+        if ( file !== undefined ) {
+            try {
+                let fpath = this.blob_dir + '/' + file
+                await fsPromises.rm(fpath)
+            } catch (e) {}
+        }
+    }
+
+
 }
 
 //
 // and also a pub/sub client
 //
-class StaticContracts extends FilesAndRelays {
+class StaticContracts extends LocalStorageSerialization {
     //
     constructor(messenger,stash_interval,default_m_path,whokey_field) {
         super(messenger,stash_interval,default_m_path)
@@ -84,15 +150,10 @@ class StaticContracts extends FilesAndRelays {
             //
             this._whokey_field = conf.static_db.index_key ? conf.static_db.index_key : this._whokey_field
             //
-            this.blob_dir = conf.static_db.blob_dir
             let freeloading_timeout = conf.static_db.freeloading_timeout
             this.max_freeloading_time =  freeloading_timeout ? freeloading_timeout : MAX_LAX_CACHE_TIME
             this.memory_allocation_preference = conf.static_db.max_data_RAM
             this._max_group_storage = conf.static_db.max_forwarded_storage ? conf.static_db.max_forwarded_storage : MAX_GROUP_STORAGE_SIZE
-            //
-            if ( this.blob_dir ) {
-                this.load_dir(this.blob_dir)
-            }
         }
     }
     //
@@ -111,7 +172,7 @@ class StaticContracts extends FilesAndRelays {
     }
 
     newer(remote_obj,up_obj) {
-        return false        // applicatio policy
+        return false        // application policy
     }
 
     flat_object_size(obj) {
@@ -174,7 +235,7 @@ class StaticContracts extends FilesAndRelays {
         return hh
     }
 
-    // // 
+    // // override FilesAndRelays
     application_stash_large_data(obj,check_presistence) {
         let flat_object = this.flat_object(obj)
         if ( obj && (flat_object.length < this._max_group_storage) ) return(obj)  // no concern of this method
@@ -305,7 +366,7 @@ class StaticContracts extends FilesAndRelays {
     async get_key_value(whokey) {
         let id = this._whokey_to_ids[whokey]
         let obj = null
-        if ( id === undefined ) {       // ever saw this object (but someone seems to know its key)
+        if ( id === undefined ) {       // never saw this object (but someone seems to know its key)
             obj = await this.search_one(whokey,this._whokey_field)
         } else {
             let hh = this._whokey_to_hash[whokey]
@@ -346,56 +407,6 @@ class StaticContracts extends FilesAndRelays {
         delete this._whokey_to_hash[whokey]
     }
 
-    // 
-    async remove_file(file) {
-        if ( this.blob_dir === undefined ) return;
-        if ( file !== undefined ) {
-            try {
-                let fpath = this.blob_dir + '/' + file
-                await fsPromises.rm(fpath)
-            } catch (e) {}
-        }
-    }
-
-    load_file(file) {
-        if ( this.blob_dir === undefined ) return;
-        if ( file !== undefined ) {
-            try {
-                let fpath = this.blob_dir + '/' + file
-                let data = fs.readFileSync(fpath)
-                let str = data.toString()
-                return str
-            } catch (e) {}
-        }
-        return false
-    }
-
-    // //
-    load_dir(blob_dir) {
-        if ( this.blob_dir === undefined ) return;
-        try {
-            fs.mkdirSync(blob_dir)
-        } catch (e) {
-        }
-        try {
-            let files = fs.readdirSync(blob_dir)
-            files.forEach(async file => {
-                if ( file === '.DS_Store' ) return
-                try {
-                    let datstr = this.load_file(file)
-                    if ( datstr ) {
-                        let obj = JSON.parse(datstr)
-                        this.application_stash_large_data(obj,true)
-                        // can't do this:: this.set_key_value(whokey,datum)    
-                    }
-                } catch (e) {
-                }
-            });            
-        } catch (e) {
-        }
-
-
-    }
 
     schedule(sync_function,static_sync_interval) {  // sync_function this may go away, but it is here for now...
         if ( static_sync_interval ) {

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: general_lifecyle.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: general_lifecyle.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
+/** 
+ * This class is the root class for most classes in lib directory.
+ * This class handles the creation of interval timers required by some messaging and storage aspects of the application.
+ * This class allows for a graceful shutdown of operations, closing off resources that may prevent the termination of 
+ * an application. Furthermore, it is tasked with establishing safe conditions for termination.
+ */
+
+class GeneralAppLifeCycle {
+
+    //
+    constructor() {
+        this.intervalRefs = []
+        this.timerRefs = {}
+        this.app_shutdown = false
+        this.tindex = 0
+
+        global_shutdown_manager.add_me_to_shutdown(this)
+    }
+
+    //
+    shutdown() {
+        if ( this.intervalRefs &amp;&amp; this.intervalRefs.length ) {
+            this.intervalRefs.forEach((interval) => {
+                clearInterval(interval)
+            })
+        }
+        this.intervalRefs = []
+        if ( this.timerRefs ) {
+            for ( let tt in this.timerRefs ) {
+                this.remove_timer(tt)
+            }
+        }
+        this.timerRefs = null
+        //
+        if ( this.app_shutdown &amp;&amp; ( typeof this.app_shutdown === "function" ) ) {
+            this.app_shutdown()
+        }
+    }
+
+    add_interval(iref) {
+        this.intervalRefs.push(iref)
+    }
+
+    // remove_interval -- for the application if the interval is removed before shutdown
+    remove_interval(iref) {
+        let idx = this.intervalRefs.indexOf(iref)
+        if ( idx >= 0 ) {
+            clearInterval(iref)
+            this.intervalRefs.splice(idx,1)
+        }
+    }
+
+    add_timer(tt,timer) {
+        this.timerRefs[tt] = timer
+    }
+    
+    remove_timer(tt) {
+        let timerRef = this.timerRefs[tt]
+        if ( timerRef ) clearTimeout(timerRef)
+        delete this.timerRefs[tt]
+    }
+
+    // add_timeout  -- best for timers expected to be extant for a long time (shorter ones might be managed by their app)
+    add_timeout(fn,time_lapse) {
+        let tt = this.tindex++
+        let timer = setTimeout(() => { this.removeTimer(tt), fn()}, time_lapse)
+        this.add_timer(tt,timer)
+    }
+
+}
+
+
+module.exports = GeneralAppLifeCycle</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DataLookupField.html">DataLookupField</a></li><li><a href="EmailField.html">EmailField</a></li><li><a href="EmailVerifyField.html">EmailVerifyField</a></li><li><a href="EndpointManager.html">EndpointManager</a></li><li><a href="FieldTest.html">FieldTest</a></li><li><a href="FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="FileMapper.html">FileMapper</a></li><li><a href="ForeignAuth.html">ForeignAuth</a></li><li><a href="GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="GeneralAuth.html">GeneralAuth</a></li><li><a href="GeneralBusiness.html">GeneralBusiness</a></li><li><a href="GeneralDBWrapperImpl.html">GeneralDBWrapperImpl</a></li><li><a href="GeneralDynamic.html">GeneralDynamic</a></li><li><a href="GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="GeneralStatic.html">GeneralStatic</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralValidator.html">GeneralValidator</a></li><li><a href="LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="LengthyField.html">LengthyField</a></li><li><a href="LengthyStringField.html">LengthyStringField</a></li><li><a href="LocalSessionTokens.html">LocalSessionTokens</a></li><li><a href="PasswordField.html">PasswordField</a></li><li><a href="PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="PersistenceManager.html">PersistenceManager</a></li><li><a href="ReMailer.html">ReMailer</a></li><li><a href="SessionManager.html">SessionManager</a></li><li><a href="SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="TaggedTransition.html">TaggedTransition</a></li><li><a href="TokenTables.html">TokenTables</a></li><li><a href="TypeCheckField.html">TypeCheckField</a></li><li><a href="UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sun Jun 25 2023 15:23:42 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

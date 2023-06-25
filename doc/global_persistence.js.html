@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: global_persistence.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: global_persistence.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
+const LRU = require('shm-lru-cache')
+const {MessageRelayer} = require("message-relay-services")
+
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+const DFLT_SLOW_MESSAGE_QUERY_INTERVAL = 5000
+const DFLT_FAST_MESSAGE_QUERY_INTERVAL = 1000
+
+/*
+{
+  "lastAccess": 1343846924959,
+  "cookie": {
+    "originalMaxAge": 172800000,
+    "expires": "2012-08-03T18:48:45.144Z",
+    "httpOnly": true,
+    "path": "/"
+  },
+  "user": { 
+    "name":"waylon",
+    "status":"pro"
+  }
+}
+*/
+
+class LRUManager {
+  //
+  constructor(conf) {
+  console.log("LRUManager conf=")
+  console.dir(conf)
+    conf.module_path = global_module_path.replace('/lib','')
+    if ( conf.module_path[conf.module_path-1] ==='/' ) conf.module_path = conf.module_path.substr(0,conf.module_path.length-1)
+    conf.cache.module_path = conf.module_path
+    this.cache = new LRU(conf.cache)
+    this.in_operation = true
+  }
+
+  initialize(conf) {
+  }
+
+  //
+  set(key,value) {
+    let sdata = ( typeof value !== 'string' ) ? JSON.stringify(value) : value
+    let augmented_hash_token = this.cache.hash(key)
+    this.cache.set(augmented_hash_token, sdata)   // store in the LRU cache
+    return(augmented_hash_token)    // return the derived key
+  }
+
+  hash_set(key,value) {
+    let sdata = ( typeof value !== 'string' ) ? JSON.stringify(value) : value
+    let augmented_hash_token = this.cache.hash(key)
+    let hh_unidentified = this.cache.hasher(sdata)
+    this.cache.set(augmented_hash_token, hh_unidentified)   // store in the LRU cache
+    return(hh_unidentified)    // return the derived key
+  }
+  
+  //
+  delete(key) { // token must have been returned by set () -> augmented_hash_token
+    let augmented_hash_token = this.cache.hash(key)
+    this.cache.del(augmented_hash_token)
+  }
+
+  //
+  get(key) {    // token must have been returned by set () -> augmented_hash_token
+    let augmented_hash_token = this.cache.hash(key)
+    let value = this.cache.get(augmented_hash_token)
+    if ( typeof value !== 'string' ) {
+      return false
+    }
+    return value
+  }
+
+  //
+  disconnect(opt) {
+    this.in_operation = false
+    return this.cache.disconnect(opt)
+  }
+
+}
+
+
+
+/** 
+ * Provides a default persistence manager for which may be replaced by an interface to much more complex P2P 
+ * persistence operations.
+ */
+
+class PersistenceManager {
+//
+  constructor(persistence,message_relays) {
+    if ( persistence.password ) {
+      this.persistence_pass = persistence.password.trim(); // decrypt ??  // remote password for admin authority... not on this box
+    }
+    this._LRUManager = new LRUManager(persistence);
+    this.message_fowarding = (message_relays !== undefined) ? new MessageRelayer(message_relays) : false
+    this._all_senders = []
+  }
+
+  get_LRUManager() {
+    return(this._LRUManager)
+  }
+
+  client_going_down() {
+    if ( this._LRUManager.in_operation ) {
+      this._LRUManager.disconnect()
+    }
+  }
+
+  post_message(msgObject) {
+    if ( this.message_fowarding ) {
+      if ( msgObject.m_path === undefined ) {
+        msgObject.m_path = "persistence"
+      }
+      this.message_fowarding.sendMessage(msgObject)  
+    }
+  }
+
+  add_message_handler(m_handler,q_holder,prf_slow,prf_fast) {
+
+    if ( m_handler === undefined ) return;
+    let handler = m_handler
+    if ( q_holder === undefined ) return;
+    let _q = q_holder
+    let slow = DFLT_SLOW_MESSAGE_QUERY_INTERVAL
+    if ( prf_slow !== undefined ) slow = prf_slow;
+    let fast = DFLT_FAST_MESSAGE_QUERY_INTERVAL
+    if ( prf_slow !== undefined ) fast = prf_fast;
+
+    let sender_index = this._all_senders.length
+
+    let message_sender = async () => {
+        let m_snder = this._all_senders[sender_index]
+        if ( m_snder ) {
+            if ( _q.empty_queue() ) {
+                setTimeout(() => { m_snder() }, slow )
+            } else {
+                //
+                while ( !(_q.empty_queue()) ) {
+                  let datum = _q.get_work()
+                  let msgObject = handler(datum)
+                  await this.post_message(msgObject)   // message to admin
+                }
+                setTimeout(() => { m_snder() }, fast )
+            }    
+        }
+    }
+
+    this._all_senders.push(message_sender)
+
+    setTimeout(message_sender,slow)
+
+  }
+
+}
+
+
+module.exports = PersistenceManager;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DataLookupField.html">DataLookupField</a></li><li><a href="EmailField.html">EmailField</a></li><li><a href="EmailVerifyField.html">EmailVerifyField</a></li><li><a href="EndpointManager.html">EndpointManager</a></li><li><a href="FieldTest.html">FieldTest</a></li><li><a href="FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="FileMapper.html">FileMapper</a></li><li><a href="ForeignAuth.html">ForeignAuth</a></li><li><a href="GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="GeneralAuth.html">GeneralAuth</a></li><li><a href="GeneralBusiness.html">GeneralBusiness</a></li><li><a href="GeneralDBWrapperImpl.html">GeneralDBWrapperImpl</a></li><li><a href="GeneralDynamic.html">GeneralDynamic</a></li><li><a href="GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="GeneralStatic.html">GeneralStatic</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralValidator.html">GeneralValidator</a></li><li><a href="LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="LengthyField.html">LengthyField</a></li><li><a href="LengthyStringField.html">LengthyStringField</a></li><li><a href="LocalSessionTokens.html">LocalSessionTokens</a></li><li><a href="PasswordField.html">PasswordField</a></li><li><a href="PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="PersistenceManager.html">PersistenceManager</a></li><li><a href="ReMailer.html">ReMailer</a></li><li><a href="SessionManager.html">SessionManager</a></li><li><a href="SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="TaggedTransition.html">TaggedTransition</a></li><li><a href="TokenTables.html">TokenTables</a></li><li><a href="TypeCheckField.html">TypeCheckField</a></li><li><a href="UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sun Jun 25 2023 15:23:42 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
