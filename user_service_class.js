@@ -455,6 +455,13 @@ function load_parameters(config,if_module_top) {
         */
     }
 
+    global.global_appwide_token = () => {      // was uuid -- may change
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+         });
+    }
+
     global.isHex = (str) => {
         let check = g_hex_re.test(str)
         g_hex_re.lastIndex = 0; // be sure to reset the index after using .text()

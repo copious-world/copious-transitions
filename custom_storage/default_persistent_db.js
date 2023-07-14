@@ -1,7 +1,6 @@
 
 const fs = require('fs')
-const AppLifeCycle = require("./general_lifecyle")
-const uuid = require('./uuid')
+const AppLifeCycle = require("../lib/general_lifecyle")
 
 const DB_STASH_INTERVAL = 10000
 
@@ -51,7 +50,7 @@ class FileMapper extends AppLifeCycle {
             if ( cb ) cb(new Error("already exists"),null)
         }
         if ( !obj._id ) {
-            obj._id = uuid()
+            obj._id = global_appwide_token()
         }
         this.storage_map[obj._id] = obj
         if ( cb ) cb(null)

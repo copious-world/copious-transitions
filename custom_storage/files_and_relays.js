@@ -1,11 +1,10 @@
 //
 const AppLifeCycle = require('../lib/general_lifecyle')
 const fs = require('fs')
-const uuid = require('../lib/uuid')
+
 
 const DB_STASH_INTERVAL = 10000
 const AGED_OUT_DELTA = (1000*60*30)
-
 
 
 // newer things use the repository bridge and store large objects via the repo bridge the JSON is just a meta object
@@ -195,7 +194,7 @@ class LocalStorageLifeCycle extends RemoteMessaging {
     }
 
     id_maker() {
-        return uuid()
+        return global_appwide_token()
     }
 
     hash_from_key(id) {
