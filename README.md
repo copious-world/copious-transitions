@@ -175,3 +175,17 @@ These are default instance classes each of which descends from a generalized cla
 
 
 
+
+## WebSockets
+
+The copious-transitions library will provide methods for initializing custom websocket servers. This library will only provide servers but will not provide clients. For backend communication, message relays and endpoints and pub/sub will be used with packets kept down to a minimal size.
+
+
+##Sesion Tokens
+
+Session tokens are isolared.
+
+LocalSessionTokens
+
+
+

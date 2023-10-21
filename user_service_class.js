@@ -2,9 +2,6 @@
 const fs = require('fs')
 const crypto = require('crypto')
 const clone = require('clone')
-const WebSocket = require('ws')
-const WebSocketServer = WebSocket.Server;
-const http = require("http");
 const passwordGenerator = require('generate-password');
 const ShutdownManager = require('./lib/shutdown-manager')
 //const shutdown_server_helper_factory = require('http-shutdown')
@@ -31,10 +28,11 @@ const g_expected_modules = [
                             "dynamic_assets",
                             "expression",
                             "business",
-                            "transition_engine"
+                            "transition_engine",
+                            "web_sockets"
                         ]
 //
-let g_proc_ws_token = ''
+
 const g_hex_re = /^[0-9a-fA-F]+$/;
 //
 
@@ -59,6 +57,7 @@ class CopiousTransitions extends EventEmitter {
         this.validator = require(conf_obj.mod_path.validator)     // Custom access to field specification from configuration and the application through DB or inline code
         this.business = require(conf_obj.mod_path.business)       // backend tasks that don't return values, but may send them out to other services.. (some procesing involved)
         this.transition_engine = require(conf_obj.mod_path.transition_engine)
+        this.web_sockets = require(conf_obj.mod_path.web_sockets) // web sockets - serveral types of application supported -- use app chosen ws interface
         //
         this.app = require(conf_obj.mod_path.expression)(conf_obj,this.db); // exports a function
         this.session_manager = null
@@ -101,9 +100,15 @@ class CopiousTransitions extends EventEmitter {
         this.user_handler = new UserHandling(this.session_manager,this.validator,this.statics,this.dynamics,this.transition_engine,use_foreign,this.max_cache_time)
         this.mime_handler = new MimeHandling(this.session_manager,this.validator,this.statics,this.dynamics,this.max_cache_time)
         this.transition_processing = new TranstionHandling(this.session_manager,this.validator,this.dynamics,this.max_cache_time)
+        // websocket access to contractual logic
+        this.web_sockets.initialize(conf_obj,this.app)
+        this.web_sockets.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
+        // transition engine access to web sockets and contractual logic
+        this.transition_engine.set_ws(this.web_sockets)
         this.transition_engine.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
         //
     }
+    
 
 
     setup_paths(conf_obj) {
@@ -249,104 +254,12 @@ class CopiousTransitions extends EventEmitter {
                 this.app.responder(res).status(code).send(result)
             })
 
-/*
-            this.app.post('/foreign_login/:token', async (req, foreign_res) => {  // or use the websockets publication of state....
-                let body = req.body
-                let token = req.params.token
-                let [code,report,response] = await this.user_handler.foreign_authorizer(body,token)
-                foreign_res.status(code).end(report)
-                this.user_handler.send_ws_outofband(token,response)
-            })
-*/
-
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
         }       // LOGIN APPS OPTION (END)
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
     }
 
-
-    setup_ws(conf_obj) {
-        // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-        if ( conf_obj.ws_port ) {   // WEB SCOCKETS OPTION (START)    Web Socket Server
-            // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-    
-            let server = http.createServer(this.app);
-            server.listen(conf_obj.ws_port);
-        
-            this.auth_wss = new WebSocketServer({server: server});
-            
-            this.auth_wss.on("connection", (ws,req) => {
-            
-                if ( !this.auth_wss ) {
-                    console.log("ws connection attempt after shutdown")
-                    return
-                }
-                //
-                //
-                let path_on_connect = req.path      // MESSAGE PATHWAYS
-                //
-                switch ( path_on_connect ) {
-                    //
-                    /*
-                    case "foreign_auth" : {
-                        if ( setup_foreign_auth ) setup_foreign_auth(ws)
-                        break
-                    }
-                    */
-                    //
-                    case "site_wide" : {
-                        ws.on("message",this.transition_engine.ws_message_handler)  // data parameter implicit
-                        ws.on("close",() => { this.transition_engine.ws_shutdown(ws) })
-                        break;
-                    }
-                }
-                //
-            });
-            
-            // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-            }       // WEB SCOCKETS OPTION (END)
-            // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-
-            // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-            if ( conf_obj.ws_client_port && !(g_debug) ) {   // SUPPORT SERVICE WEB SCOCKETS OPTION (START)  Web Socket Client
-            // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-            
-            let socket_host =  conf_obj.ws_client_server
-            let sitewide_socket = new WebSocket(`ws://${socket_host}/auth_ws/site_wide`);
-            if ( !sitewide_socket ) {
-                console.log(new Error("Failed to connect to the sitewide server"))
-            }
-            this.transition_engine.ws_connection_attempt(g_proc_ws_token,sitewide_socket)
-        
-        // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-        }       // SUPPORT SERVICE WEB SCOCKETS OPTION (END)
-        // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-    }
-
-
-    setup_app_ws(conf_obj) {
-        // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-        if ( conf_obj.wss_app_port ) {   // WEB APP SCOCKETS OPTION (START)
-            // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-            let app_server = http.createServer(this.app);
-            app_server.listen(conf_obj.wss_app_port);
-            this.app_wss = new WebSocketServer({server: app_server});
-            
-            this.app_wss.on("connection", (ws,req) => {
-                if ( req.url.indexOf("/transitional") > 0  ) {
-                    this.transition_engine.setup_app_ws(ws,this.app_wss)
-                }
-            });
-            
-        // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-        }       // WEB APP SCOCKETS OPTION (END)
-        // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
-    }
-
-
-
-    
 
     // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
     //       // RUN AND STOP
@@ -358,10 +271,9 @@ class CopiousTransitions extends EventEmitter {
         this.app.listen(this.port,() => {
             console.log(`listening on ${this.port}`)
         });
-        //
-        this.setup_ws(this.conf_obj)
-        this.setup_app_ws(this.conf_obj)
-        //
+        if ( this.web_sockets ) {
+            this.web_sockets.final()
+        }
     }
 
 
@@ -445,6 +357,8 @@ function load_parameters(config,if_module_top) {
     //
     global.g_debug = false
     //
+    //
+    // clonify
     global.clonify = (obj) => {
         return(clone(obj))
         /*
@@ -455,6 +369,7 @@ function load_parameters(config,if_module_top) {
         */
     }
 
+    // global_appwide_token
     global.global_appwide_token = () => {      // was uuid -- may change
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -462,21 +377,45 @@ function load_parameters(config,if_module_top) {
          });
     }
 
+    // isHex
     global.isHex = (str) => {
         let check = g_hex_re.test(str)
         g_hex_re.lastIndex = 0; // be sure to reset the index after using .text()
         return(check)
     }
 
-    global.do_hash = (text) => {
-        const hash = crypto.createHash('sha256');
-        hash.update(text);
-        let ehash = hash.digest('hex');
-        return(ehash)
+
+    // do_hash
+    if ( config.session_token_hasher ) {
+        global.do_hash = require(config.session_token_hasher)
+        config.session_token_hasher = global.do_hash // pass on the override
+    } else {
+        global.do_hash = (text) => {
+            const hash = crypto.createHash('sha256');
+            hash.update(text);
+            let ehash = hash.digest('base64url');
+            return(ehash)
+        }
+    }
+    
+
+    // global_hasher
+    if ( config.global_hasher ) {
+        global.global_hasher = require(config.global_hasher)
+        config.global_hasher = global.global_hasher // pass on the override
+    } else {
+        global.global_hasher = (str,specials) => {               // global_hasher(user_str,ipfs) // can ask to store the record on chain...
+            if ( str ) {
+                return do_hash(str)
+            }
+            return('')
+        }
     }
 
+    
     generate_password_block()
 
+    // generate_password
     global.generate_password = () => {
         let password = g_password_store.shift()
         if ( g_password_store.length < PASSWORD_DEPLETION_MIN ) {
@@ -485,19 +424,8 @@ function load_parameters(config,if_module_top) {
         return(password)
     }
 
-    global.global_hasher = (str,specials) => {               // global_hasher(user_str,ipfs) // can ask to store the record on chain...
-        if ( str ) {
-            const hash = crypto.createHash('sha256');
-            hash.update(str);
-            return(hash.digest('hex'))
-        }
-        return('')
-    }
 
     global.global_shutdown_manager = new ShutdownManager()
-
-
-    g_proc_ws_token = do_hash('' + config + '+=+' + Date.now())
 
     try {
         let data = load_configuration(config,if_module_top)
