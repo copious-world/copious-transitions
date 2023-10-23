@@ -308,7 +308,6 @@ class CopiousTransitions extends EventEmitter {
             }
         })
 
-
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
         // TRANSITIONS - pure state transition dynamics for sessions
@@ -466,7 +465,7 @@ function module_top(caller_dir) {
  * 
  * @param {string} cpath 
  * @param {boolean} if_module_top 
- * @returns 
+ * @returns {object} if successful, the configuration object made from reading and parsing the file
  */
 function load_configuration(cpath,if_module_top) {
     cpath = cpath.trim()
@@ -505,7 +504,7 @@ function load_configuration(cpath,if_module_top) {
  * 
  * @param {object} config 
  * @param {boolean} if_module_top 
- * @returns 
+ * @returns {object} - the updated configuration object
  */
 function load_parameters(config,if_module_top) {
     //

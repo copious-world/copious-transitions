@@ -117,7 +117,7 @@ class FileMapper extends AppLifeCycle {
      * 
      * @param {string} id 
      * @param {Function} cb 
-     * @returns 
+     * @returns {boolean|object} if ther eis no callback, returns the object found otherwise true and the object is passed to the callback
      */
     findOne(id,cb) {
         let obj = this.storage_map[id]

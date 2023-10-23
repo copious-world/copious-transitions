@@ -6,11 +6,66 @@ The applications may be separate processes, each with their own TCP port. They w
 
 How big or small the footprint of the service will be will depend mostly on configuration. Each application will read in a configuration file and marshal parts of it to subprocesses and library class instances. Some aspects of configuration will direct the subprocesses to connect on pub/sub pathways on predetermined addresses and ports. Some application will want to automate high level configuration of nodes in their own way. This module provides configuration mostly at the process level, but provides pathways to open up configuration at a higher level.
 
+
+## Main Process Script
+
+In all, the manner in which files are brought into the processes makes the main program very simple. The following is an example of a complete main application script:
+
+```
+const CopiousTransitions = require('copious-transitions')
+
+let [config,debug] = [false,false]
+
+// the application definition is here.
+config = "./user-service-myapp.conf"
+
+if ( process.argv[2] !== undefined ) { // conf file on command line
+    config = process.argv[2];
+}
+
+if (  process.argv[3] !== undefined ) { // maybe debug
+    if ( process.argv[3] === 'debug' ) {
+        g_debug = true
+    }
+}
+
+let transition_app = new CopiousTransitions(config,debug)
+
+
+transition_app.on('ready',() => {
+    transition_app.run()
+})
+```
+
+When the application starts at its entrypoint, **copious-transitions** provides a configuration file reader. The configuration reader will look for the file that provides the database override as in the example; it will look for all overrides in the configuration. Then **copious-transitions** will create instances of the classes and set up HTML API paths that use the instances when running transactions.
+
+
+
 ## Installation
 
 ```
 npm install copious-transitions --save
 ```
+
+
+## Configuration
+
+The configuration is required. 
+
+For an application to be useful, it must provide overrides of the general classes provided by the module. How these classes are addressed is determined by the so called `contractual` modules.
+
+The `contractual` modules process transactions based on a few web API paths. Most of these respond to POST methods that expect JSON objects carrying session identifiers, state machine tokens, and relavent data. The `contractual` path handlers pass off *safe* objects to the methods implemented (overrides) by the application classes.
+
+The application clases are specified in the configuration file along with other applications parameters, such as ports and addresses and security configuration parameters. Applications may extend the basic configuration to set up their downstream connections, database connections, special directories, etc. But, the basic configuration will be present in all derived applications. 
+
+Here is an example of a basic configuration:
+
+```
+BASIC CONFIGURATION
+
+```
+
+
 
 
 ## Transactions and Classes
@@ -43,37 +98,6 @@ const { DBClass, CustomPersistenceDB, CustomStaticDB } = require('copious-transi
 ```
 
 In the example, one class is taken from general\_db.js, which is listed above. There are more classes involved -- these will be explained later. For now, it can be said that the application program will override DBClass and export the override from a new module. And, the calling program will pick up the new class from the configuration.
-
-### Main Process Script
-
-In all, the manner in which files are brought into the processes makes the main program very simple. The following is an example of a complete main application script:
-
-```
-const CopiousTransitions = require('copious-transitions')
-
-let [config,debug] = [false,false]
-
-config = "./user-service-igid.conf"
-if ( process.argv[2] !== undefined ) {
-    config = process.argv[2];
-}
-
-if (  process.argv[3] !== undefined ) {
-    if ( process.argv[3] === 'debug' ) {
-        g_debug = true
-    }
-}
-
-let transition_app = new CopiousTransitions(config,debug)
-
-
-transition_app.on('ready',() => {
-    transition_app.run()
-})
-```
-
-When the application starts at its entrypoint, **copious-transitions** provides a configuration file reader. The configuration reader will look for the file that provides the database override as in the example; it will look for all overrides in the configuration. Then **copious-transitions** will create instances of the classes and set up HTML API paths that use the instances when running transactions.
-
 
 ## API Transactions on the High Level
 

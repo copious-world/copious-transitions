@@ -96,22 +96,110 @@
     
 
     
-
-    
-        <h3 class="subsection-title">Type Definitions</h3>
+        <h3 class="subsection-title">Methods</h3>
 
         
-                
+            
 
     
 
     
-    <h4 class="name" id="token_lambda"><span class="type-signature"></span>token_lambda<span class="signature">(prefix<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <h4 class="name" id="generate_password_block"><span class="type-signature"></span>generate_password_block<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="user_service_class.js.html">user_service_class.js</a>, <a href="user_service_class.js.html#line436">line 436</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="load_configuration"><span class="type-signature"></span>load_configuration<span class="signature">(cpath, if_module_top)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Load the configuration. Called by <code>load_parameters</code>.
+It is absolutely required that there be a configuration file for any application using this module.</p>
+<p>Pleases refer to documentation referened in the readme.md file for a description of the configuration file.</p>
+</div>
 
 
 
@@ -134,8 +222,6 @@
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
         
 
@@ -148,7 +234,7 @@
 
         <tr>
             
-                <td class="name"><code>prefix</code></td>
+                <td class="name"><code>cpath</code></td>
             
 
             <td class="type">
@@ -161,20 +247,33 @@
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
 
-                
+            
 
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>if_module_top</code></td>
+            
+
+            <td class="type">
+            
                 
-                </td>
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
             
 
             
 
-            <td class="description last"><p>optionally prefix the token whith an application specfic string</p></td>
+            <td class="description last"></td>
         </tr>
 
     
@@ -215,7 +314,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="default_session_token.js.html">default_session_token.js</a>, <a href="default_session_token.js.html#line8">line 8</a>
+        <a href="user_service_class.js.html">user_service_class.js</a>, <a href="user_service_class.js.html#line470">line 470</a>
     </li></ul></dd>
     
 
@@ -244,7 +343,347 @@
 
         
 <div class="param-desc">
-    <p>-- a unique identifier relative to the running application scope (defind by the application)</p>
+    <p>if successful, the configuration object made from reading and parsing the file</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="load_parameters"><span class="type-signature"></span>load_parameters<span class="signature">(config, if_module_top)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>config</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>if_module_top</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="user_service_class.js.html">user_service_class.js</a>, <a href="user_service_class.js.html#line509">line 509</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>the updated configuration object</li>
+</ul>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="module_top"><span class="type-signature"></span>module_top<span class="signature">(caller_dir)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>caller_dir</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">caller_dir</span>
+|
+
+<span class="param-type">undefined</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="user_service_class.js.html">user_service_class.js</a>, <a href="user_service_class.js.html#line452">line 452</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>the directory from which the mod path modules will be loaded.</li>
+</ul>
 </div>
 
 
@@ -267,7 +706,9 @@
 
 
 
-            
+        
+    
+
     
 
     
@@ -281,13 +722,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DataLookupField.html">DataLookupField</a></li><li><a href="EmailField.html">EmailField</a></li><li><a href="EmailVerifyField.html">EmailVerifyField</a></li><li><a href="EndpointManager.html">EndpointManager</a></li><li><a href="FieldTest.html">FieldTest</a></li><li><a href="FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="FileMapper.html">FileMapper</a></li><li><a href="ForeignAuth.html">ForeignAuth</a></li><li><a href="GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="GeneralAuth.html">GeneralAuth</a></li><li><a href="GeneralBusiness.html">GeneralBusiness</a></li><li><a href="GeneralDBWrapperImpl.html">GeneralDBWrapperImpl</a></li><li><a href="GeneralDynamic.html">GeneralDynamic</a></li><li><a href="GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="GeneralStatic.html">GeneralStatic</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralValidator.html">GeneralValidator</a></li><li><a href="LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="LengthyField.html">LengthyField</a></li><li><a href="LengthyStringField.html">LengthyStringField</a></li><li><a href="LocalSessionTokens.html">LocalSessionTokens</a></li><li><a href="PasswordField.html">PasswordField</a></li><li><a href="PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="PersistenceManager.html">PersistenceManager</a></li><li><a href="ReMailer.html">ReMailer</a></li><li><a href="SessionManager.html">SessionManager</a></li><li><a href="SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="TaggedTransition.html">TaggedTransition</a></li><li><a href="TokenTables.html">TokenTables</a></li><li><a href="TypeCheckField.html">TypeCheckField</a></li><li><a href="UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DataLookupField.html">DataLookupField</a></li><li><a href="EmailField.html">EmailField</a></li><li><a href="EmailVerifyField.html">EmailVerifyField</a></li><li><a href="EndpointManager.html">EndpointManager</a></li><li><a href="FieldTest.html">FieldTest</a></li><li><a href="FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="FileMapper.html">FileMapper</a></li><li><a href="ForeignAuth.html">ForeignAuth</a></li><li><a href="GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="GeneralAuth.html">GeneralAuth</a></li><li><a href="GeneralBusiness.html">GeneralBusiness</a></li><li><a href="GeneralDBWrapperImpl.html">GeneralDBWrapperImpl</a></li><li><a href="GeneralDynamic.html">GeneralDynamic</a></li><li><a href="GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="GeneralStatic.html">GeneralStatic</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a></li><li><a href="GeneralValidator.html">GeneralValidator</a></li><li><a href="LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="LengthyField.html">LengthyField</a></li><li><a href="LengthyStringField.html">LengthyStringField</a></li><li><a href="PasswordField.html">PasswordField</a></li><li><a href="PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="ReMailer.html">ReMailer</a></li><li><a href="SessionManager.html">SessionManager</a></li><li><a href="SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="SessionTokenManager.html">SessionTokenManager</a></li><li><a href="TaggedTransition.html">TaggedTransition</a></li><li><a href="TokenTables.html">TokenTables</a></li><li><a href="TypeCheckField.html">TypeCheckField</a></li><li><a href="UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li><li><a href="WebSocketManager.html">WebSocketManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#generate_password_block">generate_password_block</a></li><li><a href="global.html#load_configuration">load_configuration</a></li><li><a href="global.html#load_parameters">load_parameters</a></li><li><a href="global.html#module_top">module_top</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sun Jun 25 2023 15:23:42 GMT-0700 (Pacific Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sun Oct 22 2023 21:24:14 GMT-0700 (Pacific Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
