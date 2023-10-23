@@ -36,6 +36,65 @@ const g_expected_modules = [
 const g_hex_re = /^[0-9a-fA-F]+$/;
 //
 
+/**
+ * 
+ * The class provided in this module provides the main method for the entry point to an application running 
+ * a CopiousTransitions web server.
+ * 
+ * Here is a typical application. 
+ * 
+ * ```
+const CopiousTransitions = require('copious-transitions')  // include this module
+
+let [config,debug] = [false,false]      // define the variables
+
+config = "./user-service-myapp.conf"    // set the configuration file name
+if ( process.argv[2] !== undefined ) {
+    config = process.argv[2];
+}
+
+if (  process.argv[3] !== undefined ) {  // maybe use debugging
+    if ( process.argv[3] === 'debug' ) {
+        debug = true
+    }
+}
+
+let transition_app = new CopiousTransitions(config,debug,__dirname)  // Initialize everything according to the configuration.
+// in this application the local directory of the calling module is the place to look for mod path modules to be loaded.
+
+transition_app.on('ready',() => {       // when the configuration is done the application is ready to run
+    transition_app.run()                // run the application
+})
+
+```
+ * 
+ * The constructor loads all the modules that are configured for execution.
+ * Take note that the module are not specified at the top of file where this class is defined.
+ * The modules that this process will use are required to be specified in the configuration file.
+ * 
+ * The constuctor first calls `load_parameters` which can reset the module offsets as needed. 
+ * In some cases, a module might not be listed in the configuration, for instance. 
+ * 
+ * The `load_parameters` call also defines a set of global variables and methods that can be used throughout the process
+ * as needed. A restriction of the basic module architecture is that these globals be defined here and nowhere else. 
+ * (While there is no way to regulate the management of globals in an application, it is recommended to keep any global definitions
+ * in one place.)
+ * 
+ * After the `load_parameters` call is performed, the required modules are loaded. Each module is responsible for returning a 
+ * constucted object based on the classes defined with it.
+ * 
+ * In the module stack, most of the salient variables that must be configured are set in the intialization methods. 
+ * The same is true here, and the constructor defers the all the initializations to the initialization method.
+ * The main initialization method is asynchronous, and so this constructor parsels its call out to a thunk.
+ * 
+ * The only modules that are loaded by `requires` at the top of this file are the `contractual` modules. 
+ * The `contractual` modules are supposed to be universal enough so as to not require overrides. In some cases, 
+ * an application might choose to replace the. Such applications can override the class provided here. The method `initlialize_contractuals`
+ * is set aside for the purpose of overriding these methods. However, it is recommended that the existing methods be kept in tact, 
+ * as they define the basic structure for handling requests in applications derived from CopiousTransitions.
+ * 
+ */
+
 class CopiousTransitions extends EventEmitter {
     //
     constructor(config,debug,caller_dir) {
@@ -81,6 +140,10 @@ class CopiousTransitions extends EventEmitter {
 
 
     // INITIALIZE
+    /**
+     * 
+     * @param {object} conf_obj 
+     */
     async initialize_all(conf_obj) {
         //
         this.db.initialize(conf_obj)
@@ -96,10 +159,7 @@ class CopiousTransitions extends EventEmitter {
         this.transition_engine.install(this.statics,this.dynamics,this.session_manager)
 
         //  --- contractual logic ---
-        let use_foreign = false // conf_obj.foreign_auth.allowed
-        this.user_handler = new UserHandling(this.session_manager,this.validator,this.statics,this.dynamics,this.transition_engine,use_foreign,this.max_cache_time)
-        this.mime_handler = new MimeHandling(this.session_manager,this.validator,this.statics,this.dynamics,this.max_cache_time)
-        this.transition_processing = new TranstionHandling(this.session_manager,this.validator,this.dynamics,this.max_cache_time)
+        this.initlialize_contractuals()
         // websocket access to contractual logic
         this.web_sockets.initialize(conf_obj,this.app)
         this.web_sockets.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
@@ -108,9 +168,67 @@ class CopiousTransitions extends EventEmitter {
         this.transition_engine.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
         //
     }
-    
 
 
+    /**
+     * Construct the contractual handlers. Simply new object instances. 
+     * Pass in the previously allocated handlers. 
+     */
+    initlialize_contractuals() {
+        let use_foreign = false // conf_obj.foreign_auth.allowed (deprecated)
+        this.user_handler = new UserHandling(this.session_manager,this.validator,this.statics,this.dynamics,this.transition_engine,use_foreign,this.max_cache_time)
+        this.mime_handler = new MimeHandling(this.session_manager,this.validator,this.statics,this.dynamics,this.max_cache_time)
+        this.transition_processing = new TranstionHandling(this.session_manager,this.validator,this.dynamics,this.max_cache_time)    
+    }
+
+
+    /**
+     * Set up the web api paths which will be used by the router to find the handler methods.
+     * The paths specified in this method are a short list of paths describing the general types of transactions 
+     * that are needed to carry out actions for fetching something, creating something to be returned as a mime type asset, 
+     * or for performing a state transition. Some paths are of the type that are *guarded*. Guarded paths require user identification
+     * via session identification and token matching, especially if there is a secondary action.
+     * 
+     * Here is a list of the paths that this module defines:
+     * 
+     * * /static/:asset            -- previously static_mime.  This just returns a static (not computed) piece of information. The app should be able to set the mime type.
+     * * /guarded/static/:asset    -- previously keyed_mime.   Same as above, but checks the session for access.
+     * * /guarded/dynamic/:asset   -- does the same as static but calls on functions that generate assets -- could be a function service.
+     * * /guarded/secondary        -- a handshake that may be required of some assets before delivery of the asset.
+     * * /transition/:transition   -- a kind of transition of the session -- this may return a dynamic asset or it might just process a form -- a change of state expected
+     * * /transition/secondary     -- a handshake that may be required of some assets before delivery of the asset and always finalization of transition
+     * * '/users/login','/users/logout','/users/register','/users/forgot' -- the start, stop sessions, manage passwords.
+     * * /users/secondary/:action  -- the handler for user session management that may require a handshake or finalization.
+     * 
+     * Each of these paths hands off processing to a type of contractual class. Each contractual class defines the checks on permission
+     * and availability that is needed to retrieve an asset or perform an action. (Note: contractual class in this case do not have to
+     * do with blockchain contract processing [yet such versions of these classes can be imagined]) What is meant by contractual here
+     * is that the client (browser... usually) and the server will provide authorization, session identity, and token handshakes 
+     * in a particular, well-defined way.
+     * 
+     * Note that that there are three types of contractual classes:
+     * 
+     * 1. user processing - this type of processing has to do with the user session being established or terminated and user existence.
+     * 2. mime processing - This processing has to do with items being returned to the client, e.g. images, text, HTML, JSON, etc.
+     * 3. transition processing - This proessing has to do with driving a state machine in some way.
+     * 
+     * In the case of state machine processing, most of the application are just taking in data, sending it somewhere, and updating a database
+     * about the state of the data and/or the user. In some applications, an actual state machine (for the user) might be implemented and the finalization 
+     * of the state will result in reseting the state of the machine for a particular user. 
+     * 
+     * How the methods map to the contractual methods:
+     * 
+     * * /static/:asset            -- `mime_handler.static_asset_handler`
+     * * /guarded/static/:asset    -- `mime_handler.guarded_static_asset_handler`
+     * * /guarded/dynamic/:asset   -- `mime_handler.guarded_dynamic_asset_handler`
+     * * /guarded/secondary        -- `mime_handler.guarded_secondary_asset_handler`
+     * * /transition/:transition   -- `transition_processing.transition_handler`
+     * * /transition/secondary     -- `transition_processing.secondary_transition_handler`
+     * * '/users/login','/users/logout','/users/register','/users/forgot' -- user_handler.user_sessions_processing
+     * * /users/secondary/:action  -- `transition_processing.secondary_transition_handler`
+     * 
+     * @param {object} conf_obj 
+     */
     setup_paths(conf_obj) {
         /*
         /static/:asset            -- previously static_mime.  This just returns a static (not computed) piece of information. The app should be able to set the mime type.
@@ -265,18 +383,30 @@ class CopiousTransitions extends EventEmitter {
     //       // RUN AND STOP
     // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
+    /**
+     * The web server will start running.
+     * Before listening, finalize the DB initialization.
+     * Once listening, complete the initialization of the web socket service if it is being used.
+     */
     run() {
         // APPLICATION STARTUP
         this.db.last_step_initalization()
         this.app.listen(this.port,() => {
             console.log(`listening on ${this.port}`)
+            if ( this.web_sockets ) {
+                this.web_sockets.final()
+            }
         });
-        if ( this.web_sockets ) {
-            this.web_sockets.final()
-        }
     }
 
 
+    /**
+     * Establish the signal handler that will allow an external process to bring this process down.
+     * The handler will shutdown the DB and wait for the DB shutdown to complete. 
+     * In many cases, the DB will write final data to the disk before disconnecting.
+     * Then, use the shutdown manager to clear out any connections and timers. 
+     * Finally, exit the process.
+     */
     setup_stopping() {
         process.on('SIGINT', async () => {
             try {
@@ -301,6 +431,9 @@ class CopiousTransitions extends EventEmitter {
 // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
 
+/**
+ * 
+ */
 function generate_password_block() {
     //
     var passwords = passwordGenerator.generateMultiple(PASSWORD_BLOCKSIZE, {
@@ -312,6 +445,11 @@ function generate_password_block() {
 }
 
 
+/**
+ * 
+ * @param {caller_dir|undefined} caller_dir 
+ * @returns {string} - the directory from which the mod path modules will be loaded.
+ */
 function module_top(caller_dir) {
     if ( typeof caller_dir === "string" ) {
         return caller_dir
@@ -320,6 +458,16 @@ function module_top(caller_dir) {
 }
 
 
+/**
+ * Load the configuration. Called by `load_parameters`. 
+ * It is absolutely required that there be a configuration file for any application using this module.
+ * 
+ * Pleases refer to documentation referened in the readme.md file for a description of the configuration file.
+ * 
+ * @param {string} cpath 
+ * @param {boolean} if_module_top 
+ * @returns 
+ */
 function load_configuration(cpath,if_module_top) {
     cpath = cpath.trim()
     try {
@@ -353,6 +501,12 @@ function load_configuration(cpath,if_module_top) {
     throw new Error(`could not find the file ${cpath}`)
 }
 
+/**
+ * 
+ * @param {object} config 
+ * @param {boolean} if_module_top 
+ * @returns 
+ */
 function load_parameters(config,if_module_top) {
     //
     global.g_debug = false
