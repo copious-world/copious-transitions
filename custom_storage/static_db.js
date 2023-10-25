@@ -399,6 +399,8 @@ class LocalStorageSerialization extends FilesAndRelays {
      * Called by the ancestor FilesAndRelays. In FilesAndRelays, this method is a nooperation.
      * It is assumed that the static DB will provide custom storage for certain types of obects.
      * 
+     * 
+     * 
      * @param {object} obj 
      * @param {string} key 
      * @param {string} field 
@@ -409,7 +411,7 @@ class LocalStorageSerialization extends FilesAndRelays {
             let id_chunk = obj[field]
             if ( id_chunk && id_chunk.length && (typeof id_chunk === 'string') ) {
                 if ( key.indexOf(id_chunk) < 0 ) {
-                    obj._whokey += `_${id_chunk}`
+                    obj._whokey += `_${id_chunk}`   // ??????
                 }
             } 
         }
@@ -619,7 +621,7 @@ class LocalStaticDB extends LocalStorageSerialization {
         } else {  // never saw this (this node -- plugged into the copious-transitions relationship management)
             // so we go looking for it on the mesh
             //  -----------------search_one--------> using the *field* parameter
-            let obj = await this.search_one(whokey,this._whokey_field)  // going to try to find an object with a local ownership field being used here
+            let obj = await this.search_one(whokey,this._whokey_field,data[this._whokey_field])  // going to try to find an object with a local ownership field being used here
             if ( obj ) {        // there it is from the universe
                 obj._whokey = whokey                    // the local identity will be stored with the object
                 wa_id = delete data._id                 // get the wide area id 

@@ -46,10 +46,10 @@ class RemoteMessaging extends AppLifeCycle {
      * @param {string} field - the field that is to be used as the key for identifying the object `_id` is the default.
      * @returns {object|boolean}  - returns the recovered object or false
      */
-    async remote_fetch_message(wa_id,field) {          // expect no local object -- use universal id locator
+    async remote_fetch_message(wa_id,field,match_data) {          // expect no local object -- use universal id locator
         let m_path = this.default_m_path
         let msg = {
-            "_id"  : wa_id      // should be enought for it search
+            "_id"  : (match_data !== undefined) ? match_data : wa_id      // should be enought for it search
         }
         if ( field !== undefined ) {
             msg._x_key_field = field    // the name of the field for services that need to have it defined by the caller
@@ -443,17 +443,18 @@ class FilesAndRelays_base extends ApplicationCustomizationMethods {
     }
 
 
-    // The pub/sub aspect of this data management interface allows subscription 
-    // to a number of topics refered to as knowledge_domains. Knowledge domains are listed in an array on the configuration.
-    // This initialization subscribes to a number of topcis and then passes the subscription response down to the 
-    // application implementation
     /**
+     * Sets up the db file and then calls its super intializer (LocalStorageLifeCycle).
+     * Finally, it sets up the pub/sub system configured by knowledge domains.
+     * 
+     * The pub/sub aspect of this data management interface allows subscription
+     * to a number of topics refered to as knowledge_domains. Knowledge domains are listed in an array on the configuration.
+     * This initialization subscribes to a number of topcis and then passes the subscription response down to the
+     * application implementation
      * 
      * @param {object} conf 
      */
     initialize(conf) {
-        //
-        super.initialize(conf)
         // 
         if ( conf.persistence_db ) {   // just that some configurations may be passed in this fashion 
             conf = conf.persistence_db 
@@ -526,19 +527,25 @@ class FilesAndRelays_base extends ApplicationCustomizationMethods {
         this.remote_store_message(sender,'create')             // send it away, large data and all....    
     }
 
-    // findOne -- returns false if the object is nowhere...
-    //      --- only the static descendant has to worry about dont_create
     /**
+     * First looks in the `_storage_map`.  If it is there, this method updates the object's timestamp and then 
+     * calls on the application's data completion method, `application_large_data_from_stash`.
      * 
-     * @param {string} id 
-     * @param {boolean} dont_create 
-     * @returns 
+     * If the object is not in the `_storage_map`, this attemps to fetch the object from remote stores. 
+     * (Note that the object is already known in this case in that the wide area id is the parameter of the method.)
+     * 
+     * If the object cannot be found in a remote store, then this method will attempt to create one 
+     * unless `dont_create` is set.
+     * 
+     * @param {string} wa_id 
+     * @param {boolean} dont_create - only the static descendant has to worry about dont_create
+     * @returns {object|boolean} The found object or false. Returns false if the object is nowhere...
      */
-    async findOne(id,dont_create) {
+    async findOne(wa_id,dont_create) {
         // check the storage map first....
-        let obj = this._storage_map[id]
+        let obj = this._storage_map[wa_id]
         if ( !( obj ) ) {
-            obj = await this.remote_fetch_message(id)   // by id only
+            obj = await this.remote_fetch_message(wa_id)   // by wa_id only
             if ( !( obj ) ) {
                 return false
             }
@@ -552,31 +559,46 @@ class FilesAndRelays_base extends ApplicationCustomizationMethods {
         return(app_version)
     }
 
-    // like findOne, but will return false if the remote object cannot be found
+    // 
     /**
+     * 
+     * like findOne, but will return false if the remote object cannot be found (i.e does not create)
+     * 
+     * Also, this will pass along data for a key search on the remote.
+     * When the object comes back the application has a chance to reset ID fields to match remote data.
+     * This method also calls `application_large_data_from_stash`.
      * 
      * @param {string} key 
      * @param {string} field 
      * @returns 
      */
-    async search_one(key,field) {
+    async search_one(key,field,match_data) {
         // don't check the stash
-        let obj = await this.remote_fetch_message(key,field)    // by key in chosen field
+        let obj = await this.remote_fetch_message(key,field,match_data)    // by key in chosen field
         if ( !( obj ) ) {
             return false
         }
         //
-        this.application_fix_keys_obj(obj,key,field)
+        this.application_fix_keys_obj(obj,key,field)  // given the data has come back, the object can be set to use remotely defined IDs
         let app_version = await this.application_large_data_from_stash(obj)
         return(app_version)
     }
 
     /**
+     * This adds an object to the storage map if it is not already there.
+     * An error will be returned if the object is already stored.  (This is useful for debugging but it is ignored)
+     * 
+     * If the option to to remote is true, the object will be completed by reading in large data if the object is of that size.
+     * Then, the object will be sent to the remote with a default operation `update`. The data will be marked for writing to a file.
+     * 
+     * If the is not telling the remote anything, the large data of the object will be stashed. 
+     * That is this calls `application_large_data_from_stash` which should put excessive data into a file and keep a skeleton of the 
+     * data in storage.
      * 
      * @param {object} obj 
      * @param {boolean} dont_remote 
      * @param {string} udpate_op 
-     * @returns 
+     * @returns {Error|boolean} - returns false if it does not return an error
      */
     async update(obj,dont_remote,udpate_op) {
         let e = this.add_to_storage_map(obj)
@@ -596,17 +618,19 @@ class FilesAndRelays_base extends ApplicationCustomizationMethods {
 
 
     /**
+     * This attempts to remove data from everywhere.  
+     * The local data stash is cleared of the data. 
+     * Removes the object from the local `_stroage_map`
+     * Then, it suggests to the remote that the object be forgotten. 
      * 
      * @param {string} id 
      * @param {boolean} dont_remote -- true if the object should be removed remotely
-     * @returns 
      */
     delete(id,dont_remote) {
         this.application_clear_large_data(this._storage_map[id])
         this.remove_from_storage_map(id)
         if ( !(dont_remote) ) this.remote_store_dereference(id)
         this.dirty = true
-        return(false)
     }
 
     //
