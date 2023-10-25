@@ -7,24 +7,24 @@
 class FauxInMemStore {
 
     constructor() {
-        this.#local_map
+        this._local_map = {}
     }
 
     set_on_path(msg,m_path) {
         if (  msg._id ) {
-            this.#local_map[msg._id] = msg
+            this._local_map[msg._id] = msg
         }
     }
 
     get_on_path(msg,m_path) {
         if (  msg._id ) {
-            return this.#local_map[msg._id]
+            return this._local_map[msg._id]
         }
     }
 
     del_on_path(msg,m_path) {
         if (  msg._id ) {
-            delete this.#local_map[msg._id]
+            delete this._local_map[msg._id]
         }
     }
 
