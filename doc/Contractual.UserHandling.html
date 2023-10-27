@@ -31,6 +31,15 @@
         <h2><span class="attribs"><span class="type-signature"></span></span>
             <span class="ancestors"><a href="Contractual.html">Contractual</a>.</span>UserHandling<span class="signature">()</span><span class="type-signature"></span></h2>
         
+            <div class="class-description"><p>The user handling operations deal with registration, login, logout and some supporting pathways.</p>
+<p>The main method of this class is <code>user_sessions_processing</code> which takes a <code>user_op</code> parameter, a string,
+which can be one of 'register', 'login', or 'logout'. 'forgot' has been available in the past for forgotten passwords,
+but other processes can handle the operation. Also, with a greated emphasis on using DIDs, passwords will not be stored
+in the better supported applications derived by extending the classes in lib.</p>
+<p>All the methods take a requests for managing a user session and decide how the request should be handled based on calls to the application
+session manager. The operations 'register' and 'login' will require secondary actions. The operation 'logout' can be done
+in response to a single request.</p></div>
+        
     
 </header>
 
@@ -39,6 +48,8 @@
     
         
 
+    
+    <h2>Constructor</h2>
     
 
     
@@ -90,7 +101,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="contractual_user_processing.js.html">contractual/user_processing.js</a>, <a href="contractual_user_processing.js.html#line8">line 8</a>
+        <a href="contractual_user_processing.js.html">contractual/user_processing.js</a>, <a href="contractual_user_processing.js.html#line20">line 20</a>
     </li></ul></dd>
     
 
@@ -138,6 +149,888 @@
     
 
     
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="foreign_authorizer"><span class="type-signature">(async) </span>foreign_authorizer<span class="signature">(body, token)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>(Deprecated)</p>
+<p>The purpose of this method is to provide a secondary action for login's that are started by other serivces.
+For instance, Big Company X may provide a login that we should trust.
+Foreign login was tested for this stack. But, more resources are being put into distirbuted identities.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>body</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>token</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="contractual_user_processing.js.html">contractual/user_processing.js</a>, <a href="contractual_user_processing.js.html#line173">line 173</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>a tupple really, that has: 1) the status code, 2) the JSON response, 3) possibly data or boolean (false for not in use)</li>
+</ul>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="manage_foreign_auth_session"><span class="type-signature"></span>manage_foreign_auth_session<span class="signature">(transitionObj, foreign)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>(Deprecated)</p>
+<p>The purpose of this method is to provide a primary action for login's that are started by other serivces.
+For instance, Big Company X may provide a login that we should trust.
+Foreign login was tested for this stack. But, more resources are being put into distirbuted identities.</p>
+<p>This method is reached by a pathway within <code>user_sessions_processing</code></p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>transitionObj</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>foreign</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="contractual_user_processing.js.html">contractual/user_processing.js</a>, <a href="contractual_user_processing.js.html#line153">line 153</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="secondary_processing"><span class="type-signature">(async) </span>secondary_processing<span class="signature">(action, body)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>For a few types of user operations, a seconday action will be required.</p>
+<p>The method <code>user_sessions_processing</code> must have set up match data and stored it in cache within the transition object
+mapped by the <code>token</code> riding wih the body.</p>
+<p>One simple check that is done before all others is that the cached transition object should have the same action value as the
+action parameter. If it does the operation continues. Next, this method suffixes transition object's action field with '-secondary'
+telling the ensuing operations of the session manager that the operation is secondary.</p>
+<p>The <code>match</code> method is called next. In some application this may be a simple equivalence check on the password field against
+a field in a stored user record. In other applications, it may be a cryptographic signature verification using data
+fromm the cached transition, data that was not sent to the requesting client.</p>
+<p>If the <code>match</code> passes, then the reserved session key will be taken out of the session token stash. Given that the session token
+can be retrieved, it will be used to initialize a user session by being passed to the session manager's method
+<code>initialize_session_state</code>. <code>initialize_session_state</code> may be useful enough in application that will not have to be overridden.
+But, the application's session manager may find ways to update it. The application will most likley update <code>match</code>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>action</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>one of 'register' or 'login'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>body</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="contractual_user_processing.js.html">contractual/user_processing.js</a>, <a href="contractual_user_processing.js.html#line119">line 119</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>a tupple really, that has: 1) the status code, 2) the JSON response, 3) possibly data or boolean (false for not in use)</li>
+</ul>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="sitewide_logout"><span class="type-signature">(async) </span>sitewide_logout<span class="signature">(body)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>This method calls upon the 'logout' pathway handled by the session manager's <code>process_user</code>.
+Th</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>body</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>similar to the body from HTTP requests, but delivered by a web socket...(rides on top of HTTP)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="contractual_user_processing.js.html">contractual/user_processing.js</a>, <a href="contractual_user_processing.js.html#line202">line 202</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="user_sessions_processing"><span class="type-signature">(async) </span>user_sessions_processing<span class="signature">(user_op, body)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>This method does much of its work by calling out to the session managers method <code>process_user</code>.
+For login and registration, most session initiation implementations could be expected to use a secondary action.</p>
+<p>There is a call to the validator. For a number of applications, the validator checks on password consistency,
+the syntactic structure of entries, etc. In some applications, the use of the validator is moot and it returns <strong>true</strong>
+by default.</p>
+<p>In the case where one no secondary action will be user, the method <code>process_user</code> will perform the entire operation,
+such as logging out a user.</p>
+<p>Otherwise, a response is sent to the requesting client immediately. And, the response will contain
+the data necessary to let the client set up a match in the secondary action. An example would be the data and public key
+necessary for a cryptographic signature.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>user_op</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>one of 'login', 'logout', 'register'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>body</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="contractual_user_processing.js.html">contractual/user_processing.js</a>, <a href="contractual_user_processing.js.html#line56">line 56</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>a tupple really, that has: 1) the status code, 2) the JSON response, 3) possibly data or boolean (false for not in use)</li>
+</ul>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
 
     
 
@@ -158,7 +1051,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Thu Oct 26 2023 22:40:05 GMT-0700 (Pacific Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Oct 27 2023 10:43:57 GMT-0700 (Pacific Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
