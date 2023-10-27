@@ -1,10 +1,13 @@
-
-
-// keep basic transition information around between calls for certain flow processes.
-// this is not shared with other system processes, so just use local data structures. 
-// (this could be modularized with C++ or other..)
-
-
+/**
+ * The LocalTObjectCache is a simple wrapper of an Object or Map.
+ * This is used in the contractual operations to save transition object between primary and seconday invokations.
+ * 
+ * Keep basic transition information around between calls for certain flow processes.
+ * this is not shared with other system processes, so just use local data structures. 
+ * (this could be modularized with C++ or other..)
+ * 
+ * @memberof Contractual
+ */
 class LocalTObjectCache {
     //
     constructor(cache_time) {

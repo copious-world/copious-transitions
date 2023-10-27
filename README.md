@@ -2,9 +2,9 @@
 
 This is a library that supports building and running web services applications. The library provides generalized classes implementing calling frames for applications to override. The applications may handle authorization, uploading media, accessing static pages, accessing dynamic processes that require state transition management, etc.
 
-The applications may be separate processes, each with their own TCP port. They will share information with each other via shared memory for such requirements as access control. Some of the applications may run on different nodes in a cluster. Information sharing will be controlled by the use of certain libraries providing shared memory management and pub/sub processes.
+The applications may be separate processes, each with their own TCP port. ***They will share information with each other via shared memory for such requirements as access control.*** Some of the applications may run on different nodes in a cluster. Information sharing will be controlled by the use of certain libraries providing shared memory management and pub/sub processes.
 
-How big or small the footprint of the service will be will depend mostly on configuration. Each application will read in a configuration file and marshal parts of it to subprocesses and library class instances. Some aspects of configuration will direct the subprocesses to connect on pub/sub pathways on predetermined addresses and ports. Some application will want to automate high level configuration of nodes in their own way. This module provides configuration mostly at the process level, but provides pathways to open up configuration at a higher level.
+How big or small the footprint of the service will be will depend mostly on configuration. Each application reads in a configuration file and marshals parts of it to subprocesses and library class instances. Some aspects of configuration will direct the subprocesses to connect on pub/sub pathways on predetermined addresses and ports. Some application will want to automate high level configuration of nodes in their own way. This module provides configuration mostly at the process level, but provides pathways to open up configuration at a higher level.
 
 
 ## Main Process Script

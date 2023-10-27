@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: CopiousTransitions</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: CopiousTransitions</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>
+            <span class="ancestors"><a href="CopiousTransitions.html">CopiousTransitions</a>.</span>CopiousTransitions<span class="signature">()</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description"><p>The class provided in this module provides the main method for the entry point to an application running
+a CopiousTransitions web server.</p>
+<p>Here is a typical application.</p>
+<pre class="prettyprint source"><code>const CopiousTransitions = require('copious-transitions')  // include this module
+
+let [config,debug] = [false,false]      // define the variables
+
+config = &quot;./user-service-myapp.conf&quot;    // set the configuration file name
+if ( process.argv[2] !== undefined ) {
+    config = process.argv[2];
+}
+
+if (  process.argv[3] !== undefined ) {  // maybe use debugging
+    if ( process.argv[3] === 'debug' ) {
+        debug = true
+    }
+}
+
+let transition_app = new CopiousTransitions(config,debug,__dirname)  // Initialize everything according to the configuration.
+// in this application the local directory of the calling module is the place to look for mod path modules to be loaded.
+
+transition_app.on('ready',() => {       // when the configuration is done the application is ready to run
+    transition_app.run()                // run the application
+})
+
+</code></pre>
+<p>The constructor loads all the modules that are configured for execution.
+Take note that the module are not specified at the top of file where this class is defined.
+The modules that this process will use are required to be specified in the configuration file.</p>
+<p>The constuctor first calls <code>load_parameters</code> which can reset the module offsets as needed.
+In some cases, a module might not be listed in the configuration, for instance.</p>
+<p>The <code>load_parameters</code> call also defines a set of global variables and methods that can be used throughout the process
+as needed. A restriction of the basic module architecture is that these globals be defined here and nowhere else.
+(While there is no way to regulate the management of globals in an application, it is recommended to keep any global definitions
+in one place.)</p>
+<p>After the <code>load_parameters</code> call is performed, the required modules are loaded. Each module is responsible for returning a
+constucted object based on the classes defined with it.</p>
+<p>In the module stack, most of the salient variables that must be configured are set in the intialization methods.
+The same is true here, and the constructor defers the all the initializations to the initialization method.
+The main initialization method is asynchronous, and so this constructor parsels its call out to a thunk.</p>
+<p>The only modules that are loaded by <code>requires</code> at the top of this file are the <code>contractual</code> modules.
+The <code>contractual</code> modules are supposed to be universal enough so as to not require overrides. In some cases,
+an application might choose to replace the. Such applications can override the class provided here. The method <code>initlialize_contractuals</code>
+is set aside for the purpose of overriding these methods. However, it is recommended that the existing methods be kept in tact,
+as they define the basic structure for handling requests in applications derived from CopiousTransitions.</p></div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="CopiousTransitions"><span class="type-signature"></span>new CopiousTransitions<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="user_service_class.js.html">user_service_class.js</a>, <a href="user_service_class.js.html#line101">line 101</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="initialize_all"><span class="type-signature">(async) </span>initialize_all<span class="signature">(conf_obj)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>conf_obj</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="user_service_class.js.html">user_service_class.js</a>, <a href="user_service_class.js.html#line150">line 150</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="initlialize_contractuals"><span class="type-signature"></span>initlialize_contractuals<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Construct the contractual handlers. Simply new object instances.
+Pass in the previously allocated handlers.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="user_service_class.js.html">user_service_class.js</a>, <a href="user_service_class.js.html#line180">line 180</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="run"><span class="type-signature"></span>run<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>The web server will start running.
+Before listening, finalize the DB initialization.
+Once listening, complete the initialization of the web socket service if it is being used.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="user_service_class.js.html">user_service_class.js</a>, <a href="user_service_class.js.html#line393">line 393</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setup_paths"><span class="type-signature"></span>setup_paths<span class="signature">(conf_obj)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Set up the web api paths which will be used by the router to find the handler methods.
+The paths specified in this method are a short list of paths describing the general types of transactions
+that are needed to carry out actions for fetching something, creating something to be returned as a mime type asset,
+or for performing a state transition. Some paths are of the type that are <em>guarded</em>. Guarded paths require user identification
+via session identification and token matching, especially if there is a secondary action.</p>
+<p>Here is a list of the paths that this module defines:</p>
+<ul>
+<li>/static/:asset            -- previously static_mime.  This just returns a static (not computed) piece of information. The app should be able to set the mime type.</li>
+<li>/guarded/static/:asset    -- previously keyed_mime.   Same as above, but checks the session for access.</li>
+<li>/guarded/dynamic/:asset   -- does the same as static but calls on functions that generate assets -- could be a function service.</li>
+<li>/guarded/secondary        -- a handshake that may be required of some assets before delivery of the asset.</li>
+<li>/transition/:transition   -- a kind of transition of the session -- this may return a dynamic asset or it might just process a form -- a change of state expected</li>
+<li>/transition/secondary     -- a handshake that may be required of some assets before delivery of the asset and always finalization of transition</li>
+<li>'/users/login','/users/logout','/users/register','/users/forgot' -- the start, stop sessions, manage passwords.</li>
+<li>/users/secondary/:action  -- the handler for user session management that may require a handshake or finalization.</li>
+</ul>
+<p>Each of these paths hands off processing to a type of contractual class. Each contractual class defines the checks on permission
+and availability that is needed to retrieve an asset or perform an action. (Note: contractual class in this case do not have to
+do with blockchain contract processing [yet such versions of these classes can be imagined]) What is meant by contractual here
+is that the client (browser... usually) and the server will provide authorization, session identity, and token handshakes
+in a particular, well-defined way.</p>
+<p>Note that that there are three types of contractual classes:</p>
+<ol>
+<li>user processing - this type of processing has to do with the user session being established or terminated and user existence.</li>
+<li>mime processing - This processing has to do with items being returned to the client, e.g. images, text, HTML, JSON, etc.</li>
+<li>transition processing - This proessing has to do with driving a state machine in some way.</li>
+</ol>
+<p>In the case of state machine processing, most of the application are just taking in data, sending it somewhere, and updating a database
+about the state of the data and/or the user. In some applications, an actual state machine (for the user) might be implemented and the finalization
+of the state will result in reseting the state of the machine for a particular user.</p>
+<p>How the methods map to the contractual methods:</p>
+<ul>
+<li>/static/:asset            -- <code>mime_handler.static_asset_handler</code></li>
+<li>/guarded/static/:asset    -- <code>mime_handler.guarded_static_asset_handler</code></li>
+<li>/guarded/dynamic/:asset   -- <code>mime_handler.guarded_dynamic_asset_handler</code></li>
+<li>/guarded/secondary        -- <code>mime_handler.guarded_secondary_asset_handler</code></li>
+<li>/transition/:transition   -- <code>transition_processing.transition_handler</code></li>
+<li>/transition/secondary     -- <code>transition_processing.secondary_transition_handler</code></li>
+<li>'/users/login','/users/logout','/users/register','/users/forgot' -- user_handler.user_sessions_processing</li>
+<li>/users/secondary/:action  -- <code>transition_processing.secondary_transition_handler</code></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>conf_obj</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="user_service_class.js.html">user_service_class.js</a>, <a href="user_service_class.js.html#line235">line 235</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setup_stopping"><span class="type-signature"></span>setup_stopping<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Establish the signal handler that will allow an external process to bring this process down.
+The handler will shutdown the DB and wait for the DB shutdown to complete.
+In many cases, the DB will write final data to the disk before disconnecting.
+Then, use the shutdown manager to clear out any connections and timers.
+Finally, exit the process.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="user_service_class.js.html">user_service_class.js</a>, <a href="user_service_class.js.html#line412">line 412</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="Contractual.html">Contractual</a></li><li><a href="CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.html">DefaultDB</a></li><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul><h3>Classes</h3><ul><li><a href="Contractual.LocalTObjectCache.html">LocalTObjectCache</a></li><li><a href="Contractual.MimeHandling.html">MimeHandling</a></li><li><a href="Contractual.TransitionHandling.html">TransitionHandling</a></li><li><a href="Contractual.UserHandling.html">UserHandling</a></li><li><a href="CopiousTransitions.CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.CustomizationMethodsByApplication.html">CustomizationMethodsByApplication</a></li><li><a href="DefaultDB.FauxInMemStore.html">FauxInMemStore</a></li><li><a href="DefaultDB.FileMapper.html">FileMapper</a></li><li><a href="DefaultDB.FilesAndRelays.html">FilesAndRelays</a></li><li><a href="DefaultDB.FilesAndRelays_base.html">FilesAndRelays_base</a></li><li><a href="DefaultDB.LocalStaticDB.html">LocalStaticDB</a></li><li><a href="DefaultDB.LocalStorageLifeCycle.html">LocalStorageLifeCycle</a></li><li><a href="DefaultDB.LocalStorageSerialization.html">LocalStorageSerialization</a></li><li><a href="DefaultDB.PageableMemStoreElement.html">PageableMemStoreElement</a></li><li><a href="DefaultDB.PersistenceContracts.html">PersistenceContracts</a></li><li><a href="DefaultDB.RemoteMessaging.html">RemoteMessaging</a></li><li><a href="DefaultDB.StaticDBDefault.html">StaticDBDefault</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a></li><li><a href="ReMailer.html">ReMailer</a></li><li><a href="SessionTokenManager.html">SessionTokenManager</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li><li><a href="base.DBClass.html">DBClass</a></li><li><a href="base.EndpointManager.html">EndpointManager</a></li><li><a href="base.GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">GeneralBusiness</a></li><li><a href="base.GeneralDynamic.html">GeneralDynamic</a></li><li><a href="base.GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">GeneralStatic</a></li><li><a href="base.SessionManager.html">SessionManager</a></li><li><a href="base.SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="base.TaggedTransition.html">TaggedTransition</a></li><li><a href="base.TokenTables.html">TokenTables</a></li><li><a href="base.UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="base.WebSocketManager.html">WebSocketManager</a></li><li><a href="field_validators.DataLookupField.html">DataLookupField</a></li><li><a href="field_validators.EmailField.html">EmailField</a></li><li><a href="field_validators.EmailVerifyField.html">EmailVerifyField</a></li><li><a href="field_validators.FieldTest.html">FieldTest</a></li><li><a href="field_validators.FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="field_validators.ForeignAuth.html">ForeignAuth</a></li><li><a href="field_validators.GeneralValidator.html">GeneralValidator</a></li><li><a href="field_validators.LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="field_validators.LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="field_validators.LengthyField.html">LengthyField</a></li><li><a href="field_validators.LengthyStringField.html">LengthyStringField</a></li><li><a href="field_validators.PasswordField.html">PasswordField</a></li><li><a href="field_validators.PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="field_validators.TypeCheckField.html">TypeCheckField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#generate_password_block">generate_password_block</a></li><li><a href="global.html#load_configuration">load_configuration</a></li><li><a href="global.html#load_parameters">load_parameters</a></li><li><a href="global.html#module_top">module_top</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Thu Oct 26 2023 22:40:05 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

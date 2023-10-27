@@ -10,6 +10,8 @@ let FauxRemoteMessenger = require('./in_proc_faux_messenger')
  * 
  * The result of using this is that the data will not be shared with other processes. Furthemore, 
  * users of this class can expect speed and memory management problems.
+ *
+ * @memberof DefaultDB
  */
 class StaticDBDefault extends LocalStaticDB {
 

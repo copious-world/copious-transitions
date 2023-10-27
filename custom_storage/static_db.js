@@ -1,6 +1,7 @@
-let FilesAndRelays = require('./files_and_relays')
-let fsPromises = require('fs/promises')
-let fs = require('fs')
+
+const FilesAndRelays = require('./files_and_relays')
+const fsPromises = require('fs/promises')
+const fs = require('fs')
 const uuid = require('../lib/uuid')
 //
 
@@ -26,6 +27,8 @@ const DEFAULT_DB_DIR = "local/static_db"
  * * saved -- true if the object data has been written to disk.
  * * flat_object -- the string form of the storage whose length determines if the PageableMemStoreElement is appropriate 
  * * file -- where the object will be stored, which is the name of the `_id` field, the wide are id.
+ *
+ * @memberof DefaultDB
  */
 class PageableMemStoreElement {
     //
@@ -83,6 +86,8 @@ class PageableMemStoreElement {
  * 
  * This class extends the FilesAndRelays class.
  * 
+ *
+ * @memberof DefaultDB
  */
 class LocalStorageSerialization extends FilesAndRelays {
 
@@ -397,20 +402,23 @@ class LocalStorageSerialization extends FilesAndRelays {
      * It is assumed that the static DB will provide custom storage for certain types of obects.
      * 
      * 
-     * 
      * @param {object} obj 
      * @param {string} key 
      * @param {string} field 
      */
-    application_fix_keys_obj(obj,key,field) {
+    application_fix_keys_obj(obj,key,field,match_data) {  // `_id` `_key` `_whokey`
         if ( obj._whokey === undefined  ) {
-            obj._whokey = key
+            obj._whokey_field = key
             let id_chunk = obj[field]
             if ( id_chunk && id_chunk.length && (typeof id_chunk === 'string') ) {
-                if ( key.indexOf(id_chunk) < 0 ) {
-                    obj._whokey += `_${id_chunk}`   // ??????
-                }
+                obj._whokey = id_chunk
             } 
+            if ( obj._key === undefined ) {
+                obj._key = this.hash(JSON.stringify(obj))
+            }
+            if ( obj._id === undefined ) {   // this should not happend (but as a stopgap)
+                obj._id = match_data
+            }
         }
     }
 
@@ -434,6 +442,10 @@ class LocalStorageSerialization extends FilesAndRelays {
  * is provided for default usage of the Copious Transitions stack; it is not provided to solve a universal problem. Yet, it might 
  * provide some basic logic that can be used to interface with more universal architectures. 
  * 
+ * On the other hand, there is a pub/sub mechanism that may be configured. And, a subclass of this class may implement `app_subscription_handler`. 
+ * One possibility for the implementation of that method may be to take in copies of known entries and recitfy the differences when they arive
+ * and also to put in new entries without much extra effort.
+ * 
  * This implementation stores data, all entries, in a file and reloads it later. Large objects, those that can be sent through
  * communication channels without relying on special streaming or P2P architectures, are stored in their own files, but
  * a representation of the data, including the name of the file it is in, is stored in a PageableMemStoreElement element.
@@ -454,6 +466,8 @@ class LocalStorageSerialization extends FilesAndRelays {
  * that just one object is stored per owner, or perhaps `_whokey` and `_key` are the same universal hash. (It may be the case that all 
  * three fields are the same.)
  * 
+ *
+ * @memberof DefaultDB
  * 
  */
 class LocalStaticDB extends LocalStorageSerialization {

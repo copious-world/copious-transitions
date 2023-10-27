@@ -13,6 +13,8 @@ const DB_STASH_INTERVAL = 10000
  * 
  * Writes data to a file in the directory of execution by default.
  * 
+ *
+ * @memberof DefaultDB
  */
 
 class FileMapper extends AppLifeCycle {

@@ -1,4 +1,4 @@
-//
+
 const AppLifeCycle = require('../lib/general_lifecyle')
 const fs = require('fs')
 
@@ -22,6 +22,8 @@ const AGED_OUT_DELTA = (1000*60*30)
  * The path may be configured. The constructor will use `default_m_path` in some cases, but it is not specified, 
  * 'persistence' will be the path used by default.
  * 
+ *
+ * @memberof DefaultDB
  */
 class RemoteMessaging extends AppLifeCycle {
     //
@@ -114,6 +116,20 @@ class RemoteMessaging extends AppLifeCycle {
         this.messenger.del_on_path(msg,m_path)
     }
 
+
+    /**
+     * Provide an interface to publication that a subclass might use in certain situations.
+     * Also, some users of the class instances may request publication of new data.
+     * 
+     * @param {string} topic 
+     * @param {object} obj 
+     * @returns {object} - the server response to the subscription request
+     */
+    async publish(topic,obj) {
+        let response = await this.messenger.publish(topic,obj)
+        return response
+    }
+
 }
 
 
@@ -126,6 +142,8 @@ class RemoteMessaging extends AppLifeCycle {
  * Some objects can timeout and be removed from the storage map. 
  * 
  * This class keeps objects in time buckets. If an object is accessed it will be moved to a newer bucket.
+ *
+ * @memberof DefaultDB
  */
 class LocalStorageLifeCycle extends RemoteMessaging {
 
@@ -389,9 +407,19 @@ class LocalStorageLifeCycle extends RemoteMessaging {
 /// Includes: data entry 
 
 /**
+ * This class is in some sense abstract. It provides a number of methods that are best written by an application.
+ * The StaticDB is an example of an implementer of these methods.
  * 
+ *  * `application_stash_large_data` - used when data exceeds an application defined size allowing for a skeleton to be kept in memory and the rest on disk
+ *  * `application_large_data_from_stash` - retrieves large data from the disk and completes skeleton objects with it.
+ *  * `application_clear_large_data` - removes a partular object's data stored on disk
+ *  * `application_fix_keys_obj` - given an object comes in from the remote, sets up the keys for local use
+ *  * `application_hash_key` - provides a hash of the string representation of an object kept in the `_storage_map`
+ *  * `app_subscription_handler` - provides an interface to subscription APIs
+ *
+ * @memberof DefaultDB
  */
-class ApplicationCustomizationMethods extends LocalStorageLifeCycle {
+class CustomizationMethodsByApplication extends LocalStorageLifeCycle {
 
     constructor(persistence_messenger,stash_interval,default_m_path) {
         super(persistence_messenger,stash_interval,default_m_path)
@@ -405,20 +433,13 @@ class ApplicationCustomizationMethods extends LocalStorageLifeCycle {
     application_clear_large_data(obj) {}
 
     // map keys to local use cases
-    application_fix_keys_obj(obj,key,field) {}
+    application_fix_keys_obj(obj,key,field,match_data) {}
     application_hash_key(obj) { return 0 }
 
     // called by application
     app_shutdown() {
         fs.writeFileSync(this.db_file,JSON.stringify(this._storage_map))
         this.shutdown()  //-- stops intervals,etc without a methods app_shutdown(), this does nothing to the running application
-    }
-
-
-    // allow the application to publish any object as on a topic of its choosing.
-    async publish(topic,obj) {
-        let response = await this.messenger.publish(topic,obj)
-        return response
     }
 
     // STUB: subscription handling
@@ -431,8 +452,14 @@ class ApplicationCustomizationMethods extends LocalStorageLifeCycle {
 //
 /**
  * Deals with CRUD operations for data. 
+ * 
+ * The logic of the methods provide decisions about when to request a remote for data if it is not found locally.
+ * Also, these methods interact with the application implementation of the methods outlined in CustomizationMethodsByApplication.
+ * 
+ *
+ * @memberof DefaultDB
  */
-class FilesAndRelays_base extends ApplicationCustomizationMethods {
+class FilesAndRelays_base extends CustomizationMethodsByApplication {
     //
     constructor(persistence_messenger,stash_interval,default_m_path) {
         super(persistence_messenger,stash_interval,default_m_path)
@@ -578,7 +605,7 @@ class FilesAndRelays_base extends ApplicationCustomizationMethods {
             return false
         }
         //
-        this.application_fix_keys_obj(obj,key,field)  // given the data has come back, the object can be set to use remotely defined IDs
+        this.application_fix_keys_obj(obj,key,field,match_data)  // given the data has come back, the object can be set to use remotely defined IDs
         let app_version = await this.application_large_data_from_stash(obj)
         return(app_version)
     }
@@ -648,7 +675,11 @@ class FilesAndRelays_base extends ApplicationCustomizationMethods {
 
 // FilesAndRelays
 //      ---- Expose the methods to the descendant modules here
-
+/**
+ * 
+ *
+ * @memberof DefaultDB
+ */
 class FilesAndRelays extends FilesAndRelays_base {
     constructor(persistence_messenger,stash_interval,default_m_path) {
         super(persistence_messenger,stash_interval,default_m_path)

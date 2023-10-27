@@ -1,8 +1,11 @@
-
-// This is a standin for a remote messenger
-// Given a remote process is supposed to store data objects,
-// this stores those in  a local map (a redundant one)
-// The pub/sub methods are noops.
+/**
+ * This is a standin for a remote messenger
+ * Given a remote process is supposed to store data objects,
+ * this stores those in  a local map (a redundant one)
+ * The pub/sub methods are noops.
+ *
+ * @memberof DefaultDB
+ */
 
 class FauxInMemStore {
 

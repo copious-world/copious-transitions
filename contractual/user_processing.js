@@ -1,7 +1,10 @@
 
 const LocalTObjectCache = require('../custom_storage/local_object_cache')
 
-
+/**
+ * 
+ * @memberof Contractual
+ */
 class UserHandling extends LocalTObjectCache {
     //
     //

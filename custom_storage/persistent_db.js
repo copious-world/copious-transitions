@@ -1,8 +1,10 @@
 
 let FilesAndRelays = require('./files_and_relays')
 
-
-class PesistenceContracts extends FilesAndRelays {
+/**
+ * @memberof DefaultDB
+ */
+class PersistenceContracts extends FilesAndRelays {
 
     constructor(messenger,stash_interval,default_m_path) {        // eg. message_relay_client
         super(messenger,stash_interval,default_m_path)
@@ -16,4 +18,4 @@ class PesistenceContracts extends FilesAndRelays {
 
 
 
-module.exports = PesistenceContracts
+module.exports = PersistenceContracts

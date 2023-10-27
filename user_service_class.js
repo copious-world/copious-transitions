@@ -1,4 +1,6 @@
-//
+/**
+ * @namespace CopiousTransitions
+ */
 const fs = require('fs')
 const crypto = require('crypto')
 const clone = require('clone')
@@ -93,6 +95,7 @@ transition_app.on('ready',() => {       // when the configuration is done the ap
  * is set aside for the purpose of overriding these methods. However, it is recommended that the existing methods be kept in tact, 
  * as they define the basic structure for handling requests in applications derived from CopiousTransitions.
  * 
+ * @memberof CopiousTransitions
  */
 
 class CopiousTransitions extends EventEmitter {
