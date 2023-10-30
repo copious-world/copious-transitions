@@ -2,11 +2,6 @@ const EventEmitter = require('events')
 // //
 // // 
 
-
-/** 
- * SOme buisiness operations will make use of a class that emits email to some users or customers.
- */
-
 class ReMailer extends EventEmitter {
     
     constructor(mail_transport,props) {

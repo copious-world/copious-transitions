@@ -32,13 +32,20 @@
             <span class="ancestors"><a href="base.html">base</a>.</span>TaggedTransition<span class="signature">()</span><span class="type-signature"></span></h2>
         
             <div class="class-description"><p>The objects that represent transitions are tagged transition..
-These are used for global defintions of particular transition type.
-Applications that implement custom descendant methods of the general modules
-may branch on typs of transitions by querying the <em>tagged</em> method of the transition object.</p>
-<p>The global definition is useful in short micro service modules. However, the aim is a generalization
-which will be further developed.</p>
+These are used for global defintions of particular transition type.</p>
+<p>The global definitions are useful in short micro service modules. However, the aim is a generalization
+which will be further developed. One aspect of the generalization will be that some application modules
+will not use the global variable tagged transitions, but operations will be selected out of session keyed
+data objects such as state machines. Or, a way of looking at it, might be that one type of tagged transition
+will operate a number of state transitions where the data structure will track unamed transitions.</p>
+<p>Applications that implement custom descendant methods of the general modules
+may branch on types of transitions by querying the <em>tagged</em> method of the transition object.</p>
 <p>Specific data reference fields will be provided via the transition object.
-A worker queue is part of every tagged transition. Transition engines may access the worker queue.</p></div>
+A worker queue is part of every tagged transition. Transition engines may access the worker queue.</p>
+<p>Another feature of the tagged transition is the use of modules. The array of cases can be have module keys.
+If a module is used, a transition will be identified if the request asks for the transition type in conjunction with
+the module.</p>
+<p>Most of the methods provided are normalizers for fields that go into queries or that set data aside, etc.</p></div>
         
     
 </header>
@@ -101,7 +108,7 @@ A worker queue is part of every tagged transition. Transition engines may access
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line20">line 20</a>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line27">line 27</a>
     </li></ul></dd>
     
 
@@ -149,6 +156,2846 @@ A worker queue is part of every tagged transition. Transition engines may access
     
 
     
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="action_selector"><span class="type-signature"></span>action_selector<span class="signature">(action)</span><span class="type-signature"> &rarr; {boolean|string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Some transition types may govern a set of actions which can be requested seperately during a transition action.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>action</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line229">line 229</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>will be a governing string if the action is supported, false otherwise</li>
+</ul>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+|
+
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="addModule"><span class="type-signature"></span>addModule<span class="signature">(module)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Modules may be added.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>module</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line84">line 84</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="back_ref"><span class="type-signature"></span>back_ref<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>the appliation's name of the field use to search previous/parent relationships belonging to data objects</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line178">line 178</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="dir"><span class="type-signature"></span>dir<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>In node.js this defaults to the directory the script is running from.
+But, this method can be overridden by applications to fix a particular directory</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line270">line 270</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="empty_queue"><span class="type-signature"></span>empty_queue<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Check to see if the work queue is empty or not.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line107">line 107</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>true if empty</li>
+</ul>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="enqueue"><span class="type-signature"></span>enqueue<span class="signature">(data)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>A number of transition types may enqueue work to be done after a request has returned or between rewuests, etc.
+The transtion context marker (the global variable in the basic case) can call up work in different contexts
+and do the work when the context is encountered. Or, the context may be on a separate thread.</p>
+<p>This method enqueues a data object that</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line98">line 98</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="existence_query"><span class="type-signature"></span>existence_query<span class="signature">(udata)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>This method is made to produce an object that will be used as the query to a database
+to check for the existence of a user.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>udata</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line139">line 139</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="file_entry_id"><span class="type-signature"></span>file_entry_id<span class="signature">(file_key)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>This method lets applications use a particular kind of name for certain kinds of files
+and allow for the file name to be individualized for different files (no overwrite)
+by changing the name or appending a suffix, such as the date.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>file_key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line252">line 252</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="from_cache"><span class="type-signature"></span>from_cache<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Returns true if the type of transition takes information from cache DB rather than other DB.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line160">line 160</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="get_work"><span class="type-signature"></span>get_work<span class="signature">()</span><span class="type-signature"> &rarr; {object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Pull a work descriptor off the worker queue.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line116">line 116</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="has_secondary_action"><span class="type-signature"></span>has_secondary_action<span class="signature">(asset_type)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Returns true if the kind of mime type requested requires a seondary action
+in order to finalize delivery to the client.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>asset_type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line151">line 151</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="hash_id_prefix"><span class="type-signature"></span>hash_id_prefix<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>An application and transition specific prefix for a more general hash that may be used to identify objects.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line220">line 220</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="kv_store_key"><span class="type-signature"></span>kv_store_key<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Each type of transition may use a specific field in order to query the DB for an object.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line187">line 187</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="match_key"><span class="type-signature"></span>match_key<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>This is a field in a data object that is used to perform a match test, often in the match method of the session manager.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line195">line 195</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="primary_key"><span class="type-signature"></span>primary_key<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Returns the key that is used in identifying an object for a DB query.
+Different types of transitions may have different key fields.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line170">line 170</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="session_key"><span class="type-signature"></span>session_key<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>This is a key found in a request body and is used to determine that a session is going for a particular user.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line204">line 204</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="tag"><span class="type-signature"></span>tag<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>The string representing the tag type. The string returned is part of the requesting client vocabulary of transitions with repsect to the application.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line75">line 75</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>the tag of this transition type</li>
+</ul>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="tagged"><span class="type-signature"></span>tagged<span class="signature">(tag, module)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>This check if a transition object has a particular tag.</p>
+<p>This is useful in application code for branching on the requester's transition.</p>
+<p>For instance, code might have a global variable, g_user_check. Then, code can check if operations relating to the user
+check might be used:</p>
+<pre class="prettyprint source"><code>if ( g_user_check.tagged(transition) ) {
+ // do things for this type of transition
+} else if ( .... )  // do things for another type of transition
+</code></pre>
+<p>Code that is more general might check in other ways.  E.g <code>let tagged_op = transition_map[transition]; tagged_op(req_body)</code></p>
+<p>Some of the short applications already written use global variable custom transitions.</p>
+<p>If a module is used, a transition will be identified if the request asks for the transition type in conjunction with
+the module.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tag</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>module</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line60">line 60</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="transform_file_name"><span class="type-signature"></span>transform_file_name<span class="signature">(file_name)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>This method allows for less special code to call on the application's version of file naming
+during certain transition actions.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>file_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line240">line 240</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">(data)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>This method is set asside for applications to make small changes to body data for special cases.
+For instance, sometimes the ID coming in from the client won't be in a field recognizable by the rest of the system.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line128">line 128</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="update_file_db_entry"><span class="type-signature"></span>update_file_db_entry<span class="signature">(entry_obj)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Provides a way to prepare the object representing the file entry in a database prior to
+moving the file from some default place (determined by a framework) to an application
+specific place.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>entry_obj</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line263">line 263</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="uuid_prefix"><span class="type-signature"></span>uuid_prefix<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>An application and transition specific prefix for a uuid's that may be used to identify objects.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_tagged_transitions.js.html">lib/tagged_transitions.js</a>, <a href="lib_tagged_transitions.js.html#line212">line 212</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
 
     
 
@@ -163,13 +3010,13 @@ A worker queue is part of every tagged transition. Transition engines may access
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="Contractual.html">Contractual</a></li><li><a href="CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.html">DefaultDB</a></li><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul><h3>Classes</h3><ul><li><a href="Contractual.LocalTObjectCache.html">LocalTObjectCache</a></li><li><a href="Contractual.MimeHandling.html">MimeHandling</a></li><li><a href="Contractual.TransitionHandling.html">TransitionHandling</a></li><li><a href="Contractual.UserHandling.html">UserHandling</a></li><li><a href="CopiousTransitions.CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.CustomizationMethodsByApplication.html">CustomizationMethodsByApplication</a></li><li><a href="DefaultDB.FauxInMemStore.html">FauxInMemStore</a></li><li><a href="DefaultDB.FileMapper.html">FileMapper</a></li><li><a href="DefaultDB.FilesAndRelays.html">FilesAndRelays</a></li><li><a href="DefaultDB.FilesAndRelays_base.html">FilesAndRelays_base</a></li><li><a href="DefaultDB.LocalStaticDB.html">LocalStaticDB</a></li><li><a href="DefaultDB.LocalStorageLifeCycle.html">LocalStorageLifeCycle</a></li><li><a href="DefaultDB.LocalStorageSerialization.html">LocalStorageSerialization</a></li><li><a href="DefaultDB.PageableMemStoreElement.html">PageableMemStoreElement</a></li><li><a href="DefaultDB.PersistenceContracts.html">PersistenceContracts</a></li><li><a href="DefaultDB.RemoteMessaging.html">RemoteMessaging</a></li><li><a href="DefaultDB.StaticDBDefault.html">StaticDBDefault</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a></li><li><a href="ReMailer.html">ReMailer</a></li><li><a href="SessionTokenManager.html">SessionTokenManager</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li><li><a href="base.DBClass.html">DBClass</a></li><li><a href="base.EndpointManager.html">EndpointManager</a></li><li><a href="base.GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">GeneralBusiness</a></li><li><a href="base.GeneralDynamic.html">GeneralDynamic</a></li><li><a href="base.GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">GeneralStatic</a></li><li><a href="base.SessionManager.html">SessionManager</a></li><li><a href="base.SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="base.TaggedTransition.html">TaggedTransition</a></li><li><a href="base.TokenTables.html">TokenTables</a></li><li><a href="base.UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="base.WebSocketManager.html">WebSocketManager</a></li><li><a href="field_validators.DataLookupField.html">DataLookupField</a></li><li><a href="field_validators.EmailField.html">EmailField</a></li><li><a href="field_validators.EmailVerifyField.html">EmailVerifyField</a></li><li><a href="field_validators.FieldTest.html">FieldTest</a></li><li><a href="field_validators.FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="field_validators.ForeignAuth.html">ForeignAuth</a></li><li><a href="field_validators.GeneralValidator.html">GeneralValidator</a></li><li><a href="field_validators.LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="field_validators.LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="field_validators.LengthyField.html">LengthyField</a></li><li><a href="field_validators.LengthyStringField.html">LengthyStringField</a></li><li><a href="field_validators.PasswordField.html">PasswordField</a></li><li><a href="field_validators.PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="field_validators.TypeCheckField.html">TypeCheckField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#generate_password_block">generate_password_block</a></li><li><a href="global.html#load_configuration">load_configuration</a></li><li><a href="global.html#load_parameters">load_parameters</a></li><li><a href="global.html#module_top">module_top</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="Contractual.html">Contractual</a></li><li><a href="CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.html">DefaultDB</a></li><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul><h3>Classes</h3><ul><li><a href="Contractual.LocalTObjectCache.html">LocalTObjectCache</a></li><li><a href="Contractual.MimeHandling.html">MimeHandling</a></li><li><a href="Contractual.TransitionHandling.html">TransitionHandling</a></li><li><a href="Contractual.UserHandling.html">UserHandling</a></li><li><a href="CopiousTransitions.CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.CustomizationMethodsByApplication.html">CustomizationMethodsByApplication</a></li><li><a href="DefaultDB.FauxInMemStore.html">FauxInMemStore</a></li><li><a href="DefaultDB.FileMapper.html">FileMapper</a></li><li><a href="DefaultDB.FilesAndRelays.html">FilesAndRelays</a></li><li><a href="DefaultDB.FilesAndRelays_base.html">FilesAndRelays_base</a></li><li><a href="DefaultDB.LocalStaticDB.html">LocalStaticDB</a></li><li><a href="DefaultDB.LocalStorageLifeCycle.html">LocalStorageLifeCycle</a></li><li><a href="DefaultDB.LocalStorageSerialization.html">LocalStorageSerialization</a></li><li><a href="DefaultDB.PageableMemStoreElement.html">PageableMemStoreElement</a></li><li><a href="DefaultDB.PersistenceContracts.html">PersistenceContracts</a></li><li><a href="DefaultDB.RemoteMessaging.html">RemoteMessaging</a></li><li><a href="DefaultDB.StaticDBDefault.html">StaticDBDefault</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a></li><li><a href="SessionTokenManager.html">SessionTokenManager</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li><li><a href="base.DBClass.html">DBClass</a></li><li><a href="base.EndpointManager.html">EndpointManager</a></li><li><a href="base.GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">GeneralBusiness</a></li><li><a href="base.GeneralDynamic.html">GeneralDynamic</a></li><li><a href="base.GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">GeneralStatic</a></li><li><a href="base.SessionManager.html">SessionManager</a></li><li><a href="base.SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="base.TaggedTransition.html">TaggedTransition</a></li><li><a href="base.TokenTables.html">TokenTables</a></li><li><a href="base.UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="base.WebSocketManager.html">WebSocketManager</a></li><li><a href="field_validators.DataLookupField.html">DataLookupField</a></li><li><a href="field_validators.EmailField.html">EmailField</a></li><li><a href="field_validators.EmailVerifyField.html">EmailVerifyField</a></li><li><a href="field_validators.FieldTest.html">FieldTest</a></li><li><a href="field_validators.FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="field_validators.ForeignAuth.html">ForeignAuth</a></li><li><a href="field_validators.GeneralValidator.html">GeneralValidator</a></li><li><a href="field_validators.LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="field_validators.LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="field_validators.LengthyField.html">LengthyField</a></li><li><a href="field_validators.LengthyStringField.html">LengthyStringField</a></li><li><a href="field_validators.PasswordField.html">PasswordField</a></li><li><a href="field_validators.PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="field_validators.TypeCheckField.html">TypeCheckField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#generate_password_block">generate_password_block</a></li><li><a href="global.html#load_configuration">load_configuration</a></li><li><a href="global.html#load_parameters">load_parameters</a></li><li><a href="global.html#module_top">module_top</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Oct 27 2023 10:43:57 GMT-0700 (Pacific Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Oct 30 2023 16:46:08 GMT-0700 (Pacific Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

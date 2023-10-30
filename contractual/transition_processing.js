@@ -84,7 +84,7 @@ class TransitionHandling extends LocalTObjectCache {
      * Given the client comes back with the request for the seconary action, the next handler `secondary_transition_handler` will 
      * continue the process of progression the transtion to finalization.
      * 
-     * @param {string} transition 
+     * @param {string} transition - the type of transition the client is requesting. See documentation about tagged transisions.
      * @param {object} body 
      * @param {object} transmision_headers 
      * @returns {Array} - a tupple really, that has: 1) the status code, 2) the JSON response, 3) possibly data or boolean (false for not in use)

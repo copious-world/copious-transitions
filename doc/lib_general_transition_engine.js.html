@@ -48,6 +48,11 @@ class EndpointManager extends AppLifeCycle {
         this.endpoint_service = false
     }
 
+    /**
+     * 
+     * @param {object} conf 
+     * @returns {object}
+     */
     initialize_endpoint_services(conf) {
         if ( conf === undefined ) return
         //
@@ -89,12 +94,22 @@ class WebSocketActions extends EndpointManager {
         this.web_sockets = false
     }
 
+    /**
+     * 
+     * @param {object} trans_processor 
+     * @param {object} user_processor 
+     * @param {object} mime_processor 
+     */
     set_contractual_filters(trans_processor,user_processor,mime_processor) {
         this.trans_processor = trans_processor
         this.user_processor = user_processor
         this.mime_processor = mime_processor
     }
 
+    /**
+     * 
+     * @param {object} web_sockets 
+     */
     set_ws(web_sockets) {
         this.web_sockets = web_sockets
     }
@@ -122,6 +137,11 @@ class GeneralTransitionEngImpl extends WebSocketActions {
         this.root_path = process.mainModule.path
     }
 
+    /**
+     * 
+     * @param {object} conf 
+     * @param {object} db 
+     */
     initialize(conf,db) {
         this.conf = conf
         this.db = db
@@ -130,6 +150,12 @@ class GeneralTransitionEngImpl extends WebSocketActions {
         }
     }
 
+    /**
+     * 
+     * @param {object} statics_assets 
+     * @param {object} dynamics_assets 
+     * @param {object} sessions 
+     */
     install(statics_assets,dynamics_assets,sessions) {
         this.sessions = sessions
         this.statics = statics_assets
@@ -139,20 +165,45 @@ class GeneralTransitionEngImpl extends WebSocketActions {
         dynamics_assets.import_keys(this.get_import_key_function())
     }
 
+    /**
+     * 
+     * @returns {string|boolean}
+     */
     get_import_key_function() {
         return(false)
     }
 
+    /**
+     * 
+     * @param {Buffer} blob_data 
+     * @returns {Buffer}
+     */
     chunks_to_data(blob_data) {
         return Buffer.concat(blob_data)
     }
 
 
+    /**
+     * 
+     * @param {object} file_descriptor 
+     * @param {string} target_path 
+     * @param {object} trans_obj 
+     * @param {Function} cb 
+     * @returns {Number}
+     */
     async file_mover(file_descriptor,target_path,trans_obj,cb) {
         file_descriptor.mv(target_path,cb)
         return(Math.floor(Math.random()*10000)) // default random int
     }
 
+    /**
+     * 
+     * @param {object} file_descriptor 
+     * @param {string} target_path 
+     * @param {string} writeable_data 
+     * @param {string} id 
+     * @returns {string}
+     */
     async store_data(file_descriptor,target_path,writeable_data,id) {
         await fs_pr.writeFile(target_path,writeable_data)
         return id
@@ -167,6 +218,14 @@ class GeneralTransitionEngImpl extends WebSocketActions {
 
     // chunk_mover
     // per file chunk mover
+    /**
+     * 
+     * @param {string} token 
+     * @param {object} file_descriptor 
+     * @param {string} target_path 
+     * @param {Function} cb 
+     * @returns {string|Function}
+     */
     async chunk_mover(token,file_descriptor,target_path,cb) {
         //
         let chunk_manager = this._uploader_managers[token]
@@ -196,6 +255,11 @@ class GeneralTransitionEngImpl extends WebSocketActions {
     //  and that refers to an array that can receive chunks (one or more files as separate cases)
     //  when a file list is givent, the files are keyed by the file name under the transaction token 
     //  -> (file names will not be confused with other sessions)
+    /**
+     * 
+     * @param {object} post_body 
+     * @param {string} token 
+     */
     files_coming_in_chunks(post_body,token) {
         let chunk_manager = Object.assign({},post_body)
         if ( post_body.file_list ) {            // MULTIPLE FILES. for clients sending more than one file, a list is expected beyond the typical form field list
@@ -212,6 +276,12 @@ class GeneralTransitionEngImpl extends WebSocketActions {
     }
 
     //
+    /**
+     * 
+     * @param {object} post_body 
+     * @param {string} files 
+     * @returns {object} - `finalization_state` 
+     */
     async upload_chunk(post_body,files) {
         if ( !files || Object.keys(files).length === 0) {
             let finalization_state = {
@@ -257,6 +327,12 @@ class GeneralTransitionEngImpl extends WebSocketActions {
     }
 
 
+    /**
+     * 
+     * @param {object} post_body 
+     * @param {object} ttrans 
+     * @returns {object} - `finalization_state` 
+     */
     async chunks_complete(post_body,ttrans) {
         //
         let ids =  []
@@ -303,6 +379,14 @@ class GeneralTransitionEngImpl extends WebSocketActions {
     }
 
     //
+    /**
+     * 
+     * @param {object} post_body 
+     * @param {object} ttrans 
+     * @param {Array} files 
+     * @param {object} req 
+     * @returns {object} - `finalization_state` 
+     */
     async upload_file(post_body,ttrans,files,req) {
         //
         if ( !files || Object.keys(files).length === 0) {
@@ -369,13 +453,13 @@ module.exports = GeneralTransitionEngImpl
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="Contractual.html">Contractual</a></li><li><a href="CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.html">DefaultDB</a></li><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul><h3>Classes</h3><ul><li><a href="Contractual.LocalTObjectCache.html">LocalTObjectCache</a></li><li><a href="Contractual.MimeHandling.html">MimeHandling</a></li><li><a href="Contractual.TransitionHandling.html">TransitionHandling</a></li><li><a href="Contractual.UserHandling.html">UserHandling</a></li><li><a href="CopiousTransitions.CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.CustomizationMethodsByApplication.html">CustomizationMethodsByApplication</a></li><li><a href="DefaultDB.FauxInMemStore.html">FauxInMemStore</a></li><li><a href="DefaultDB.FileMapper.html">FileMapper</a></li><li><a href="DefaultDB.FilesAndRelays.html">FilesAndRelays</a></li><li><a href="DefaultDB.FilesAndRelays_base.html">FilesAndRelays_base</a></li><li><a href="DefaultDB.LocalStaticDB.html">LocalStaticDB</a></li><li><a href="DefaultDB.LocalStorageLifeCycle.html">LocalStorageLifeCycle</a></li><li><a href="DefaultDB.LocalStorageSerialization.html">LocalStorageSerialization</a></li><li><a href="DefaultDB.PageableMemStoreElement.html">PageableMemStoreElement</a></li><li><a href="DefaultDB.PersistenceContracts.html">PersistenceContracts</a></li><li><a href="DefaultDB.RemoteMessaging.html">RemoteMessaging</a></li><li><a href="DefaultDB.StaticDBDefault.html">StaticDBDefault</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a></li><li><a href="ReMailer.html">ReMailer</a></li><li><a href="SessionTokenManager.html">SessionTokenManager</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li><li><a href="base.DBClass.html">DBClass</a></li><li><a href="base.EndpointManager.html">EndpointManager</a></li><li><a href="base.GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">GeneralBusiness</a></li><li><a href="base.GeneralDynamic.html">GeneralDynamic</a></li><li><a href="base.GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">GeneralStatic</a></li><li><a href="base.SessionManager.html">SessionManager</a></li><li><a href="base.SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="base.TaggedTransition.html">TaggedTransition</a></li><li><a href="base.TokenTables.html">TokenTables</a></li><li><a href="base.UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="base.WebSocketManager.html">WebSocketManager</a></li><li><a href="field_validators.DataLookupField.html">DataLookupField</a></li><li><a href="field_validators.EmailField.html">EmailField</a></li><li><a href="field_validators.EmailVerifyField.html">EmailVerifyField</a></li><li><a href="field_validators.FieldTest.html">FieldTest</a></li><li><a href="field_validators.FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="field_validators.ForeignAuth.html">ForeignAuth</a></li><li><a href="field_validators.GeneralValidator.html">GeneralValidator</a></li><li><a href="field_validators.LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="field_validators.LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="field_validators.LengthyField.html">LengthyField</a></li><li><a href="field_validators.LengthyStringField.html">LengthyStringField</a></li><li><a href="field_validators.PasswordField.html">PasswordField</a></li><li><a href="field_validators.PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="field_validators.TypeCheckField.html">TypeCheckField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#generate_password_block">generate_password_block</a></li><li><a href="global.html#load_configuration">load_configuration</a></li><li><a href="global.html#load_parameters">load_parameters</a></li><li><a href="global.html#module_top">module_top</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="Contractual.html">Contractual</a></li><li><a href="CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.html">DefaultDB</a></li><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul><h3>Classes</h3><ul><li><a href="Contractual.LocalTObjectCache.html">LocalTObjectCache</a></li><li><a href="Contractual.MimeHandling.html">MimeHandling</a></li><li><a href="Contractual.TransitionHandling.html">TransitionHandling</a></li><li><a href="Contractual.UserHandling.html">UserHandling</a></li><li><a href="CopiousTransitions.CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.CustomizationMethodsByApplication.html">CustomizationMethodsByApplication</a></li><li><a href="DefaultDB.FauxInMemStore.html">FauxInMemStore</a></li><li><a href="DefaultDB.FileMapper.html">FileMapper</a></li><li><a href="DefaultDB.FilesAndRelays.html">FilesAndRelays</a></li><li><a href="DefaultDB.FilesAndRelays_base.html">FilesAndRelays_base</a></li><li><a href="DefaultDB.LocalStaticDB.html">LocalStaticDB</a></li><li><a href="DefaultDB.LocalStorageLifeCycle.html">LocalStorageLifeCycle</a></li><li><a href="DefaultDB.LocalStorageSerialization.html">LocalStorageSerialization</a></li><li><a href="DefaultDB.PageableMemStoreElement.html">PageableMemStoreElement</a></li><li><a href="DefaultDB.PersistenceContracts.html">PersistenceContracts</a></li><li><a href="DefaultDB.RemoteMessaging.html">RemoteMessaging</a></li><li><a href="DefaultDB.StaticDBDefault.html">StaticDBDefault</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a></li><li><a href="SessionTokenManager.html">SessionTokenManager</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li><li><a href="base.DBClass.html">DBClass</a></li><li><a href="base.EndpointManager.html">EndpointManager</a></li><li><a href="base.GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">GeneralBusiness</a></li><li><a href="base.GeneralDynamic.html">GeneralDynamic</a></li><li><a href="base.GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">GeneralStatic</a></li><li><a href="base.SessionManager.html">SessionManager</a></li><li><a href="base.SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="base.TaggedTransition.html">TaggedTransition</a></li><li><a href="base.TokenTables.html">TokenTables</a></li><li><a href="base.UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="base.WebSocketManager.html">WebSocketManager</a></li><li><a href="field_validators.DataLookupField.html">DataLookupField</a></li><li><a href="field_validators.EmailField.html">EmailField</a></li><li><a href="field_validators.EmailVerifyField.html">EmailVerifyField</a></li><li><a href="field_validators.FieldTest.html">FieldTest</a></li><li><a href="field_validators.FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="field_validators.ForeignAuth.html">ForeignAuth</a></li><li><a href="field_validators.GeneralValidator.html">GeneralValidator</a></li><li><a href="field_validators.LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="field_validators.LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="field_validators.LengthyField.html">LengthyField</a></li><li><a href="field_validators.LengthyStringField.html">LengthyStringField</a></li><li><a href="field_validators.PasswordField.html">PasswordField</a></li><li><a href="field_validators.PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="field_validators.TypeCheckField.html">TypeCheckField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#generate_password_block">generate_password_block</a></li><li><a href="global.html#load_configuration">load_configuration</a></li><li><a href="global.html#load_parameters">load_parameters</a></li><li><a href="global.html#module_top">module_top</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Oct 27 2023 10:43:57 GMT-0700 (Pacific Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Oct 30 2023 16:46:07 GMT-0700 (Pacific Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

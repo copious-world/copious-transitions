@@ -1,5 +1,5 @@
 const GeneralBusiness = require.main.require('./lib/general_business')
-const ReMailer = require.main.require("./lib/remailer");
+const ReMailer = require("./remailer");
 const apiKeys = require.main.require('./local/api_keys')
 //
 const {MessageRelayer} = require("message-relay-services")

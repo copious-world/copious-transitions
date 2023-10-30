@@ -41,6 +41,7 @@ function no_trailing(char,str) {
     return(str)
 }
 
+/*
 function require_trailing(char,str) {
     if ( str.lastIndexOf(char) !== (str.length - 1) ) {
         str = str + char
@@ -54,6 +55,7 @@ function no_leading(char,str) {
     }
     return(str)
 }
+*/
 
 function require_leading(char,str) {
     if ( str[0] !== char ) {
@@ -116,11 +118,24 @@ async function async_load_file(fname,ftype)  {
 }
 
 /** 
+ * 
  * This class provide a basic interface for carrying out actions required for providing static content.
  * Here **Static Content** is taken to mean content that is created previous to the launch of the application.
  * 
  * The application sets a static store by passing a class (constructor) to the GeneralStatic constructor
- * as in new GeneralStatic(MyStaticStoreClass)  v.s. new GeneralStatic(), which uses the general database static storage class
+ * as in new GeneralStatic(MyStaticStoreClass)  v.s. new GeneralStatic(), which uses the general database static storage class.
+ * 
+ * This static storage is not a replacement for all ways of serving static files. The primary web server of an website might
+ * be the best place for setting up static file service. 
+ * 
+ * The presence of this class in the library can be used in conjunction with the contractual access clases. And, there may be some 
+ * files best stored with the application code - and that might have more to do with installation of an application than configuring 
+ * the static load.
+ * 
+ * Also, this module has methods for preparing JSON descriptors of HTML and JavaScript that goes with it. This allows for 
+ * parts of pages to be delivered as lazy loaded components.
+ * 
+ * Finally, some processes may request files from the local process.
  * 
  * @memberof base
  */
@@ -140,6 +155,16 @@ class GeneralStatic extends AppLifeCycle {
         }
     }
     // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+    /**
+     * Loads files from locations that are identified in the `static_files` field of the configuration.
+     * The `static_files` object may have a directory field, in which case all the files in the directory will be loaded.
+     * Otherwise, it will have a map of files, *files*, which will be transfered into the `_preloaded` map.
+     * 
+     * Once all the entries are established in the map `_preloaded`, they data is loaded into the map for later access. 
+     * 
+     * @param {object} db_obj 
+     * @param {object} conf 
+     */
     initialize(db_obj,conf) {
         this.db = db_obj
         if ( conf ) {
@@ -155,12 +180,32 @@ class GeneralStatic extends AppLifeCycle {
         }
     }
     //
+    /**
+     * Set the transion engine reference.
+     * @param {object} transition_engine - a reference to the application transition engine
+     */
     set_transition_engine(transition_engine) {
         this.trans_engine = transition_engine
     }
     // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
     //
     //          FETCH
+    /**
+     * 
+     * This method may be the point of this module. It attempts to find a static asset and return an object 
+     * describing it if it does find it.
+     * 
+     * The contractual methods that use this method
+     * prefer to have an object delivered wiht two fields `mime_type` and `string`. The first field 
+     * identifies the type of object that it is, the second is the string representation of the object.
+     * 
+     * In most cases, this returns an object from the `_preloaded` table. But, if the object is not there, 
+     * this method will try to find it in the DB or in the custom static store.
+     * 
+     * @param {string} asset_key 
+     * @param {object} etc - and object to pass to `static_store` if used.
+     * @returns {object}
+     */
     async fetch(asset_key,etc) {
         if ( asset_key ) {
             // first try to get a preloaded asset.... (the idea is that there should not be too many, so this search will be fast)
@@ -179,14 +224,16 @@ class GeneralStatic extends AppLifeCycle {
         return("not found -- no direct file reads")
     }
 
-    /*
-    // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-    // static_store -- a custom store supplied by the application in lieu of other other stores the application may supply to the db
-    //      -- the app might not want to call out a DB implementation... so this is a little extra
-    //      -- This makes the supplied static store custom for just the static pathways and falls out of scope of other assets 
-    //      -- managed through the DB. (Use this option carefully)
-    */
-
+    /**
+     * static_store -- a custom store supplied by the application in lieu of other other stores the application may supply to the db
+     * the app might not want to call out a DB implementation... so this is a little extra
+     * This makes the supplied static store custom for just the static pathways and falls out of scope of other assets 
+     * managed through the DB. (Use this option carefully)
+     * 
+     * @param {*} asset_key 
+     * @param {*} etc 
+     * @returns {object|boolean} returns false if no `custom_static_store` has been set up. Returns the result of `custom_static_store.fetch` othewise.
+     */
     static_store(asset_key,etc) {
         if ( this.custom_static_store ) {
             return(this.custom_static_store.fetch(asset_key,etc))
@@ -218,6 +265,20 @@ class GeneralStatic extends AppLifeCycle {
     }
 
     //
+    /**
+     * 
+     * The configuration object is available for those applications that use it to identify files 
+     * to be loaded. 
+     * 
+     * The result of calling this method should be that the table `_preloaded[fileKey]` should have a number 
+     * of assests stored in memory for later retrieval.
+     * 
+     * If the `custom_static_store` has been set up using a parameter to the constructor (AppStaticStorageClass),
+     * the custom store will be used to load the `_preloaded` map. Otherwise, files will be loaded from the paths
+     * found in thie objects stored in the the `_preloaded` map.
+     * 
+     * @param {object} conf 
+     */
     preload_all(conf) {  // a descendant might use conf
         if ( this.custom_static_store ) {
             this.custom_static_store.load(this._preloaded)
@@ -229,6 +290,11 @@ class GeneralStatic extends AppLifeCycle {
     }
 
     //
+    /**
+     * 
+     * @param {string} fileKey 
+     * @returns {string}
+     */
     async reload(fileKey) {
         let loadable_asset = this._preloaded[fileKey]
         if ( loadable_asset ) {
@@ -237,12 +303,15 @@ class GeneralStatic extends AppLifeCycle {
         }
     }
 
-    //
-    //  prepare_asset --- 
-    //      -- some assets are delivered to the web app as an object with two parts, script and html...
-    //      -- this takes and html page (maybe just some part of one) with script and html. It splits the page into the two parts
-    //      -- and then it stores it for delivery.
-    // 
+    /**
+     * Some assets are delivered to the web app as an object with two parts, script and html...
+     * This takes an html page (maybe just some part of one) with script and html. It splits the page into the two parts
+     * and then it stores the pair for delivery.
+     * 
+     * @param {Buffer} data 
+     * @returns {object} - this is an object with two fields, `html` and `script`.
+     */
+
     prepare_asset(data) {
         if ( !(data) ) {
             console.error("Static asset prepare, file not fount")
@@ -266,6 +335,15 @@ class GeneralStatic extends AppLifeCycle {
     //
     // generic_prep_cwd_offset
     //
+    /**
+     * Some applications call this method during preloading.
+     * This method looks for the field `app_spec` on the `static_files` field of the configuration object.
+     * 
+     * After making an attemp to clean up the string, which is a relative directory to the root directory, 
+     * this method update all the `fname` fields of the descriptors stored in the `_preloaded` map.
+     * 
+     * @param {object} conf 
+     */
     generic_prep_cwd_offset(conf) {
         //
         if ( conf &amp;&amp; conf.static_files &amp;&amp; conf.static_files.app_spec ) {
@@ -302,13 +380,13 @@ module.exports = GeneralStatic
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="Contractual.html">Contractual</a></li><li><a href="CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.html">DefaultDB</a></li><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul><h3>Classes</h3><ul><li><a href="Contractual.LocalTObjectCache.html">LocalTObjectCache</a></li><li><a href="Contractual.MimeHandling.html">MimeHandling</a></li><li><a href="Contractual.TransitionHandling.html">TransitionHandling</a></li><li><a href="Contractual.UserHandling.html">UserHandling</a></li><li><a href="CopiousTransitions.CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.CustomizationMethodsByApplication.html">CustomizationMethodsByApplication</a></li><li><a href="DefaultDB.FauxInMemStore.html">FauxInMemStore</a></li><li><a href="DefaultDB.FileMapper.html">FileMapper</a></li><li><a href="DefaultDB.FilesAndRelays.html">FilesAndRelays</a></li><li><a href="DefaultDB.FilesAndRelays_base.html">FilesAndRelays_base</a></li><li><a href="DefaultDB.LocalStaticDB.html">LocalStaticDB</a></li><li><a href="DefaultDB.LocalStorageLifeCycle.html">LocalStorageLifeCycle</a></li><li><a href="DefaultDB.LocalStorageSerialization.html">LocalStorageSerialization</a></li><li><a href="DefaultDB.PageableMemStoreElement.html">PageableMemStoreElement</a></li><li><a href="DefaultDB.PersistenceContracts.html">PersistenceContracts</a></li><li><a href="DefaultDB.RemoteMessaging.html">RemoteMessaging</a></li><li><a href="DefaultDB.StaticDBDefault.html">StaticDBDefault</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a></li><li><a href="ReMailer.html">ReMailer</a></li><li><a href="SessionTokenManager.html">SessionTokenManager</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li><li><a href="base.DBClass.html">DBClass</a></li><li><a href="base.EndpointManager.html">EndpointManager</a></li><li><a href="base.GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">GeneralBusiness</a></li><li><a href="base.GeneralDynamic.html">GeneralDynamic</a></li><li><a href="base.GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">GeneralStatic</a></li><li><a href="base.SessionManager.html">SessionManager</a></li><li><a href="base.SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="base.TaggedTransition.html">TaggedTransition</a></li><li><a href="base.TokenTables.html">TokenTables</a></li><li><a href="base.UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="base.WebSocketManager.html">WebSocketManager</a></li><li><a href="field_validators.DataLookupField.html">DataLookupField</a></li><li><a href="field_validators.EmailField.html">EmailField</a></li><li><a href="field_validators.EmailVerifyField.html">EmailVerifyField</a></li><li><a href="field_validators.FieldTest.html">FieldTest</a></li><li><a href="field_validators.FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="field_validators.ForeignAuth.html">ForeignAuth</a></li><li><a href="field_validators.GeneralValidator.html">GeneralValidator</a></li><li><a href="field_validators.LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="field_validators.LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="field_validators.LengthyField.html">LengthyField</a></li><li><a href="field_validators.LengthyStringField.html">LengthyStringField</a></li><li><a href="field_validators.PasswordField.html">PasswordField</a></li><li><a href="field_validators.PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="field_validators.TypeCheckField.html">TypeCheckField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#generate_password_block">generate_password_block</a></li><li><a href="global.html#load_configuration">load_configuration</a></li><li><a href="global.html#load_parameters">load_parameters</a></li><li><a href="global.html#module_top">module_top</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="Contractual.html">Contractual</a></li><li><a href="CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.html">DefaultDB</a></li><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul><h3>Classes</h3><ul><li><a href="Contractual.LocalTObjectCache.html">LocalTObjectCache</a></li><li><a href="Contractual.MimeHandling.html">MimeHandling</a></li><li><a href="Contractual.TransitionHandling.html">TransitionHandling</a></li><li><a href="Contractual.UserHandling.html">UserHandling</a></li><li><a href="CopiousTransitions.CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.CustomizationMethodsByApplication.html">CustomizationMethodsByApplication</a></li><li><a href="DefaultDB.FauxInMemStore.html">FauxInMemStore</a></li><li><a href="DefaultDB.FileMapper.html">FileMapper</a></li><li><a href="DefaultDB.FilesAndRelays.html">FilesAndRelays</a></li><li><a href="DefaultDB.FilesAndRelays_base.html">FilesAndRelays_base</a></li><li><a href="DefaultDB.LocalStaticDB.html">LocalStaticDB</a></li><li><a href="DefaultDB.LocalStorageLifeCycle.html">LocalStorageLifeCycle</a></li><li><a href="DefaultDB.LocalStorageSerialization.html">LocalStorageSerialization</a></li><li><a href="DefaultDB.PageableMemStoreElement.html">PageableMemStoreElement</a></li><li><a href="DefaultDB.PersistenceContracts.html">PersistenceContracts</a></li><li><a href="DefaultDB.RemoteMessaging.html">RemoteMessaging</a></li><li><a href="DefaultDB.StaticDBDefault.html">StaticDBDefault</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a></li><li><a href="SessionTokenManager.html">SessionTokenManager</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li><li><a href="base.DBClass.html">DBClass</a></li><li><a href="base.EndpointManager.html">EndpointManager</a></li><li><a href="base.GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">GeneralBusiness</a></li><li><a href="base.GeneralDynamic.html">GeneralDynamic</a></li><li><a href="base.GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">GeneralStatic</a></li><li><a href="base.SessionManager.html">SessionManager</a></li><li><a href="base.SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="base.TaggedTransition.html">TaggedTransition</a></li><li><a href="base.TokenTables.html">TokenTables</a></li><li><a href="base.UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="base.WebSocketManager.html">WebSocketManager</a></li><li><a href="field_validators.DataLookupField.html">DataLookupField</a></li><li><a href="field_validators.EmailField.html">EmailField</a></li><li><a href="field_validators.EmailVerifyField.html">EmailVerifyField</a></li><li><a href="field_validators.FieldTest.html">FieldTest</a></li><li><a href="field_validators.FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="field_validators.ForeignAuth.html">ForeignAuth</a></li><li><a href="field_validators.GeneralValidator.html">GeneralValidator</a></li><li><a href="field_validators.LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="field_validators.LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="field_validators.LengthyField.html">LengthyField</a></li><li><a href="field_validators.LengthyStringField.html">LengthyStringField</a></li><li><a href="field_validators.PasswordField.html">PasswordField</a></li><li><a href="field_validators.PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="field_validators.TypeCheckField.html">TypeCheckField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#generate_password_block">generate_password_block</a></li><li><a href="global.html#load_configuration">load_configuration</a></li><li><a href="global.html#load_parameters">load_parameters</a></li><li><a href="global.html#module_top">module_top</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Oct 27 2023 10:43:57 GMT-0700 (Pacific Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Oct 30 2023 16:46:07 GMT-0700 (Pacific Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
