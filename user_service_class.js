@@ -31,7 +31,8 @@ const g_expected_modules = [
                             "expression",
                             "business",
                             "transition_engine",
-                            "web_sockets"
+                            "web_sockets",
+                            "endpoint_server"
                         ]
 //
 
@@ -120,6 +121,7 @@ class CopiousTransitions extends EventEmitter {
         this.business = require(conf_obj.mod_path.business)       // backend tasks that don't return values, but may send them out to other services.. (some procesing involved)
         this.transition_engine = require(conf_obj.mod_path.transition_engine)
         this.web_sockets = require(conf_obj.mod_path.web_sockets) // web sockets - serveral types of application supported -- use app chosen ws interface
+        this.endpoint_server = require(conf_obj.mod_path.endpoint_server) // certain applications will handle transition from the backend
         //
         this.app = require(conf_obj.mod_path.expression)(conf_obj,this.db); // exports a function
         this.session_manager = null
@@ -166,6 +168,11 @@ class CopiousTransitions extends EventEmitter {
         // websocket access to contractual logic
         this.web_sockets.initialize(conf_obj,this.app)
         this.web_sockets.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
+        //
+        this.endpoint_server.initialize(conf_obj,this.db)
+        this.endpoint_server.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
+        this.endpoint_server.set_ws(this.web_sockets)
+        //
         // transition engine access to web sockets and contractual logic
         this.transition_engine.set_ws(this.web_sockets)
         this.transition_engine.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)

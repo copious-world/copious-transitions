@@ -19,6 +19,9 @@ module.exports._set_conf_and_return = require('./lib/general_express')
 module.exports.GeneralTransitionEngine = require('./lib/general_transition_engine')
 module.exports.TaggedTransition = require('./lib/tagged_transitions')
 
+module.exports.WebSocketManager = require('./lib/websocket')
+module.exports.EndPointServer = require('./lib/general_endpoint_server')
+
 // ---- ----  ----  ----  ---- 
 module.exports.DBClass = require('./lib/general_db')
 module.exports.GeneralDynamic = require('./lib/general_dynamic')
