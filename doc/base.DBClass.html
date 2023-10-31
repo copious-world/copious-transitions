@@ -56,7 +56,10 @@ This class provides interfaes for different type of databases.</p>
 -- these are sitewide pages or page frameworks which might be loaded with user specific data.)</li>
 </ol>
 <p>Note: both the persistence DB and the static DB will default to using the DB provided by <code>default_persistent_db</code> if these are not
-configured or passed into the constructor.</p></div>
+configured or passed into the constructor.</p>
+<p>NOTE: all the base classes in /lib return the class and do not return an instance. Explore the applications and
+the reader will find that the descendant modules export instances. The classes provided by copious-transitions must
+be extended by an application.</p></div>
         
     
 </header>
@@ -119,7 +122,7 @@ configured or passed into the constructor.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line39">line 39</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line42">line 42</a>
     </li></ul></dd>
     
 
@@ -295,7 +298,7 @@ configured or passed into the constructor.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line326">line 326</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line329">line 329</a>
     </li></ul></dd>
     
 
@@ -450,7 +453,7 @@ configured or passed into the constructor.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line120">line 120</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line123">line 123</a>
     </li></ul></dd>
     
 
@@ -587,7 +590,7 @@ configured or passed into the constructor.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line163">line 163</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line166">line 166</a>
     </li></ul></dd>
     
 
@@ -720,7 +723,7 @@ configured or passed into the constructor.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line277">line 277</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line280">line 280</a>
     </li></ul></dd>
     
 
@@ -809,7 +812,7 @@ or at various other times.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line414">line 414</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line417">line 417</a>
     </li></ul></dd>
     
 
@@ -994,7 +997,7 @@ The collection is some object (perhaps a string) identifying the object to be dr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line405">line 405</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line408">line 408</a>
     </li></ul></dd>
     
 
@@ -1154,7 +1157,7 @@ The collection is some object (perhaps a string) identifying the object to be dr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line385">line 385</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line388">line 388</a>
     </li></ul></dd>
     
 
@@ -1310,7 +1313,7 @@ This is left as an abstract entry point for an application to define.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line215">line 215</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line218">line 218</a>
     </li></ul></dd>
     
 
@@ -1466,7 +1469,7 @@ This method is called by the method used to configure the validator.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line195">line 195</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line198">line 198</a>
     </li></ul></dd>
     
 
@@ -1622,7 +1625,7 @@ retun null if the value is not present.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line132">line 132</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line135">line 135</a>
     </li></ul></dd>
     
 
@@ -1778,7 +1781,7 @@ The value mapped by the key is often a JSON object. If so, it should be parsed b
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line175">line 175</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line178">line 178</a>
     </li></ul></dd>
     
 
@@ -1939,7 +1942,7 @@ The <code>static_sync</code> interval is read from the configuration.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line78">line 78</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line81">line 81</a>
     </li></ul></dd>
     
 
@@ -2028,7 +2031,7 @@ in the <code>user_service_class</code> module.  This method is called at the sta
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line92">line 92</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line95">line 95</a>
     </li></ul></dd>
     
 
@@ -2235,7 +2238,7 @@ in the <code>user_service_class</code> module.  This method is called at the sta
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line255">line 255</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line258">line 258</a>
     </li></ul></dd>
     
 
@@ -2409,7 +2412,7 @@ in the <code>user_service_class</code> module.  This method is called at the sta
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line395">line 395</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line398">line 398</a>
     </li></ul></dd>
     
 
@@ -2547,7 +2550,7 @@ then the application may use this method to set the has function for use by the 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line101">line 101</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line104">line 104</a>
     </li></ul></dd>
     
 
@@ -2709,7 +2712,7 @@ then the application may use this method to set the has function for use by the 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line111">line 111</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line114">line 114</a>
     </li></ul></dd>
     
 
@@ -2871,7 +2874,7 @@ Some implementations may user share memory storage. And, some may use DHT (distr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line153">line 153</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line156">line 156</a>
     </li></ul></dd>
     
 
@@ -3032,7 +3035,7 @@ Some implementations may user share memory storage. And, some may use DHT (distr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line228">line 228</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line231">line 231</a>
     </li></ul></dd>
     
 
@@ -3187,7 +3190,7 @@ Some implementations may user share memory storage. And, some may use DHT (distr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line286">line 286</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line289">line 289</a>
     </li></ul></dd>
     
 
@@ -3347,7 +3350,7 @@ Some implementations may user share memory storage. And, some may use DHT (distr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line375">line 375</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line378">line 378</a>
     </li></ul></dd>
     
 
@@ -3526,7 +3529,7 @@ Some implementations may user share memory storage. And, some may use DHT (distr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line305">line 305</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line308">line 308</a>
     </li></ul></dd>
     
 
@@ -3705,7 +3708,7 @@ Some implementations may user share memory storage. And, some may use DHT (distr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line348">line 348</a>
+        <a href="lib_general_db.js.html">lib/general_db.js</a>, <a href="lib_general_db.js.html#line351">line 351</a>
     </li></ul></dd>
     
 
@@ -3751,13 +3754,13 @@ Some implementations may user share memory storage. And, some may use DHT (distr
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="Contractual.html">Contractual</a></li><li><a href="CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.html">DefaultDB</a></li><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul><h3>Classes</h3><ul><li><a href="Contractual.LocalTObjectCache.html">LocalTObjectCache</a></li><li><a href="Contractual.MimeHandling.html">MimeHandling</a></li><li><a href="Contractual.TransitionHandling.html">TransitionHandling</a></li><li><a href="Contractual.UserHandling.html">UserHandling</a></li><li><a href="CopiousTransitions.CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.CustomizationMethodsByApplication.html">CustomizationMethodsByApplication</a></li><li><a href="DefaultDB.FauxInMemStore.html">FauxInMemStore</a></li><li><a href="DefaultDB.FileMapper.html">FileMapper</a></li><li><a href="DefaultDB.FilesAndRelays.html">FilesAndRelays</a></li><li><a href="DefaultDB.FilesAndRelays_base.html">FilesAndRelays_base</a></li><li><a href="DefaultDB.LocalStaticDB.html">LocalStaticDB</a></li><li><a href="DefaultDB.LocalStorageLifeCycle.html">LocalStorageLifeCycle</a></li><li><a href="DefaultDB.LocalStorageSerialization.html">LocalStorageSerialization</a></li><li><a href="DefaultDB.PageableMemStoreElement.html">PageableMemStoreElement</a></li><li><a href="DefaultDB.PersistenceContracts.html">PersistenceContracts</a></li><li><a href="DefaultDB.RemoteMessaging.html">RemoteMessaging</a></li><li><a href="DefaultDB.StaticDBDefault.html">StaticDBDefault</a></li><li><a href="GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a></li><li><a href="SessionTokenManager.html">SessionTokenManager</a></li><li><a href="WebSocketActions.html">WebSocketActions</a></li><li><a href="base.DBClass.html">DBClass</a></li><li><a href="base.EndpointManager.html">EndpointManager</a></li><li><a href="base.GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">GeneralBusiness</a></li><li><a href="base.GeneralDynamic.html">GeneralDynamic</a></li><li><a href="base.GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">GeneralStatic</a></li><li><a href="base.SessionManager.html">SessionManager</a></li><li><a href="base.SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="base.TaggedTransition.html">TaggedTransition</a></li><li><a href="base.TokenTables.html">TokenTables</a></li><li><a href="base.UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="base.WebSocketManager.html">WebSocketManager</a></li><li><a href="field_validators.DataLookupField.html">DataLookupField</a></li><li><a href="field_validators.EmailField.html">EmailField</a></li><li><a href="field_validators.EmailVerifyField.html">EmailVerifyField</a></li><li><a href="field_validators.FieldTest.html">FieldTest</a></li><li><a href="field_validators.FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="field_validators.ForeignAuth.html">ForeignAuth</a></li><li><a href="field_validators.GeneralValidator.html">GeneralValidator</a></li><li><a href="field_validators.LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="field_validators.LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="field_validators.LengthyField.html">LengthyField</a></li><li><a href="field_validators.LengthyStringField.html">LengthyStringField</a></li><li><a href="field_validators.PasswordField.html">PasswordField</a></li><li><a href="field_validators.PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="field_validators.TypeCheckField.html">TypeCheckField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#generate_password_block">generate_password_block</a></li><li><a href="global.html#load_configuration">load_configuration</a></li><li><a href="global.html#load_parameters">load_parameters</a></li><li><a href="global.html#module_top">module_top</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="Contractual.html">Contractual</a></li><li><a href="CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.html">DefaultDB</a></li><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul><h3>Classes</h3><ul><li><a href="Contractual.LocalTObjectCache.html">LocalTObjectCache</a></li><li><a href="Contractual.MimeHandling.html">MimeHandling</a></li><li><a href="Contractual.TransitionHandling.html">TransitionHandling</a></li><li><a href="Contractual.UserHandling.html">UserHandling</a></li><li><a href="CopiousTransitions.CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.CustomizationMethodsByApplication.html">CustomizationMethodsByApplication</a></li><li><a href="DefaultDB.FauxInMemStore.html">FauxInMemStore</a></li><li><a href="DefaultDB.FileMapper.html">FileMapper</a></li><li><a href="DefaultDB.FilesAndRelays.html">FilesAndRelays</a></li><li><a href="DefaultDB.FilesAndRelays_base.html">FilesAndRelays_base</a></li><li><a href="DefaultDB.LocalStaticDB.html">LocalStaticDB</a></li><li><a href="DefaultDB.LocalStorageLifeCycle.html">LocalStorageLifeCycle</a></li><li><a href="DefaultDB.LocalStorageSerialization.html">LocalStorageSerialization</a></li><li><a href="DefaultDB.PageableMemStoreElement.html">PageableMemStoreElement</a></li><li><a href="DefaultDB.PersistenceContracts.html">PersistenceContracts</a></li><li><a href="DefaultDB.RemoteMessaging.html">RemoteMessaging</a></li><li><a href="DefaultDB.StaticDBDefault.html">StaticDBDefault</a></li><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a></li><li><a href="SessionTokenManager.html">SessionTokenManager</a></li><li><a href="base.DBClass.html">DBClass</a></li><li><a href="base.EndpointManager.html">EndpointManager</a></li><li><a href="base.GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">GeneralBusiness</a></li><li><a href="base.GeneralDynamic.html">GeneralDynamic</a></li><li><a href="base.GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">GeneralStatic</a></li><li><a href="base.GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="base.SessionManager.html">SessionManager</a></li><li><a href="base.SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="base.TaggedTransition.html">TaggedTransition</a></li><li><a href="base.TokenTables.html">TokenTables</a></li><li><a href="base.UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="base.WebSocketManager.html">WebSocketManager</a></li><li><a href="field_validators.DataLookupField.html">DataLookupField</a></li><li><a href="field_validators.EmailField.html">EmailField</a></li><li><a href="field_validators.EmailVerifyField.html">EmailVerifyField</a></li><li><a href="field_validators.FieldTest.html">FieldTest</a></li><li><a href="field_validators.FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="field_validators.ForeignAuth.html">ForeignAuth</a></li><li><a href="field_validators.GeneralValidator.html">GeneralValidator</a></li><li><a href="field_validators.LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="field_validators.LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="field_validators.LengthyField.html">LengthyField</a></li><li><a href="field_validators.LengthyStringField.html">LengthyStringField</a></li><li><a href="field_validators.PasswordField.html">PasswordField</a></li><li><a href="field_validators.PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="field_validators.TypeCheckField.html">TypeCheckField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#generate_password_block">generate_password_block</a></li><li><a href="global.html#load_configuration">load_configuration</a></li><li><a href="global.html#load_parameters">load_parameters</a></li><li><a href="global.html#module_top">module_top</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Oct 30 2023 16:46:08 GMT-0700 (Pacific Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Tue Oct 31 2023 11:51:15 GMT-0700 (Pacific Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

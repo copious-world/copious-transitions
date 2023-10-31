@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: lib/general_business.js</title>
+    <title>JSDoc: Source: lib/general_endpoint_server.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: lib/general_business.js</h1>
+    <h1 class="page-title">Source: lib/general_endpoint_server.js</h1>
 
     
 
@@ -26,23 +26,18 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const AppLifeCycle = require("./general_lifecyle")
-const fs = require('fs')
-
-
+            <pre class="prettyprint source linenums"><code>
+const AppLifeCycle = require("./general_lifecyle")
+const DEFAULT_TRANSITION_ENDPOINT = "./transition-endpoint-server"
 
 /** 
- * This module provides a stand-in for applications that will perform some business processing 
- * one transitions have fulfilled.
  * 
- * Interesting implementations have been moved out of the library and into applications. 
- * Some actions such as email responses previously program are becoming archaic.
- * But, some applications may still use them.
+ * The most basic version of this transition engine is an endpoint manager.
+ * This 
  * 
- * In any case, the reference to the applications Business class instance is available to a number of other clases, 
- * among them, the application's session manager. The application's session manager is the only CopiousTranstions governed library class
- * to be initialized with the Business class as a parameter. But the session manager might pass this on to the transition engine or 
- * to the DB manager in some applications. (Again, it is up to the application to use or ignore this class.)
+ * especially useful for uploaders or other types of processes that 
+ * use a backend servrer conversation in order to expose validated endpoints
+ * to the user facing services (web servers)
  * 
  * NOTE: all the base classes in /lib return the class and do not return an instance. Explore the applications and 
  * the reader will find that the descendant modules export instances. The classes provided by copious-transitions must
@@ -50,102 +45,124 @@ const fs = require('fs')
  * 
  * @memberof base
  */
+class EndpointManager extends AppLifeCycle {
 
-class GeneralBusiness extends AppLifeCycle {
-    
     constructor() {
         super()
-        //
-        this.recently_forgetful = {}
-        this.forgetfulness_tag = ""
-        this.logo_body = ""
+        this.trans_processor = false
+        this.user_processor = false
+        this.endpoint_service = false
+        this.web_sockets = false
     }
 
-    //
+
     /**
+     * Give the enpoint to the contractual 
+     * @param {object} trans_processor 
+     * @param {object} user_processor 
+     * @param {object} mime_processor 
+     */
+    set_contractual_filters(trans_processor,user_processor,mime_processor) {
+        this.trans_processor = trans_processor
+        this.user_processor = user_processor
+        this.mime_processor = mime_processor
+    }
+
+
+    /**
+     * Accepts a reference to the application supplied web socket server manager and sets the `web_sockets` field to it.
      * 
-     * @param {object} conf_obj 
+     * @param {object} web_sockets - the reference to the application supplied web socket server manager.
+     */
+    set_ws(web_sockets) {
+        this.web_sockets = web_sockets
+    }
+
+    /**
+     * Checks for the `transition_endpoint` field on the configuration object (conf).
+     * 
+     * If the `transition_endpoint` field is an object, this assumes that the object is a configuration 
+     * that can be passed to `initialize_endpoint_services`.
+     * 
+     * @param {object} conf 
      * @param {object} db 
      */
-    initialize(conf_obj,db) {
+    initialize(conf,db) {
+        this.conf = conf
         this.db = db
-        this.rules = conf_obj.business ? ( conf_obj.business.rules ? conf_obj.business.rules : null ) : null
-        this.forgetfulness_tag = conf_obj ? ( conf_obj.forgetfulness_tag ? conf_obj.forgetfulness_tag : "" ) : ""
-        this.root_path = process.cwd()
-        try {
-            this.logo_body = fs.readFileSync(this.root_path + '/' + conf_obj.html_wrapper_with_logo,"utf-8").toString()
-        } catch (e) {
-            // this.logo_body = require("vanilla").load()
+        if ( (conf.transition_endpoint !== undefined) &amp;&amp; (typeof conf.transition_endpoint === 'object') ) {
+            this.initialize_endpoint_services(conf.transition_endpoint)
         }
-        
     }
 
-    //
-    /**
-     * For definition by an application.
-     * 
-     * If a application's session manager calls for the initiation of some business process, identified by `use_case`,
-     * this method can be called. This method is left empty for definition in an applications's subclass. 
-     * 
-     * And example might be that email is sent to someone once a transition if finalized.
-     * 
-     * @param {string} use_case - a flag for a switch statement or a map key to a function. 
-     * @param {object} post_body - The post body is from the client request.
-     */
-    process(use_case,post_body) {
-    }
 
     /**
-     * Some applications may support forgotten passwords as part of authorization.
-     * This interface provides applications with some methods to start tracking exchanges 
-     * with users having to do with reseting passwords or other activities related to forgotten authorization memes.
+     * Creates a transition endpoint based on the class determined by configuration.
+     * The field `endpoint_module`  (i.e. `conf.transition_endpoint.endpoint_module`) provides 
+     * the name of the module to require if it is supplied. If it is not mentioned, then 
+     * the default transition endpoint will be used. 
      * 
-     * This method makes an entry for the forgotten item.
+     * (Applications seeking to supply an endpoint server for transition processing should overrided the default.)
      * 
-     * @param {string} pkey 
-     * @param {object} trackable 
-     */
-    store_recent_forgetfulness(pkey,trackable) {
-        this.recently_forgetful[pkey] = trackable
-    }
-
-    /**
-     * Retrieve information related to the forgotten password activity.
+     * An instance of the class will be created. The creation of this class will result in a listening server on a tls port.
      * 
-     * @param {string} pkey 
+     * Once the class is created and no error has been encountered,
+     * the transition handler and the mime handler may be set. (Note: the user processes is not handled through the endpoint server.)
+     * 
+     * Any version of this method should call upon the transion processor for using the endpoint transition.
+     * Also, it should call upon the mime handler to access static assets. The methods called will be the following:
+     * 
+     * * `endpoint_transition`
+     * * `static_asset_handler`
+     * 
+     * In the supplied handlers, a server id is required to be included in the message object coming from a message relay client.
+     * The message object will be passed on to the contractual module handling the use case (transition or mime).
+     * 
+     * Finally, the results are passed back to the message hanlder the called the transition/mime handler.
+     * The message handler will handle the client message response. 
+     * 
+     * 
+     * @param {object} conf 
      * @returns {object}
      */
-    get_recently_forgetful(pkey) {
-        return(this.recently_forgetful[pkey])
+    initialize_endpoint_services(conf) {
+        if ( conf === undefined ) return
+        //
+        let TransitionalEndpoint = require((conf.endpoint_module !== undefined) ? conf.endpoint_module : DEFAULT_TRANSITION_ENDPOINT)
+        if ( TransitionalEndpoint !== undefined ) {
+            this.endpoint_service = new TransitionalEndpoint(conf)
+            this.endpoint_service.set_transition_handler(async (transition,msg_obj) => {
+                // called from app_message_handler  (see endpoint service message-relay-services)
+                let server_id = msg_obj ? msg_obj.server_id : false
+                if ( server_id &amp;&amp; this.trans_processor ) {      // transitional
+                    let result = await this.trans_processor.endpoint_transition(transition,msg_obj)
+                    return result[1]  // this will send back the JSON object without HTTP status codes
+                } 
+            })
+    
+            this.endpoint_service.set_mime_handler(async (asset,msg_obj) => {
+                // called from app_message_handler  (see endpoint service message-relay-services)
+                let server_id = msg_obj ? msg_obj.server_id : false
+                if ( server_id &amp;&amp; this.this.mime_processor ) {      // transitional
+                    msg_obj._x_c$trns_path = "set_mime_handler"
+                    let result = await this.this.mime_processor.static_asset_handler(asset,msg_obj)
+                    return [result[1] ,result[2]] // [1] is mime type object, [2] is a string determined by the app
+                }
+            })
+        } else {
+            throw new Error("general endpoint server: no TransitionalEndpoint class type provided by configuration or default")
+        }
+
+        //
+        return {}
     }
 
-    /**
-     * Delete information related to the forgotten password activity.
-     * 
-     * @param {string} pkey 
-     */
-    del_recent_forgetfulness(pkey) {
-        delete this.recently_forgetful[pkey]
-    }
-
-    /**
-     * Related to the forgotten information. Provides a call frame that relates the 
-     * forgotten information to a transition. And allows for some application defined process 
-     * that uses information from the request's body.
-     * 
-     * @param {string} transition 
-     * @param {string} pkey 
-     * @param {object} post_body 
-     */
-    cleanup(transition,pkey,post_body) {
-        this.del_recent_forgetfulness(pkey)
-    }
 }
 
 
 
-module.exports = GeneralBusiness
 
+module.exports = EndpointManager
 </code></pre>
         </article>
     </section>
