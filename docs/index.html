@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>copious-transitions</h1>
+<p>This is a library that supports building and running web services applications. The library provides generalized classes implementing calling frames for applications to override. The applications may handle authorization, uploading media, accessing static pages, accessing dynamic processes that require state transition management, etc.</p>
+<p>The applications may be separate processes, each with their own TCP port. <em><strong>They will share information with each other via shared memory for such requirements as access control.</strong></em> Some of the applications may run on different nodes in a cluster. Information sharing will be controlled by the use of certain libraries providing shared memory management and pub/sub processes.</p>
+<p>How big or small the footprint of the service will be will depend mostly on configuration. Each application reads in a configuration file and marshals parts of it to subprocesses and library class instances. Some aspects of configuration will direct the subprocesses to connect on pub/sub pathways on predetermined addresses and ports. Some application will want to automate high level configuration of nodes in their own way. This module provides configuration mostly at the process level, but provides pathways to open up configuration at a higher level.</p>
+<h2>Main Process Script</h2>
+<p>In all, the manner in which files are brought into the processes makes the main program very simple. The following is an example of a complete main application script:</p>
+<pre class="prettyprint source"><code>const CopiousTransitions = require('copious-transitions')
+
+let [config,debug] = [false,false]
+
+// the application definition is here.
+config = &quot;./user-service-myapp.conf&quot;
+
+if ( process.argv[2] !== undefined ) { // conf file on command line
+    config = process.argv[2];
+}
+
+if (  process.argv[3] !== undefined ) { // maybe debug
+    if ( process.argv[3] === 'debug' ) {
+        g_debug = true
+    }
+}
+
+let transition_app = new CopiousTransitions(config,debug)
+
+
+transition_app.on('ready',() => {
+    transition_app.run()
+})
+</code></pre>
+<p>When the application starts at its entrypoint, <strong>copious-transitions</strong> provides a configuration file reader. The configuration reader will look for the file that provides the database override as in the example; it will look for all overrides in the configuration. Then <strong>copious-transitions</strong> will create instances of the classes and set up HTML API paths that use the instances when running transactions.</p>
+<h2>Installation</h2>
+<pre class="prettyprint source"><code>npm install copious-transitions --save
+</code></pre>
+<h2>Configuration</h2>
+<p>The configuration is required.</p>
+<p>For an application to be useful, it must provide overrides of the general classes provided by the module. How these classes are addressed is determined by the so called <code>contractual</code> modules.</p>
+<p>The <code>contractual</code> modules process transactions based on a few web API paths. Most of these respond to POST methods that expect JSON objects carrying session identifiers, state machine tokens, and relavent data. The <code>contractual</code> path handlers pass off <em>safe</em> objects to the methods implemented (overrides) by the application classes.</p>
+<p>The application clases are specified in the configuration file along with other applications parameters, such as ports and addresses and security configuration parameters. Applications may extend the basic configuration to set up their downstream connections, database connections, special directories, etc. But, the basic configuration will be present in all derived applications.</p>
+<p>Here is an example of a basic configuration:</p>
+<pre class="prettyprint source"><code>BASIC CONFIGURATION
+
+</code></pre>
+<h2>Transactions and Classes</h2>
+<p>The name, <strong>copious-transition</strong>, is meant to evoke the idea of state transitions. The main idea is that clients will synchronize their awareness of the state of a process by keeping track of a transition token. The kinds of state transitions might be characterized by ATM or Petri Net transions. (<em>Some of the meat of this will come later as this repository grows. At the moment there are very basic transitions needed that can be hardwired in for common website operations. More on that later.</em>)</p>
+<p>From this library, <strong>copious-transition</strong>, the main calling framework provides URL path responses, a.k.a. web APIs, for handling generic transactions. Some transactions may occur in a single call and response. Some may take a few steps and will map the state of the transactions to tokens shared between the servers and the clients.</p>
+<p>Classes are provided for performing parts of common web transactions. These classes have such roles as authorization, database interaction, processes management, etc. Here is a list of some of the generic classes provided by this library:</p>
+<ul>
+<li>general_auth.js</li>
+<li>general_db.js</li>
+<li>general_lifecyle.js</li>
+<li>general_transition_engine.js</li>
+<li>general_auth_session_lite.js</li>
+<li>general_dynamic.js</li>
+<li>general_mware.js</li>
+<li>general_validator.js</li>
+<li>general_business.js</li>
+<li>general_express.js</li>
+<li>general_static.js</li>
+</ul>
+<p>These files include classes that are exposed by the top level index.js in the module directory. They classes in index.js are from more than one file.</p>
+<p>In each of the applications types, the service components may include a parent class to derive new classes. For example, if an application details the database, it will create a module which imports database classes. For example:</p>
+<pre class="prettyprint source"><code>const { DBClass, CustomPersistenceDB, CustomStaticDB } = require('copious-transitions')
+
+</code></pre>
+<p>In the example, one class is taken from general_db.js, which is listed above. There are more classes involved -- these will be explained later. For now, it can be said that the application program will override DBClass and export the override from a new module. And, the calling program will pick up the new class from the configuration.</p>
+<h2>API Transactions on the High Level</h2>
+<p>Keeping the main program simple means that some web API paths, as in parts of URLs, will be determined by the <strong>copious-transions</strong> code. Some clients may want more flexibility in stating their paths. And, they can have that by creating proxies closer to the clients using node.js or nginx or other generic web servers. Or, they can write separate services from the ones made available here, where the ones provided by <strong>copious-transions</strong> provide authorization and token tracking.</p>
+<blockquote>
+<p>The API pathways provided by <strong>copious-transions</strong> regulate tokenized access to certain types of media, static assets, dynamically generated assets, and transitional processes.</p>
+</blockquote>
+<p>The API paths are written with variable expressions in a manner defined by <strong>express.js</strong>, <strong>fastly.js</strong>, or <strong>polka.js</strong>.</p>
+<p>Here is a list of common pathways that are defined in the <strong>CopiousTransitions</strong> class definition found in the file <strong>user_services_class.js</strong>:</p>
+<ul>
+<li><em>path :: HTTP METHOD :: description</em></li>
+<li><strong>/ :: GET ::</strong> returns a local index.js for default behavior</li>
+<li><strong>/static/:asset :: GET ::</strong> returns an asset keyed in a static db</li>
+<li><strong>/guarded/static/:asset :: POST ::</strong> returns an asset after authorization checks</li>
+<li><strong>/guarded/dynamic/:asset :: POST ::</strong> authorized and optionally confirmed asset generation</li>
+<li><strong>/secondary/guarded :: POST ::</strong> a transition keyed on a token from guarded paths</li>
+<li><strong>/transition/:transition :: POST ::</strong> start of a process and guarded</li>
+<li><strong>/secondary/transition :: POST ::</strong> continuation of a process and guarded</li>
+<li><strong>/user/:operation :: POST ::</strong> configurable list of paths offering the following:</li>
+</ul>
+<blockquote>
+<ul>
+<li>login</li>
+<li>logout</li>
+<li>registration</li>
+</ul>
+</blockquote>
+<ul>
+<li>Additional paths for setting up web sockets, and other types of generic paths.</li>
+</ul>
+<blockquote>
+<p>The path list categorizes a types of transactions. Furthermore, there is a basic logical format for dealing with transactions and transitions.</p>
+</blockquote>
+<p>User pathways provide interfaces to login/logout and other possible types of user interactions that a web service might support.
+The user pathways may be configured to work with application requirements by allowing for the configuration of modules requirements for modules that
+provide subclassing customizations to generalized classes which carry out commonly occuring backend interfaces. Some of the general modules may interact
+with databases, crypto modules, middleware modules, file management modules, etc. Customization may allow for selections of databases, file systems,
+state management processes, etc.</p>
+<p>For example, several types of authorization have been addressed and interfaces to difference repositories have been addressed. Using the copious-transitions
+framework, authorization such as logining in, wrapped key with accounts, and derived key with no stored accounts have been developed. There are three
+terse application classes for each kind of authorization and each type of authorization descends from the same generalized authorization classes.</p>
+<p>Similarly, file uploading has placed files on disks, encrypted or not, and alternatively has utiltized IPFS and other storage schemes. Uploading is processed in all
+cases by the same transtional pathways which check session and captcha prior to allowing data transfer. And, terse customized subclasses of transition
+engines have provided choices for the type of medium onto which the uploaders place files. In each case, some custom code is required for utilizing
+types of storage and this custom code is required beyond the normalization done by file systems.</p>
+<p>Copious-transitions applications are servers. A single web service will have a number of servers handling similar paths but different logic.
+The copious-transitions package makes it easy to decide that one server may handle sessions lifecylces and that other servers will obtain shared
+session inforamtion within a local cluster. A process can be configured to include or omit user management API pathways. While all servers will include token
+authorized media pathways.</p>
+<h2>What's in Certain Directories</h2>
+<h3>1. <u>lib</u></h3>
+<h3>2. <u>contractual</u></h3>
+<h3>3. <u>custom storage</u></h3>
+<p>The <strong>custom_storage</strong> directory contains some default key-value store operations for static (local) assets and for persistent data, which may be stored both locally and remotely.</p>
+<p>This section refers to persistent and static storage. The terms are common among storage schemes. For example, the copious-world repositories (to be found on github) includes global-persitence and copious-endpoints, which has a persistence endpoint. The terms related to this particular directory refer more to an interface to persistent storage services with some local buffering and aging requirements.</p>
+<ul>
+<li><strong>static storage</strong></li>
+</ul>
+<blockquote>
+<p>The one requirement static storage is supposed to fulfill is that particular files (data) will be gauranteed to be quickly accessible. If the files are being used regularly, they will be maintained in processes memory. If they age out of storage, then static storage will have a local file reference to the local data. If requested file is not on local drives, then static storage may refer to persistent storage to obtain a copy from remote caches. Static storage fails to deliver only if the file cannot be found in any storage the configured instance of a copious-transisions implementation ever knows about.</p>
+</blockquote>
+<ul>
+<li><strong>persistent storage</strong></li>
+</ul>
+<blockquote>
+<p>Data and files are considered to be persistent if there is some representation of the data somewhere in repositories that the copious-transisions implementation knows about and if the data can be retrieved. Persistent storage may store some data in memory (in the LRU sense) for a short period of time. It may be assumed that data will age out faster than static data. Persistent storage is not required to always keep a copy of data locally if it can be guaranteed to obtain it from some cache.</p>
+<p>Persistent storage may take in new data from the client facing processes and store it locally and in remote repositories. When a copious-transisions implementation takes in new data it can use persistent storage key-value APIs to proxy sending data to endpoints that curate the data and make it available to other services such as link services and counting services.</p>
+</blockquote>
+<p>A copious-transisions implementation accesses the static and persistent storage code via the <strong>generalized_db</strong> class and its descendant implementations.</p>
+<p>Persistent storage acts as a proxy to upstream repositories only as a user of communication class instances, those most likely provided by the <strong>message-relay-services</strong> module. The persistent storage class provided by <strong>custom_storage</strong> does not create the connection to endpoint services, but will be constructed with an instance of the communication class which must have been created by the <strong>generalized_db</strong> class descendant. (Note: <strong>generalized_db</strong> does not create default class instances and just provides a calling framework.)</p>
+<blockquote>
+<p>Persistent storage in  <strong>custom_storage</strong> communicates with data repositories providing some business transactions only because its communication class instance is configured to talk to those services. Persistent storage has no concept of what upstream services do. It just manages the lifecycle of data on the local machine and sends messages.</p>
+</blockquote>
+<p><em>Refer to descendants of</em> <strong>generalized_db</strong> <em>in order to determine the business logic of the database interface instance</em>.</p>
+<h3>4. <u>captcha</u></h3>
+<p>This is an example web application that provides common web page login with an SVG captcha.</p>
+<h3>5. <u>defaults</u></h3>
+<p>These are default instance classes each of which descends from a generalized class from the <strong>lib</strong> directory. If a configuration fails to introduce a class for a particular role, a default class will be used instead. The default classes do next to nothing but they are not necessarily noops.</p>
+<h3>6. <u>local</u></h3>
+<h2>Setting up a web service</h2>
+<h2>WebSockets</h2>
+<p>The copious-transitions library will provide methods for initializing custom websocket servers. This library will only provide servers but will not provide clients. For backend communication, message relays and endpoints and pub/sub will be used with packets kept down to a minimal size.</p>
+<p>##Sesion Tokens</p>
+<p>Session tokens are isolared.</p>
+<p>LocalSessionTokens</p></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="Contractual.html">Contractual</a></li><li><a href="CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.html">DefaultDB</a></li><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul><h3>Classes</h3><ul><li><a href="Contractual.LocalTObjectCache.html">LocalTObjectCache</a></li><li><a href="Contractual.MimeHandling.html">MimeHandling</a></li><li><a href="Contractual.TransitionHandling.html">TransitionHandling</a></li><li><a href="Contractual.UserHandling.html">UserHandling</a></li><li><a href="CopiousTransitions.CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.CustomizationMethodsByApplication.html">CustomizationMethodsByApplication</a></li><li><a href="DefaultDB.FauxInMemStore.html">FauxInMemStore</a></li><li><a href="DefaultDB.FileMapper.html">FileMapper</a></li><li><a href="DefaultDB.FilesAndRelays.html">FilesAndRelays</a></li><li><a href="DefaultDB.FilesAndRelays_base.html">FilesAndRelays_base</a></li><li><a href="DefaultDB.LocalStaticDB.html">LocalStaticDB</a></li><li><a href="DefaultDB.LocalStorageLifeCycle.html">LocalStorageLifeCycle</a></li><li><a href="DefaultDB.LocalStorageSerialization.html">LocalStorageSerialization</a></li><li><a href="DefaultDB.PageableMemStoreElement.html">PageableMemStoreElement</a></li><li><a href="DefaultDB.PersistenceContracts.html">PersistenceContracts</a></li><li><a href="DefaultDB.RemoteMessaging.html">RemoteMessaging</a></li><li><a href="DefaultDB.StaticDBDefault.html">StaticDBDefault</a></li><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a></li><li><a href="SessionTokenManager.html">SessionTokenManager</a></li><li><a href="base.DBClass.html">DBClass</a></li><li><a href="base.EndpointManager.html">EndpointManager</a></li><li><a href="base.GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">GeneralBusiness</a></li><li><a href="base.GeneralDynamic.html">GeneralDynamic</a></li><li><a href="base.GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">GeneralStatic</a></li><li><a href="base.GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="base.SessionManager.html">SessionManager</a></li><li><a href="base.SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="base.TaggedTransition.html">TaggedTransition</a></li><li><a href="base.TokenTables.html">TokenTables</a></li><li><a href="base.UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="base.WebSocketManager.html">WebSocketManager</a></li><li><a href="field_validators.DataLookupField.html">DataLookupField</a></li><li><a href="field_validators.EmailField.html">EmailField</a></li><li><a href="field_validators.EmailVerifyField.html">EmailVerifyField</a></li><li><a href="field_validators.FieldTest.html">FieldTest</a></li><li><a href="field_validators.FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="field_validators.ForeignAuth.html">ForeignAuth</a></li><li><a href="field_validators.GeneralValidator.html">GeneralValidator</a></li><li><a href="field_validators.LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="field_validators.LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="field_validators.LengthyField.html">LengthyField</a></li><li><a href="field_validators.LengthyStringField.html">LengthyStringField</a></li><li><a href="field_validators.PasswordField.html">PasswordField</a></li><li><a href="field_validators.PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="field_validators.TypeCheckField.html">TypeCheckField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#generate_password_block">generate_password_block</a></li><li><a href="global.html#load_configuration">load_configuration</a></li><li><a href="global.html#load_parameters">load_parameters</a></li><li><a href="global.html#module_top">module_top</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Tue Oct 31 2023 17:32:59 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: lib/general_business.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: lib/general_business.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const AppLifeCycle = require("./general_lifecyle")
+const fs = require('fs')
+
+
+
+/** 
+ * This module provides a stand-in for applications that will perform some business processing 
+ * one transitions have fulfilled.
+ * 
+ * Interesting implementations have been moved out of the library and into applications. 
+ * Some actions such as email responses previously program are becoming archaic.
+ * But, some applications may still use them.
+ * 
+ * In any case, the reference to the applications Business class instance is available to a number of other clases, 
+ * among them, the application's session manager. The application's session manager is the only CopiousTranstions governed library class
+ * to be initialized with the Business class as a parameter. But the session manager might pass this on to the transition engine or 
+ * to the DB manager in some applications. (Again, it is up to the application to use or ignore this class.)
+ * 
+ * NOTE: all the base classes in /lib return the class and do not return an instance. Explore the applications and 
+ * the reader will find that the descendant modules export instances. The classes provided by copious-transitions must
+ * be extended by an application.
+ * 
+ * @memberof base
+ */
+
+class GeneralBusiness extends AppLifeCycle {
+    
+    constructor() {
+        super()
+        //
+        this.recently_forgetful = {}
+        this.forgetfulness_tag = ""
+        this.logo_body = ""
+    }
+
+    //
+    /**
+     * 
+     * @param {object} conf_obj 
+     * @param {object} db 
+     */
+    initialize(conf_obj,db) {
+        this.db = db
+        this.rules = conf_obj.business ? ( conf_obj.business.rules ? conf_obj.business.rules : null ) : null
+        this.forgetfulness_tag = conf_obj ? ( conf_obj.forgetfulness_tag ? conf_obj.forgetfulness_tag : "" ) : ""
+        this.root_path = process.cwd()
+        try {
+            this.logo_body = fs.readFileSync(this.root_path + '/' + conf_obj.html_wrapper_with_logo,"utf-8").toString()
+        } catch (e) {
+            // this.logo_body = require("vanilla").load()
+        }
+        
+    }
+
+    //
+    /**
+     * For definition by an application.
+     * 
+     * If a application's session manager calls for the initiation of some business process, identified by `use_case`,
+     * this method can be called. This method is left empty for definition in an applications's subclass. 
+     * 
+     * And example might be that email is sent to someone once a transition if finalized.
+     * 
+     * @param {string} use_case - a flag for a switch statement or a map key to a function. 
+     * @param {object} post_body - The post body is from the client request.
+     */
+    process(use_case,post_body) {
+    }
+
+    /**
+     * Some applications may support forgotten passwords as part of authorization.
+     * This interface provides applications with some methods to start tracking exchanges 
+     * with users having to do with reseting passwords or other activities related to forgotten authorization memes.
+     * 
+     * This method makes an entry for the forgotten item.
+     * 
+     * @param {string} pkey 
+     * @param {object} trackable 
+     */
+    store_recent_forgetfulness(pkey,trackable) {
+        this.recently_forgetful[pkey] = trackable
+    }
+
+    /**
+     * Retrieve information related to the forgotten password activity.
+     * 
+     * @param {string} pkey 
+     * @returns {object}
+     */
+    get_recently_forgetful(pkey) {
+        return(this.recently_forgetful[pkey])
+    }
+
+    /**
+     * Delete information related to the forgotten password activity.
+     * 
+     * @param {string} pkey 
+     */
+    del_recent_forgetfulness(pkey) {
+        delete this.recently_forgetful[pkey]
+    }
+
+    /**
+     * Related to the forgotten information. Provides a call frame that relates the 
+     * forgotten information to a transition. And allows for some application defined process 
+     * that uses information from the request's body.
+     * 
+     * @param {string} transition 
+     * @param {string} pkey 
+     * @param {object} post_body 
+     */
+    cleanup(transition,pkey,post_body) {
+        this.del_recent_forgetfulness(pkey)
+    }
+}
+
+
+
+module.exports = GeneralBusiness
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="Contractual.html">Contractual</a></li><li><a href="CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.html">DefaultDB</a></li><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul><h3>Classes</h3><ul><li><a href="Contractual.LocalTObjectCache.html">LocalTObjectCache</a></li><li><a href="Contractual.MimeHandling.html">MimeHandling</a></li><li><a href="Contractual.TransitionHandling.html">TransitionHandling</a></li><li><a href="Contractual.UserHandling.html">UserHandling</a></li><li><a href="CopiousTransitions.CopiousTransitions.html">CopiousTransitions</a></li><li><a href="DefaultDB.CustomizationMethodsByApplication.html">CustomizationMethodsByApplication</a></li><li><a href="DefaultDB.FauxInMemStore.html">FauxInMemStore</a></li><li><a href="DefaultDB.FileMapper.html">FileMapper</a></li><li><a href="DefaultDB.FilesAndRelays.html">FilesAndRelays</a></li><li><a href="DefaultDB.FilesAndRelays_base.html">FilesAndRelays_base</a></li><li><a href="DefaultDB.LocalStaticDB.html">LocalStaticDB</a></li><li><a href="DefaultDB.LocalStorageLifeCycle.html">LocalStorageLifeCycle</a></li><li><a href="DefaultDB.LocalStorageSerialization.html">LocalStorageSerialization</a></li><li><a href="DefaultDB.PageableMemStoreElement.html">PageableMemStoreElement</a></li><li><a href="DefaultDB.PersistenceContracts.html">PersistenceContracts</a></li><li><a href="DefaultDB.RemoteMessaging.html">RemoteMessaging</a></li><li><a href="DefaultDB.StaticDBDefault.html">StaticDBDefault</a></li><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a></li><li><a href="SessionTokenManager.html">SessionTokenManager</a></li><li><a href="base.DBClass.html">DBClass</a></li><li><a href="base.EndpointManager.html">EndpointManager</a></li><li><a href="base.GeneralAppLifeCycle.html">GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">GeneralBusiness</a></li><li><a href="base.GeneralDynamic.html">GeneralDynamic</a></li><li><a href="base.GeneralMiddleWare.html">GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">GeneralStatic</a></li><li><a href="base.GeneralTransitionEngImpl.html">GeneralTransitionEngImpl</a></li><li><a href="base.SessionManager.html">SessionManager</a></li><li><a href="base.SessionManager_Lite.html">SessionManager_Lite</a></li><li><a href="base.TaggedTransition.html">TaggedTransition</a></li><li><a href="base.TokenTables.html">TokenTables</a></li><li><a href="base.UserMessageEndpoint.html">UserMessageEndpoint</a></li><li><a href="base.WebSocketManager.html">WebSocketManager</a></li><li><a href="field_validators.DataLookupField.html">DataLookupField</a></li><li><a href="field_validators.EmailField.html">EmailField</a></li><li><a href="field_validators.EmailVerifyField.html">EmailVerifyField</a></li><li><a href="field_validators.FieldTest.html">FieldTest</a></li><li><a href="field_validators.FieldValidatorTools.html">FieldValidatorTools</a></li><li><a href="field_validators.ForeignAuth.html">ForeignAuth</a></li><li><a href="field_validators.GeneralValidator.html">GeneralValidator</a></li><li><a href="field_validators.LengthyAlphabetField.html">LengthyAlphabetField</a></li><li><a href="field_validators.LengthyDigitalField.html">LengthyDigitalField</a></li><li><a href="field_validators.LengthyField.html">LengthyField</a></li><li><a href="field_validators.LengthyStringField.html">LengthyStringField</a></li><li><a href="field_validators.PasswordField.html">PasswordField</a></li><li><a href="field_validators.PasswordVerifyField.html">PasswordVerifyField</a></li><li><a href="field_validators.TypeCheckField.html">TypeCheckField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#generate_password_block">generate_password_block</a></li><li><a href="global.html#load_configuration">load_configuration</a></li><li><a href="global.html#load_parameters">load_parameters</a></li><li><a href="global.html#module_top">module_top</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Tue Oct 31 2023 17:32:59 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
