@@ -2,16 +2,16 @@
 
 **Purpose:** The main purpose of this module is to provide a framework for handling state transition requests, where requests are messages from UI clients and/or backend services. 
 
-Some requests may be delivered as HTTP requests. Other requests may be delivered as backend JSON messages. The message handlers may be thought of as API handlers that are aware of authorized sessions and the state.
+Some requests may be delivered as HTTP requests. Other requests may be delivered as backend JSON messages. The message handlers may be thought of as API handlers that are aware of authorized sessions and its state.
 
 
-**transition tokens:** Sessions own transition tokens that key data being used in a state transition. The tokens, ***transition tokens***, are made by services implemented with respect to this framework. They are made in response to initial requests and are tracked by secondary requests. Tokens go back to requesters, clients. If the requester makes more requests with regard to a single requested transtion, the requesters must send the tokens back to the services in order to regognize sendary actions that drive a state transition towards completion.
+**Transition tokens:** Sessions own transition tokens that key data being used in a state transition. The tokens, ***transition tokens***, are made by services implemented with respect to this framework. They are made in response to initial requests and are tracked by secondary requests. Tokens go back to requesters, clients. If the requester makes more requests with regard to a single requested transtion, the requesters must send the the transition's token back to the services in order to regognize secondary actions that drive a state transition towards completion.
 
-**development:** This library supports building and running web services applications by providing several types of HTTP API endpoints. The API (URI) forms specify general classes of activity and may be parameterized by the names of transitions or actions. Then, most POST requests will contain JSON objects that describe a transition or a media request or a user action.
+**Development:** This library supports building and running web services applications by providing several types of HTTP API endpoints. The API (URI) forms specify general classes of activity and may be parameterized by the names of transitions or actions. Then, most POST requests will contain JSON objects that describe a transition or a media request or a user action.
 
-This library provides application developers classes implementing general behavior for dealing with requests. This library provides generalized classes implementing calling frames for applications to override. In turn, the applications may handle authorization, uploading media, accessing static pages, accessing dynamic processes requiring state transition management, etc. by customizing extensions of these classes.
+This library provides application developers classes implementing general behavior for dealing with requests. These generalized classes provide method for use within calling frames. And, these methods are for applications to override. Depending on how a method overrides the methods, the applications may handle authorization, uploading media, accessing static pages, accessing dynamic processes requiring state transition management, etc. by customizing extensions of these classes. In turn, the generalized classes provide execution pathways which may be used without alteration.
 
-**processes and distribution:** The extending applications may be separate processes, each with their own TCP port. ***They will share information with each other via shared memory for such requirements as access control.*** Some of the applications may run on different nodes in a cluster. Information sharing will be controlled by the use of certain libraries providing shared memory management and pub/sub processes.
+**Processes and distribution:** The extending applications may be separate processes, each with their own TCP port. ***They will share information with each other via shared memory for such requirements as access control.*** Some of the applications may run on different nodes in a cluster. Information sharing will be controlled by the use of certain libraries providing shared memory management and pub/sub processes.
 
 **the main:** How big or small the footprint of the service will be will depend mostly on configuration. Each application will create an instance of the same main class, **CopiousTransitions**. This application instance will read the configuration file to look for the application's extension classes which the **CopiousTransitions** instane knows how to use.
 
@@ -69,9 +69,9 @@ The configuration is required.
 
 For an application to be useful, it must provide overrides of the general classes provided by the module. How these classes are addressed is determined by the so called `contractual` modules.
 
-The `contractual` modules process transactions based on a few web API paths. Most of these respond to POST methods that expect JSON objects carrying session identifiers, state machine tokens, and relavent data. The `contractual` path handlers pass off *safe* objects to the methods implemented (overrides) by the application classes.
+The `contractual` modules process transactions based on a few web API paths. Most of these respond to POST methods that expect JSON objects carrying session identifiers, state machine tokens, and relevant data. The `contractual` path handlers pass off *safe* objects to the methods implemented (overrides) by the application classes.
 
-The application clases are specified in the configuration file along with other applications parameters, such as ports and addresses and security configuration parameters. Applications may extend the basic configuration to set up their downstream connections, database connections, special directories, etc. But, the basic configuration will be present in all derived applications. 
+The application classes are specified in the configuration file along with other applications parameters, such as ports and addresses and security configuration parameters. Applications may extend the basic configuration to set up their downstream connections, database connections, special directories, etc. But, the basic configuration will be present in all derived applications. 
 
 Here is an example of a basic configuration:
 
