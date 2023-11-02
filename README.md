@@ -1,13 +1,26 @@
 # copious-transitions
 
-This is a library that supports building and running web services applications. The library provides generalized classes implementing calling frames for applications to override. The applications may handle authorization, uploading media, accessing static pages, accessing dynamic processes that require state transition management, etc.
+**Purpose:** The main purpose of this module is to provide a framework for handling state transition requests, where requests are messages from UI clients and/or backend services. 
 
-The applications may be separate processes, each with their own TCP port. ***They will share information with each other via shared memory for such requirements as access control.*** Some of the applications may run on different nodes in a cluster. Information sharing will be controlled by the use of certain libraries providing shared memory management and pub/sub processes.
+Some requests may be delivered as HTTP requests. Other requests may be delivered as backend JSON messages. The message handlers may be thought of as API handlers that are aware of authorized sessions and the state.
 
-How big or small the footprint of the service will be will depend mostly on configuration. Each application reads in a configuration file and marshals parts of it to subprocesses and library class instances. Some aspects of configuration will direct the subprocesses to connect on pub/sub pathways on predetermined addresses and ports. Some application will want to automate high level configuration of nodes in their own way. This module provides configuration mostly at the process level, but provides pathways to open up configuration at a higher level.
+
+**transition tokens:** Sessions own transition tokens that key data being used in a state transition. The tokens, ***transition tokens***, are made by services implemented with respect to this framework. They are made in response to initial requests and are tracked by secondary requests. Tokens go back to requesters, clients. If the requester makes more requests with regard to a single requested transtion, the requesters must send the tokens back to the services in order to regognize sendary actions that drive a state transition towards completion.
+
+**development:** This library supports building and running web services applications by providing several types of HTTP API endpoints. The API (URI) forms specify general classes of activity and may be parameterized by the names of transitions or actions. Then, most POST requests will contain JSON objects that describe a transition or a media request or a user action.
+
+This library provides application developers classes implementing general behavior for dealing with requests. This library provides generalized classes implementing calling frames for applications to override. In turn, the applications may handle authorization, uploading media, accessing static pages, accessing dynamic processes requiring state transition management, etc. by customizing extensions of these classes.
+
+**processes and distribution:** The extending applications may be separate processes, each with their own TCP port. ***They will share information with each other via shared memory for such requirements as access control.*** Some of the applications may run on different nodes in a cluster. Information sharing will be controlled by the use of certain libraries providing shared memory management and pub/sub processes.
+
+**the main:** How big or small the footprint of the service will be will depend mostly on configuration. Each application will create an instance of the same main class, **CopiousTransitions**. This application instance will read the configuration file to look for the application's extension classes which the **CopiousTransitions** instane knows how to use.
 
 
 ## Main Process Script
+
+Each application mentions its extension classes in a configuration file. While these classes will get most of their functionality from their general base classes, their specific implementations will drive their operation through processing decisions and customization of resource usage such as database connections.
+
+In some applications, the configuration will direct the subprocesses to connect on pub/sub pathways on predetermined addresses and ports. Some applications will want to automate high level configuration of nodes in their own way.
 
 In all, the manner in which files are brought into the processes makes the main program very simple. The following is an example of a complete main application script:
 
@@ -28,6 +41,8 @@ if (  process.argv[3] !== undefined ) { // maybe debug
         g_debug = true
     }
 }
+
+// the following line can be the same line for all applications
 
 let transition_app = new CopiousTransitions(config,debug)
 
