@@ -76,7 +76,133 @@ The application classes are specified in the configuration file along with other
 Here is an example of a basic configuration:
 
 ```
-BASIC CONFIGURATION
+
+
+{
+  "domain": "copious.world",
+  "module_path": "captcha/lib",
+  "port": "2006",
+  "ws_port": "2007",
+  "ws_client_port" : false,
+  "foreign_auth_port" : "2009",
+  "user_cookie": "copiousToken",
+  "forgetfulness_tag": "DOY",
+  "login_app": [ "/users/login", "/users/logout", "/users/register", "/users/forgot" ],
+  "html_wrapper_with_logo": "personals-templates/header-empty.html",
+  "foreign_authorizer_api_enpoint": "https://www.copious.world/fauth",
+  "login_amelioration": "join_process()",
+  "second_login_amelioration": "already_logged_in()",
+  "failed_password_amelioration": "login_retry_password()",
+  "failed_registration_duplicate": "already_registered()",
+  "modules": {
+    "custom_transitions": "captcha_transitions",
+    "db": "captcha_db",
+    "middleware": "captcha_mware",
+    "authorizer": "captcha_auth",
+    "validator": "captcha_validator",
+    "static_assets": "captcha_static",
+    "dynamic_assets": "captcha_dynamic",
+    "expression": "captcha_express",
+    "business": "captcha_business"
+  },
+  "static_db" : {
+    "blob_dir" : "local/static_db",
+    "freeloading_timeout" : 7200000,
+    "max_data_RAM" : 25000000,
+    "max_forwarded_storage" : 256,
+    "knowledge_domains" : {},
+    "db_file" : "local/static_db/userdata.db"
+  },
+  "persistence_db" : {
+    "knowledge_domains" : {},
+    "db_file" : "local/userdata.db"
+  },
+  "middleware": {
+    "session": [],
+    "transforms": []
+  },
+  "use_secure_transfer" : false,
+  "sessions": {
+    "secret": "this is secret no doubt"
+  },
+  "static_files": {
+    "reason": "files listed here will override the directory entries",
+    "files": [],
+    "directory": "statics",
+    "app_spec": "captcha/static"
+  },
+  "field_set": {
+    "reason": "some fields may be specified in conf, others in the application module",
+    "login": {
+      "email": {
+        "field_type": "email"
+      },
+      "password": {
+        "field_type": "password"
+      },
+      "strategy": {
+        "field_type": "foreign_auth"
+      }
+    },
+    "register": {
+      "email": {
+        "field_type": "email"
+      },
+      "name": {
+        "field_type": "lengthy-alpha",
+        "length": {
+          "min": 2,
+          "max": 32
+        }
+      },
+      "password": {
+        "field_type": "password",
+        "length": {
+          "min": 8,
+          "max": 24
+        },
+        "code": "A2C2N2S2"
+      },
+      "verify_password": {
+        "field_type": "password-verify"
+      }
+    },
+    "forgot": {
+      "email": {
+        "field_type": "email"
+      },
+      "password": {
+        "field_type": "password",
+        "length": {
+          "min": 8,
+          "max": 24
+        },
+        "code": "A2C2N2S2"
+      },
+      "verify_password": {
+        "field_type": "password-verify"
+      }
+    },
+    "password-reset": {
+      "password": {
+        "field_type": "password",
+        "length": {
+          "min": 8,
+          "max": 24
+        },
+        "code": "A2C2N2S2"
+      }
+    }
+  },
+  "forhash": {
+    "field1": "email",
+    "field2": "password"
+  },
+  "foreign_auth": {
+    "allowed" : true,
+    "api_enpoint": "https://www.copious.world/fauth",
+  }
+}
 
 ```
 
