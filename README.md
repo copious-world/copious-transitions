@@ -5,7 +5,7 @@
 Some requests may be delivered as HTTP requests. Other requests may be delivered as backend JSON messages. The message handlers may be thought of as API handlers that are aware of authorized sessions and its state.
 
 
-**Transition tokens:** Sessions own transition tokens that key data being used in a state transition. The tokens, ***transition tokens***, are made by services implemented with respect to this framework. They are made in response to initial requests and are tracked by secondary requests. Tokens go back to requesters, clients. If the requester makes more requests with regard to a single requested transtion, the requesters must send the the transition's token back to the services in order to regognize secondary actions that drive a state transition towards completion.
+**Transition tokens:** Sessions own transition tokens that key data being used in a state transition. The tokens, ***transition tokens***, are made by services implemented with respect to this framework. They are made in response to initial requests and are tracked by secondary requests. Tokens go back to requesters, clients. If the requester makes more requests with regard to a single requested transtion, the requesters must send the the transition's token back to the services in order to recognize secondary actions that drive a state transition towards completion.
 
 **Development:** This library supports building and running web services applications by providing several types of HTTP API endpoints. The API (URI) forms specify general classes of activity and may be parameterized by the names of transitions or actions. Then, most POST requests will contain JSON objects that describe a transition or a media request or a user action.
 
@@ -13,7 +13,7 @@ This library provides application developers classes implementing general behavi
 
 **Processes and distribution:** The extending applications may be separate processes, each with their own TCP port. ***They will share information with each other via shared memory for such requirements as access control.*** Some of the applications may run on different nodes in a cluster. Information sharing will be controlled by the use of certain libraries providing shared memory management and pub/sub processes.
 
-**the main:** How big or small the footprint of the service will be will depend mostly on configuration. Each application will create an instance of the same main class, **CopiousTransitions**. This application instance will read the configuration file to look for the application's extension classes which the **CopiousTransitions** instane knows how to use.
+**the main:** How big or small the footprint of the service will be will depend mostly on configuration. Each application will create an instance of the same main class, **CopiousTransitions**. This application instance will read the configuration file to look for the application's extension classes which the **CopiousTransitions** instance knows how to use.
 
 
 ## Main Process Script
@@ -67,9 +67,7 @@ npm install copious-transitions --save
 
 The configuration is required. 
 
-For an application to be useful, it must provide overrides of the general classes provided by the module. How these classes are addressed is determined by the so called `contractual` modules.
-
-The `contractual` modules process transactions based on a few web API paths. Most of these respond to POST methods that expect JSON objects carrying session identifiers, state machine tokens, and relevant data. The `contractual` path handlers pass off *safe* objects to the methods implemented (overrides) by the application classes.
+For an application to be useful, it must provide overrides of the general classes provided by the module. How these classes are addressed is determined by the so called `contractual` modules. Application classes must be useable by the contractual modules. (Also, they use and expose methods to the classes they are extending and each other. Hence, there is API documentation.)
 
 The application classes are specified in the configuration file along with other applications parameters, such as ports and addresses and security configuration parameters. Applications may extend the basic configuration to set up their downstream connections, database connections, special directories, etc. But, the basic configuration will be present in all derived applications. 
 
@@ -206,6 +204,32 @@ Here is an example of a basic configuration:
 
 ```
 
+This configuration is used by the included example implementation `captcha`. This is an old, but still working implentation. Newer ones rely less on the validation and may be using distributed identies, etc. The newer implementations may be published as their own module.
+
+Notice the field **modules**. This is a map from application independent module names to the application files which export class instances to the main. The main CopiousTransitions class instance will look for the modules to load in the diretory `module_path`, which is another field on the configuration object. Here the directory is "captcha/lib". In the configuration the exention of the files is not mentioned, but the file names are being passed to node.js **require**. 
+
+(Note: an extension of this module might load modules in other ways. For instance, if a Bun version is created, Typescript could be used.)
+
+Other fields in the configuration are supported by basic general classes, including `field_set` and `middleware`. But, some of the other are specific to the application. The configuration object is passed to the basic classes when the main calls `initialize` for their object instances.
+
+More on configuration can be found here: [link to configuration doc]()
+
+
+## Contractual Modules
+
+Some modules have been set aside and have been dubbed `contractual` to indicate that they provide a promised flow logic for handling requests with respect to sessions and tokens. The term `contractual` as used here should not be confused with blockchain contracts, although such a functional module might be added in the future.
+
+The `contractual` modules process transactions based on a few web API paths. Most of these respond to POST methods that expect JSON objects carrying session identifiers, state machine tokens, and relevant data. The `contractual` path handlers pass off *safe* objects to the methods implemented (overrides) by the application classes.
+
+The `contractual` modules may be foun in the directory `contractual`. The files included are the following:
+
+* mime_processing.js - handle static and dynamic content requests
+* user_processing.js - handles user session management
+* transition_processing.js - handles transitions, requests for action
+
+The class implementations in these files call out to the authorization module for access and permissions. The job of producing transaction tokens is given to the authorization module. The contractual module will stash tokens and make appropriate calls to the authorization module in order to gain access to the transition engine. If data is requested via mime processing, the mime methods will call out to static or dynamic handlers after getting permission from the authorization module.
+
+The transition processing methods will call on the authorization modules to invoke transition processing. The authorization module makes the transition object and determines the number of times it will be used across primary and seconday requests. Transition processing calls on the authorization module to finalize state transition which results in a change to the session state. In the case of user processing, finalization comes in the flavor of *starting* a user session. But, a state transition is finalized in the authorization module as well. Often state finalization requires a call out to the DB or to the transition engine, neither of which are accessible from the `contractual` modules. But, state finalization may also involve encryption and decryption which is accessible via authorization.
 
 
 
@@ -255,7 +279,7 @@ Here is a list of common pathways that are defined in the **CopiousTransitions**
 * **/static/:asset :: GET ::** returns an asset keyed in a static db 
 * **/guarded/static/:asset :: POST ::** returns an asset after authorization checks
 * **/guarded/dynamic/:asset :: POST ::** authorized and optionally confirmed asset generation
-* **/secondary/guarded :: POST ::** a transition keyed on a token from guarded paths
+* **/secondary/guarded :: POST ::** a request keyed on a token from guarded paths
 * **/transition/:transition :: POST ::** start of a process and guarded
 * **/secondary/transition :: POST ::** continuation of a process and guarded
 * **/user/:operation :: POST ::** configurable list of paths offering the following:
@@ -296,8 +320,11 @@ authorized media pathways.
 
 ### 1. <u>lib</u>
 
+All the files mentioned in the previous section are to be found in the *lib* directory. There are a few more files beyond what was discussed.
 
 ### 2. <u>contractual</u>
+
+The contractual modules were discussed in the previous section **Transactions and Classes**.
 
 
 ### 3. <u>custom storage</u>
@@ -332,25 +359,6 @@ This is an example web application that provides common web page login with an S
 
 These are default instance classes each of which descends from a generalized class from the **lib** directory. If a configuration fails to introduce a class for a particular role, a default class will be used instead. The default classes do next to nothing but they are not necessarily noops.
 
-### 6. <u>local</u>
-
-
-
-## Setting up a web service
-
-
-
-
-## WebSockets
-
-The copious-transitions library will provide methods for initializing custom websocket servers. This library will only provide servers but will not provide clients. For backend communication, message relays and endpoints and pub/sub will be used with packets kept down to a minimal size.
-
-
-##Sesion Tokens
-
-Session tokens are isolared.
-
-LocalSessionTokens
 
 
 
