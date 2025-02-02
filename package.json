@@ -40,6 +40,7 @@
     "clone": "^2.1.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "extra-file-class": "^0.9.20",
     "generate-password": "^1.7.0",
     "message-relay-services": "^0.9.14",
     "mime-db": "^1.52.0",
