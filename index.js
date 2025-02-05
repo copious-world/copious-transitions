@@ -34,8 +34,8 @@ module.exports.ReMailer = require('./lib/remailer')
 module.exports.ShutdownManager = require('./lib/shutdown-manager')
 
 // ---- ----  ----  ----  ---- 
-module.exports.CustomPersistenceDB = require('./custom_storage/persistent_db')
-module.exports.CustomStaticDB = require('./custom_storage/static_db')
-module.exports.DefaultKeyValue = require('./custom_storage/key_value_db')
+module.exports.DefaultPersistenceDB = require('./default_storage/persistent_db')
+module.exports.DefaultStaticDB = require('./default_storage/static_db')
+module.exports.DefaultKeyValueDB = require('./default_storage/key_value_db')
 
 module.exports.GeneralLifeCycleManager = require('./lib/general_lifecyle')

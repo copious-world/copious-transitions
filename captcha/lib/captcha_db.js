@@ -1,7 +1,7 @@
 const { DBClass } = require.main.require('./lib/general_db')
 const PersistenceManager = require.main.require('./lib/global_persistence')
-const CustomPersistenceDB = require.main.require('./custom_storage/persistent_db')
-const CustomStaticDB = require.main.require('./custom_storage/static_db')
+const DefaultPersistenceDB = require.main.require('./default_storage/persistent_db')
+const DefaultStaticDB = require.main.require('./default_storage/static_db')
 //
 const apiKeys = require.main.require('./local/api_keys')
 //
@@ -73,9 +73,9 @@ class CaptchaDBClass extends DBClass {
     constructor() {
       // pass app messages to the backend
       let stash_interval = WRITE_OBJECT_MAP_EVERY_INTERVAL
-      let persistenceDB = new CustomPersistenceDB(g_persistence.message_fowarding,stash_interval,'user')
+      let persistenceDB = new DefaultPersistenceDB(g_persistence.message_fowarding,stash_interval,'user')
       stash_interval = WRITE_UNUSED_LARGE_ENTRIES_EVERY_INTERVAL
-      let staticDB = new CustomStaticDB(g_persistence.message_fowarding,stash_interval,'user','email')
+      let staticDB = new DefaultStaticDB(g_persistence.message_fowarding,stash_interval,'user','email')
       super(g_keyValueDB,g_keyValueSessions,persistenceDB,staticDB)
     }
 

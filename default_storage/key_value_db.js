@@ -6,7 +6,7 @@ const {FileOperationsCache} = require('extra-file-class')
  * 1) The key value DB is an LRU in memory cache which has disk backup. Different kinds of data structures can be put there.
  *      -- If a value is out of cache, it can be retrieved from disk. Used in song-search db. Stores files as the value.
  *      -- Also, it retrieves files from disk at startup and stores them into the in-memory table. (A shim for something like 
- *      -- Redis might be used.)
+ *      -- Redis might be used instead.)
  * 
  */
 
