@@ -1,5 +1,5 @@
 
-const LocalTObjectCache = require('../custom_storage/local_object_cache')
+const LocalTObjectCache = require('../default_storage/local_object_cache')
 
 /**
  * The user handling operations deal with registration, login, logout and some supporting pathways.

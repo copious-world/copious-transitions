@@ -1,5 +1,5 @@
 
-const LocalTObjectCache = require('../custom_storage/local_object_cache')
+const LocalTObjectCache = require('../default_storage/local_object_cache')
 
 /**
  * MimeHandling provides a collection of methods that serve an API made for retrieving assets

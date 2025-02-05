@@ -1,5 +1,5 @@
 
-const LocalTObjectCache = require('../custom_storage/local_object_cache')
+const LocalTObjectCache = require('../default_storage/local_object_cache')
 
 /**
  * Transition handling is a collection of POST method responses designed to provide executive action. 
