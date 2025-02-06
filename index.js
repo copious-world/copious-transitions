@@ -30,7 +30,6 @@ module.exports.GeneralBusiness = require('./lib/general_business')
 
 // ---- ----  ----  ----  ---- 
 module.exports.GeneralValidator = require('./lib/general_validator')
-module.exports.ReMailer = require('./lib/remailer')
 module.exports.ShutdownManager = require('./lib/shutdown-manager')
 
 // ---- ----  ----  ----  ---- 

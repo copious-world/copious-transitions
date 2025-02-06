@@ -2,7 +2,12 @@
 const FilesAndRelays = require('./files_and_relays')
 const fsPromises = require('fs/promises')
 const fs = require('fs')
-const uuid = require('../lib/uuid')
+const uuid = () => {      // was uuid -- may change -- this instance is placed here for convenience (a module has been removed ... initialization order)
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+     });
+}
 //
 
 const MAX_LAX_CACHE_TIME = 1000*3600*4
@@ -103,8 +108,8 @@ class LocalStorageSerialization extends FilesAndRelays {
      * @param {object} conf 
      */
     initialize(conf) {
-        super.initialize(conf.static_db)
-        this.blob_dir = conf.static_db.blob_dir
+        super.initialize(conf)
+        this.blob_dir = conf.blob_dir
         //
         if ( this.blob_dir ) {
             this.load_dir(this.blob_dir)

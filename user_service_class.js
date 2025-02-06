@@ -39,6 +39,16 @@ const g_expected_modules = [
 const g_hex_re = /^[0-9a-fA-F]+$/;
 //
 
+
+// global_appwide_token
+global.global_appwide_token = () => {      // was uuid -- may change
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+        });
+}
+
+
 /**
  * 
  * The class provided in this module provides the main method for the entry point to an application running 
