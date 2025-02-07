@@ -30,4 +30,4 @@ class StaticDBDefault extends LocalStaticDB {
 
 
 
-module.exports = StaticDBDefault
+module.exports = new StaticDBDefault()
