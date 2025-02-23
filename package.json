@@ -5,6 +5,10 @@
   "directories": {
     "lib": "lib"
   },
+  "main": "index.js",
+  "bin" : {
+    "copious-captcha" : "./bin/index.js"
+  },
   "scripts": {
     "test": "node tests/runall.js"
   },

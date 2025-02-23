@@ -187,6 +187,8 @@ class CopiousTransitions extends EventEmitter {
         this.transition_engine.set_ws(this.web_sockets)
         this.transition_engine.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
         //
+
+        this.transition_processing.initialize_service_configuration(this.db,this.transition_engine,this.web_sockets)
     }
 
 
