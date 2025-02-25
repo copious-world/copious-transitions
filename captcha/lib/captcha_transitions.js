@@ -1,4 +1,4 @@
-const TaggedTransition = require.main.require("./lib/tagged_transitions")
+const {TaggedTransition} = require("../../index")
 
 // Captcha Users
 class CaptchaUsers extends TaggedTransition {

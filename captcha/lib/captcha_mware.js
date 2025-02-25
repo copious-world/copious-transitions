@@ -1,13 +1,13 @@
-const GeneralMiddleWare = require.main.require('./lib/general_mware')
+const {GeneralMiddleWare} = require("../../index")
 
 
-var bodyParser = require('body-parser');
-var cors = require('cors')
+const bodyParser = require('body-parser');
+const cors = require('cors')
 
 // create application/json parser
-var jsonParser = bodyParser.json()
+const jsonParser = bodyParser.json()
 // create application/x-www-form-urlencoded parser
-var urlencodedParser = bodyParser.urlencoded({ extended: false })
+const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 
 class CaptchaMiddleWare extends GeneralMiddleWare {

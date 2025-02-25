@@ -1,4 +1,4 @@
-const { GeneralAuth, SessionManager } = require.main.require('./lib/general_auth')
+const { GeneralAuth, SessionManager } = require('../../index')
 //
 //const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
@@ -8,9 +8,8 @@ var cnt = 0
 
 class CaptchaSessionManager extends SessionManager {
 
-    constructor(exp_app,db_obj,bussiness) {
-        //
-        super(exp_app,db_obj,bussiness)         //
+    constructor(exp_app,db_obj,business,trans_engine,token_storage) {   //
+        super(exp_app,db_obj,business,trans_engine,token_storage)       //
         //  ----  ----  ----  ----  ----  ----  ----  ----  ----
         this.middle_ware.push(cookieParser())           // use a cookie parser
     }

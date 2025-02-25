@@ -1,6 +1,7 @@
-const GeneralBusiness = require.main.require('./lib/general_business')
+const {GeneralBusiness} = require('../../index')
 const ReMailer = require("./remailer");
-const apiKeys = require.main.require('./local/api_keys')
+
+const apiKeys = require('../../bin/local/api_keys')
 //
 const {MessageRelayer} = require("message-relay-services")
 
@@ -54,9 +55,11 @@ class CaptchaBusines extends GeneralBusiness {
     }
 
     initialize_mailing() {
-        this.mail_transport = new MessageRelayer(apiKeys.message_relays);
-        this.mail_to_new_user =  new ReMailer(this.mail_transport,new_user_props);
-        this.mail_to_forgetful_user = new ReMailer(this.mail_transport,forgetful_user_props);
+        //this.mail_transport = new MessageRelayer(apiKeys.message_relays);
+        if ( this.mail_transport ) {
+            this.mail_to_new_user =  new ReMailer(this.mail_transport,new_user_props);
+            this.mail_to_forgetful_user = new ReMailer(this.mail_transport,forgetful_user_props);    
+        }
     }
 
     //

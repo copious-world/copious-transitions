@@ -27,27 +27,37 @@ class RemoteMessaging extends AppLifeCycle {
     //
     constructor(persistence_messenger_conf,default_m_path) {
         super()
+
+
+        this.messenger = false
         this.default_m_path = default_m_path ? default_m_path : 'persistence'
         //
+        let module = persistence_messenger_conf.module
         let messenger_connector_class = persistence_messenger_conf.communication_class
-        if ( typeof messenger_connector_class !== 'string' ) {
-            console.log("database initialization using the default DB does not name a module... communication_class in the configuration")
+        if ( typeof module !== 'string' ) {
+            console.log("database initialization using the default DB does not name a module in the configuration")
             console.log("see api.keys for configuration")
             throw new Error("bad configuration for data base messenger")
         }
-        let MessengerConnectorClass = false
+        let messenger_classes = false
         try {
-            MessengerConnectorClass = require(communication_class)
+            messenger_classes = require(module)
         } catch (e) {
             throw e
         }
+
+        if ( typeof messenger_connector_class !== 'string' ) {
+            console.log("database initialization using the default DB does not name a communication_class in the configuration")
+            console.log("see api.keys for configuration")
+            throw new Error("bad configuration for data base messenger")
+        }
+        let MessengerConnectorClass = messenger_classes[messenger_connector_class]
         //
         if ( MessengerConnectorClass ) {
-            let persistence_messenger = new MessengerConnectorClass(persistence_messenger_conf)
-            this.messenger = persistence_messenger    
+            this.messenger = new MessengerConnectorClass(persistence_messenger_conf)
         }
         //
-        if ( this.messenger === undefined ) {
+        if ( this.messenger === false ) {
             throw new Error("Files and Relays -- must have a defined messenger -- cannot proceed without it.")
         }
     }

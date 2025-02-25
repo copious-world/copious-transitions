@@ -495,18 +495,18 @@ class LocalStaticDB extends LocalStorageSerialization {
     /**
      * Calls the initializer for FilesAndRelays and the immediate LocalStorageSerialization
      * 
-     * @param {object} conf 
+     * @param {object} conf  -- this is conf.db.static_db
      */
     initialize(conf) {
-        super.initialize(conf.static_db)
-        if ( conf.static_db ) {
+        super.initialize(conf)
+        if ( conf ) {
             //
-            this._whokey_field = conf.static_db.index_key ? conf.static_db.index_key : this._whokey_field
+            this._whokey_field = conf.index_key ? conf.index_key : this._whokey_field
             //
-            let freeloading_timeout = conf.static_db.freeloading_timeout
+            let freeloading_timeout = conf.freeloading_timeout
             this.max_freeloading_time =  freeloading_timeout ? freeloading_timeout : MAX_LAX_CACHE_TIME
-            this.memory_allocation_preference = conf.static_db.max_data_RAM
-            this._max_group_storage = conf.static_db.max_forwarded_storage ? conf.static_db.max_forwarded_storage : MAX_GROUP_STORAGE_SIZE
+            this.memory_allocation_preference = conf.max_data_RAM
+            this._max_group_storage = conf.max_forwarded_storage ? conf.max_forwarded_storage : MAX_GROUP_STORAGE_SIZE
         }
     }
     //

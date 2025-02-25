@@ -1,4 +1,4 @@
-const GeneralDynamic = require.main.require('./lib/general_dynamic')
+const { GeneralDynamic } = require('../../index')
 
 const svgCaptcha = require('svg-captcha');
 

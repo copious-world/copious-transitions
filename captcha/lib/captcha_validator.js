@@ -1,6 +1,6 @@
 
-const GeneralValidator = require.main.require('./lib/general_validator')
 
+const {GeneralValidator} = require("../../index")
 
 class CaptchaValidator extends GeneralValidator {
 
