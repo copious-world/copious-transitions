@@ -1,67 +1,27 @@
-const { DBClass } = require.main.require('./lib/general_db')
-const PersistenceManager = require.main.require('./lib/global_persistence')
-const DefaultPersistenceDB = require.main.require('./default_storage/persistent_db')
-const DefaultStaticDB = require.main.require('./default_storage/static_db')
+const { DBClass, DefaultStaticDB, DefaultPersistenceDB, DefaultKeyValueDB, DefaultNoShareSessionTable } = require('../../index')
 //
 const apiKeys = require.main.require('./local/api_keys')
 //
 //  We may allow the persitence manager to choose the message relay, 
 //  or override with the one chosen by the application...
 //
-const g_persistence = new PersistenceManager(apiKeys.persistence,apiKeys.message_relays)
-const g_ephemeral = new PersistenceManager(apiKeys.session)
 
-const SLOW_MESSAGE_QUERY_INTERVAL = 5000
-const FAST_MESSAGE_QUERY_INTERVAL = 1000
+
+
 const WRITE_OBJECT_MAP_EVERY_INTERVAL = 1000*60*15  // 15 minutes
 const WRITE_UNUSED_LARGE_ENTRIES_EVERY_INTERVAL = 1000*60*60  // ones an hour
 //
-const g_keyValueDB = g_persistence.get_LRUManager(); // leave it to the module to figure out how to connect
-const g_keyValueSessions =  g_ephemeral.get_LRUManager();
+const g_keyValueDB = new DefaultKeyValueDB(); // leave it to the module to figure out how to connect
+const g_keyValueSessions =  new DefaultNoShareSessionTable()
 //
 //
 async function run_persistence() {   // describe the entry point to super storage
-  if ( g_persistence ) {
-    let user_slow = SLOW_MESSAGE_QUERY_INTERVAL
-    let user_fast = FAST_MESSAGE_QUERY_INTERVAL
-    let user_q_holder = G_users_trns
-    //
-    let user_m_handler = (i_obj) => {
-        let o_obj = i_obj
-        i_obj.m_path = "user"
-        return(o_obj)
-      }
-      //  ADD PARAMETERS TO THE NEW SENDER
-    g_persistence.add_message_handler(user_m_handler,user_q_holder,user_slow,user_fast)
 
-    let contact_slow = SLOW_MESSAGE_QUERY_INTERVAL
-    let contact_fast = FAST_MESSAGE_QUERY_INTERVAL
-    let contact_q_holder = G_contact_trns
-    //
-    let contact_m_handler = (i_obj) => {
-        let o_obj = {
-          'm_path' : "contact",
-          'recipient' : "admin",
-          'anonymous' : false, 
-          'type' : false,
-          'subject' : decodeURIComponent(i_obj.name),
-          'author' : decodeURIComponent(i_obj.email),
-          'references' : decodeURIComponent(i_obj.website),
-          'text' : decodeURIComponent(i_obj.comment)
-        }
-        return(o_obj)
-    }
-    //  ADD PARAMETERS TO THE NEW SENDER
-    g_persistence.add_message_handler(contact_m_handler,contact_q_holder,contact_slow,contact_fast)
-
-  }
 }
 
 
 async function dropConnections() {
-  if ( g_persistence ) {
-    await g_persistence.client_going_down("captcha")
-  }
+
 }
 
 
@@ -73,9 +33,12 @@ class CaptchaDBClass extends DBClass {
     constructor() {
       // pass app messages to the backend
       let stash_interval = WRITE_OBJECT_MAP_EVERY_INTERVAL
-      let persistenceDB = new DefaultPersistenceDB(g_persistence.message_fowarding,stash_interval,'user')
+      let persistenceDB = new DefaultPersistenceDB(apiKeys.config.db_messenger,stash_interval,'user')
       stash_interval = WRITE_UNUSED_LARGE_ENTRIES_EVERY_INTERVAL
-      let staticDB = new DefaultStaticDB(g_persistence.message_fowarding,stash_interval,'user','email')
+
+
+      let staticDB = new DefaultStaticDB(apiKeys.config.db_messenger,stash_interval,'user','email')
+      //
       super(g_keyValueDB,g_keyValueSessions,persistenceDB,staticDB)
     }
 

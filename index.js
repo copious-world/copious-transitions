@@ -36,5 +36,6 @@ module.exports.ShutdownManager = require('./lib/shutdown-manager')
 module.exports.DefaultPersistenceDB = require('./default_storage/persistent_db')
 module.exports.DefaultStaticDB = require('./default_storage/static_db')
 module.exports.DefaultKeyValueDB = require('./default_storage/key_value_db')
+module.exports.DefaultNoShareSessionTable = require('./default_storage/session_table_no_sharing')
 
 module.exports.GeneralLifeCycleManager = require('./lib/general_lifecyle')

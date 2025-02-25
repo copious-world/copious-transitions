@@ -1,7 +1,5 @@
-
 const AppLifeCycle = require('../lib/general_lifecyle')
 const fs = require('fs')
-
 
 const DB_STASH_INTERVAL = 10000
 const AGED_OUT_DELTA = (1000*60*30)
@@ -27,14 +25,49 @@ const AGED_OUT_DELTA = (1000*60*30)
  */
 class RemoteMessaging extends AppLifeCycle {
     //
-    constructor(persistence_messenger,default_m_path) {
+    constructor(persistence_messenger_conf,default_m_path) {
         super()
         this.default_m_path = default_m_path ? default_m_path : 'persistence'
-        this.messenger = persistence_messenger
+        //
+        let messenger_connector_class = persistence_messenger_conf.communication_class
+        if ( typeof messenger_connector_class !== 'string' ) {
+            console.log("database initialization using the default DB does not name a module... communication_class in the configuration")
+            console.log("see api.keys for configuration")
+            throw new Error("bad configuration for data base messenger")
+        }
+        let MessengerConnectorClass = false
+        try {
+            MessengerConnectorClass = require(communication_class)
+        } catch (e) {
+            throw e
+        }
+        //
+        if ( MessengerConnectorClass ) {
+            let persistence_messenger = new MessengerConnectorClass(persistence_messenger_conf)
+            this.messenger = persistence_messenger    
+        }
+        //
         if ( this.messenger === undefined ) {
             throw new Error("Files and Relays -- must have a defined messenger -- cannot proceed without it.")
         }
     }
+
+    async add_connection(conf) {
+        if ( conf.path ) {
+            await this.messenger.add_relay_path(conf)
+        } else {
+            await this.add_relay_peer(conf,conf.peer)
+        }
+    }
+
+    async close_connection(conf) {
+        if ( conf.path ) {
+            await this.remove_relay_path(conf)
+        } else {
+            await this.remove_relay_peer(conf)
+        }
+    }
+
 
     /// --- COMMUNICATION METHODS....
 
@@ -130,6 +163,10 @@ class RemoteMessaging extends AppLifeCycle {
         return response
     }
 
+
+
+
+
 }
 
 
@@ -147,8 +184,8 @@ class RemoteMessaging extends AppLifeCycle {
  */
 class LocalStorageLifeCycle extends RemoteMessaging {
 
-    constructor(persistence_messenger,stash_interval,default_m_path) {
-        super(persistence_messenger,default_m_path)
+    constructor(persistence_messenger_conf,stash_interval,default_m_path) {
+        super(persistence_messenger_conf,default_m_path)
 
         this._storage_map = {}
         this._time_to_id = {}

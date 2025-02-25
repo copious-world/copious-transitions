@@ -22,6 +22,10 @@ class KeyValueDBDefault {
         this.table = new Map()
         this.keys_to_remove = []
         //
+        this.removal_interval = false
+        this.memcheck_interval = false
+        //
+        this.fosc = false
     }
 
     async initialize(conf) {
@@ -29,30 +33,66 @@ class KeyValueDBDefault {
         if ( conf.file_cache !== undefined ) {
             this.fosc = new FileOperationsCache(conf.file_cache)
         } else {
-            throw new Error("FileOperationsCache initialized without 'file_cache' file path in configuration")
+            return false
         }
         if ( conf.disk_storage !== undefined ) {
             await this.load_all_records()
         } else {
-            throw new Error("KeyValueDBDefault initialized without 'disk_storage' file path in configuration")
+            return false
         }
-
-        if ( this.conf.check_mem_interval ) {
+        //
+        if ( conf.check_mem_interval ) {
+            if ( this.check_mem_interval ) {
+                clearInterval(this.check_mem_interval)
+                this.check_mem_interval = null
+            }
             let memcheck_interval_time = parseInt(this.conf.check_mem_interval)
             let self = this
             this.memcheck_interval = setInterval(async () => {
                 await self.persistence_store_and_cull(false)
             },memcheck_interval_time)
         }
-
-        if ( this.conf.removal_interval ) {
+        //
+        if ( conf.removal_interval ) {
+            if ( this.removal_interval ) {
+                clearInterval(this.removal_interval)
+                this.removal_interval = null
+            }
             let removal_interval_time = parseInt(this.conf.removal_interval)
             let self = this
             this.removal_interval = setInterval(async () => {
                 await self.remove_when()
             },removal_interval_time)
         }
+        //
     }
+
+
+
+    async add_connection(conf) {
+        //
+        await this.close_connection(conf)
+        await this.initialize(conf)
+    }
+
+    async close_connection(conf) {
+        //
+        if ( this.check_mem_interval ) {
+            clearInterval(this.check_mem_interval)
+            this.check_mem_interval = null
+        }
+        if ( this.removal_interval ) {
+            clearInterval(this.removal_interval)
+            this.removal_interval = null
+        }
+        //
+        if ( this.fosc ) {
+            await this.fosc.synch_files()
+            await this.fosc.stop_sync()    
+        }
+        //
+    }
+
 
     // specifically do not implement setPersistence
     // setPersistence(pdb) {
@@ -168,9 +208,11 @@ class KeyValueDBDefault {
      * @returns 
      */
     async load_data_category(map_file_key) {
-        let key_map = await this.fosc.load_json_data_at_path(`${this.conf.disk_storage}/${map_file_key}.json`)  // list of keys
-        if ( !key_map && (map_file_key !== undefined) ) {  // the file does not exist yet
-            key_map = {}
+        if ( this.fosc ) {
+            let key_map = await this.fosc.load_json_data_at_path(`${this.conf.disk_storage}/${map_file_key}.json`)  // list of keys
+            if ( !key_map && (map_file_key !== undefined) ) {  // the file does not exist yet
+                key_map = {}
+            }    
         }
         return key_map
     }
@@ -183,8 +225,10 @@ class KeyValueDBDefault {
      * @param {Object} selected_stores 
      */
     async write_data_categories(selected_stores) {
-        for ( let map_file_key in selected_stores ) {
-            await this.fosc.output_json(`${this.conf.disk_storage}/${map_file_key}.json`,selected_stores[map_file_key])
+        if ( this.fosc ) {
+            for ( let map_file_key in selected_stores ) {
+                await this.fosc.output_json(`${this.conf.disk_storage}/${map_file_key}.json`,selected_stores[map_file_key])
+            }
         }
     }
 
@@ -195,12 +239,14 @@ class KeyValueDBDefault {
      * For initialization
      */
     async load_all_records() {
-        let record_list = await this.fosc.dir_reader(this.conf.disk_storage)
-        record_list = record_list.filter((file) => {
-            return ( file.lastIndexOf('.json') > 0 )
-        })
-        for ( let recordfile of record_list ) {
-            await this.fosc.load_json_data_at_path(`${this.conf.disk_storage}/${recordfile}`)
+        if ( this.fosc ) {
+            let record_list = await this.fosc.dir_reader(this.conf.disk_storage)
+            record_list = record_list.filter((file) => {
+                return ( file.lastIndexOf('.json') > 0 )
+            })
+            for ( let recordfile of record_list ) {
+                await this.fosc.load_json_data_at_path(`${this.conf.disk_storage}/${recordfile}`)
+            }
         }
     }
 
@@ -241,14 +287,16 @@ class KeyValueDBDefault {
      * @returns 
      */
     async remove_existence(key) {
-        let map_file_key = key.substring(0,8) // get a file that stores all the keys of similarly named humans
-        let key_map = await this.fosc.load_json_data_at_path(`${this.conf.disk_storage}/${map_file_key}.json`)  // list of ccwids
-        if ( key_map == false ) {
-            return
-        }
-        if ( key in key_map ) {
-            delete key_map[key]
-            await this.fosc.output_json(`${this.conf.disk_storage}/${map_file_key}.json`,key_map)
+        if ( this.fosc ) {
+            let map_file_key = key.substring(0,8) // get a file that stores all the keys of similarly named humans
+            let key_map = await this.fosc.load_json_data_at_path(`${this.conf.disk_storage}/${map_file_key}.json`)  // list of ccwids
+            if ( key_map == false ) {
+                return
+            }
+            if ( key in key_map ) {
+                delete key_map[key]
+                await this.fosc.output_json(`${this.conf.disk_storage}/${map_file_key}.json`,key_map)
+            }
         }
     }
 

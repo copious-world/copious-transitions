@@ -97,8 +97,8 @@ class PageableMemStoreElement {
 class LocalStorageSerialization extends FilesAndRelays {
 
 
-    constructor(messenger,stash_interval,default_m_path) {
-        super(messenger,stash_interval,default_m_path)
+    constructor(messenger_conf,stash_interval,default_m_path) {
+        super(messenger_conf,stash_interval,default_m_path)
         //
         this.blob_dir = false
     }
