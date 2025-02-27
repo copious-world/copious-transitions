@@ -1,27 +1,10 @@
-const { DBClass, DefaultStaticDB, DefaultPersistenceDB, DefaultKeyValueDB, DefaultNoShareSessionTable } = require('../../index')
-//
-const apiKeys = require.main.require('./local/api_keys')
-//
-//  We may allow the persitence manager to choose the message relay, 
-//  or override with the one chosen by the application...
+const { DBClass } = require('../../index')
 //
 
-
-
-const WRITE_OBJECT_MAP_EVERY_INTERVAL = 1000*60*15  // 15 minutes
-const WRITE_UNUSED_LARGE_ENTRIES_EVERY_INTERVAL = 1000*60*60  // ones an hour
-//
-const g_keyValueDB = new DefaultKeyValueDB(); // leave it to the module to figure out how to connect
-const g_keyValueSessions =  new DefaultNoShareSessionTable()
-//
-//
 async function run_persistence() {   // describe the entry point to super storage
-
 }
 
-
 async function dropConnections() {
-
 }
 
 
@@ -31,15 +14,9 @@ async function dropConnections() {
 class CaptchaDBClass extends DBClass {
     //
     constructor() {
-      // pass app messages to the backend
-      let stash_interval = WRITE_OBJECT_MAP_EVERY_INTERVAL
-      let persistenceDB = new DefaultPersistenceDB(apiKeys.config.db_messenger,stash_interval,'user')
-      stash_interval = WRITE_UNUSED_LARGE_ENTRIES_EVERY_INTERVAL
-
-
-      let staticDB = new DefaultStaticDB(apiKeys.config.db_messenger,stash_interval,'user','email')
       //
-      super(g_keyValueDB,g_keyValueSessions,persistenceDB,staticDB)
+      super(false,false,false,false)
+      //
     }
 
     // // // 
@@ -135,7 +112,7 @@ class CaptchaDBClass extends DBClass {
     disconnect() {
        return new Promise((resolve,reject) => {
           g_persistence.client_going_down()
-          if ( g_keyValueDB.disconnect(true) ) {
+          if ( this.key_value_db. && this.key_value_db.disconnect(true) ) {
             resolve(true)
           } else {
             reject(false)

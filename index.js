@@ -21,6 +21,7 @@ module.exports.TaggedTransition = require('./lib/tagged_transitions')
 
 module.exports.WebSocketManager = require('./lib/websocket')
 module.exports.EndPointServer = require('./lib/general_endpoint_server')
+module.exports.LinkManager = require('./lib/general_link_manager')
 
 // ---- ----  ----  ----  ---- 
 module.exports.DBClass = require('./lib/general_db')
@@ -32,9 +33,9 @@ module.exports.GeneralBusiness = require('./lib/general_business')
 module.exports.GeneralValidator = require('./lib/general_validator')
 module.exports.ShutdownManager = require('./lib/shutdown-manager')
 
-// ---- ----  ----  ----  ---- 
-module.exports.DefaultPersistenceDB = require('./default_storage/persistent_db')
-module.exports.DefaultStaticDB = require('./default_storage/static_db')
+// ---- ----  ----  ----  ---- creates instances
+module.exports.DefaultPersistenceDB = require('./default_storage/default_persistent_db')
+module.exports.DefaultStaticDB = require('./default_storage/default_static_db')
 module.exports.DefaultKeyValueDB = require('./default_storage/key_value_db')
 module.exports.DefaultNoShareSessionTable = require('./default_storage/session_table_no_sharing')
 

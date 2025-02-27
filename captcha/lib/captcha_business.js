@@ -1,10 +1,6 @@
 const {GeneralBusiness} = require('../../index')
 const ReMailer = require("./remailer");
 
-const apiKeys = require('../../bin/local/api_keys')
-//
-const {MessageRelayer} = require("message-relay-services")
-
 
 const new_user_props = {
     "html" : `Thank you for joining our community.
@@ -42,7 +38,6 @@ class CaptchaBusines extends GeneralBusiness {
         super()
         this.db = null
         this.rules = null
-        this.mail_transport = null
         this.mail_to_new_user = null
         this.mail_to_forgetful_user = null
     }
@@ -54,8 +49,20 @@ class CaptchaBusines extends GeneralBusiness {
         this.initialize_mailing()
     }
 
+
+    seeking_endpoint_paths() {
+        return [ "mail" ]
+    }
+
+    set_messenger(path,messenger) {
+        if ( path === 'mail' ) {
+            this.mail_transport = messenger
+            this.initialize_mailing()
+        }
+    }
+
+    
     initialize_mailing() {
-        //this.mail_transport = new MessageRelayer(apiKeys.message_relays);
         if ( this.mail_transport ) {
             this.mail_to_new_user =  new ReMailer(this.mail_transport,new_user_props);
             this.mail_to_forgetful_user = new ReMailer(this.mail_transport,forgetful_user_props);    

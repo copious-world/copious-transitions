@@ -32,7 +32,8 @@ const g_expected_modules = [
                             "business",
                             "transition_engine",
                             "web_sockets",
-                            "endpoint_server"
+                            "endpoint_server",
+                            "link_manager"
                         ]
 //
 
@@ -132,6 +133,7 @@ class CopiousTransitions extends EventEmitter {
         this.transition_engine = require(conf_obj.mod_path.transition_engine)
         this.web_sockets = require(conf_obj.mod_path.web_sockets) // web sockets - serveral types of application supported -- use app chosen ws interface
         this.endpoint_server = require(conf_obj.mod_path.endpoint_server) // certain applications will handle transition from the backend
+        this.link_manager = require(conf_obj.mod_path.link_manager) // queries modules for the type of connections they want and manages linkage
         //
         this.app = require(conf_obj.mod_path.expression)(conf_obj,this.db); // exports a function
         this.session_manager = null
@@ -187,7 +189,10 @@ class CopiousTransitions extends EventEmitter {
         this.transition_engine.set_ws(this.web_sockets)
         this.transition_engine.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
         //
-        this.endpoint_server.initialize_service_configuration(this.db,this.transition_engine,this.web_sockets)
+        this.link_manager.initialize(conf_obj,this.db,this.transition_engine,this.web_sockets,
+                                            this.session_manager, this.statics, this.dynamics, this.business, this.validator)
+        //
+        this.endpoint_server.initialize_service_configuration(this.link_manager)
     }
 
 

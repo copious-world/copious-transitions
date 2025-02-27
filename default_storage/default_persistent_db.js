@@ -161,4 +161,4 @@ class FileMapper extends AppLifeCycle {
 
 
 
-module.exports = new FileMapper()
+module.exports = FileMapper
