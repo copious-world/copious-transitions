@@ -20,8 +20,6 @@ if (  process.argv[3] !== undefined ) {
 
 let transition_app = new CopiousTransitions(config,debug,__dirname)
 
-
-transition_app.on('ready',() => {
-    transition_app.run()
+transition_app.on('ready',async () => {
+    await transition_app.run()
 })
-

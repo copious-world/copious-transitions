@@ -22,6 +22,8 @@ let conf_str = fs.readFileSync(conf_file).toString()
 let conf = JSON.parse(conf_str)
 
 
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 let message_relayer = new MessageRelayer(conf)
 message_relayer.on('ready',async () => {
@@ -49,9 +51,50 @@ message_relayer.on('ready',async () => {
     if ( typeof cmd_pars.conf !== 'object' ) {
         console.log("no configuration object specified for " + connection_type)
         process.exit(0)
-    }    
+    }
 
-    if ( descriptor.action = 'add-service' ) {
+    if ( descriptor.action = "db-management" ) {
+    } else if ( cmd_pars.target === "database" ) {
+        //
+        let possible_db_types = {
+            "key_value_db" : false,
+            "session_key_value_db" : false,
+            "static_db" : true,
+            "persistence_db" : true
+        }
+        let possible_ops = {
+            "store" : true,
+            "exists" : true,
+            "query" : true,
+            "drop" : true,
+            "remove" : true
+        }
+        //
+        if ( !(cmd_pars.db_type in possible_db_types) ) {
+            console.log(`the database type ${cmd_pars.db_type} is not handled by copious transitions`)
+            process.exit(0)
+        }
+
+        if ( possible_db_types[cmd_pars.db_type] ) {
+            //
+            if ( !(typeof cmd_pars.collection === 'string' ) ) {
+                console.log(`the database operations require a 'collection' parameter`)
+                process.exit(0)
+            }
+            //
+            if ( !(cmd_pars.op in possible_ops) ) {
+                console.log(`The operation ${md_pars.op} is not a recognized database management operation`)
+                process.exit(0)
+            }
+            //
+            if ( !(typeof cmd_pars.data === 'object') || !(typeof cmd_pars.query === 'object' || typeof cmd_pars.query === 'string') ) {
+                console.log(`The operation ${md_pars.op} requires some type of query 'data' or 'query`)
+                process.exit(0)
+            }
+            //
+        }
+
+    } else if ( descriptor.action = 'add-service' ) {
         //
         if ( cmd_pars.target === 'transtion_engine' ) {
             //
@@ -84,7 +127,7 @@ message_relayer.on('ready',async () => {
             }
 
             if ( !(cmd_pars.change) && !(cmd_pars.connect) ) {
-                console.log(`the database changes require iether change or connect fields to be true (not both)`)
+                console.log(`the database changes require either change or connect fields to be true (not both)`)
                 process.exit(0)
             }
 

@@ -112,7 +112,7 @@ class CaptchaDBClass extends DBClass {
     disconnect() {
        return new Promise((resolve,reject) => {
           g_persistence.client_going_down()
-          if ( this.key_value_db. && this.key_value_db.disconnect(true) ) {
+          if ( this.key_value_db && this.key_value_db.disconnect(true) ) {
             resolve(true)
           } else {
             reject(false)

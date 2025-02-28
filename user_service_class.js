@@ -76,8 +76,8 @@ if (  process.argv[3] !== undefined ) {  // maybe use debugging
 let transition_app = new CopiousTransitions(config,debug,__dirname)  // Initialize everything according to the configuration.
 // in this application the local directory of the calling module is the place to look for mod path modules to be loaded.
 
-transition_app.on('ready',() => {       // when the configuration is done the application is ready to run
-    transition_app.run()                // run the application
+transition_app.on('ready',async () => {       // when the configuration is done the application is ready to run
+    await transition_app.run()                // run the application
 })
 
 ```
@@ -413,9 +413,9 @@ class CopiousTransitions extends EventEmitter {
      * Before listening, finalize the DB initialization.
      * Once listening, complete the initialization of the web socket service if it is being used.
      */
-    run() {
+    async run() {
         // APPLICATION STARTUP
-        this.db.last_step_initalization()
+        await this.db.last_step_initalization()
         this.app.listen(this.port,() => {
             console.log(`listening on ${this.port}`)
             if ( this.web_sockets ) {
