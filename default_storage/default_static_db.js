@@ -1,6 +1,5 @@
 
 let LocalStaticDB = require('./static_db')
-let FauxRemoteMessenger = require('./in_proc_faux_messenger')
 
 
 /**
@@ -16,14 +15,11 @@ let FauxRemoteMessenger = require('./in_proc_faux_messenger')
 class StaticDBDefault extends LocalStaticDB {
 
     constructor() {        // eg. message_relay_client
-
-        const messenger = new FauxRemoteMessenger()
-
-        super(messenger,false,'static')
+        super()
     }
 
-    initialize(conf) {
-        super.initialize(conf)
+    async initialize(conf) {
+        await super.initialize(conf)
     }
 
 }

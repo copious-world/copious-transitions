@@ -6,6 +6,8 @@ module.exports = CopiousTransitions
 
 // AUTH ----
 
+module.exports.GeneralLifeCycleManager = require('./lib/general_lifecyle')
+
 // will expose {GeneralAuth,SessionManager,SessionManager_Lite}
 let { GeneralAuth, SessionManager } = require('./lib/general_auth')
 module.exports.GeneralAuth = GeneralAuth
@@ -24,7 +26,6 @@ module.exports.EndPointServer = require('./lib/general_endpoint_server')
 module.exports.LinkManager = require('./lib/general_link_manager')
 
 // ---- ----  ----  ----  ---- 
-module.exports.DBClass = require('./lib/general_db')
 module.exports.GeneralDynamic = require('./lib/general_dynamic')
 module.exports.GeneralStatic = require('./lib/general_static')
 module.exports.GeneralBusiness = require('./lib/general_business')
@@ -33,10 +34,10 @@ module.exports.GeneralBusiness = require('./lib/general_business')
 module.exports.GeneralValidator = require('./lib/general_validator')
 module.exports.ShutdownManager = require('./lib/shutdown-manager')
 
-// ---- ----  ----  ----  ---- creates instances
+// ---- ----  ----  ----  ---- 
 module.exports.DefaultPersistenceDB = require('./default_storage/default_persistent_db')
 module.exports.DefaultStaticDB = require('./default_storage/default_static_db')
 module.exports.DefaultKeyValueDB = require('./default_storage/key_value_db')
 module.exports.DefaultNoShareSessionTable = require('./default_storage/session_table_no_sharing')
-
-module.exports.GeneralLifeCycleManager = require('./lib/general_lifecyle')
+//
+module.exports.DBClass = require('./lib/general_db')

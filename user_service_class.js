@@ -163,25 +163,25 @@ class CopiousTransitions extends EventEmitter {
      */
     async initialize_all(conf_obj) {
         //
-        this.db.initialize(conf_obj)
-        this.business.initialize(conf_obj,this.db)
-        this.transition_engine.initialize(conf_obj,this.db)
+        await this.db.initialize(conf_obj)
+        await this.business.initialize(conf_obj,this.db)
+        await this.transition_engine.initialize(conf_obj,this.db)
         //
         this.session_manager = this.authorizer.sessions(this.app,this.db,this.business,this.transition_engine)   // setup session management, session, cookies, tokens, etc. Use database and Express api.
                                                                     // sessions inializes the custom session manager determined in the application authorizer.
         this.middleware.setup(this.app,this.db,this.session_manager)            // use a module to cusomize the use of Express middleware.
         this.validator.initialize(conf_obj,this.db,this.session_manager)     // The validator may refer to stored items and look at other context dependent information
-        this.statics.initialize(this.db,conf_obj)                         // Static assets may be taken out of DB storage or from disk, etc.
+        await this.statics.initialize(this.db,conf_obj)                         // Static assets may be taken out of DB storage or from disk, etc.
         await this.dynamics.initialize(this.db,conf_obj)                        // Dynamichk assets may be taken out of DB storage or from disk, etc.
         this.transition_engine.install(this.statics,this.dynamics,this.session_manager)
 
         //  --- contractual logic ---
         this.initlialize_contractuals()
         // websocket access to contractual logic
-        this.web_sockets.initialize(conf_obj,this.app)
+        await this.web_sockets.initialize(conf_obj,this.app)
         this.web_sockets.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
         //
-        this.endpoint_server.initialize(conf_obj,this.db)
+        await this.endpoint_server.initialize(conf_obj,this.db)
         this.endpoint_server.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
         this.endpoint_server.set_ws(this.web_sockets)
         //
@@ -189,10 +189,10 @@ class CopiousTransitions extends EventEmitter {
         this.transition_engine.set_ws(this.web_sockets)
         this.transition_engine.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
         //
-        this.link_manager.initialize(conf_obj,this.db,this.transition_engine,this.web_sockets,
+        await this.link_manager.initialize(conf_obj,this.db,this.transition_engine,this.web_sockets,
                                             this.session_manager, this.statics, this.dynamics, this.business, this.validator)
         //
-        this.endpoint_server.initialize_service_configuration(this.link_manager)
+        await this.endpoint_server.initialize_service_configuration(this.link_manager)
     }
 
 

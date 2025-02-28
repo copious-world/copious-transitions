@@ -1,5 +1,7 @@
+const { resolve } = require('path')
 const AppLifeCycle = require('../lib/general_lifecyle')
 const fs = require('fs')
+const { rejects } = require('assert')
 
 const DB_STASH_INTERVAL = 10000
 const AGED_OUT_DELTA = (1000*60*30)
@@ -25,44 +27,70 @@ const AGED_OUT_DELTA = (1000*60*30)
  */
 class RemoteMessaging extends AppLifeCycle {
     //
-    constructor(persistence_messenger_conf,default_m_path) {
+    constructor() {
         super()
-
-
+        //
         this.messenger = false
-        this.default_m_path = default_m_path ? default_m_path : 'persistence'
+        this.default_m_path ='persistence'
+        this.initialized = false
         //
-        let module = persistence_messenger_conf.module
-        let messenger_connector_class = persistence_messenger_conf.communication_class
-        if ( typeof module !== 'string' ) {
-            console.log("database initialization using the default DB does not name a module in the configuration")
-            console.log("see api.keys for configuration")
-            throw new Error("bad configuration for data base messenger")
-        }
-        let messenger_classes = false
-        try {
-            messenger_classes = require(module)
-        } catch (e) {
-            throw e
-        }
+    }
 
-        if ( typeof messenger_connector_class !== 'string' ) {
-            console.log("database initialization using the default DB does not name a communication_class in the configuration")
-            console.log("see api.keys for configuration")
-            throw new Error("bad configuration for data base messenger")
-        }
-        let MessengerConnectorClass = messenger_classes[messenger_connector_class]
+
+    async initialize(conf) {
+
+        this.conf = conf
+
+        this.default_m_path = conf.default_m_path ? conf.default_m_path : 'persistence'
         //
-        if ( MessengerConnectorClass ) {
-            this.messenger = new MessengerConnectorClass(persistence_messenger_conf)
-        }
-        //
-        if ( this.messenger === false ) {
-            throw new Error("Files and Relays -- must have a defined messenger -- cannot proceed without it.")
+        if ( !(conf.delay_relay_module_loading) ) {
+            this.messenger = false 
+            let module = conf.module
+            let messenger_connector_class = conf.communication_class
+            if ( typeof module !== 'string' ) {
+                console.log("database initialization using the default DB does not name a module in the configuration")
+                console.log("see api.keys for configuration")
+                return false
+            }
+            let messenger_classes = false
+            try {
+                messenger_classes = require(module)
+            } catch (e) {
+                console.log("files_and_relays ::: initialize :: cannot load module " + module)
+                return false
+            }
+    
+            if ( typeof messenger_connector_class !== 'string' ) {
+                console.log("database initialization using the default DB does not name a communication_class in the configuration")
+                console.log("see api.keys for configuration")
+                return false
+            }
+            let MessengerConnectorClass = messenger_classes[messenger_connector_class]
+            //
+            if ( MessengerConnectorClass ) {
+                let p = new Promise((resolve,reject) => {
+                    let messenger = new MessengerConnectorClass(persistence_messenger_conf)
+                    messenger.on('ready',() => {
+                        resolve(messenger)
+                    })
+                })
+                this.messenger = await p;
+            }
+            //
+            if ( this.messenger === false ) {
+                console.log("Files and Relays -- failed to initialize messenger.")
+                return false
+            }
+            return true
         }
     }
 
     async add_connection(conf) {
+
+        if ( !this.initialized ) {
+            this.initialized = await this.initialize(conf)
+        }
+
         if ( conf.path ) {
             await this.messenger.add_relay_path(conf)
         } else {
@@ -71,10 +99,12 @@ class RemoteMessaging extends AppLifeCycle {
     }
 
     async close_connection(conf) {
-        if ( conf.path ) {
-            await this.remove_relay_path(conf)
-        } else {
-            await this.remove_relay_peer(conf)
+        if ( this.initialized ) {
+            if ( conf.path ) {
+                await this.remove_relay_path(conf)
+            } else {
+                await this.remove_relay_peer(conf)
+            }    
         }
     }
 
@@ -92,6 +122,7 @@ class RemoteMessaging extends AppLifeCycle {
      * @returns {object|boolean}  - returns the recovered object or false
      */
     async remote_fetch_message(wa_id,field,match_data) {          // expect no local object -- use universal id locator
+        if ( !this.messenger ) return false
         let m_path = this.default_m_path
         let msg = {
             "_id"  : (match_data !== undefined) ? match_data : wa_id      // should be enought for it search
@@ -130,12 +161,13 @@ class RemoteMessaging extends AppLifeCycle {
      * @param {object} obj -- the data object that will be stored remotely.
      * @param {string} user_op -- this is used if the message is going to an endpoint providing operations.
      */
-    remote_store_message(obj,user_op) {
-        if ( obj === undefined ) return
+    async remote_store_message(obj,user_op) {
+        if ( !this.messenger ) return false
+        if ( obj === undefined ) return false
         if ( user_op ) obj._user_op = user_op
         let m_path = obj._m_path ? obj._m_path : this.default_m_path
         let msg = Object.assign({},obj)     // the message handling message might alter the object... leave the same locally
-        this.messenger.set_on_path(msg,m_path)
+        await this.messenger.set_on_path(msg,m_path)
     }
 
 
@@ -151,12 +183,15 @@ class RemoteMessaging extends AppLifeCycle {
      * 
      * @param {string} wa_id - the wide area identity
      */
-    remote_store_dereference(wa_id) {
+    async remote_store_dereference(wa_id) {
+        if ( !this.messenger ) return false
+
         let m_path = this.default_m_path
         let msg = {
             "_id"  : wa_id
         }
-        this.messenger.del_on_path(msg,m_path)
+        await this.messenger.del_on_path(msg,m_path)
+        return true
     }
 
 
@@ -169,6 +204,7 @@ class RemoteMessaging extends AppLifeCycle {
      * @returns {object} - the server response to the subscription request
      */
     async publish(topic,obj) {
+        if ( !this.messenger ) return false
         let response = await this.messenger.publish(topic,obj)
         return response
     }
@@ -194,14 +230,14 @@ class RemoteMessaging extends AppLifeCycle {
  */
 class LocalStorageLifeCycle extends RemoteMessaging {
 
-    constructor(persistence_messenger_conf,stash_interval,default_m_path) {
-        super(persistence_messenger_conf,default_m_path)
+    constructor() {
+        super()
 
         this._storage_map = {}
         this._time_to_id = {}
         this._age_out_delta = AGED_OUT_DELTA
         
-        this.stash_interval = stash_interval ? stash_interval : DB_STASH_INTERVAL
+        this.stash_interval = DB_STASH_INTERVAL
     }
 
     /**
@@ -213,6 +249,10 @@ class LocalStorageLifeCycle extends RemoteMessaging {
      * @param {object} conf 
      */
     async initialize(conf) {
+        //
+        this.stash_interval = conf.stash_interval ? conf.stash_interval : DB_STASH_INTERVAL
+        //
+        await super.initialize(conf)
         // 
         try {
             this._storage_map = await this.local_db_load_map()
@@ -468,8 +508,8 @@ class LocalStorageLifeCycle extends RemoteMessaging {
  */
 class CustomizationMethodsByApplication extends LocalStorageLifeCycle {
 
-    constructor(persistence_messenger,stash_interval,default_m_path) {
-        super(persistence_messenger,stash_interval,default_m_path)
+    constructor() {
+        super()
     }
 
     // APPLICATION METHODS this class
@@ -508,9 +548,8 @@ class CustomizationMethodsByApplication extends LocalStorageLifeCycle {
  */
 class FilesAndRelays_base extends CustomizationMethodsByApplication {
     //
-    constructor(persistence_messenger,stash_interval,default_m_path) {
-        super(persistence_messenger,stash_interval,default_m_path)
-        this.root_path = require.main.path
+    constructor() {
+        super()
         this.dirty = false
         this._search_attempted = false
     }
@@ -527,7 +566,7 @@ class FilesAndRelays_base extends CustomizationMethodsByApplication {
      * 
      * @param {object} conf 
      */
-    initialize(conf) {
+    async initialize(conf) {
         // 
         if ( conf.persistence_db ) {   // just that some configurations may be passed in this fashion 
             conf = conf.persistence_db 
@@ -535,25 +574,27 @@ class FilesAndRelays_base extends CustomizationMethodsByApplication {
         // Read previously locally stored records (default is users..) Build the storage map
         this.db_file = this.root_path + '/' + (conf.db_file ? conf.db_file : 'userdata.db')
         // 
-        super.initialize(conf)
+        await super.initialize(conf)
         //
         if ( conf === undefined ) {
             console.log("files and relays: initialize: no configuration parameter ... shutting down")
-            process.exit(0)
+            return false
         }
         //
         // Subscribe to new information coming in on this local channel (default.. users)
         let knowledge_domains = conf.knowledge_domains ? conf.knowledge_domains : undefined
         if ( knowledge_domains && knowledge_domains.length ) {
-            knowledge_domains.array.forEach(kd => {
-                let topic = kd.topic
-                if ( topic ) {
-                    let topic_handler = ((topc) => {
-                        return (msg) => { this.app_subscription_handler(topc,msg) }
-                    })(topic)
-                    this.messenger.subscribe(topic,{},topic_handler)
-                }
-            });
+            if ( this.messenger ) {
+                knowledge_domains.array.forEach(async kd => {
+                    let topic = kd.topic
+                    if ( topic ) {
+                        let topic_handler = ((topc) => {
+                            return (msg) => { this.app_subscription_handler(topc,msg) }
+                        })(topic)
+                        await this.messenger.subscribe(topic,{},topic_handler)
+                    }
+                });    
+            }
         }
     }
 
@@ -720,19 +761,6 @@ class FilesAndRelays_base extends CustomizationMethodsByApplication {
 
 // EXPORT ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- 
 
-// FilesAndRelays
-//      ---- Expose the methods to the descendant modules here
-/**
- * 
- *
- * @memberof DefaultDB
- */
-class FilesAndRelays extends FilesAndRelays_base {
-    constructor(persistence_messenger,stash_interval,default_m_path) {
-        super(persistence_messenger,stash_interval,default_m_path)
-    }
-}
 
 
-
-module.exports = FilesAndRelays
+module.exports = FilesAndRelays_base
