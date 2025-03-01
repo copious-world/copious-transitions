@@ -12,6 +12,7 @@ const UserHandling = require('./contractual/user_processing')
 const MimeHandling = require('./contractual/mime_processing')
 const TranstionHandling = require('./contractual/transition_processing');
 const { EventEmitter } = require('events');
+const { type } = require('os');
 
 // https://github.com/fastify/fastify
 
@@ -270,13 +271,21 @@ class CopiousTransitions extends EventEmitter {
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
         // ROOT ... unauthorized entry point  -- this is likely to be done by Nginx and will not be needed here.
-        this.app.get('/', (req, res) => {
+        this.app.get('/', async (req, res) => {
             try {
-                let html = this.statics.fetch('index.html');
-                console.log(html)
+                let html = await this.statics.fetch('index.html');
+                if ( typeof html !== 'string' ) {
+                    if ( (typeof html === 'object') && (html.ftype === 'html') ) {
+                        html = html.data
+                    }
+                    if ( typeof html !== 'string' ) {
+                        throw new Error(`the static module returned data of the wrong type for key asset 'index.html'`)
+                    }
+                }
                 res.writeHead(200, { 'Content-Type': 'text/html' });
                 res.end(html);    
             } catch (e) {
+                console.log(e)
                 res.end('system check')
             }
         });

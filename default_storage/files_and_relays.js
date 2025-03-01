@@ -1,7 +1,5 @@
-const { resolve } = require('path')
 const AppLifeCycle = require('../lib/general_lifecyle')
 const fs = require('fs')
-const { rejects } = require('assert')
 
 const DB_STASH_INTERVAL = 10000
 const AGED_OUT_DELTA = (1000*60*30)
