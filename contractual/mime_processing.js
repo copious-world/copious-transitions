@@ -97,11 +97,11 @@ class MimeHandling extends LocalTObjectCache {
      * @param {Function} fetcher 
      * @returns {Array} - a tupple really, that has: 1) the status code, 2) the JSON response, 3) possibly data or boolean (false for not in use)
      */
-    async guarded_kindof_asset_handler(asset,body,transmision_headers,fetcher) {
+    async guarded_kindof_asset_handler(asset,body,transmision_headers,fetcher,is_dynamic) {
         //
         let proceed = await this.session_manager.guard(asset,body,transmision_headers)
         if ( proceed ) {             // asset exits, permission granted, etc.
-            let transitionObj = await this.session_manager.process_asset(asset,body)  // not checking sesssion, key the asset and use any search refinement in the body.
+            let transitionObj = await this.session_manager.process_asset(asset,body,is_dynamic)  // not checking sesssion, key the asset and use any search refinement in the body.
             if ( transitionObj ) {
                 if ( transitionObj.secondary_action ) {                          // return a transition object to go to the client. 
                     try {
@@ -135,8 +135,8 @@ class MimeHandling extends LocalTObjectCache {
      * @returns {Array} - a tupple really, that has: 1) the status code, 2) the JSON response, 3) possibly data or boolean (false for not in use)
      */
     async guarded_static_asset_handler(asset,body,transmision_headers) {
-        let fetcher = this.statics.fetch
-        return await this.guarded_kindof_asset_handler(asset,body,transmision_headers,fetcher)
+        let fetcher = this.statics.guarded_fetch
+        return await this.guarded_kindof_asset_handler(asset,body,transmision_headers,fetcher,false)
     }
 
 
@@ -152,7 +152,7 @@ class MimeHandling extends LocalTObjectCache {
      */
     async guarded_dynamic_asset_handler(asset,body,transmision_headers) {
         let fetcher = this.dynamics.fetch
-        return await this.guarded_kindof_asset_handler(asset,body,transmision_headers,fetcher)
+        return await this.guarded_kindof_asset_handler(asset,body,transmision_headers,fetcher,true)
     }
 
     /**
@@ -190,8 +190,6 @@ class MimeHandling extends LocalTObjectCache {
         return [200,{ 'type' : 'user', 'OK' : 'false', 'reason' : 'unavailable' }, false]
         //
     }
-
-
 
 }
 

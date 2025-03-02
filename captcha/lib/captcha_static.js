@@ -20,6 +20,12 @@ class CaptchaStatic extends GeneralStatic {
         this.login_asset_media_object = null
         this.register_asset_media_object = null
         this.forgetful_asset_media_object = null
+        //
+        this._preloaded_guarded = {
+            "easter_egg" : { "fname" : '/easter_egg.svg', "ftype" : "svg" }
+        } 
+        this.easter_egg_asset_media_object = null
+        //
     }
 
     preload_all(conf) {

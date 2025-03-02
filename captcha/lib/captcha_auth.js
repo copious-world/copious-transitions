@@ -1,10 +1,8 @@
 const { GeneralAuth, SessionManager } = require('../../index')
 //
-//const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
-//const uuid = require('uuid/v4');
 
-var cnt = 0
+let cnt = 0
 
 class CaptchaSessionManager extends SessionManager {
 
@@ -71,6 +69,15 @@ class CaptchaSessionManager extends SessionManager {
     }
 
     //  process_asset(asset_id,post_body) {}
+
+    process_asset(asset_id,post_body) {
+        if ( asset_id === 'chocolate' ) {
+            let tobj = super.process_asset(asset_id,post_body)
+            tobj.secondary_action = "true"
+        }
+        return super.process_asset(asset_id,post_body)
+    }
+
     feasible(transition,post_body,req) {                // is the transition something that can be done?
         if (  G_captcha_trns.tagged(transition) || G_contact_trns.tagged(transition) ) {
             return(true)
@@ -109,7 +116,7 @@ class CaptchaSessionManager extends SessionManager {
         } else if ( G_users_trns.secondary_action_selector(transtion_object.action) ) {
             post_body._t_match_field = post_body[G_users_trns.secondary_match_key()]
         } else {
-            return false
+            post_body._t_match_field = post_body.matcher
         }
         return super.match(post_body,transtion_object)
     }

@@ -692,6 +692,76 @@ html {
 </html>
 <script>
 
+	let asset_secondary = "secondary/guarded"
+	let transition_secondary = "secondary/transition"
+
+	let click_paths = {
+		//
+		"login" : {
+			"method" : "GET",
+			"path" : "static/login"
+		},
+		"register" : {
+			"method" : "GET",
+			"path" : "static/register"
+		},
+		"forgetful" : {
+			"method" : "GET",
+			"path" : "static/forgetful"
+		},
+		"forgetful" : {
+			"method" : "GET",
+			"path" : "static/forgetful"
+		},
+		"easter_egg" : {
+			"method" : "POST",
+			"path" : "/guarded/static/easter_egg"
+		},
+		"tell-time" : {
+			"method" : "POST",
+			"path" : "/guarded/dynamic/tell-time"
+		},
+		"captcha" : {
+			"method" : "POST",
+			"path" : {
+				"asset" : "/guarded/dynamic/captcha",
+				"transition" : "/transition/captcha",
+			}
+		},
+		"chocolate" : {
+			"method" : "POST",
+			"path" : "/guarded/dynamic/chocolate"
+		},
+		"password-reset" : {
+			"method" : "POST",
+			"path" : "/guarded/dynamic/password-reset"
+		},
+		"contact" : {
+			"method" : "POST",
+			"path" : "/transition/contact"
+		},
+		"login" : {
+			"method" : "POST",
+			"path" : "/users/login"
+		},
+		"logout" : {
+			"method" : "POST",
+			"path" : "/users/logout"
+		},
+		"register" : {
+			"method" : "POST",
+			"path" : "/users/register"
+		},
+		"forgot" : {
+			"method" : "POST",
+			"path" : "/users/forgot"
+		}
+		//
+	}
+
+	
+	
+
 	async function postData(url = '', data = {}, creds = 'omit', do_stringify = true) {
 		// Default options are marked with *
 		const response = await fetch(url, {

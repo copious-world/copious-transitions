@@ -12,7 +12,6 @@ const UserHandling = require('./contractual/user_processing')
 const MimeHandling = require('./contractual/mime_processing')
 const TranstionHandling = require('./contractual/transition_processing');
 const { EventEmitter } = require('events');
-const { type } = require('os');
 
 // https://github.com/fastify/fastify
 
