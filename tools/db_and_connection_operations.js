@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // 
 const fs = require('fs')
 
@@ -54,46 +55,46 @@ message_relayer.on('ready',async () => {
     }
 
     if ( descriptor.action = "db-management" ) {
-    } else if ( cmd_pars.target === "database" ) {
-        //
-        let possible_db_types = {
-            "key_value_db" : false,
-            "session_key_value_db" : false,
-            "static_db" : true,
-            "persistence_db" : true
-        }
-        let possible_ops = {
-            "store" : true,
-            "exists" : true,
-            "query" : true,
-            "drop" : true,
-            "remove" : true
-        }
-        //
-        if ( !(cmd_pars.db_type in possible_db_types) ) {
-            console.log(`the database type ${cmd_pars.db_type} is not handled by copious transitions`)
-            process.exit(0)
-        }
+        if ( cmd_pars.target === "database" ) {
+            //
+            let possible_db_types = {
+                "key_value_db" : false,
+                "session_key_value_db" : false,
+                "static_db" : true,
+                "persistence_db" : true
+            }
+            let possible_ops = {
+                "store" : true,
+                "exists" : true,
+                "query" : true,
+                "drop" : true,
+                "remove" : true
+            }
+            //
+            if ( !(cmd_pars.db_type in possible_db_types) ) {
+                console.log(`the database type ${cmd_pars.db_type} is not handled by copious transitions`)
+                process.exit(0)
+            }
 
-        if ( possible_db_types[cmd_pars.db_type] ) {
-            //
-            if ( !(typeof cmd_pars.collection === 'string' ) ) {
-                console.log(`the database operations require a 'collection' parameter`)
-                process.exit(0)
+            if ( possible_db_types[cmd_pars.db_type] ) {
+                //
+                if ( !(typeof cmd_pars.collection === 'string' ) ) {
+                    console.log(`the database operations require a 'collection' parameter`)
+                    process.exit(0)
+                }
+                //
+                if ( !(cmd_pars.op in possible_ops) ) {
+                    console.log(`The operation ${md_pars.op} is not a recognized database management operation`)
+                    process.exit(0)
+                }
+                //
+                if ( !(typeof cmd_pars.data === 'object') || !(typeof cmd_pars.query === 'object' || typeof cmd_pars.query === 'string') ) {
+                    console.log(`The operation ${md_pars.op} requires some type of query 'data' or 'query`)
+                    process.exit(0)
+                }
+                //
             }
-            //
-            if ( !(cmd_pars.op in possible_ops) ) {
-                console.log(`The operation ${md_pars.op} is not a recognized database management operation`)
-                process.exit(0)
-            }
-            //
-            if ( !(typeof cmd_pars.data === 'object') || !(typeof cmd_pars.query === 'object' || typeof cmd_pars.query === 'string') ) {
-                console.log(`The operation ${md_pars.op} requires some type of query 'data' or 'query`)
-                process.exit(0)
-            }
-            //
         }
-
     } else if ( descriptor.action = 'add-service' ) {
         //
         if ( cmd_pars.target === 'transtion_engine' ) {

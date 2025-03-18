@@ -7,7 +7,8 @@
   },
   "main": "index.js",
   "bin" : {
-    "copious-captcha" : "./bin/index.js"
+    "copious-captcha" : "./bin/index.js",
+    "copious-db-tool" : "./tools/db_and_connection_operations.js"
   },
   "scripts": {
     "test": "node tests/runall.js"
