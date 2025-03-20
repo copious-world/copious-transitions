@@ -8,13 +8,13 @@ const {MessageRelayer} = require('message-relay-services')
 conf_file = process.argv[2]
 
 if ( conf_file === undefined ) {
-    console.log("need configuration for connection command to transition app")
+    console.log("the db tool needs a configuration file for sending connection commands to the transition app")
     process.exit(0)
 }
 
 let connection_type = process.argv[3]
 if ( connection_type === undefined ) {
-    console.log("need connection type for connection command to transition app")
+    console.log("the db tool needs a connection type for sending connection commands to the transition app")
     process.exit(0)
 }
 
@@ -27,7 +27,7 @@ let conf = JSON.parse(conf_str)
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 let message_relayer = new MessageRelayer(conf)
-message_relayer.on('ready',async () => {
+message_relayer.on('client-ready',async () => {
     //
     //
     let descriptor = conf[connection_type]
@@ -202,5 +202,7 @@ message_relayer.on('ready',async () => {
 
     let result = await message_relayer.send_on_path(msg_obj,"connections")
     console.dir(result)
-
+    //
+    message_relayer.closeAll()
+    //
 })
