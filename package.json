@@ -1,14 +1,14 @@
 {
   "name": "copious-transitions",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "description": "Framework for working with frameworks",
   "directories": {
     "lib": "lib"
   },
   "main": "index.js",
-  "bin" : {
-    "copious-captcha" : "./bin/index.js",
-    "copious-db-tool" : "./tools/db_and_connection_operations.js"
+  "bin": {
+    "copious-captcha": "./bin/index.js",
+    "copious-db-tool": "./tools/db_and_connection_operations.js"
   },
   "scripts": {
     "test": "node tests/runall.js"
@@ -46,18 +46,11 @@
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "extra-file-class": "^0.9.20",
-    "generate-password": "^1.7.0",
     "message-relay-services": "^0.9.14",
     "mime-db": "^1.52.0",
     "mime-types": "^2.1.35",
-    "node-fetch": "^3.3.0",
-    "nodemailer": "^6.8.0",
     "polka": "^0.5.2",
-    "process-exists": "^5.0.0",
-    "ps-list": "^8.1.0",
-    "quick-format-unescaped": "^4.0.4",
     "session_tokens": "^1.0.0",
-    "shm-lru-cache": "^0.1.8",
     "state-tokens": "^1.0.0",
     "svg-captcha": "^1.4.0",
     "ws": "^8.11.0"

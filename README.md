@@ -2,7 +2,7 @@
 
 **Purpose:** The main purpose of this module is to provide a framework for handling state transition requests, where requests are messages from UI clients and/or backend services. 
 
-Some requests may be delivered as HTTP requests. Other requests may be delivered as backend JSON messages. The message handlers may be thought of as API handlers that are aware of authorized sessions and its state.
+Some requests may be delivered as HTTP requests. Other requests may be delivered as backend JSON messages. The message handlers may be thought of as API handlers that are aware of authorized sessions and their states.
 
 
 **Transition tokens:** Sessions own transition tokens that key data being used in a state transition. The tokens, ***transition tokens***, are made by services implemented with respect to this framework. They are made in response to initial requests and are tracked by secondary requests. Tokens go back to requesters, clients. If the requester makes more requests with regard to a single requested transtion, the requesters must send the the transition's token back to the services in order to recognize secondary actions that drive a state transition towards completion.

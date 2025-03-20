@@ -4,7 +4,6 @@
 const fs = require('fs')
 const crypto = require('crypto')
 const clone = require('clone')
-const passwordGenerator = require('generate-password');
 const ShutdownManager = require('./lib/shutdown-manager')
 //const shutdown_server_helper_factory = require('http-shutdown')
 
@@ -597,18 +596,6 @@ function load_parameters(config,if_module_top) {
             }
             return('')
         }
-    }
-
-    
-    generate_password_block()
-
-    // generate_password
-    global.generate_password = () => {
-        let password = g_password_store.shift()
-        if ( g_password_store.length < PASSWORD_DEPLETION_MIN ) {
-            setTimeout(generate_password_block,100)
-        }
-        return(password)
     }
 
 
