@@ -180,7 +180,6 @@ class CopiousTransitions extends EventEmitter {
         await this.web_sockets.initialize(conf_obj,this.app)
         this.web_sockets.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
         //
-        await this.endpoint_server.initialize(conf_obj,this.db)
         this.endpoint_server.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
         this.endpoint_server.set_ws(this.web_sockets)
         //
@@ -192,6 +191,8 @@ class CopiousTransitions extends EventEmitter {
                                             this.session_manager, this.statics, this.dynamics, this.business, this.validator)
         //
         await this.endpoint_server.initialize_service_configuration(this.link_manager)
+        //
+        await this.endpoint_server.initialize(conf_obj,this.db)
     }
 
 
