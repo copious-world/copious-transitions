@@ -168,6 +168,7 @@ class CopiousTransitions extends EventEmitter {
         //
         this.session_manager = this.authorizer.sessions(this.app,this.db,this.business,this.transition_engine)   // setup session management, session, cookies, tokens, etc. Use database and Express api.
                                                                     // sessions inializes the custom session manager determined in the application authorizer.
+        this.middleware.initialize(conf_obj)
         this.middleware.setup(this.app,this.db,this.session_manager)            // use a module to cusomize the use of Express middleware.
         this.validator.initialize(conf_obj,this.db,this.session_manager)     // The validator may refer to stored items and look at other context dependent information
         await this.statics.initialize(this.db,conf_obj)                         // Static assets may be taken out of DB storage or from disk, etc.
@@ -180,6 +181,8 @@ class CopiousTransitions extends EventEmitter {
         await this.web_sockets.initialize(conf_obj,this.app)
         this.web_sockets.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
         //
+        this.endpoint_server.set_link_manager(this.link_manager)
+        await this.endpoint_server.initialize(conf_obj,this.db)
         this.endpoint_server.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)
         this.endpoint_server.set_ws(this.web_sockets)
         //
@@ -498,7 +501,7 @@ function module_top(caller_dir) {
  * Pleases refer to documentation referened in the readme.md file for a description of the configuration file.
  * 
  * @param {string} cpath 
- * @param {boolean} if_module_top 
+ * @param {boolean} if_module_top - must be a string to be used (top directory) otherwise current working directory
  * @returns {object} if successful, the configuration object made from reading and parsing the file
  */
 function load_configuration(cpath,if_module_top) {
@@ -535,16 +538,21 @@ function load_configuration(cpath,if_module_top) {
 }
 
 /**
+ * load_parameters
  * 
  * @param {object} config 
- * @param {boolean} if_module_top 
+ * @param {boolean} if_module_top -- if given, the directory of the caller
+ * 
  * @returns {object} - the updated configuration object
  */
 function load_parameters(config,if_module_top) {
     //
+    // some gratuitous globals
+    // 1)
     global.g_debug = false
     //
     //
+    // 2)
     // clonify
     global.clonify = (obj) => {
         return(clone(obj))
@@ -556,6 +564,7 @@ function load_parameters(config,if_module_top) {
         */
     }
 
+    // 3)
     // global_appwide_token
     global.global_appwide_token = () => {      // was uuid -- may change
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -564,6 +573,7 @@ function load_parameters(config,if_module_top) {
          });
     }
 
+    // 4)
     // isHex
     global.isHex = (str) => {
         let check = g_hex_re.test(str)
@@ -572,6 +582,7 @@ function load_parameters(config,if_module_top) {
     }
 
 
+    // 5)
     // do_hash
     if ( config.session_token_hasher ) {
         global.do_hash = require(config.session_token_hasher)
@@ -586,6 +597,7 @@ function load_parameters(config,if_module_top) {
     }
     
 
+    // 6)
     // global_hasher
     if ( config.global_hasher ) {
         global.global_hasher = require(config.global_hasher)
@@ -614,13 +626,13 @@ function load_parameters(config,if_module_top) {
         g_expected_modules.forEach(mname => {
             let modName = confJSON.modules[mname]
             if ( (typeof modName === 'string') || ( modName === undefined )  ) {
-                if ( modName ) {
+                if ( modName ) {                // e.g. node_modules/app_module/lib/auth_module
                     confJSON.mod_path[mname] =  module_top(if_module_top) + `/${module_path}/${modName}`
-                } else {
+                } else {        // module not included in the module map... use the module supplied by copious-transitions
                     confJSON.mod_path[mname] = __dirname + `/defaults/lib/default_${mname}`
                 }
             } else if ( typeof modName === 'object' ) {  // allow for modules from other locations
-                modName = modName.module
+                modName = modName.module // the name of the module file
                 let alternate_mod_path = modName.mod_path   // perhaps filter this in the future to attain some standard in locations..
                 confJSON.mod_path[mname] = module_top(if_module_top) + `/${alternate_mod_path}/${modName}`
             } else {
