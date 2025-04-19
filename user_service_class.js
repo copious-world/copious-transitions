@@ -132,7 +132,9 @@ class CopiousTransitions extends EventEmitter {
         this.transition_engine = require(conf_obj.mod_path.transition_engine)
         this.web_sockets = require(conf_obj.mod_path.web_sockets) // web sockets - serveral types of application supported -- use app chosen ws interface
         this.endpoint_server = require(conf_obj.mod_path.endpoint_server) // certain applications will handle transition from the backend
-        this.link_manager = require(conf_obj.mod_path.link_manager) // queries modules for the type of connections they want and manages linkage
+        //
+        let LinkManagerClass = require(conf_obj.mod_path.link_manager)  // this class only, will initialize a server on construction
+        this.link_manager = new LinkManagerClass(conf_obj) // queries modules for the type of connections they want and manages linkage
         //
         this.app = require(conf_obj.mod_path.expression)(conf_obj,this.db); // exports a function
         this.session_manager = null

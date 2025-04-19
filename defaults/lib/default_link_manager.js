@@ -7,8 +7,8 @@ const { LinkManager } = require('../../index')
 class DefaultEndPointServer extends LinkManager {
 
     //
-    constructor() {
-        super()
+    constructor(conf) {
+        super(conf)
     }
 
 }
@@ -16,5 +16,5 @@ class DefaultEndPointServer extends LinkManager {
 
 //
 //
-module.exports = new DefaultEndPointServer()
+module.exports = DefaultEndPointServer      // In this case, export the class and do not construct
 
