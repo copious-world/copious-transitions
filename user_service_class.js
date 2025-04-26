@@ -195,8 +195,6 @@ class CopiousTransitions extends EventEmitter {
         await this.link_manager.initialize(conf_obj,this.db,this.transition_engine,this.web_sockets,
                                             this.session_manager, this.statics, this.dynamics, this.business, this.validator)
         //
-        await this.endpoint_server.initialize_service_configuration(this.link_manager)
-        //
         await this.endpoint_server.initialize(conf_obj,this.db)
     }
 
