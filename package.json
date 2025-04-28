@@ -1,6 +1,6 @@
 {
   "name": "copious-transitions",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Framework for working with frameworks",
   "directories": {
     "lib": "lib"
@@ -41,19 +41,19 @@
   "homepage": "https://github.com/rleddy/copious-transitions#readme",
   "dependencies": {
     "@polka/send-type": "^0.5.2",
-    "body-parser": "^1.20.1",
+    "body-parser": "^2.2.0",
     "clone": "^2.1.2",
-    "cookie-parser": "^1.4.6",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "extra-file-class": "^0.9.20",
-    "message-relay-services": "^0.9.14",
+    "message-relay-services": "^0.9.25",
     "mime-db": "^1.52.0",
     "mime-types": "^2.1.35",
     "polka": "^0.5.2",
     "session_tokens": "^1.0.0",
-    "state-tokens": "^1.0.0",
+    "state-tokens": "^1.0.2",
     "svg-captcha": "^1.4.0",
-    "ws": "^8.11.0"
+    "ws": "^8.18.1"
   },
   "devDependencies": {
     "node-scp": "0.0.22",
