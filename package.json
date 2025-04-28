@@ -1,6 +1,6 @@
 {
   "name": "copious-transitions",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "description": "Framework for working with frameworks",
   "directories": {
     "lib": "lib"
