@@ -211,7 +211,7 @@ class KeyValueDBDefault {
         let key_map = {}
         if ( this.fosc ) {
             key_map = await this.fosc.load_json_data_at_path(`${this.conf.disk_storage}/${map_file_key}.json`)  // list of keys
-            if ( !key_map && (map_file_key !== undefined) ) {  // the file does not exist yet
+            if ( !(key_map) && (map_file_key !== undefined) ) {  // the file does not exist yet
                 key_map = {}
                 await this.fosc.output_json(`${this.conf.disk_storage}/${map_file_key}.json`,{})
             }    
