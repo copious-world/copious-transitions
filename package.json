@@ -1,6 +1,6 @@
 {
   "name": "copious-transitions",
-  "version": "0.7.12",
+  "version": "0.7.14",
   "description": "Framework for working with frameworks",
   "directories": {
     "lib": "lib"
@@ -26,6 +26,8 @@
     "js",
     "sandwich",
     "framework",
+    "authorization",
+    "permission",
     "state",
     "state-transitions",
     "tokens",
@@ -46,14 +48,14 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "extra-file-class": "^0.9.20",
-    "message-relay-services": "^0.9.25",
+    "message-relay-services": "^0.9.29",
     "mime-db": "^1.52.0",
     "mime-types": "^2.1.35",
     "polka": "^0.5.2",
     "session_tokens": "^1.0.0",
     "state-tokens": "^1.0.4",
     "svg-captcha": "^1.4.0",
-    "ws": "^8.18.1"
+    "ws": "^8.18.2"
   },
   "devDependencies": {
     "node-scp": "0.0.22",
