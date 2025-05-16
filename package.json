@@ -1,6 +1,6 @@
 {
   "name": "copious-transitions",
-  "version": "0.7.14",
+  "version": "0.7.15",
   "description": "Framework for working with frameworks",
   "directories": {
     "lib": "lib"
@@ -52,7 +52,7 @@
     "mime-db": "^1.52.0",
     "mime-types": "^2.1.35",
     "polka": "^0.5.2",
-    "session_tokens": "^1.0.0",
+    "session_tokens": "^1.0.1",
     "state-tokens": "^1.0.4",
     "svg-captcha": "^1.4.0",
     "ws": "^8.18.2"
