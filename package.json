@@ -1,6 +1,6 @@
 {
   "name": "copious-transitions",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "Framework for working with frameworks",
   "directories": {
     "lib": "lib"
@@ -45,7 +45,7 @@
     "@polka/send-type": "^0.5.2",
     "body-parser": "^2.2.0",
     "clone": "^2.1.2",
-    "com_link_manager": "^0.2.1",
+    "com_link_manager": "^0.2.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "extra-file-class": "^0.9.20",
