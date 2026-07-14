@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>session_token_manager.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Overview</a></h2><h2><a href="https://github.com/copious-world/copious-transitions" target="_blank" class="menu-item" id="repository" >Github repo</a></h2><h2><a href="https://www.npmjs.com/package/copious-transitions" target="_blank" class="menu-item" id="package" >Npm package</a></h2><h3>Classes</h3>
+                        <ul id="classes-ul-overflow" class="menu-contained-nav" ><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a><ul class='methods'><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#fetch_user">fetch_user</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#fetch_user_from_key_value_store">fetch_user_from_key_value_store</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#id_hashing">id_hashing</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#put_user_into_key_value_store">put_user_into_key_value_store</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#seeking_endpoint_paths">seeking_endpoint_paths</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#set_messenger">set_messenger</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#store_user">store_user</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#update_user">update_user</a></li></ul></li><li><a href="SessionTokenManager.html">SessionTokenManager</a><ul class='methods'><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#addSession">addSession</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#destroySession">destroySession</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#do_hash">do_hash</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#generate_session_token">generate_session_token</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#insert_session">insert_session</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#sess_data_accessor">sess_data_accessor</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#sessionCurrent">sessionCurrent</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#stash_session_token">stash_session_token</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#unstash_session_token">unstash_session_token</a></li></ul></li><li><a href="base.EndpointManager.html">base.EndpointManager</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.EndpointManager.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.EndpointManager.html#initialize_endpoint_services">initialize_endpoint_services</a></li><li data-type='method' style='display: none;'><a href="base.EndpointManager.html#set_contractual_filters">set_contractual_filters</a></li><li data-type='method' style='display: none;'><a href="base.EndpointManager.html#set_ws">set_ws</a></li></ul></li><li><a href="base.GeneralAppLifeCycle.html">base.GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">base.GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">base.GeneralBusiness</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.GeneralBusiness.html#cleanup">cleanup</a></li><li data-type='method' style='display: none;'><a href="base.GeneralBusiness.html#del_recent_forgetfulness">del_recent_forgetfulness</a></li><li data-type='method' style='display: none;'><a href="base.GeneralBusiness.html#get_recently_forgetful">get_recently_forgetful</a></li><li data-type='method' style='display: none;'><a href="base.GeneralBusiness.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.GeneralBusiness.html#process">process</a></li><li data-type='method' style='display: none;'><a href="base.GeneralBusiness.html#store_recent_forgetfulness">store_recent_forgetfulness</a></li></ul></li><li><a href="base.GeneralDBWrapperImpl.html">base.GeneralDBWrapperImpl</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#add_key_value_db_connection">add_key_value_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#add_persistence_db_connection">add_persistence_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#add_session_key_value_db_connection">add_session_key_value_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#add_static_db_connection">add_static_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#cache_stored">cache_stored</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#change_key_value_db_instance">change_key_value_db_instance</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#change_persistence_db_instance">change_persistence_db_instance</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#change_session_key_value_db_instance">change_session_key_value_db_instance</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#change_static_db_instance">change_static_db_instance</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#check_hash">check_hash</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#del_key_value">del_key_value</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#del_session_key_value">del_session_key_value</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#del_static_store">del_static_store</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#disconnect">disconnect</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#drop">drop</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#establish_admin_endpoints">establish_admin_endpoints</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#exists">exists</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#fetch">fetch</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#fetch_fields">fetch_fields</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#get_key_value">get_key_value</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#get_session_key_value">get_session_key_value</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#last_step_initalization">last_step_initalization</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#put_static_store">put_static_store</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#query">query</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#remove_key_value_db_connection">remove_key_value_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#remove_persistence_db_connection">remove_persistence_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#remove_session_key_value_db_connection">remove_session_key_value_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#remove_static_db_connection">remove_static_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#set_hasher">set_hasher</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#set_key_value">set_key_value</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#set_session_key_value">set_session_key_value</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#static_store">static_store</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#static_synchronizer">static_synchronizer</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#store">store</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#store_cache">store_cache</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#update_cache">update_cache</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#which_db">which_db</a></li></ul></li><li><a href="base.GeneralDynamic.html">base.GeneralDynamic</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#add_import">add_import</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#fetch">fetch</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#fetch_elements">fetch_elements</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#import_keys">import_keys</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#load_key">load_key</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#seeking_endpoint_paths">seeking_endpoint_paths</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#set_messenger">set_messenger</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#set_transition_engine">set_transition_engine</a></li></ul></li><li><a href="base.GeneralMiddleWare.html">base.GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">base.GeneralStatic</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#fetch">fetch</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#generic_prep_cwd_offset">generic_prep_cwd_offset</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#guarded_fetch">guarded_fetch</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#preload_all">preload_all</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#prepare_asset">prepare_asset</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#reload">reload</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#seeking_endpoint_paths">seeking_endpoint_paths</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#set_messenger">set_messenger</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#set_transition_engine">set_transition_engine</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#static_store">static_store</a></li></ul></li><li><a href="base.GeneralTransitionEngImpl.html">base.GeneralTransitionEngImpl</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#add_repo_path">add_repo_path</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#alt_store">alt_store</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#app_pack_data">app_pack_data</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#chunk_mover">chunk_mover</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#chunks_complete">chunks_complete</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#chunks_to_data">chunks_to_data</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#file_mover">file_mover</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#files_coming_in_chunks">files_coming_in_chunks</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#get_import_key_function">get_import_key_function</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#install">install</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#seeking_endpoint_paths">seeking_endpoint_paths</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#set_contractual_filters">set_contractual_filters</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#set_file_promise_ops">set_file_promise_ops</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#set_messenger">set_messenger</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#set_ws">set_ws</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#store_data">store_data</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#update_meta_descriptors">update_meta_descriptors</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#upload_chunk">upload_chunk</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#upload_file">upload_file</a></li></ul></li><li><a href="base.SessionManager.html">base.SessionManager</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.SessionManager.html#app_set_user_cookie">app_set_user_cookie</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#app_user_release_cookie">app_user_release_cookie</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#hash_pass">hash_pass</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#initialize_session_state">initialize_session_state</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#loginTransitionFields">loginTransitionFields</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#login_transition">login_transition</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#ok_forgetfulness">ok_forgetfulness</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#password_check">password_check</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#process_user">process_user</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#registration_transition">registration_transition</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#update_user_password">update_user_password</a></li></ul></li><li><a href="base.SessionManager_Lite.html">base.SessionManager_Lite</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#app_user_check_cookie">app_user_check_cookie</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#cipher">cipher</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#create_transition_record">create_transition_record</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#extract_exposable_user_info">extract_exposable_user_info</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#feasible">feasible</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#finalize_transition">finalize_transition</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#gen_wrapped_key">gen_wrapped_key</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#guard">guard</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#guard_static">guard_static</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#handle_cookies">handle_cookies</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#key_for_user">key_for_user</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#match">match</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#post_body_decode">post_body_decode</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#process_asset">process_asset</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#process_transition">process_transition</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#release_cookie">release_cookie</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#selected_session_table_hash">selected_session_table_hash</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#session_accrue_errors">session_accrue_errors</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#session_guard">session_guard</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#set_cookie">set_cookie</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#update_session_state">update_session_state</a></li></ul></li><li><a href="base.TaggedTransition.html">base.TaggedTransition</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#action_selector">action_selector</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#addModule">addModule</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#back_ref">back_ref</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#dir">dir</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#empty_queue">empty_queue</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#enqueue">enqueue</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#existence_query">existence_query</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#file_entry_id">file_entry_id</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#from_cache">from_cache</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#get_work">get_work</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#has_secondary_action">has_secondary_action</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#hash_id_prefix">hash_id_prefix</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#kv_store_key">kv_store_key</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#match_key">match_key</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#primary_key">primary_key</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#seeking_endpoint_paths">seeking_endpoint_paths</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#session_key">session_key</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#set_messenger">set_messenger</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#tag">tag</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#tagged">tagged</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#transform_file_name">transform_file_name</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#update">update</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#update_file_db_entry">update_file_db_entry</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#uuid_prefix">uuid_prefix</a></li></ul></li><li><a href="base.TokenTables.html">base.TokenTables</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.TokenTables.html#generate_transition_token">generate_transition_token</a></li><li data-type='method' style='display: none;'><a href="base.TokenTables.html#tokenCurrent">tokenCurrent</a></li><li data-type='method' style='display: none;'><a href="base.TokenTables.html#token_to_key">token_to_key</a></li></ul></li><li><a href="base.WebSocketManager.html">base.WebSocketManager</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#_setup_app_ws">_setup_app_ws</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#_setup_sitewide_ws">_setup_sitewide_ws</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#add_service">add_service</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#add_ws_session">add_ws_session</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#close_suspects">close_suspects</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#close_wss_session">close_wss_session</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#do_pings">do_pings</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#ping">ping</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#ponged">ponged</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#send_to_ws">send_to_ws</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#send_ws">send_ws</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#send_ws_outofband">send_ws_outofband</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#set_contractual_filters">set_contractual_filters</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#setup_app_ws">setup_app_ws</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#setup_sitewide_ws">setup_sitewide_ws</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#start_checking_pings">start_checking_pings</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#ws_connection_attempt">ws_connection_attempt</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#ws_shutdown">ws_shutdown</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#ws_sitewide_message_handler">ws_sitewide_message_handler</a></li></ul></li><li><a href="field_validators.DataLookupField.html">field_validators.DataLookupField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.DataLookupField.html#test">test</a></li></ul></li><li><a href="field_validators.EmailField.html">field_validators.EmailField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.EmailField.html#test">test</a></li></ul></li><li><a href="field_validators.EmailVerifyField.html">field_validators.EmailVerifyField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.EmailVerifyField.html#test">test</a></li></ul></li><li><a href="field_validators.FieldTest.html">field_validators.FieldTest</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.FieldTest.html#test">test</a></li></ul></li><li><a href="field_validators.FieldValidatorTools.html">field_validators.FieldValidatorTools</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.FieldValidatorTools.html#generate_tester">generate_tester</a></li><li data-type='method' style='display: none;'><a href="field_validators.FieldValidatorTools.html#get_field_test">get_field_test</a></li><li data-type='method' style='display: none;'><a href="field_validators.FieldValidatorTools.html#init_field_classes">init_field_classes</a></li><li data-type='method' style='display: none;'><a href="field_validators.FieldValidatorTools.html#setup_field_test">setup_field_test</a></li></ul></li><li><a href="field_validators.ForeignAuth.html">field_validators.ForeignAuth</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.ForeignAuth.html#test">test</a></li></ul></li><li><a href="field_validators.GeneralValidator.html">field_validators.GeneralValidator</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.GeneralValidator.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="field_validators.GeneralValidator.html#setup_tests">setup_tests</a></li><li data-type='method' style='display: none;'><a href="field_validators.GeneralValidator.html#valid">valid</a></li></ul></li><li><a href="field_validators.LengthyAlphabetField.html">field_validators.LengthyAlphabetField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.LengthyAlphabetField.html#test">test</a></li></ul></li><li><a href="field_validators.LengthyDigitalField.html">field_validators.LengthyDigitalField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.LengthyDigitalField.html#test">test</a></li></ul></li><li><a href="field_validators.LengthyField.html">field_validators.LengthyField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.LengthyField.html#test">test</a></li></ul></li><li><a href="field_validators.LengthyStringField.html">field_validators.LengthyStringField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.LengthyStringField.html#test">test</a></li></ul></li><li><a href="field_validators.PasswordField.html">field_validators.PasswordField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.PasswordField.html#test">test</a></li></ul></li><li><a href="field_validators.PasswordVerifyField.html">field_validators.PasswordVerifyField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.PasswordVerifyField.html#test">test</a></li></ul></li><li><a href="field_validators.TypeCheckField.html">field_validators.TypeCheckField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.TypeCheckField.html#test">test</a></li></ul></li></ul>
+                    <h3>Namespaces</h3>
+                        <ul><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul>
+                    
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">session_token_manager.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//
+const AppLifeCycle = require("./general_lifecyle")
+
+
+
+/// TokenTables
+
+/**
+ * Top level abstraction defining the relationship between token users, and token storage which may refer to some DB.
+ * 
+ * Provides access to token storage, making the semantics of token processing available to 
+ * the authorization classes.
+ * 
+ * This abstraction just fixes a handle to some DB interface and provides methods that wrap the token storage,
+ * which must be provided to the constructor.
+ * 
+ * @memberof base
+ */
+class TokenTables extends AppLifeCycle {
+
+    constructor(db_obj,tokenStorage) {
+        super()
+        //
+        this.db = db_obj
+        // These are loosly written here. But, it may be good to keep 
+        // a small number relative to session size id the backend is efficient
+        try {
+            this.tk_store = new tokenStorage(db_obj)
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    /**
+     * 
+     * @param {string} prefix 
+     * @returns {string} -  a token for a transition object
+     */
+    generate_transition_token(prefix) {
+        return (this.tk_store.create_token(prefix))
+    }
+
+    /**
+     * 
+     * @param {string} token 
+     * @returns {any|Promise}
+     */
+    token_to_key(token) {
+        let key = this.tk_store.from_token(token)
+        return key
+    }
+
+
+    /**
+     * 
+     * @param {string} token 
+     * @returns {boolean}
+     */
+    async tokenCurrent(token) {
+        if ( token === undefined ) return(false)  
+        let current = await this.tk_store.transition_token_is_active(token)
+        return ( current !== false )
+    }
+
+}
+
+
+/// SessionTokenManager
+
+/**
+ * 
+ * The Session Token Manager deals JSON objects arriving from some session oriented client. 
+ * The JSON object is interned and stored as in the language's data object format. 
+ * Certain fields may be expected in the data object. Methods for some default case are provided, but
+ * it is expected the application will override these methods and provide access for fields germain to the application.
+ * 
+ * Provides basic methods for generating session tokens, stashing and unstashing.
+ * 
+ * Manages a reference to a hashing method, called by `do_hash`. 
+ * 
+ * @extends TokenTables
+ */
+
+class SessionTokenManager extends TokenTables {
+    //
+    /**
+     * 
+     * The configuration may bind the field `forhash` to a hashing function that will be used throughout the runtime.
+     * 
+     * The db_obj is a reference to a class instance that knows how to talk to a database.
+     * 
+     * The tokenStorage parameter is a required class reference that can generate a instance that manages tables of tokens.
+     * 
+     * Initializes a table `release_session_data` for keeping data between client repsonses, where data comes from user objects,
+     * most likely obtained from the DB. In particular, the data will have a named field provided by `sess_data_accessor`. The data
+     * lasts until the user session is initialized by an authorization process, one that uses the general authorization (as opposed to 
+     * light authorizatoin).
+     * 
+     * @param {object} conf 
+     * @param {object} db_obj 
+     * @param {Class} tokenStorage 
+     */
+    constructor(conf,db_obj,tokenStorage) {
+        //
+        super(db_obj,tokenStorage)    // token tables
+        //
+        this._sess_tok_hasher = (conf &amp;&amp; (typeof conf.session_token_hasher === 'function')) ? conf.session_token_hasher : this.#produce_hasher()
+        //
+        if ( conf ) {
+            this.hashables = clonify(conf.forhash)   // clone the field map from the configuration.
+        } else {
+            this.hashables = { "field1" : "ucwid", "field2" : "timestamp" }   // if these were not configured use something failry arbitrary
+        }
+        //
+        this.release_session_data = {}  // if a session provides information for release on finalization, temporarily keep it here
+    }
+
+    /**
+     * Return the field name of the user object that references data that should be accessed as part of the session
+     */
+    sess_data_accessor() {  // likely to be overridden e.g. "_tracking"
+        return "app_user_data"
+    }
+
+
+    /**
+     * Access to a default hash function set globally for the application
+     */
+    #produce_hasher() {
+        try {
+            if ( global_hasher === undefined ) {
+                throw new Error("no hasher to return to the session manager in #produce_hasher")
+            } else {
+                return global_hasher
+            }
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    /**
+     * Synonimic method to expose the hash function field, a configurable parameter
+     * 
+     * @param {string} str 
+     * @returns {string} - the hash of the string 
+     */
+    do_hash(str) { // default behavior -- 
+        return(this._sess_tok_hasher(str))
+    }
+
+    /**
+     * Makes a session token and returns it as a string
+     * 
+     * >Uses access to a default hash function set globally for the application
+     * 
+     * This method concatentates two informational parts and one nonce to make a parameter to a hash function
+     * in order to get a key that may be used as the session identifier.
+     * 
+     * @param {object} post_body  -- this is the JSON post body from the web application 
+     */
+    generate_session_token(post_body) {
+        let nonce = this.generate_transition_token();
+        //
+        let hash_part_1 = post_body[this.hashables.field1]   // the field might no be supplied by the application
+        hash_part_1 = hash_part_1 ? hash_part_1 : "nothing1"
+        let hash_part_2 = post_body[this.hashables.field3]   // the field might no be supplied by the application
+        hash_part_2 = hash_part_2 ? hash_part_2 : "nothing2"
+        //
+        let sess_tok = this.do_hash(hash_part_1 + hash_part_2 + nonce) // this is the session identifier just getting started.
+        return sess_tok
+    }
+
+    // 
+    // stash_session_token
+
+    /**
+     * Stashes a session in the 'elements' map of the server-side transition object
+     * 
+     * @param {object} user  -- The user object is most likely extracted from the DB
+     * @param {object} transition_object -- a nascent transition object that has both server side and client side aspects, but must contain the newly generated session token
+     */
+    stash_session_token(user,transition_object) {  // sess_tok a made up token (app rule)
+        let sess_tok = transition_object.session_token
+        let app_sess_data_access_fld = this.sess_data_accessor()  // get the application identified field name that should occur in a user object
+        if ( app_sess_data_access_fld ) {
+            this.release_session_data[sess_tok] = user[app_sess_data_access_fld]  // app overrides so that it knows this field (ucwid)
+            // The elements field will provide access to the session token (in turn to the user data) for the life the authorization transition
+            transition_object.elements[app_sess_data_access_fld] = sess_tok  // for secondary
+        }
+    }
+
+
+    // the stored transition object identified (mapped) by its token,
+    // will have the session token within the elements map object.
+    // see stash_session_token(user,transition_object,sess_tok) in general_auth which extends this module
+    // 
+    /**
+     * given the server side transition object for an authorization transition retrieve the sesssion token
+     * from the transition object's elements fields
+     */
+    unstash_session_token(transObject) {
+        let key = this.sess_data_accessor()
+        if ( key ) {
+            return(transObject.elements[key])
+        }
+        return false
+    }
+
+    /**
+    * Calls upon token storage to save the session and the relationship to its owner.
+    * 
+    * @param {string} key -- a key, mostly likely a ucwid that identifies an owner of the session
+    * @param {string} session_token --  a session token (should be made by generate_session_token)
+    */
+    async addSession(key,session_token) {    // e.g. ucwid and server side hash
+        if ( (key !== undefined) &amp;&amp; (session_token !== undefined) ) {
+            return (await this.tk_store.add_session(session_token,key,false,true))    // ucwid, stashed token -> stashed token, ucwid
+        }
+    }
+
+    /**
+    * Calls upon token storage to termiate a session and the tokens that expire with its termination.
+    * The parameter passed is the session's transition token, which had been created for authorization transitions.
+    * The parameter is used to obtain the session token.
+    * 
+    * @param {string} token -- the session's authorization transition token.
+    */
+    destroySession(token) {
+        this.tk_store.destroy_session(token)
+    }
+
+    /**
+    * Checks to see if a session is current.
+    * The source key may be supplied to check on the hash of owner related data.
+    * 
+    * @param {string} session_token --  a session token (should be made by generate_session_token)
+    * @param {string} [src_key] -- data returned from storing the transition token
+    */
+    async sessionCurrent(session_token,src_key) {           // src_key is not in use in the general case
+        if ( src_key === undefined ) return(false)
+        let key = await this.tk_store.active_session(session_token,src_key)  // src key might be a ucwid
+        return key
+    }
+
+    /**
+     * insert_session
+     * 
+     * For apps that only check the session but have been informed how to construct a link hash.
+     * 
+     * @param {string} session_token 
+     * @param {string} link_hash 
+     */
+    insert_session(session_token,link_hash) {
+        this.tk_store.quick_insert_active_session(session_token,link_hash)
+    }
+
+    remove_session(session_token) {
+        this.tk_store.discard_quick_insert(session_token)
+    }
+
+}
+
+
+
+
+
+module.exports = SessionTokenManager</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sat Jul 11 2026 00:30:10 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

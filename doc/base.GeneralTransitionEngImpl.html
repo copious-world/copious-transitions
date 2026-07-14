@@ -1,0 +1,3518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>GeneralTransitionEngImpl - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Overview</a></h2><h2><a href="https://github.com/copious-world/copious-transitions" target="_blank" class="menu-item" id="repository" >Github repo</a></h2><h2><a href="https://www.npmjs.com/package/copious-transitions" target="_blank" class="menu-item" id="package" >Npm package</a></h2><h3>Classes</h3>
+                        <ul id="classes-ul-overflow" class="menu-contained-nav" ><li><a href="GeneralUserDBWrapperImpl.html">GeneralUserDBWrapperImpl</a><ul class='methods'><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#fetch_user">fetch_user</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#fetch_user_from_key_value_store">fetch_user_from_key_value_store</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#id_hashing">id_hashing</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#put_user_into_key_value_store">put_user_into_key_value_store</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#seeking_endpoint_paths">seeking_endpoint_paths</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#set_messenger">set_messenger</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#store_user">store_user</a></li><li data-type='method' style='display: none;'><a href="GeneralUserDBWrapperImpl.html#update_user">update_user</a></li></ul></li><li><a href="SessionTokenManager.html">SessionTokenManager</a><ul class='methods'><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#addSession">addSession</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#destroySession">destroySession</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#do_hash">do_hash</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#generate_session_token">generate_session_token</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#insert_session">insert_session</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#sess_data_accessor">sess_data_accessor</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#sessionCurrent">sessionCurrent</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#stash_session_token">stash_session_token</a></li><li data-type='method' style='display: none;'><a href="SessionTokenManager.html#unstash_session_token">unstash_session_token</a></li></ul></li><li><a href="base.EndpointManager.html">base.EndpointManager</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.EndpointManager.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.EndpointManager.html#initialize_endpoint_services">initialize_endpoint_services</a></li><li data-type='method' style='display: none;'><a href="base.EndpointManager.html#set_contractual_filters">set_contractual_filters</a></li><li data-type='method' style='display: none;'><a href="base.EndpointManager.html#set_ws">set_ws</a></li></ul></li><li><a href="base.GeneralAppLifeCycle.html">base.GeneralAppLifeCycle</a></li><li><a href="base.GeneralAuth.html">base.GeneralAuth</a></li><li><a href="base.GeneralBusiness.html">base.GeneralBusiness</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.GeneralBusiness.html#cleanup">cleanup</a></li><li data-type='method' style='display: none;'><a href="base.GeneralBusiness.html#del_recent_forgetfulness">del_recent_forgetfulness</a></li><li data-type='method' style='display: none;'><a href="base.GeneralBusiness.html#get_recently_forgetful">get_recently_forgetful</a></li><li data-type='method' style='display: none;'><a href="base.GeneralBusiness.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.GeneralBusiness.html#process">process</a></li><li data-type='method' style='display: none;'><a href="base.GeneralBusiness.html#store_recent_forgetfulness">store_recent_forgetfulness</a></li></ul></li><li><a href="base.GeneralDBWrapperImpl.html">base.GeneralDBWrapperImpl</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#add_key_value_db_connection">add_key_value_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#add_persistence_db_connection">add_persistence_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#add_session_key_value_db_connection">add_session_key_value_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#add_static_db_connection">add_static_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#cache_stored">cache_stored</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#change_key_value_db_instance">change_key_value_db_instance</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#change_persistence_db_instance">change_persistence_db_instance</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#change_session_key_value_db_instance">change_session_key_value_db_instance</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#change_static_db_instance">change_static_db_instance</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#check_hash">check_hash</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#del_key_value">del_key_value</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#del_session_key_value">del_session_key_value</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#del_static_store">del_static_store</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#disconnect">disconnect</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#drop">drop</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#establish_admin_endpoints">establish_admin_endpoints</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#exists">exists</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#fetch">fetch</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#fetch_fields">fetch_fields</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#get_key_value">get_key_value</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#get_session_key_value">get_session_key_value</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#last_step_initalization">last_step_initalization</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#put_static_store">put_static_store</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#query">query</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#remove_key_value_db_connection">remove_key_value_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#remove_persistence_db_connection">remove_persistence_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#remove_session_key_value_db_connection">remove_session_key_value_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#remove_static_db_connection">remove_static_db_connection</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#set_hasher">set_hasher</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#set_key_value">set_key_value</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#set_session_key_value">set_session_key_value</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#static_store">static_store</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#static_synchronizer">static_synchronizer</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#store">store</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#store_cache">store_cache</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#update_cache">update_cache</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDBWrapperImpl.html#which_db">which_db</a></li></ul></li><li><a href="base.GeneralDynamic.html">base.GeneralDynamic</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#add_import">add_import</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#fetch">fetch</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#fetch_elements">fetch_elements</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#import_keys">import_keys</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#load_key">load_key</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#seeking_endpoint_paths">seeking_endpoint_paths</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#set_messenger">set_messenger</a></li><li data-type='method' style='display: none;'><a href="base.GeneralDynamic.html#set_transition_engine">set_transition_engine</a></li></ul></li><li><a href="base.GeneralMiddleWare.html">base.GeneralMiddleWare</a></li><li><a href="base.GeneralStatic.html">base.GeneralStatic</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#fetch">fetch</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#generic_prep_cwd_offset">generic_prep_cwd_offset</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#guarded_fetch">guarded_fetch</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#preload_all">preload_all</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#prepare_asset">prepare_asset</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#reload">reload</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#seeking_endpoint_paths">seeking_endpoint_paths</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#set_messenger">set_messenger</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#set_transition_engine">set_transition_engine</a></li><li data-type='method' style='display: none;'><a href="base.GeneralStatic.html#static_store">static_store</a></li></ul></li><li><a href="base.GeneralTransitionEngImpl.html">base.GeneralTransitionEngImpl</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#add_repo_path">add_repo_path</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#alt_store">alt_store</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#app_pack_data">app_pack_data</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#chunk_mover">chunk_mover</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#chunks_complete">chunks_complete</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#chunks_to_data">chunks_to_data</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#file_mover">file_mover</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#files_coming_in_chunks">files_coming_in_chunks</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#get_import_key_function">get_import_key_function</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#install">install</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#seeking_endpoint_paths">seeking_endpoint_paths</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#set_contractual_filters">set_contractual_filters</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#set_file_promise_ops">set_file_promise_ops</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#set_messenger">set_messenger</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#set_ws">set_ws</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#store_data">store_data</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#update_meta_descriptors">update_meta_descriptors</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#upload_chunk">upload_chunk</a></li><li data-type='method' style='display: none;'><a href="base.GeneralTransitionEngImpl.html#upload_file">upload_file</a></li></ul></li><li><a href="base.SessionManager.html">base.SessionManager</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.SessionManager.html#app_set_user_cookie">app_set_user_cookie</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#app_user_release_cookie">app_user_release_cookie</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#hash_pass">hash_pass</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#initialize_session_state">initialize_session_state</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#loginTransitionFields">loginTransitionFields</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#login_transition">login_transition</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#ok_forgetfulness">ok_forgetfulness</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#password_check">password_check</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#process_user">process_user</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#registration_transition">registration_transition</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager.html#update_user_password">update_user_password</a></li></ul></li><li><a href="base.SessionManager_Lite.html">base.SessionManager_Lite</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#app_user_check_cookie">app_user_check_cookie</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#cipher">cipher</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#create_transition_record">create_transition_record</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#extract_exposable_user_info">extract_exposable_user_info</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#feasible">feasible</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#finalize_transition">finalize_transition</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#gen_wrapped_key">gen_wrapped_key</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#guard">guard</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#guard_static">guard_static</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#handle_cookies">handle_cookies</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#key_for_user">key_for_user</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#match">match</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#post_body_decode">post_body_decode</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#process_asset">process_asset</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#process_transition">process_transition</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#release_cookie">release_cookie</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#selected_session_table_hash">selected_session_table_hash</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#session_accrue_errors">session_accrue_errors</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#session_guard">session_guard</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#set_cookie">set_cookie</a></li><li data-type='method' style='display: none;'><a href="base.SessionManager_Lite.html#update_session_state">update_session_state</a></li></ul></li><li><a href="base.TaggedTransition.html">base.TaggedTransition</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#action_selector">action_selector</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#addModule">addModule</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#back_ref">back_ref</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#dir">dir</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#empty_queue">empty_queue</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#enqueue">enqueue</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#existence_query">existence_query</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#file_entry_id">file_entry_id</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#from_cache">from_cache</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#get_work">get_work</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#has_secondary_action">has_secondary_action</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#hash_id_prefix">hash_id_prefix</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#kv_store_key">kv_store_key</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#match_key">match_key</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#primary_key">primary_key</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#seeking_endpoint_paths">seeking_endpoint_paths</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#session_key">session_key</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#set_messenger">set_messenger</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#tag">tag</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#tagged">tagged</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#transform_file_name">transform_file_name</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#update">update</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#update_file_db_entry">update_file_db_entry</a></li><li data-type='method' style='display: none;'><a href="base.TaggedTransition.html#uuid_prefix">uuid_prefix</a></li></ul></li><li><a href="base.TokenTables.html">base.TokenTables</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.TokenTables.html#generate_transition_token">generate_transition_token</a></li><li data-type='method' style='display: none;'><a href="base.TokenTables.html#tokenCurrent">tokenCurrent</a></li><li data-type='method' style='display: none;'><a href="base.TokenTables.html#token_to_key">token_to_key</a></li></ul></li><li><a href="base.WebSocketManager.html">base.WebSocketManager</a><ul class='methods'><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#_setup_app_ws">_setup_app_ws</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#_setup_sitewide_ws">_setup_sitewide_ws</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#add_service">add_service</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#add_ws_session">add_ws_session</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#close_suspects">close_suspects</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#close_wss_session">close_wss_session</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#do_pings">do_pings</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#ping">ping</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#ponged">ponged</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#send_to_ws">send_to_ws</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#send_ws">send_ws</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#send_ws_outofband">send_ws_outofband</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#set_contractual_filters">set_contractual_filters</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#setup_app_ws">setup_app_ws</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#setup_sitewide_ws">setup_sitewide_ws</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#start_checking_pings">start_checking_pings</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#ws_connection_attempt">ws_connection_attempt</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#ws_shutdown">ws_shutdown</a></li><li data-type='method' style='display: none;'><a href="base.WebSocketManager.html#ws_sitewide_message_handler">ws_sitewide_message_handler</a></li></ul></li><li><a href="field_validators.DataLookupField.html">field_validators.DataLookupField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.DataLookupField.html#test">test</a></li></ul></li><li><a href="field_validators.EmailField.html">field_validators.EmailField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.EmailField.html#test">test</a></li></ul></li><li><a href="field_validators.EmailVerifyField.html">field_validators.EmailVerifyField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.EmailVerifyField.html#test">test</a></li></ul></li><li><a href="field_validators.FieldTest.html">field_validators.FieldTest</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.FieldTest.html#test">test</a></li></ul></li><li><a href="field_validators.FieldValidatorTools.html">field_validators.FieldValidatorTools</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.FieldValidatorTools.html#generate_tester">generate_tester</a></li><li data-type='method' style='display: none;'><a href="field_validators.FieldValidatorTools.html#get_field_test">get_field_test</a></li><li data-type='method' style='display: none;'><a href="field_validators.FieldValidatorTools.html#init_field_classes">init_field_classes</a></li><li data-type='method' style='display: none;'><a href="field_validators.FieldValidatorTools.html#setup_field_test">setup_field_test</a></li></ul></li><li><a href="field_validators.ForeignAuth.html">field_validators.ForeignAuth</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.ForeignAuth.html#test">test</a></li></ul></li><li><a href="field_validators.GeneralValidator.html">field_validators.GeneralValidator</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.GeneralValidator.html#initialize">initialize</a></li><li data-type='method' style='display: none;'><a href="field_validators.GeneralValidator.html#setup_tests">setup_tests</a></li><li data-type='method' style='display: none;'><a href="field_validators.GeneralValidator.html#valid">valid</a></li></ul></li><li><a href="field_validators.LengthyAlphabetField.html">field_validators.LengthyAlphabetField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.LengthyAlphabetField.html#test">test</a></li></ul></li><li><a href="field_validators.LengthyDigitalField.html">field_validators.LengthyDigitalField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.LengthyDigitalField.html#test">test</a></li></ul></li><li><a href="field_validators.LengthyField.html">field_validators.LengthyField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.LengthyField.html#test">test</a></li></ul></li><li><a href="field_validators.LengthyStringField.html">field_validators.LengthyStringField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.LengthyStringField.html#test">test</a></li></ul></li><li><a href="field_validators.PasswordField.html">field_validators.PasswordField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.PasswordField.html#test">test</a></li></ul></li><li><a href="field_validators.PasswordVerifyField.html">field_validators.PasswordVerifyField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.PasswordVerifyField.html#test">test</a></li></ul></li><li><a href="field_validators.TypeCheckField.html">field_validators.TypeCheckField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="field_validators.TypeCheckField.html#test">test</a></li></ul></li></ul>
+                    <h3>Namespaces</h3>
+                        <ul><li><a href="base.html">base</a></li><li><a href="field_validators.html">field_validators</a></li></ul>
+                    
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">GeneralTransitionEngImpl</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+            <span class="ancestors"><a href="base.html">base</a>.</span>
+        
+        
+            GeneralTransitionEngImpl
+        
+        </h2>
+        
+            <div class="class-description usertext"><p>The General Transition Engine provides basic transitions for files and media while keeping the
+abstraction for managing and executing transtions which may be of varying complexity and asynchronicity.</p>
+<p>Ideally, the most advanced transition engine will operate distributed ATMs or Petri nets with the web interface
+taking part a an active input driver from among many input drivers.</p>
+<p>NOTE: all the base classes in /lib return the class and do not return an instance. Explore the applications and
+the reader will find that the descendant modules export instances. The classes provided by copious-transitions must
+be extended by an application.</p></div>
+        
+    
+</header>
+
+<article>
+    
+        <div class="container-overview">
+        
+            
+
+    
+    <h2>Constructor</h2>
+    
+
+    <h4 class="name" id="GeneralTransitionEngImpl"><span class="type-signature"></span>new GeneralTransitionEngImpl<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line21">line 21</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        </div>
+    
+
+    
+
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="add_repo_path"><span class="type-signature type-signature-async">(async) </span>add_repo_path<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>add_repo_path</p>
+<p>This method is called by the general link manager when installing a new repository link,
+which will mostly likey be an instance of CategoricalPersistenceManager from global_persistence</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line59">line 59</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="alt_store"><span class="type-signature"></span>alt_store<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Returns true if the application override is configured to use alternate storage to the default storage provided here.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line222">line 222</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="app_pack_data"><span class="type-signature"></span>app_pack_data<span class="signature">(blob_data)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Replaces the functionality of <code>store_data</code> if alt_store returns true.</p>
+<p>In the application version of this method, the point is to return data that can be written into a
+file using the method <code>store_data</code>.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line232">line 232</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>blob_data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="chunk_mover"><span class="type-signature type-signature-async">(async) </span>chunk_mover<span class="signature">(`token`, `file_descriptor`, `target_path`, `cb`)</span><span class="type-signature"> &rarr; {string|function}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>The map <code>_uploader_managers</code> stores a chunk manager per transition token.
+Elsewhere in this documentation, the transition object and its token is explained.
+One kind of transition is one that takes in data from the client, and its token
+will last as long as the data is being uploaded.</p>
+<p>The chunk manager has the purpose of return a collection of chunks in preparation for writing to storage.
+In some applications, the <code>chunk_mover</code> may return <strong>false</strong> if the chunks cannot be a complete file.
+The expectation is that the chunk mover will be called again after adding more chunks, until the data can be stored
+as a complete object.</p>
+<p>When the storage operation has been performed, the <code>store_data</code> method will return an identifier that identifies the data.
+This may be a hash of the data. Ultimately, this identifier will be returned by this method.</p>
+<p>This method is called by <code>chunks_complete</code>.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line260">line 260</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>`token`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>`file_descriptor`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>`target_path`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>`cb`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+|
+
+<span class="param-type">function</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="chunks_complete"><span class="type-signature type-signature-async">(async) </span>chunks_complete<span class="signature">(post_body, ttrans)</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>The post body must have the <code>token</code> field with the value being the transition token required by the request.</p>
+<p>The previously prepared chunk manager will be accessed by mapping the token to the chunk manager in the
+<code>_uploader_managers</code> map.</p>
+<p>The post body must have one of the following fields:</p>
+<ul>
+<li><code>file_list</code> - an array of file descriptors</li>
+<li><code>file</code> - a single descriptor</li>
+</ul>
+<p>If the post body has the field <code>file_list</code>,which must be an array of file descriptors,
+then each descriptor will have at least one field <code>name</code>. The chunk manager will have a map, <code>_chunkers</code>,
+which maps the file name to the array of gathered chunks.</p>
+<p>If the post body  as a <code>file</code> field instead of a <code>file_list</code> field, the chunk manager will look for the one array
+where all the chunks being uploaded have been gathered for storage in just one file.</p>
+<p>This method attempts to create a unique name for the file from the information that has been passed to it.
+Furthermore, it makes use of the transition class object's <code>file_entry_id</code>.</p>
+<p>This method is often called by the application's session manager as a part of transition finalization.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line414">line 414</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>post_body</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ttrans</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the transition class object</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li><code>finalization_state</code> - this object has fields &quot;state&quot; equal to &quot;stored&quot; if successful, &quot;OK&quot; equal to <strong>true</strong>,
+and a list of ids, which are all the file ids that have been finally stored.</li>
+</ul>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="chunks_to_data"><span class="type-signature"></span>chunks_to_data<span class="signature">(`blob_data`)</span><span class="type-signature"> &rarr; {Buffer}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Calls the node.js Buffer.concat method. Some application may do something else.
+Returns a buffer.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line165">line 165</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>`blob_data`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Buffer</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="file_mover"><span class="type-signature type-signature-async">(async) </span>file_mover<span class="signature">(`file_descriptor`, `target_path`, `trans_obj`, cb)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>A number of parameters are provided for applications needing more complexity than this method provides.</p>
+<p>As a default, this method calls node.js <code>mv</code>.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line181">line 181</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>`file_descriptor`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>`target_path`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>`trans_obj`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Number</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="files_coming_in_chunks"><span class="type-signature"></span>files_coming_in_chunks<span class="signature">(`post_body`, `token`)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Initializes a chunk manager that will receive a number of files identified in the requet body of an uploader type
+of transition. The chunk manager will be keyed (remembered) by its transition token.</p>
+<p>The post body should have a field <code>file_list</code> which must be an array of file descriptors.
+Each descriptor will have at least one field <code>name</code>. The chunk manager will have a map, <code>_chunkers</code>,
+which maps the file name to an empty array. The empty array will later be filled with chunk data.</p>
+<p>If the post body does not have a <code>file_list</code> field, the chunk manager will keep just one array where all the chunks
+being uploaded will be placed for future storage in just one file.</p>
+<p>This method is often called by the application's session manager as a part of transition processing.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line300">line 300</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>`post_body`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the POST request body from the client (or a message from the endpoint server)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>`token`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the chunk manager is always identified by the transtion token</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="get_import_key_function"><span class="type-signature"></span>get_import_key_function<span class="signature">()</span><span class="type-signature"> &rarr; {string|boolean}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>This method returns false. It should be overridden in applications using crytpo key processing.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line154">line 154</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="initialize"><span class="type-signature"></span>initialize<span class="signature">(conf, db)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>At this level, this method just sets the configuration and the database referenc.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line72">line 72</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>conf</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>db</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="install"><span class="type-signature"></span>install<span class="signature">(`statics_assets`, `dynamics_assets`, sessions)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>This method sets back references to other lib component class instances.
+It also tends to the importation of crypto keys.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line107">line 107</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>`statics_assets`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>`dynamics_assets`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sessions</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="seeking_endpoint_paths"><span class="type-signature"></span>seeking_endpoint_paths<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>seeking_endpoint_paths</p>
+<p>Included for special cases</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line84">line 84</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Array</p>
+</div>
+
+
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="set_contractual_filters"><span class="type-signature"></span>set_contractual_filters<span class="signature">(`trans_processor`, `user_processor`, `mime_processor`)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>This method sets back references to the contractual methods which provide the skeletal outline
+for handling client requests. The contractual class methods, especially those for transition processing,
+are generally the callers of the application's transition engine. But, the transition engine may call
+back to those classes if needed (depends on the application).</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line129">line 129</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>`trans_processor`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>`user_processor`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>`mime_processor`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="set_file_promise_ops"><span class="type-signature"></span>set_file_promise_ops<span class="signature">(f_pr_ops)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>set_file_promise_ops</p>
+<p>can be <code>extra-file-class</code> for instance...</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line48">line 48</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>f_pr_ops</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><ul>
+<li>an instance of class providing file promises as an extension of fs/promises</li>
+</ul></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="set_messenger"><span class="type-signature"></span>set_messenger<span class="signature">(path, messenger)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>set_messenger</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line94">line 94</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>messenger</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><ul>
+<li>communication object</li>
+</ul></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="set_ws"><span class="type-signature"></span>set_ws<span class="signature">(`web_sockets`)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Accepts a reference to the application supplied web socket server manager and sets the <code>web_sockets</code> field to it.</p>
+<p>At times, the transition engine will use the web socket service to fire off messages to listening clients.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line144">line 144</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>`web_sockets`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the reference to the application supplied web socket server manager.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="store_data"><span class="type-signature type-signature-async">(async) </span>store_data<span class="signature">(`file_descriptor`, `target_path`, `writeable_data`, id)</span><span class="type-signature"> &rarr; {string}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>By default, this method calls the async writeFile method to store data.
+Some applications may need to route storage at this point.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line200">line 200</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>`file_descriptor`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>`target_path`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>`writeable_data`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="update_meta_descriptors"><span class="type-signature type-signature-async">(async) </span>update_meta_descriptors<span class="signature">(`post_body`, ids)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>This method is provided for those applications using persistent storage use meta descriptors of files.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line215">line 215</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>`post_body`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ids</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="upload_chunk"><span class="type-signature type-signature-async">(async) </span>upload_chunk<span class="signature">(`post_body`, `files`)</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>This method takes in the client's POST request body (or endpoint message) and the list of files associated with it.
+In some applications, the <em>files</em> map may be part of the request body. In other applications, the <em>files</em> map may be associated with a
+session token or session and might be cached between calls to the <code>upload_chunk</code>.</p>
+<p>The post body must have the <code>token</code> field with the value being the transition token required by the request.</p>
+<p>The previously prepared chunk manager will be accessed by mapping the token to the chunk manager in the
+<code>_uploader_managers</code> map.</p>
+<p>The files parameter must alwasy be a map even if there is only one file in <code>files</code>.
+If there is just one file, this method will check to see if uploading has been prepared to manage just one file.
+If it has been prepared to upload more, it is possible to have just one file if it is the last file still gathering chunks
+from the client. Complete files may have already been finalized. (This is why there are differen field names for the single
+and multiple case.)</p>
+<p>This method is often called by the application's session manager as a part of secondary transition processing.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line340">line 340</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>`post_body`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>`files`</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li><code>state_of_result</code></li>
+</ul>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="upload_file"><span class="type-signature type-signature-async">(async) </span>upload_file<span class="signature">(post_body, ttrans, files, req)</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>This method servers to upload a single file or multiple files in response one request, where
+all the files are complete upon arrival. (If chunking has occurred, it has been handled by standard HTTP mechanisms).</p>
+<p>The function of this handler is fairly common code stacks. Other methods in the class are useful in situations
+where data undergoes intermediate treatment during data gathering or when data is coming in messages from the endpoint server.
+Usually, this method is used when uploading a file from disk and passing it through standard forms.</p>
+<p>This method augments the placement of the file into an application directory by adding descriptors of the file into the DB
+(which is again defined by the application).</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="general_transition_engine.js.html">general_transition_engine.js</a>, <a href="general_transition_engine.js.html#line477">line 477</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>post_body</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ttrans</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>files</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li><code>finalization_state</code></li>
+</ul>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sat Jul 11 2026 00:30:10 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

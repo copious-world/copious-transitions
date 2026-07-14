@@ -1,67 +1,68 @@
 {
-  "name": "copious-transitions",
-  "version": "0.8.3",
-  "description": "Framework for working with frameworks",
-  "directories": {
-    "lib": "lib"
-  },
-  "main": "index.js",
-  "bin": {
-    "copious-captcha": "./bin/index.js",
-    "copious-db-tool": "./tools/db_and_connection_operations.js"
-  },
-  "scripts": {
-    "test": "node tests/runall.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rleddy/copious-transitions.git"
-  },
-  "funding": {
-    "type": "GitHub Sponsors",
-    "url": "https://github.com/sponsors/copious-world"
-  },
-  "keywords": [
-    "node",
-    "js",
-    "sandwich",
-    "framework",
-    "authorization",
-    "permission",
-    "state",
-    "state-transitions",
-    "tokens",
-    "session",
-    "micro-service",
-    "gateway"
-  ],
-  "author": "Richard Leddy",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/rleddy/copious-transitions/issues"
-  },
-  "homepage": "https://github.com/rleddy/copious-transitions#readme",
-  "dependencies": {
-    "@polka/send-type": "^0.5.2",
-    "body-parser": "^2.2.0",
-    "clone": "^2.1.2",
-    "com_link_manager": "^0.2.2",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "extra-file-class": "^0.9.20",
-    "message-relay-services": "^0.9.29",
-    "mime-db": "^1.52.0",
-    "mime-types": "^2.1.35",
-    "polka": "^0.5.2",
-    "session_tokens": "^1.0.1",
-    "state-tokens": "^1.0.4",
-    "svg-captcha": "^1.4.0",
-    "ws": "^8.18.3"
-  },
-  "devDependencies": {
-    "node-scp": "^0.0.25",
-    "tape": "^5.6.1",
-    "tar": "^6.1.13",
-    "terser": "^5.16.1"
-  }
+    "name": "copious-transitions",
+    "version": "0.8.3",
+    "description": "Framework for working with frameworks",
+    "directories": {
+        "lib": "lib"
+    },
+    "main": "index.js",
+    "bin": {
+        "copious-captcha": "./bin/index.js",
+        "copious-db-tool": "./tools/db_and_connection_operations.js"
+    },
+    "scripts": {
+        "test": "node tests/runall.js",
+        "gen-docs": "jsdoc --configure ./tools/jsdoc.conf -a all -R README.md --verbose"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rleddy/copious-transitions.git"
+    },
+    "funding": {
+        "type": "GitHub Sponsors",
+        "url": "https://github.com/sponsors/copious-world"
+    },
+    "keywords": [
+        "node",
+        "js",
+        "sandwich",
+        "framework",
+        "authorization",
+        "permission",
+        "state",
+        "state-transitions",
+        "tokens",
+        "session",
+        "micro-service",
+        "gateway"
+    ],
+    "author": "Richard Leddy",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/rleddy/copious-transitions/issues"
+    },
+    "homepage": "https://github.com/rleddy/copious-transitions#readme",
+    "dependencies": {
+        "@polka/send-type": "^0.5.2",
+        "body-parser": "^2.2.0",
+        "clone": "^2.1.2",
+        "com_link_manager": "^0.2.2",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.5",
+        "extra-file-class": "^0.9.20",
+        "message-relay-services": "^0.9.29",
+        "mime-db": "^1.52.0",
+        "mime-types": "^2.1.35",
+        "polka": "^0.5.2",
+        "session_tokens": "^1.0.1",
+        "state-tokens": "^1.0.4",
+        "svg-captcha": "^1.4.0",
+        "ws": "^8.18.3"
+    },
+    "devDependencies": {
+        "node-scp": "^0.0.25",
+        "tape": "^5.6.1",
+        "tar": "^6.1.13",
+        "terser": "^5.16.1"
+    }
 }
