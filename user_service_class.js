@@ -175,6 +175,7 @@ class CopiousTransitions extends EventEmitter {
         this.validator.initialize(conf_obj,this.db,this.session_manager)     // The validator may refer to stored items and look at other context dependent information
         await this.statics.initialize(this.db,conf_obj)                         // Static assets may be taken out of DB storage or from disk, etc.
         await this.dynamics.initialize(this.db,conf_obj)                        // Dynamichk assets may be taken out of DB storage or from disk, etc.
+        this.dynamics.set_contractual_filters(this.transition_processing,this.user_handler,this.mime_handler)  // very special casess
         this.transition_engine.install(this.statics,this.dynamics,this.session_manager)
 
         //  --- contractual logic ---

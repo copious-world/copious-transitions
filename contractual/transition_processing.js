@@ -113,8 +113,10 @@ class TransitionHandling extends LocalTObjectCache {
                             //
                             transition = ((transitionObj.transition !== undefined) ? transitionObj.transition : transition)
                             //
-                            let tObjCached = { 'tobj' : transitionObj, 'elements' : store_elements, 'transition' : transition }
-                            this.add_local_cache_transition(transitionObj.token,tObjCached)
+                            if ( transitionObj.secondary_action ) {  // if the secondary has not been killed by the fetch
+                                let tObjCached = { 'tobj' : transitionObj, 'elements' : store_elements, 'transition' : transition }
+                                this.add_local_cache_transition(transitionObj.token,tObjCached)
+                            }
                             //
                             let t_state = { 'type' : 'transition', 'OK' : 'true', 'transition' : transitionObj, 'elements' : send_elements }
                             return [200,t_state]    
