@@ -12,7 +12,6 @@ const MimeHandling = require('./contractual/mime_processing')
 const TranstionHandling = require('./contractual/transition_processing');
 const { EventEmitter } = require('events');
 
-// https://github.com/fastify/fastify
 
 let g_password_store = []
 const PASSWORD_DEPLETION_MIN = 3
@@ -302,7 +301,7 @@ class CopiousTransitions extends EventEmitter {
                 res.writeHead(code,header);
                 res.end(data);    
             } else {
-                res.status(code).send(JSON.stringify(header))
+                res.status(code).send(JSON.stringify(header))     // usually error
             }
         });
 
@@ -315,7 +314,7 @@ class CopiousTransitions extends EventEmitter {
             let body = req.body
             let [code,header,data] = await this.mime_handler.guarded_static_asset_handler(asset,body,req.headers) 
             if ( typeof data === 'boolean' ) {
-                res.status(code).send(JSON.stringify(header))
+                res.status(code).send(JSON.stringify(header))   // usually error
             } else {
                 res.writeHead(code,header);
                 res.end(data);    
@@ -327,7 +326,7 @@ class CopiousTransitions extends EventEmitter {
             let body = req.body
             let [code,header,data] = await this.mime_handler.guarded_dynamic_asset_handler(asset,body,req.headers)
             if ( typeof data === 'boolean' ) {
-                res.status(code).send(JSON.stringify(header))
+                res.status(code).send(JSON.stringify(header))   // usually error
             } else {
                 res.writeHead(code,header);
                 res.end(data);    
@@ -335,11 +334,11 @@ class CopiousTransitions extends EventEmitter {
         });
 
         // KEYED MIME_TYPES  - TRANSITION ACCEPTED  -- the body should send back the token it got with the asset.
-        this.app.post('/secondary/guarded', async (req,res) => {
+        this.app.post('/secondary/guarded', async (req, res) => {
             let body = req.body
             let [code,header,data] = await this.mime_handler.guarded_secondary_asset_handler(body) 
             if ( typeof data === 'boolean' ) {
-                res.status(code).send(JSON.stringify(header))
+                res.status(code).send(JSON.stringify(header))   // usually error
             } else {
                 res.writeHead(code,header);
                 res.end(data);    
@@ -381,7 +380,7 @@ class CopiousTransitions extends EventEmitter {
             // USER MANAGEMENT - handle authorization and user presence.
             for ( let path of conf_obj.login_app ) {
                 //
-                this.app.post(path, async (req,res) => {
+                this.app.post(path, async (req, res) => {
                     //
                     let body = req.body
                     let user_op = body['action']

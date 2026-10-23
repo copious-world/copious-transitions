@@ -7,7 +7,7 @@
     },
     "main": "index.js",
     "bin": {
-        "copious-captcha": "./bin/index.js",
+        "copious-captcha": "./bin/index.js --turbo-fast-api-calls",
         "copious-db-tool": "./tools/db_and_connection_operations.js"
     },
     "scripts": {
@@ -55,14 +55,21 @@
         "mime-types": "^2.1.35",
         "polka": "^0.5.2",
         "session_tokens": "^1.0.1",
+        "ssh2": "^1.17.0",
         "state-tokens": "^1.0.4",
         "svg-captcha": "^1.4.0",
+        "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.70.0",
         "ws": "^8.18.3"
     },
     "devDependencies": {
         "node-scp": "^0.0.25",
+        "node-gyp": "^12.4.0",
         "tape": "^5.6.1",
-        "tar": "^6.1.13",
+        "tar": "^7.5.22",
         "terser": "^5.16.1"
+    },
+    "allowScripts": {
+        "cpu-features@0.0.10": true,
+        "ssh2@1.17.0": true
     }
 }
