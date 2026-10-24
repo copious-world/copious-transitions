@@ -272,6 +272,7 @@ class CopiousTransitions extends EventEmitter {
 
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
+        // (1)
         // ROOT ... unauthorized entry point  -- this is likely to be done by Nginx and will not be needed here.
         this.app.get('/', async (req, res) => {
             try {
@@ -292,6 +293,7 @@ class CopiousTransitions extends EventEmitter {
             }
         });
 
+        // (2)
         // STATIC FETCH
         this.app.get('/static/:asset', async (req, res) => {
             let asset = req.params['asset']
@@ -308,6 +310,7 @@ class CopiousTransitions extends EventEmitter {
 
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
+        // (3)
         // STATIC KEYED MIME_TYPES  -- no form validation, but GUARD asset within a session
         this.app.post('/guarded/static/:asset', async (req, res) => {
             let asset = req.params['asset']
@@ -321,6 +324,7 @@ class CopiousTransitions extends EventEmitter {
             }
         });
 
+        // (4)
         this.app.post('/guarded/dynamic/:asset', async (req, res) => {
             let asset = req.params['asset']
             let body = req.body
@@ -333,6 +337,7 @@ class CopiousTransitions extends EventEmitter {
             }
         });
 
+        // (5)
         // KEYED MIME_TYPES  - TRANSITION ACCEPTED  -- the body should send back the token it got with the asset.
         this.app.post('/secondary/guarded', async (req, res) => {
             let body = req.body
@@ -347,8 +352,8 @@ class CopiousTransitions extends EventEmitter {
 
         // ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
 
+        // (6)
         // TRANSITIONS - pure state transition dynamics for sessions
-
         this.app.post('/transition/:transition', async (req, res) => {           // the transition is a name or key
             let body = req.body
             let transition = req.params.transition
@@ -356,6 +361,7 @@ class CopiousTransitions extends EventEmitter {
             this.app.responder(res).status(code).send(data)
         });
 
+        // (7)
         // TRANSITIONS  - TRANSITION ACCEPTED  -- the body should send back the token it got with the asset.
         this.app.post('/secondary/transition',async (req, res) => {
             let body = req.body
@@ -376,6 +382,7 @@ class CopiousTransitions extends EventEmitter {
             }
         */
 
+            // (8-11)
             //
             // USER MANAGEMENT - handle authorization and user presence.
             for ( let path of conf_obj.login_app ) {
@@ -395,7 +402,7 @@ class CopiousTransitions extends EventEmitter {
                 })
             }
 
-
+            // (12)
             // USER MANAGEMENT - finalize the user action.
             this.app.post('/secondary/users/:action', async (req, res) => {
                 let body = req.body
@@ -555,7 +562,7 @@ function load_parameters(config,if_module_top) {
     // 2)
     // clonify
     global.clonify = (obj) => {
-        return(clone(obj))
+        return(structuredClone(obj))
         /*
         if ( typeof obj == "object" ) {
             return(JSON.parse(JSON.stringify(obj)))
