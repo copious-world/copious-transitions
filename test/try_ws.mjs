@@ -16,16 +16,25 @@ const app = uWS.App(
 )
 
 let conf = {
-
+    "web_sockets" : {
+        "web_socket_server_class" : "test",
+        "http_module" : false,
+        "ports" : {
+            "port_names" : [ "transitional", "auth" ],
+            "defs" : {
+                "transitional" : 20,
+                "auth" : 30
+            }
+        },
+        "http_module"  : "uct_http_module"
+    }
 }
 
 
 console.dir(wsM)
 
 
-
 wsM.initialize(conf,app)
-
 
 
 app.ws('/*', {
