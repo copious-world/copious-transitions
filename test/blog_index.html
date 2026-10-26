@@ -959,4 +959,239 @@ html {
 	}
 
 
+const HUMAN_PAGE_WEBSOCKET_SERVER = "ws://localhost:9797"      // have to come up with a good one.
+
+
+// TEST THE HUMAN PAGE WEBSOCKET APPLICATION...
+
+class HumanPageChatRoom {
+
+    constructor(server_url) {
+        this.chat_room_members = {}
+        this.requesting_members = {}
+        this.server_url = server_url
+        this.source_url = window.location
+        this.socket = false
+        this.ws_id = ""
+    }
+
+    web_socket_url(session) {
+        this.session = session
+        return this.server_url
+    }
+
+    add_chat_member_request(req_hash,id_object) {
+        if ( this.requesting_members[req_hash] ) {
+            return false
+        }
+        let {id, screen_name, url, icon_url} = id_object
+        let join_time = Date.now()
+        this.requesting_members[req_hash] = { id, req_hash, screen_name, url, icon_url, join_time }
+        return true
+    }
+
+
+    handle_ws_json_rpc_error(ev_message) {
+        console.log(ev_message.message)
+    }
+
+
+    set_socket(socket) {
+        this.socket = socket
+    }
+
+
+    /**
+     * 
+     * the ws transition path will be "human-chat"
+     * body.message ? body.message.server_id
+     * body.transition
+     * 
+     * @param {string} req_hash 
+     * @param {object} message 
+     */
+    send_message(req_hash,message) {
+        if ( this.chat_room_members[req_hash] ) {
+            if ( this.socket ) {
+                let JSONrpc = {
+                    "jsonrpc" : "2.0",
+                    "method" : "chat-message",
+                    "parameters" : {
+                        "human_page" : this.source_url,
+                        "req_hash" : req_hash,
+                        "message" : message
+                    }
+                }
+
+                let transition_body = {
+                    "transition" : "human-chat",
+                    "server_id" : this.server_url,
+                    "message" : {
+                        "ws_id" : this.ws_id,
+                        "session" : this.session,
+                        "JSONrpc" : JSONrpc
+                    }
+                }
+
+                let transition_app_ws = JSON.stringify(transition_body)
+
+                this.socket.send(transition_app_ws)
+            }
+        }
+    }
+
+
+    /**
+     * ???
+     */
+    async transaction_handler(req_hash,message) {
+        if ( this.chat_room_members[req_hash] ) {
+            
+        }
+        return false
+    }
+    
+
+    async process_ws_json_rpc(method, parameters) {
+        //
+        let ccwid = g_current_pub_identity ? g_current_pub_identity.ccwid : false
+        if ( ccwid ) {
+            // msg is completed in the cases and returned after the switch
+            let msg = {
+                "category" : FRAME_TO_CHAT,
+                "data" : {
+                    "session" : this.session,   // a human page session... 
+                    "ccwid" : g_current_pub_identity ? g_current_pub_identity.ccwid : false,
+                    "req_hash" : parameters.req_hash
+                }
+            }
+            //
+            switch ( method ) {
+                case "joining"  : {
+                    let req_hash = parameters.req_hash
+                    if ( this.requesting_members[req_hash] ) {
+                        msg.action = CHAT_JOIN_OK
+                        this.chat_room_members[req_hash] = this.requesting_members[req_hash]
+                        msg.data.display_info = parameters.display_info
+                        msg.data.humaness = parameters.from_business ? 0 : 10
+                    } else return;
+                    break;
+                }
+                case "leaving"  : {
+                    let req_hash = parameters.req_hash
+                    if ( this.requesting_members[req_hash] ) {
+                        msg.action = CHAT_LEAVING
+                        delete this.chat_room_members[req_hash]
+                        delete this.requesting_members[req_hash]
+                    } else return;
+                    break;
+                }
+                case "message" : {
+                    let req_hash = parameters.req_hash
+                    if ( this.chat_room_members[req_hash] ) {
+                        msg.action = CHAT_MESSAGE
+                        msg.data.text = parameters.text
+                        msg.data.is_html = parameters.is_html
+                        msg.data.contains_media = parameters.contains_media
+                        if ( msg.data.contains_media ) {
+                            msg.data.media_url = parameters.media_url
+                            msg.data.mime_type = parameters.mime_type
+                        }
+                    } else {
+                        msg.action = UNAUTHORIZED_CHAT_MESSAGE
+                        msg.data.hash_id = req_hash
+                    }
+                    break
+                }
+                case "transaction" : {
+                    let req_hash = parameters.req_hash
+                    let proceed = await this.transaction_handler(req_hash,message)
+                    // opportunity to display the result of a transaction...
+                    if ( proceed && this.chat_room_members[req_hash] ) {
+                        msg.action = CHAT_TRANSACTION
+                        msg.data.text = parameters.text
+                        msg.data.is_html = parameters.is_html
+                        msg.data.contains_media = parameters.contains_media
+                        if ( msg.data.contains_media ) {
+                            msg.data.media_url = parameters.media_url
+                            msg.data.mime_type = parameters.mime_type
+                        }
+                    } else {
+                        msg.action = UNAUTHORIZED_CHAT_MESSAGE
+                        msg.data.hash_id = req_hash
+                    }
+                    break
+                }
+            }
+            //
+            tell_chat_page(msg)
+        }
+        //
+    }
+
+    async setup_websockets_chat_room() {
+
+        // websocket offering to chats that supply out of frame connectivity
+
+        try {
+            const socket = new WebSocket(this.server_ur);
+            let socket_owner = this
+
+            this.set_socket(socket)
+
+            // Connection opened
+            socket.addEventListener("open", (event) => {
+                let ccwid = g_current_pub_identity ? g_current_pub_identity.ccwid : false
+                if ( ccwid ) {
+                    let chat_room_opener = {
+                        "human_page" : window.location.hostname,
+                        "ccwid" : g_current_pub_identity ? g_current_pub_identity.ccwid : false,
+                    }
+                    let JSON_rpc = {
+                        "JSON" : "JSON-RPC 2.0",
+                        "parameters" : chat_room_opener
+                    }
+                    let msg = JSON.stringify(JSON_rpc)
+                    socket.send(msg);
+                }
+            });
+
+            // Listen for messages
+            socket.addEventListener("message", (event) => {
+                try {
+                    let ev_message = JSON.parse(event.data)
+                    if ( (ev_message.status === "connected") &&  (ev_message.type === "ws_id") ) {
+                        let ws_id = ev_message.ws_id
+                        socket_owner.ws_id = ws_id
+                    } else {
+                        if ( ev_message.error ) {
+                            socket_owner.handle_ws_json_rpc_error(ev_message)
+                        } else {
+                            socket_owner.process_ws_json_rpc(ev_message.method,ev_message.parameters)
+                        }
+                    }
+
+                } catch (e) {
+                }
+
+            });
+
+            // Listen for messages
+            socket.addEventListener("error", (event) => {
+            });
+
+            // Listen for messages
+            socket.addEventListener("close", (event) => {
+            });
+
+        } catch (e) {
+
+        }
+    }
+}
+
+let g_chat_room_manager = new HumanPageChatRoom(HUMAN_PAGE_WEBSOCKET_SERVER)
+
+
+
 </script>

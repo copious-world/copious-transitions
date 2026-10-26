@@ -3,7 +3,6 @@
  */
 const fs = require('fs')
 const crypto = require('crypto')
-const clone = require('clone')
 const ShutdownManager = require('./lib/shutdown-manager')
 //const shutdown_server_helper_factory = require('http-shutdown')
 
