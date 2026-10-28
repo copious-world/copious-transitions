@@ -44,29 +44,25 @@
     "homepage": "https://github.com/rleddy/copious-transitions#readme",
     "dependencies": {
         "@polka/send-type": "^0.5.2",
-        "body-parser": "^2.2.0",
-        "clone": "^2.1.2",
+        "body-parser": "^2.4.0",
         "com_link_manager": "^0.2.2",
         "cookie-parser": "^1.4.7",
-        "cors": "^2.8.5",
-        "extra-file-class": "^0.9.20",
-        "message-relay-services": "^0.9.29",
-        "mime-db": "^1.52.0",
-        "mime-types": "^2.1.35",
+        "cors": "^2.8.6",
+        "extra-file-class": "^1.0.4",
+        "message-relay-services": "^0.9.30",
         "polka": "^0.5.2",
         "session_tokens": "^1.0.1",
-        "ssh2": "^1.17.0",
         "state-tokens": "^1.0.4",
         "svg-captcha": "^1.4.0",
-        "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.70.0",
-        "ws": "^8.18.3"
+        "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.71.0",
+        "ws": "^8.22.0"
     },
     "devDependencies": {
-        "node-scp": "^0.0.25",
-        "node-gyp": "^12.4.0",
-        "tape": "^5.6.1",
+        "node-gyp": "^13.1.0",
+        "node-scp": "^1.0.0",
+        "tape": "^5.10.3",
         "tar": "^7.5.22",
-        "terser": "^5.16.1"
+        "terser": "^5.51.2"
     },
     "allowScripts": {
         "cpu-features@0.0.10": true,
