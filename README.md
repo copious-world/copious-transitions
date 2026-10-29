@@ -4,17 +4,21 @@
 
 Some requests may be delivered as HTTP requests. Other requests may be delivered as backend JSON messages. The message handlers may be thought of as API handlers that are aware of authorized sessions and their states.
 
-
 **Transition tokens:** Sessions own transition tokens that key data being used in a state transition. The tokens, ***transition tokens***, are made by services implemented with respect to this framework. They are made in response to initial requests and are tracked by secondary requests. Tokens go back to requesters, clients. If the requester makes more requests with regard to a single requested transtion, the requesters must send the the transition's token back to the services in order to recognize secondary actions that drive a state transition towards completion.
 
 **Development:** This library supports building and running web services applications by providing several types of HTTP API endpoints. The API (URI) forms specify general classes of activity and may be parameterized by the names of transitions or actions. Then, most POST requests will contain JSON objects that describe a transition or a media request or a user action.
 
-This library provides application developers classes implementing general behavior for dealing with requests. These generalized classes provide method for use within calling frames. And, these methods are for applications to override. Depending on how a method overrides the methods, the applications may handle authorization, uploading media, accessing static pages, accessing dynamic processes requiring state transition management, etc. by customizing extensions of these classes. In turn, the generalized classes provide execution pathways which may be used without alteration.
+This library provides application developers classes implementing general behavior for dealing with requests. These generalized classes provide method for use within calling frames. And, these methods are for applications to override. Depending on how a method overrides a general class method, the applications may handle authorization, uploading media, accessing static pages, accessing dynamic processes requiring state transition management, etc. by customizing extensions of these classes. In turn, the generalized classes provide execution pathways which may be used without alteration.
 
-**Processes and distribution:** The extending applications may be separate processes, each with their own TCP port. ***They will share information with each other via shared memory for such requirements as access control.*** Some of the applications may run on different nodes in a cluster. Information sharing will be controlled by the use of certain libraries providing shared memory management and pub/sub processes.
+**Processes and distribution:** Those applications that extend the general classes may be separate processes, each with their own TCP port. ***They will share information with each other via shared memory for such requirements as access control.*** Some of the applications may run on different nodes in a cluster. Information sharing will be controlled by the use of certain libraries providing shared memory management and pub/sub processes.
 
-**the main:** How big or small the footprint of the service will be will depend mostly on configuration. Each application will create an instance of the same main class, **CopiousTransitions**. This application instance will read the configuration file to look for the application's extension classes which the **CopiousTransitions** instance knows how to use.
+That being said, there are one or two "merged" copious-transition applications that work as a single monolithic process. These are not as monolithic as it sounds. But, they do auth, uploading, transitioning, all in one. One has been created to work with the citadel.org mail server. It's custom databases use the citadel server as a DB of sorts, beside being a mail endpoint. It also defers to the LMDB.  
 
+See [copioius-transitions-apps](https://github.com/copious-world/copious-transition-apps) for a collection of npm packages implementing merged and distributed versions of copious-transition descendants. 
+
+**the main:** How big or small the footprint of the service will be, will depend mostly on configuration. Each application will create an instance of the same main class, **CopiousTransitions**. This application instance will read the configuration file to look for the application's extension classes which the **CopiousTransitions** instance knows how to use.
+
+**<u>work to be done:</u>** [partial roadmap](./docs/roadmap.md)
 
 ## Main Process Script
 
@@ -54,14 +58,11 @@ transition_app.on('ready',() => {
 
 When the application starts at its entrypoint, **copious-transitions** provides a configuration file reader. The configuration reader will look for the file that provides the database override as in the example; it will look for all overrides in the configuration. Then **copious-transitions** will create instances of the classes and set up HTML API paths that use the instances when running transactions.
 
-
-
 ## Installation
 
 ```
 npm install copious-transitions --save
 ```
-
 
 ## Configuration
 
@@ -74,8 +75,6 @@ The application classes are specified in the configuration file along with other
 Here is an example of a basic configuration:
 
 ```
-
-
 {
   "domain": "copious.world",
   "module_path": "captcha/lib",
@@ -195,13 +194,8 @@ Here is an example of a basic configuration:
   "forhash": {
     "field1": "email",
     "field2": "password"
-  },
-  "foreign_auth": {
-    "allowed" : true,
-    "api_enpoint": "https://www.copious.world/fauth",
   }
 }
-
 ```
 
 This configuration is used by the included example implementation `captcha`. This is an old, but still working implentation. Newer ones rely less on the validation and may be using distributed identies, etc. The newer implementations may be published as their own module.
@@ -212,8 +206,7 @@ Notice the field **modules**. This is a map from application independent module 
 
 Other fields in the configuration are supported by basic general classes, including `field_set` and `middleware`. But, some of the other are specific to the application. The configuration object is passed to the basic classes when the main calls `initialize` for their object instances.
 
-More on configuration can be found here: [link to configuration doc]()
-
+**<u>More on configuration can be found here:</u>** [link to configuration doc](./docs/configuration.md)
 
 ## Contractual Modules
 
@@ -231,23 +224,21 @@ The class implementations in these files call out to the authorization module fo
 
 The transition processing methods will call on the authorization modules to invoke transition processing. The authorization module makes the transition object and determines the number of times it will be used across primary and seconday requests. Transition processing calls on the authorization module to finalize state transition which results in a change to the session state. In the case of user processing, finalization comes in the flavor of *starting* a user session. But, a state transition is finalized in the authorization module as well. Often state finalization requires a call out to the DB or to the transition engine, neither of which are accessible from the `contractual` modules. But, state finalization may also involve encryption and decryption which is accessible via authorization.
 
-
-
 ## Transactions and Classes
 
-The name, **copious-transition**, is meant to evoke the idea of state transitions. The main idea is that clients will synchronize their awareness of the state of a process by keeping track of a transition token. The kinds of state transitions might be characterized by ATM or Petri Net transions. (*Some of the meat of this will come later as this repository grows. At the moment there are very basic transitions needed that can be hardwired in for common website operations. More on that later.*)
+The name, **copious-transitions**, is meant to evoke the idea of state transitions. The main idea is that clients will synchronize their awareness of the state of a process by keeping track of a transition token. The kinds of state transitions might be characterized by ATM or Petri Net transions. (*Some of the meat of this will come later as this repository grows. At the moment there are very basic transitions needed that can be hardwired in for common website operations. More on that later.*)
 
-From this library, **copious-transition**, the main calling framework provides URL path responses, a.k.a. web APIs, for handling generic transactions. Some transactions may occur in a single call and response. Some may take a few steps and will map the state of the transactions to tokens shared between the servers and the clients.
+From this library, **copious-transitions**, the main calling framework provides URL path responses, a.k.a. web APIs, for handling generic transactions. Some transactions may occur in a single call and response. Some may take a few steps and will map the state of the transactions to tokens shared between the servers and the clients.
 
 Classes are provided for performing parts of common web transactions. These classes have such roles as authorization, database interaction, processes management, etc. Here is a list of some of the generic classes provided by this library:
 
 * general\_auth.js
 * general\_db.js
-* general\_lifecyle.js		
+* general\_lifecyle.js        
 * general\_transition\_engine.js
-* general\_auth\_session\_lite.js	
-* general\_dynamic.js		
-* general\_mware.js	
+* general\_auth\_session\_lite.js    
+* general\_dynamic.js        
+* general\_mware.js    
 * general\_validator.js
 * general\_business.js
 * general\_express.js
@@ -259,7 +250,6 @@ In each of the applications types, the service components may include a parent c
 
 ```
 const { DBClass, CustomPersistenceDB, CustomStaticDB } = require('copious-transitions')
-
 ```
 
 In the example, one class is taken from general\_db.js, which is listed above. There are more classes involved -- these will be explained later. For now, it can be said that the application program will override DBClass and export the override from a new module. And, the calling program will pick up the new class from the configuration.
@@ -292,8 +282,6 @@ Here is a list of common pathways that are defined in the **CopiousTransitions**
 
 > The path list categorizes a types of transactions. Furthermore, there is a basic logical format for dealing with transactions and transitions. 
 
-
-
 User pathways provide interfaces to login/logout and other possible types of user interactions that a web service might support.
 The user pathways may be configured to work with application requirements by allowing for the configuration of modules requirements for modules that 
 provide subclassing customizations to generalized classes which carry out commonly occuring backend interfaces. Some of the general modules may interact
@@ -314,9 +302,7 @@ The copious-transitions package makes it easy to decide that one server may hand
 session inforamtion within a local cluster. A process can be configured to include or omit user management API pathways. While all servers will include token
 authorized media pathways. 
 
-
 ## What's in Certain Directories
-
 
 ### 1. <u>lib</u>
 
@@ -325,7 +311,6 @@ All the files mentioned in the previous section are to be found in the *lib* dir
 ### 2. <u>contractual</u>
 
 The contractual modules were discussed in the previous section **Transactions and Classes**.
-
 
 ### 3. <u>custom storage</u>
 
@@ -358,7 +343,3 @@ This is an example web application that provides common web page login with an S
 ### 5. <u>defaults</u>
 
 These are default instance classes each of which descends from a generalized class from the **lib** directory. If a configuration fails to introduce a class for a particular role, a default class will be used instead. The default classes do next to nothing but they are not necessarily noops.
-
-
-
-
